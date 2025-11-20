@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  @apply bg-background text-slate-900 antialiased;
+}
+
+a {
+  @apply text-primary hover:underline;
+}
+
+.glass-card {
+  @apply rounded-2xl border border-white/40 bg-white/70 shadow-card backdrop-blur-xl;
+}
+
+.dark-panel {
+  @apply rounded-xl border border-white/5 bg-brand-dark text-white;
+}
+
+.auth-secondary-button {
+  @apply inline-flex items-center justify-center rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-800;
+}
