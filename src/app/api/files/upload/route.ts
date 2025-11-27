@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseServerClient } from '@/lib/supabase-server';
+import { getSupabaseStorageClient } from '@/lib/supabase-server';
 
 /**
  * ============================================
@@ -68,11 +68,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = await getSupabaseServerClient();
+    const supabase = await getSupabaseStorageClient();
 
-    // 파일명 생성 (타임스탬프 + 원본 파일명으로 중복 방지)
+    // 파일명 생성 (타임스탬프 + URL-safe 파일명으로 중복 방지)
     const timestamp = Date.now();
-    const fileName = `${folder}/${timestamp}-${file.name}`;
+    
+    // 파일명을 URL-safe하게 변환 (한글 및 특수문자 처리)
+    const originalFileName = file.name;
+    const fileExtension = originalFileName.split('.').pop() || '';
+    const fileNameWithoutExt = originalFileName.substring(0, originalFileName.lastIndexOf('.')) || originalFileName;
+    
+    // 한글 및 특수문자를 제거하고 영문/숫자/하이픈/언더스코어만 사용
+    const sanitizedFileName = fileNameWithoutExt
+      .replace(/[^a-zA-Z0-9_-]/g, '_') // 한글 및 특수문자를 언더스코어로 변환
+      .substring(0, 50); // 파일명 길이 제한
+    
+    const safeFileName = `${sanitizedFileName}.${fileExtension}`;
+    const fileName = `${folder}/${timestamp}-${safeFileName}`;
 
     // 파일을 ArrayBuffer로 변환
     const arrayBuffer = await file.arrayBuffer();
@@ -86,7 +98,31 @@ export async function POST(request: NextRequest) {
         upsert: false, // 중복 시 덮어쓰지 않음
       });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase Storage 업로드 오류:', error);
+      
+      // 버킷이 존재하지 않는 경우
+      if (error.message?.includes('Bucket not found') || error.message?.includes('The resource was not found')) {
+        throw new Error(
+          'Storage 버킷이 존재하지 않습니다. Supabase 대시보드에서 "client-attachments" 버킷을 생성해주세요.\n\n' +
+          '설정 방법:\n' +
+          '1. Supabase 대시보드 > Storage로 이동\n' +
+          '2. "New bucket" 클릭\n' +
+          '3. 버킷 이름: "client-attachments"\n' +
+          '4. Public bucket: 체크 (공개 버킷으로 설정)\n' +
+          '5. 생성 완료'
+        );
+      }
+      
+      // 권한 오류
+      if (error.message?.includes('new row violates row-level security') || error.message?.includes('permission denied')) {
+        throw new Error(
+          'Storage 버킷 권한이 설정되지 않았습니다. Supabase 대시보드에서 버킷 권한을 설정해주세요.'
+        );
+      }
+      
+      throw error;
+    }
 
     // 공개 URL 생성
     const { data: urlData } = supabase.storage
@@ -96,19 +132,38 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       url: urlData.publicUrl,
-      fileName: file.name,
+      fileName: originalFileName, // 원본 파일명 반환
+      storedFileName: safeFileName, // 저장된 파일명 (디버깅용)
     });
   } catch (error) {
     console.error('파일 업로드 오류:', error);
+    console.error('에러 상세:', JSON.stringify(error, null, 2));
+    
+    let errorMessage = '파일 업로드에 실패했습니다.';
+    
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    } else if (typeof error === 'object' && error !== null) {
+      // Supabase 에러 객체 처리
+      const supabaseError = error as any;
+      if (supabaseError.message) {
+        errorMessage = supabaseError.message;
+      } else if (supabaseError.error) {
+        errorMessage = supabaseError.error;
+      }
+    }
+    
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : '파일 업로드에 실패했습니다.',
+        error: errorMessage,
+        details: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.stack : String(error)) : undefined,
       },
       { status: 500 }
     );
   }
 }
+
 
 
 

@@ -1,4 +1,4 @@
-type RequiredEnv = 'NEXT_PUBLIC_SUPABASE_URL' | 'NEXT_PUBLIC_SUPABASE_ANON_KEY';
+type RequiredEnv = 'NEXT_PUBLIC_SUPABASE_URL' | 'NEXT_PUBLIC_SUPABASE_ANON_KEY' | 'PUBLIC_DATA_API_KEY';
 
 export function getEnv(name: RequiredEnv): string {
   const value = process.env[name];
@@ -7,6 +7,7 @@ export function getEnv(name: RequiredEnv): string {
   }
   return value;
 }
+
 
 
 

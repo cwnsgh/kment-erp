@@ -1,0 +1,203 @@
+import { NextRequest, NextResponse } from "next/server";
+import { getEnv } from "@/lib/env";
+
+/**
+ * 국세청 사업자등록정보 상태조회 API
+ * POST /api/business/verify
+ *
+ * 요청: { businessNumber: "123-45-67890" } 또는 { businessNumbers: ["1234567890", "9876543210"] } (배치 처리)
+ * 응답: { success: true, status: "approved" | "suspended" | "closed", statusText: "계속사업자" | "휴업자" | "폐업자" }
+ *       또는 { success: true, results: [{ businessNumber, status, statusText }, ...] } (배치 처리)
+ */
+export async function POST(request: NextRequest) {
+  try {
+    const { businessNumber, businessNumbers } = await request.json();
+
+    // API 키 가져오기
+    const apiKey =
+      process.env.PUBLIC_DATA_API_KEY || getEnv("PUBLIC_DATA_API_KEY");
+
+    if (!apiKey) {
+      return NextResponse.json(
+        { success: false, error: "국세청 API 키가 설정되지 않았습니다." },
+        { status: 500 }
+      );
+    }
+
+    // 단일 또는 배치 처리
+    if (businessNumber) {
+      // 단일 사업자등록번호 처리
+      const cleanBusinessNumber = businessNumber.replace(/-/g, "");
+
+      const apiUrl = `https://api.odcloud.kr/api/nts-businessman/v1/status?serviceKey=${encodeURIComponent(
+        apiKey
+      )}&returnType=JSON`;
+
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          b_no: [cleanBusinessNumber],
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("국세청 API 오류:", errorText);
+        return NextResponse.json(
+          { success: false, error: `국세청 API 호출 실패: ${response.status}` },
+          { status: response.status }
+        );
+      }
+
+      const data = await response.json();
+
+      // 응답 확인
+      if (data.status_code !== "OK" || !data.data || data.data.length === 0) {
+        return NextResponse.json(
+          { success: false, error: "사업자등록번호를 확인할 수 없습니다." },
+          { status: 404 }
+        );
+      }
+
+      const businessInfo = data.data[0];
+      const statusCode = businessInfo.b_stt_cd;
+
+      // 상태 코드 매핑
+      // 01: 계속사업자, 02: 휴업자, 03: 폐업자
+      let status: "approved" | "suspended" | "closed";
+      let statusText: string;
+
+      switch (statusCode) {
+        case "01":
+          status = "approved";
+          statusText = businessInfo.b_stt || "계속사업자";
+          break;
+        case "02":
+          status = "suspended";
+          statusText = businessInfo.b_stt || "휴업자";
+          break;
+        case "03":
+          status = "closed";
+          statusText = businessInfo.b_stt || "폐업자";
+          break;
+        default:
+          status = "approved";
+          statusText = businessInfo.b_stt || "계속사업자";
+      }
+
+      return NextResponse.json({
+        success: true,
+        status,
+        statusText,
+        statusCode,
+        businessInfo: {
+          businessNumber: businessInfo.b_no,
+          taxType: businessInfo.tax_type,
+          endDate: businessInfo.end_dt,
+        },
+      });
+    } else if (
+      businessNumbers &&
+      Array.isArray(businessNumbers) &&
+      businessNumbers.length > 0
+    ) {
+      // 배치 처리 (최대 100개)
+      const batchSize = 100;
+      const batches: string[][] = [];
+      for (let i = 0; i < businessNumbers.length; i += batchSize) {
+        batches.push(businessNumbers.slice(i, i + batchSize));
+      }
+
+      const results: Array<{
+        businessNumber: string;
+        status: "approved" | "suspended" | "closed";
+        statusText: string;
+        statusCode?: string;
+      }> = [];
+
+      for (const batch of batches) {
+        const cleanBatch = batch.map((bn: string) => bn.replace(/-/g, ""));
+        const apiUrl = `https://api.odcloud.kr/api/nts-businessman/v1/status?serviceKey=${encodeURIComponent(
+          apiKey
+        )}&returnType=JSON`;
+
+        const response = await fetch(apiUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            b_no: cleanBatch,
+          }),
+        });
+
+        if (!response.ok) {
+          console.error(`배치 API 호출 실패: ${response.status}`);
+          continue;
+        }
+
+        const data = await response.json();
+
+        if (data.status_code === "OK" && data.data) {
+          for (const businessInfo of data.data) {
+            const statusCode = businessInfo.b_stt_cd;
+            let status: "approved" | "suspended" | "closed";
+            let statusText: string;
+
+            switch (statusCode) {
+              case "01":
+                status = "approved";
+                statusText = businessInfo.b_stt || "계속사업자";
+                break;
+              case "02":
+                status = "suspended";
+                statusText = businessInfo.b_stt || "휴업자";
+                break;
+              case "03":
+                status = "closed";
+                statusText = businessInfo.b_stt || "폐업자";
+                break;
+              default:
+                status = "approved";
+                statusText = businessInfo.b_stt || "계속사업자";
+            }
+
+            results.push({
+              businessNumber: businessInfo.b_no,
+              status,
+              statusText,
+              statusCode,
+            });
+          }
+        }
+      }
+
+      return NextResponse.json({
+        success: true,
+        results,
+      });
+    } else {
+      return NextResponse.json(
+        { success: false, error: "사업자등록번호가 필요합니다." },
+        { status: 400 }
+      );
+    }
+  } catch (error) {
+    console.error("사업자 상태 확인 오류:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : "사업자 상태 확인 중 오류가 발생했습니다.",
+      },
+      { status: 500 }
+    );
+  }
+}
