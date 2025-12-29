@@ -1,0 +1,374 @@
+/* 사이드바 스타일 */
+
+.sidebar {
+  width: 280px;
+  background-color: #fff;
+  padding: 40px 20px;
+  height: 100%;
+  box-sizing: border-box;
+  min-height: 100vh;
+  transition: width 0.3s ease;
+}
+
+.sidebarMini {
+  width: 90px;
+  padding: 40px 10px;
+}
+
+.sidebarNav {
+}
+
+.menuList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menuItem {
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--border-color);
+  position: relative;
+}
+
+.menuItem:not(.hasSub) {
+  padding-bottom: 24px;
+  padding-top: 24px;
+}
+
+.menuItem:not(.hasSub):first-child {
+  padding-top: 0;
+}
+
+.menuItem:not(.hasSub):hover > a {
+  border-radius: 10px;
+  background-color: var(--hover-bg);
+  color: var(--primary);
+}
+
+.menuItem:not(.hasSub):hover :global(.iconB) {
+  display: none;
+}
+
+.menuItem:not(.hasSub):hover :global(.iconC) {
+  display: block !important;
+}
+
+.menuItem:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.menuItem.active > a {
+  border-radius: 10px;
+  background-color: var(--hover-bg);
+  color: var(--primary);
+}
+
+.menuItem.active > a > .menuText {
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+}
+
+.menuItem.active :global(.iconB) {
+  display: none;
+}
+
+.menuItem.active :global(.iconC) {
+  display: block !important;
+}
+
+.menuItem > a {
+  padding: 12px 14px;
+  transition: all 0.3s;
+}
+
+.menuItem a {
+  display: flex;
+  justify-content: flex-start;
+  gap: 16px;
+  align-items: center;
+  color: var(--text-color);
+  text-decoration: none;
+}
+
+.menuItem a > .menuText {
+  font-size: 16px;
+  font-weight: var(--font-weight-semibold);
+  line-height: 1;
+}
+
+/* 서브메뉴가 열렸을 때는 메인 메뉴가 활성화처럼 보이지 않도록 수정 */
+/* (실제 활성화는 .active 클래스로만 처리) */
+.menuItem.open .menuBtn .menuText {
+  /* 활성화 스타일 제거 - 서브메뉴가 열렸다고 활성화되면 안됨 */
+  /* font-weight: var(--font-weight-bold); */
+  /* color: var(--primary); */
+}
+
+.menuItem.open :global(.iconB) {
+  /* 서브메뉴 열림 상태에서는 아이콘 색상 변경 안함 */
+  display: block;
+  transition: all 0.3s;
+}
+
+.menuItem.open :global(.iconC) {
+  /* 서브메뉴 열림 상태에서는 아이콘 색상 변경 안함 */
+  display: none;
+  transition: all 0.3s;
+}
+
+.icon {
+  display: block;
+  width: 20px;
+  height: 20px;
+  padding: 2px;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.icon img {
+  object-fit: contain;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  transform: translate(-50%, -50%);
+}
+
+.icon :global(.iconB) {
+  display: block;
+}
+
+.icon :global(.iconC) {
+  display: none;
+}
+
+.menuBtn {
+  padding: 0 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  margin-top: 24px;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+}
+
+.menuBtn > div {
+  display: flex;
+  gap: 16px;
+}
+
+.menuBtn .menuText {
+  font-size: 16px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.arrow {
+  transform: rotate(90deg);
+  transition: all 0.3s;
+}
+
+.arrow img {
+  width: 12px;
+  opacity: 0.3;
+}
+
+.menuItem.open .menuBtn .arrow {
+  transform: rotate(-90deg);
+}
+
+.submenu {
+  text-indent: 38px;
+  max-height: 0;
+  overflow: hidden;
+  padding-top: 24px;
+  opacity: 0;
+  transition: max-height 0.4s ease, opacity 0.4s ease;
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.menuItem.open .submenu {
+  max-height: 500px;
+  opacity: 1;
+  padding-top: 24px;
+  padding-bottom: 24px;
+}
+
+.submenu > li {
+  position: relative;
+}
+
+.submenu > li > a {
+  padding: 10px;
+  transition: all 0.3s;
+  margin-bottom: 4px;
+  display: block;
+  position: relative;
+}
+
+.submenu > li:last-child {
+  margin-bottom: 4px;
+}
+
+.submenu > li:hover > a {
+  background: var(--hover-bg);
+  border-radius: 10px;
+  color: var(--primary);
+}
+
+.submenu > li.active {
+  background: var(--hover-bg);
+  border-radius: 10px;
+}
+
+.submenu > li.active > a {
+  color: var(--primary);
+  font-weight: var(--font-weight-bold);
+}
+
+.submenu > li > a {
+  color: var(--text-gray);
+  font-size: 16px;
+  font-weight: var(--font-weight-semibold);
+  transition: all 0.3s;
+  text-decoration: none;
+}
+
+.arlam {
+  display: block;
+  padding: 4px;
+  background-color: var(--primary);
+  border-radius: 4px;
+  color: #fff;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+  text-indent: 0;
+  min-width: 27px;
+  text-align: center;
+  box-sizing: border-box;
+  font-size: 13px;
+  position: absolute;
+  right: 20px;
+}
+
+.subdepth2 {
+  text-indent: 58px;
+  position: relative;
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.subdepth2:before {
+  content: '';
+  display: block;
+  width: 1px;
+  height: 80%;
+  background: var(--border-color);
+  position: absolute;
+  top: 50%;
+  left: 48px;
+  transform: translateY(-50%);
+}
+
+.subdepth2 li {
+  padding: 10px;
+}
+
+.subdepth2 li a {
+  color: var(--text-gray) !important;
+  font-weight: var(--font-weight-medium);
+  text-decoration: none;
+}
+
+.subdepth2 li:hover a {
+  color: var(--text-color) !important;
+  font-weight: var(--font-weight-semibold);
+}
+
+/* 미니 사이드바 스타일 */
+.sidebarMini .sidebarNav .menuList .menuItem {
+  border-bottom: none;
+  padding-bottom: 10px;
+}
+
+.sidebarMini .sidebarNav .menuList .menuItem:hover a {
+  background: var(--hover-bg);
+  color: var(--primary);
+  border-radius: 10px;
+}
+
+.sidebarMini .sidebarNav .menuList .menuItem:hover .icon :global(.iconC) {
+  display: block !important;
+}
+
+.sidebarMini .sidebarNav .menuList .menuItem:hover .icon :global(.iconB) {
+  display: none !important;
+}
+
+.sidebarMini .sidebarNav .menuList .menuItem a {
+  padding: 15px 8px;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sidebarMini .sidebarNav .menuList .menuItem a .menuText {
+  font-size: 12px;
+  text-align: center;
+}
+
+.sidebarMini .sidebarNav .menuList .menuItem:not(.hasSub) {
+  padding-top: 0;
+}
+
+/* 미니 사이드바에서 서브메뉴가 있는 메뉴도 단순 링크처럼 표시 */
+.sidebarMini .sidebarNav .menuList .menuItem.hasSub {
+  padding-top: 0;
+}
+
+.sidebarMini .sidebarNav .menuList .menuItem .menuBtn {
+  display: none;
+}
+
+.sidebarMini .sidebarNav .menuList .menuItem a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 15px 8px;
+}
+
+.sidebarMini .sidebarNav .menuList .menuItem.active a {
+  border-radius: 10px;
+  background-color: var(--hover-bg);
+  color: var(--primary);
+}
+
+.sidebarMini .sidebarNav .menuList .menuItem.active .icon :global(.iconB) {
+  display: none;
+}
+
+.sidebarMini .sidebarNav .menuList .menuItem.active .icon :global(.iconC) {
+  display: block !important;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 1023px) {
+  .sidebar {
+    position: fixed;
+    top: 80px;
+    left: 0;
+    z-index: 40;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .sidebarHidden {
+    transform: translateX(-100%);
+  }
+}
+

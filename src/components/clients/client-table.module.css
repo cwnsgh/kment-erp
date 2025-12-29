@@ -1,0 +1,195 @@
+/* Client List Styles */
+
+.searchBox {
+  box-sizing: border-box;
+  padding: 0 40px;
+}
+
+.searchBox .searchFlex {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.searchBox .searchFlex input[type="text"] {
+  height: 40px;
+  line-height: 40px;
+  margin-right: 6px;
+  width: 300px;
+}
+
+.searchBox .searchFlex select {
+  height: 40px;
+  width: 120px;
+}
+
+/* 페이지 목록 테이블 공통 css */
+.listTable {
+  margin-top: 80px;
+}
+
+.listTable .tableTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding: 0 40px;
+}
+
+.listTable .tableWrap table tr:last-child {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.listTable .tableTop .topTotal p {
+  font-size: 13px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-gray);
+}
+
+.listTable .tableTop .topTotal p > span {
+  color: var(--primary);
+  font-weight: var(--font-weight-bold);
+}
+
+.listTable .tableTop .topBtnGroup {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.listTable .tableTop .topBtnGroup :global(.view_select) {
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 13px;
+  background-color: #fff;
+}
+
+.tableWrap {
+  padding: 0 40px;
+}
+
+.tableWrap table {
+  text-align: center;
+  width: 100%;
+}
+
+.tableWrap table th {
+  padding: 24px 0;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-gray);
+}
+
+.tableWrap table tr {
+  cursor: pointer;
+  border-top: 1px solid var(--border-color);
+}
+
+.tableWrap table tbody tr:hover {
+  background-color: rgba(59, 130, 246, 0.08);
+}
+
+.tableWrap table td {
+  padding: 16px 10px;
+  font-size: 14px;
+  font-weight: var(--font-weight-medium);
+  vertical-align: middle;
+  word-break: keep-all;
+  box-sizing: border-box;
+}
+
+.pagination {
+  margin-top: 60px;
+  text-align: center;
+}
+
+.pagination ul {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.pagination .page {
+  min-width: 26px;
+  height: 26px;
+  font-size: 15px;
+  font-weight: var(--font-weight-bold);
+  opacity: 0.4;
+  line-height: 26px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+}
+
+.pagination .page.active {
+  opacity: 1;
+}
+
+.pagination .page.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pagination .page.first {
+  background: url(/images/page_last_icon.svg) no-repeat center center;
+  transform: rotate(180deg);
+  background-size: 12px;
+  opacity: 1;
+}
+
+.pagination .page.prev {
+  background: url(/images/arrow_icon.svg) no-repeat center center;
+  transform: rotate(180deg);
+  background-size: 12px;
+  opacity: 1;
+}
+
+.pagination .page.next {
+  background: url(/images/arrow_icon.svg) no-repeat center center;
+  background-size: 12px;
+  opacity: 1;
+}
+
+.pagination .page.last {
+  background: url(/images/page_last_icon.svg) no-repeat center center;
+  background-size: 12px;
+  opacity: 1;
+}
+
+/* Status styles (global에서 가져옴) */
+.statusOngoing {
+  display: inline-block;
+  font-size: 13px;
+  color: var(--primary);
+  font-weight: var(--font-weight-bold);
+  background-color: var(--status-blue);
+  padding: 5px 10px;
+  border-radius: 4px;
+  line-height: 1;
+}
+
+.statusEnd {
+  display: inline-block;
+  font-size: 13px;
+  color: var(--text-gray);
+  font-weight: var(--font-weight-bold);
+  background-color: var(--status-gray);
+  padding: 5px 10px;
+  border-radius: 4px;
+  line-height: 1;
+}
+
+.statusUnpaid {
+  display: inline-block;
+  font-size: 13px;
+  color: var(--negative);
+  font-weight: var(--font-weight-bold);
+  background-color: var(--status-red);
+  padding: 5px 10px;
+  border-radius: 4px;
+  line-height: 1;
+}
+

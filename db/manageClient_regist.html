@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reset-css@4.0.1/reset.min.css" />
+    <link rel="stylesheet" href="common.css" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <section class="manageClient_regist page_section">
+      <div class="page_title">
+        <h1>관리 고객 등록</h1>
+        <div class="btn_wrap">
+          <div class="btn btn_lg normal">삭제</div>
+          <div class="btn btn_lg primary">등록</div>
+        </div>
+      </div>
+      <div class="white_box">
+        <div class="import_btn btn btn_md black">거래처 불러오기</div>
+        <div class="box_inner">
+          <div class="table_group">
+            <!--ERP 정보-->
+            <div class="table_item">
+              <h2 class="table_title">ERP 정보</h2>
+              <ul class="table_row">
+                <li class="row_group">
+                  <div class="table_head">아이디</div>
+                  <div class="table_data">jaycee8413</div>
+                </li>
+                <li class="row_group">
+                  <div class="table_head">패스워드</div>
+                  <div class="table_data"></div>
+                </li>
+              </ul>
+            </div>
+            <!--ERP 정보끝-->
+
+            <!--기본 정보-->
+            <div class="table_item">
+              <h2 class="table_title">기본 정보</h2>
+              <ul class="table_row">
+                <li class="row_group">
+                  <div class="table_head">거래처 사업자등록번호</div>
+                  <div class="table_data">00-000-00000</div>
+                </li>
+              </ul>
+
+              <ul class="table_row">
+                <li class="row_group">
+                  <div class="table_head">상호(법인명)</div>
+                  <div class="table_data">(주)케이먼트코퍼레이션</div>
+                </li>
+                <li class="row_group">
+                  <div class="table_head">대표자</div>
+                  <div class="table_data">김선홍</div>
+                </li>
+              </ul>
+
+              <ul class="table_row">
+                <li class="row_group">
+                  <div class="table_head">사업자 주소</div>
+                  <div class="table_data">인천시 계양구 오조산로 57번길 7-1 미래사랑빌딩 601, 602호</div>
+                </li>
+              </ul>
+
+              <ul class="table_row">
+                <li class="row_group">
+                  <div class="table_head">업태</div>
+                  <div class="table_data">업태명</div>
+                </li>
+                <li class="row_group">
+                  <div class="table_head">종목</div>
+                  <div class="table_data">종목명</div>
+                </li>
+              </ul>
+
+              <ul class="table_row">
+                <li class="row_group">
+                  <div class="table_head">사업자 등록증 첨부</div>
+                  <div class="table_data">케이먼트_사업자등록증.jpg</div>
+                </li>
+                <li class="row_group">
+                  <div class="table_head">서명 등록</div>
+                  <div class="table_data">케이먼트_서명.jpg</div>
+                </li>
+              </ul>
+
+              <ul class="table_row">
+                <li class="row_group">
+                  <div class="table_head">휴·폐업 상태</div>
+                  <div class="table_data">정상</div>
+                </li>
+              </ul>
+            </div>
+            <!--기본 정보 끝-->
+
+            <!--관리상품정보 / 금액차감형-->
+            <div class="table_item">
+              <h2 class="table_title">관리 상품 정보</h2>
+              <ul class="table_row">
+                <li class="row_group">
+                  <div class="table_head">관리 상품 유형1</div>
+                  <div class="table_data">
+                    <input type="radio" id="ptype1_deduct" name="product_type1" value="deduct" />
+                    <label for="ptype1_deduct">금액차감형</label>
+
+                    <input type="radio" id="ptype1_maintenance" name="product_type1" value="maintenance" />
+                    <label for="ptype1_maintenance">유지보수형</label>
+                  </div>
+                </li>
+              </ul>
+              <ul class="table_row">
+                <li class="row_group">
+                  <div class="table_head">관리 상품 유형2</div>
+                  <div class="table_data">
+                    <input type="radio" id="ptype2_3m" name="product_type2" value="3m" />
+                    <label for="ptype2_3m">3개월</label>
+
+                    <input type="radio" id="ptype2_6m" name="product_type2" value="6m" />
+                    <label for="ptype2_6m">6개월</label>
+
+                    <input type="radio" id="ptype2_9m" name="product_type2" value="9m" />
+                    <label for="ptype2_9m">9개월</label>
+
+                    <input type="radio" id="ptype2_12m" name="product_type2" value="12m" />
+                    <label for="ptype2_12m">12개월</label>
+                  </div>
+                </li>
+              </ul>
+              <ul class="table_row">
+                <li class="row_group">
+                  <div class="table_head">총 금액</div>
+                  <div class="table_data pd12"><input type="text" id="price_d" name="price_d" placeholder="" required /></div>
+                </li>
+                <li class="row_group">
+                  <div class="table_head">납부 진행</div>
+                  <div class="table_data">
+                    <input type="radio" id="payment_paid_d" name="payment_status_d" value="paid" />
+                    <label for="payment_paid_d">완납</label>
+
+                    <input type="radio" id="payment_unpaid_d" name="payment_status_d" value="unpaid" />
+                    <label for="payment_unpaid_d">미납</label>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <!--관리상품정보 / 금액차감형-->
+
+            <!--관리상품정보 / 유지보수형-->
+            <div class="table_item">
+              <h2 class="table_title">관리 상품 정보</h2>
+              <ul class="table_row">
+                <li class="row_group">
+                  <div class="table_head">관리 상품 유형1</div>
+                  <div class="table_data">
+                    <input type="radio" id="ptype1_deduct_m" name="product_type1" value="deduct" />
+                    <label for="ptype1_deduct_m">금액차감형</label>
+
+                    <input type="radio" id="ptype1_maintenance_m" name="product_type1" value="maintenance" />
+                    <label for="ptype1_maintenance_m">유지보수형</label>
+                  </div>
+                </li>
+                <li class="row_group">
+                  <div class="table_head">납부 진행</div>
+                  <div class="table_data">
+                    <input type="radio" id="payment_paid_m" name="payment_status_m" value="paid" />
+                    <label for="payment_paid_m">완납</label>
+
+                    <input type="radio" id="payment_prepaid_m" name="payment_status_m" value="prepaid" />
+                    <label for="payment_prepaid_m">선납</label>
+
+                    <input type="radio" id="payment_unpaid_m" name="payment_status_m" value="unpaid" />
+                    <label for="payment_unpaid_m">미납</label>
+                  </div>
+                </li>
+              </ul>
+              <ul class="table_row">
+                <li class="row_group">
+                  <div class="table_head">관리 상품 유형2</div>
+                  <div class="table_data">
+                    <input type="radio" id="ptype2_standard_m" name="product_type2_m" value="standard" />
+                    <label for="ptype2_3m">스탠다드</label>
+
+                    <input type="radio" id="ptype2_premium_m" name="product_type2_m" value="premium" />
+                    <label for="ptype2_premium_m">프리미엄</label>
+                  </div>
+                </li>
+              </ul>
+              <ul class="table_row">
+                <li class="row_group">
+                  <div class="table_head">세부 내용</div>
+                  <div class="table_data pd12" style="width: 50%">
+                    <div class="input_group"><span class="prefix">영역 텍스트 수정</span><input type="text" name="detail1_m" placeholder="" required /><span class="suffix">회</span></div>
+                    <div class="input_group"><span class="prefix">코딩 수정</span><input type="text" name="detail2_m" placeholder="" required /><span class="suffix">회</span></div>
+                    <div class="input_group"><span class="prefix">기존 결과물 이미지 수정</span><input type="text" name="detail3_m" placeholder="" required /><span class="suffix">회</span></div>
+                    <div class="input_group"><span class="prefix">팝업 디자인</span><input type="text" name="detail4_m" placeholder="" required /><span class="suffix">회</span></div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <!--관리상품정보 / 금액차감형-->
+
+            <!--담당자 정보-->
+            <div class="table_item">
+              <h2 class="table_title">담당자 정보</h2>
+              <h3 class="table_title_sub">담당자1</h3>
+              <ul class="table_row">
+                <li class="row_group">
+                  <div class="table_head">이름</div>
+                  <div class="table_data">담당자</div>
+                </li>
+                <li class="row_group">
+                  <div class="table_head">연락처</div>
+                  <div class="table_data">010-0000-0000</div>
+                </li>
+              </ul>
+              <ul class="table_row">
+                <li class="row_group">
+                  <div class="table_head">이메일</div>
+                  <div class="table_data">kment@kmentcorp.co.kr</div>
+                </li>
+                <li class="row_group">
+                  <div class="table_head">비고</div>
+                  <div class="table_data">특이사항</div>
+                </li>
+              </ul>
+            </div>
+
+            <div class="table_item">
+              <h3 class="table_title_sub">담당자2</h3>
+              <ul class="table_row">
+                <li class="row_group">
+                  <div class="table_head">이름</div>
+                  <div class="table_data">담당자</div>
+                </li>
+                <li class="row_group">
+                  <div class="table_head">연락처</div>
+                  <div class="table_data">010-0000-0000</div>
+                </li>
+              </ul>
+              <ul class="table_row">
+                <li class="row_group">
+                  <div class="table_head">이메일</div>
+                  <div class="table_data">kment@kmentcorp.co.kr</div>
+                </li>
+                <li class="row_group">
+                  <div class="table_head">비고</div>
+                  <div class="table_data">특이사항</div>
+                </li>
+              </ul>
+            </div>
+            <!--담당자 정보끝-->
+
+            <!--사이트 정보-->
+            <div class="table_item table_item2">
+              <h2 class="table_title">사이트 정보</h2>
+              <ul class="table_row">
+                <li class="row_group">
+                  <div class="table_head width20">브랜드</div>
+                  <div class="table_head width20">도메인</div>
+                  <div class="table_head width10">솔루션</div>
+                  <div class="table_head width20">아이디</div>
+                  <div class="table_head width20">패스워드</div>
+                  <div class="table_head width10">유형</div>
+                </li>
+              </ul>
+              <ul class="table_row">
+                <li class="row_group">
+                  <div class="table_data width20">케이먼트코퍼레이션</div>
+                  <div class="table_data width20">https://kmentcorp.co.kr/</div>
+                  <div class="table_data width10">카페24</div>
+                  <div class="table_data width20">jaycee8413</div>
+                  <div class="table_data width20">jaycee8413</div>
+                  <div class="table_data width10">신규</div>
+                </li>
+              </ul>
+            </div>
+            <!--사이트 정보 끝-->
+
+            <!--비고-->
+            <div class="table_item">
+              <h2 class="table_title">비고</h2>
+              <div class="text_box scroll">
+                <p>거래처 등록으로 등록했던 비고 내용입니다.</p>
+              </div>
+            </div>
+            <!--비고 끝-->
+          </div>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

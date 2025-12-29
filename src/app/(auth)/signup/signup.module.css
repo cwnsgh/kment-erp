@@ -1,0 +1,393 @@
+/* 회원가입 페이지 스타일 - join.html과 동일 */
+
+.joinPage {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.joinPage :global(.page_section) {
+  /* page_section은 전역 클래스 */
+}
+
+.pageTitle {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  gap: 30px;
+  margin-bottom: 40px;
+}
+
+.pageTitle h1 {
+  font-size: 32px;
+  font-weight: var(--font-weight-bold);
+}
+
+.pageTitle p {
+  font-size: 18px;
+  font-weight: var(--font-weight-medium);
+}
+
+.pageTitle p b {
+  font-weight: var(--font-weight-bold);
+}
+
+.whiteBox {
+  background: #fff;
+  border-radius: 10px;
+  padding: 40px 40px 60px 40px;
+  box-sizing: border-box;
+  margin-bottom: 20px;
+}
+
+.whiteBox.agreeBox {
+  margin-bottom: 20px;
+}
+
+.whiteBox.agreeBox .pageSubTitle {
+  margin-bottom: 20px;
+}
+
+.whiteBox.infoBox .pageSubTitle {
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--text-color);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  line-height: 1;
+  font-size: 18px;
+  font-weight: var(--font-weight-bold);
+  margin-bottom: 0;
+}
+
+.whiteBox.infoBox .pageSubTitle .notice {
+  font-size: 13px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-gray);
+}
+
+.whiteBox.infoBox .pageSubTitle .notice span {
+  color: var(--primary);
+  font-size: 14px;
+}
+
+.whiteBox.infoBox .pageSubTitle .plusBtn {
+  font-size: 14px;
+  font-weight: var(--font-weight-medium);
+  color: var(--primary);
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.whiteBox.infoBox .pageSubTitle .plusBtn:hover {
+  text-decoration: underline;
+}
+
+/* 약관 동의 */
+.agreeAll {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 40px;
+  margin-bottom: 30px;
+  padding-bottom: 30px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.agreeAll label {
+  font-size: 18px;
+  font-weight: var(--font-weight-bold);
+  color: var(--text-color);
+  cursor: pointer;
+}
+
+.agreeList {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.agreeList > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: var(--font-weight-semibold);
+  position: relative;
+}
+
+.agreeList > div > img {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 10px;
+  opacity: 0.3;
+  cursor: pointer;
+}
+
+.agreeList > div label {
+  color: var(--text-color);
+  cursor: pointer;
+}
+
+.agreeList > div label span {
+  color: var(--primary);
+  display: inline-block;
+  margin-right: 4px;
+}
+
+/* 폼 그리드 */
+.formGrid {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 20px 0;
+  align-items: center;
+}
+
+.formGrid label {
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-color);
+  position: relative;
+  margin-right: 0;
+  font-size: 15px;
+}
+
+.formGrid label span {
+  color: var(--primary);
+  margin-right: 4px;
+}
+
+.formGrid input,
+.formGrid select {
+  height: 36px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 4px 14px;
+  box-sizing: border-box;
+  font-size: 15px;
+  font-family: "Pretendard Variable", Pretendard, -apple-system,
+    BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI",
+    "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+}
+
+.formGrid input:focus,
+.formGrid select:focus {
+  border: 2px solid var(--primary);
+  outline: none;
+}
+
+.formGrid select {
+  height: 36px;
+}
+
+.inputGroup {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.inputGroup.phone select {
+  width: 80px;
+}
+
+.inputGroup.phone input {
+  flex: 1;
+}
+
+.inputGroup input {
+  width: 100%;
+  flex: 1;
+}
+
+.inputGroup :global(.btn) {
+  width: 70px;
+  text-align: center;
+  font-size: 13px;
+  line-height: 36px;
+  border-radius: 4px;
+  height: 36px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* 파일 업로드 */
+.fileUploadBox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.fileUploadBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 14px;
+  height: 36px;
+  background: var(--text-color);
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+}
+
+.fileUploadBtn img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.fileName {
+  font-size: 13px;
+  color: var(--text-gray);
+}
+
+.desc {
+  font-size: 13px;
+  color: var(--text-gray);
+  font-weight: var(--font-weight-medium);
+  margin-top: 10px;
+  width: 100%;
+}
+
+/* 박스 내부 */
+.boxInner {
+  display: flex;
+  flex-direction: column;
+  gap: 60px;
+}
+
+.box {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.box .pageSubTitle {
+  margin-bottom: 20px;
+  font-size: 18px;
+  font-weight: var(--font-weight-bold);
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--text-color);
+}
+
+/* 담당자/사이트 추가 박스 */
+.contactBox,
+.siteBox {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 20px;
+  background: var(--background-color);
+  margin-top: 20px;
+}
+
+.contactBox:first-child,
+.siteBox:first-child {
+  margin-top: 0;
+}
+
+.contactHeader,
+.siteHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.contactHeader h4,
+.siteHeader h4 {
+  font-size: 16px;
+  font-weight: var(--font-weight-bold);
+}
+
+.removeBtn {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-gray);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: #fff;
+  transition: all 0.2s;
+}
+
+.removeBtn:hover {
+  color: var(--negative);
+  border-color: var(--negative);
+  background: #fee;
+}
+
+/* 체크박스 스타일 */
+.formGrid input[type="checkbox"] {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  position: relative;
+  margin: 0;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.formGrid input[type="checkbox"]:checked {
+  border-color: var(--primary);
+  background: var(--primary);
+}
+
+.formGrid input[type="checkbox"]:checked::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  background: url("/images/check_icon.svg") center center no-repeat;
+  background-size: contain;
+  filter: invert(1);
+}
+
+/* 회원가입 버튼 */
+.submitBtn {
+  width: 100%;
+  margin-top: 20px;
+  box-sizing: border-box;
+  text-align: center;
+  height: 50px;
+  line-height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.submitBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+  .formGrid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .formGrid label {
+    margin-bottom: 4px;
+  }
+
+  .whiteBox {
+    padding: 30px 20px;
+  }
+}

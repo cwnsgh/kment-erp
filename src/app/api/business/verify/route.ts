@@ -64,7 +64,33 @@ export async function POST(request: NextRequest) {
       }
 
       const businessInfo = data.data[0];
+
+      // 사업자등록번호가 없거나 요청한 번호와 다른 경우 (잘못된 번호)
+      if (
+        !businessInfo.b_no ||
+        businessInfo.b_no.replace(/-/g, "") !== cleanBusinessNumber
+      ) {
+        return NextResponse.json(
+          { success: false, error: "유효하지 않은 사업자등록번호입니다." },
+          { status: 404 }
+        );
+      }
+
       const statusCode = businessInfo.b_stt_cd;
+
+      // 상태 코드가 없거나 유효하지 않은 경우 (잘못된 번호)
+      if (
+        !statusCode ||
+        (statusCode !== "01" && statusCode !== "02" && statusCode !== "03")
+      ) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "사업자등록번호 상태를 확인할 수 없습니다.",
+          },
+          { status: 404 }
+        );
+      }
 
       // 상태 코드 매핑
       // 01: 계속사업자, 02: 휴업자, 03: 폐업자
@@ -85,8 +111,14 @@ export async function POST(request: NextRequest) {
           statusText = businessInfo.b_stt || "폐업자";
           break;
         default:
-          status = "approved";
-          statusText = businessInfo.b_stt || "계속사업자";
+          // 이 경우는 위에서 이미 체크했지만, 타입 안전성을 위해 추가
+          return NextResponse.json(
+            {
+              success: false,
+              error: "사업자등록번호 상태를 확인할 수 없습니다.",
+            },
+            { status: 404 }
+          );
       }
 
       return NextResponse.json({
@@ -145,7 +177,23 @@ export async function POST(request: NextRequest) {
 
         if (data.status_code === "OK" && data.data) {
           for (const businessInfo of data.data) {
+            // 사업자등록번호가 없거나 유효하지 않은 경우 건너뛰기
+            if (!businessInfo.b_no) {
+              continue;
+            }
+
             const statusCode = businessInfo.b_stt_cd;
+
+            // 상태 코드가 없거나 유효하지 않은 경우 건너뛰기
+            if (
+              !statusCode ||
+              (statusCode !== "01" &&
+                statusCode !== "02" &&
+                statusCode !== "03")
+            ) {
+              continue;
+            }
+
             let status: "approved" | "suspended" | "closed";
             let statusText: string;
 
@@ -163,8 +211,8 @@ export async function POST(request: NextRequest) {
                 statusText = businessInfo.b_stt || "폐업자";
                 break;
               default:
-                status = "approved";
-                statusText = businessInfo.b_stt || "계속사업자";
+                // 이 경우는 위에서 이미 체크했지만, 타입 안전성을 위해 건너뛰기
+                continue;
             }
 
             results.push({

@@ -1,10 +1,14 @@
-'use client';
+"use client";
 
-import { Plus, Trash2, Upload } from 'lucide-react';
-import { useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import { createClient, checkBusinessRegistrationNumber } from '@/app/actions/client';
-import AddressSearch from '@/components/common/address-search';
+import { Plus, X, Upload, Trash2 } from "lucide-react";
+import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
+import {
+  createClient,
+  checkBusinessRegistrationNumber,
+} from "@/app/actions/client";
+import AddressSearch from "@/components/common/address-search";
+import styles from "./client-form.module.css";
 
 type Contact = {
   id: string;
@@ -22,137 +26,203 @@ type Site = {
   solution: string;
   loginId: string;
   loginPassword: string;
+  type: string;
   note: string;
 };
 
 const createId = () =>
-  typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : Math.random().toString(36).slice(2);
+  typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : Math.random().toString(36).slice(2);
 
 export function ClientForm() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [checkingDuplicate, setCheckingDuplicate] = useState(false);
-  const [duplicateCheckResult, setDuplicateCheckResult] = useState<string>('');
+  const [duplicateCheckResult, setDuplicateCheckResult] = useState<string>("");
   const [uploading, setUploading] = useState(false);
   const businessRegistrationFileInputRef = useRef<HTMLInputElement>(null);
   const signatureFileInputRef = useRef<HTMLInputElement>(null);
   const [contacts, setContacts] = useState<Contact[]>([
-    { id: createId(), name: '', phone: '', email: '', title: '', note: '' }
+    { id: createId(), name: "", phone: "", email: "", title: "", note: "" },
   ]);
   const [sites, setSites] = useState<Site[]>([
-    { id: createId(), brandName: '', domain: '', solution: '', loginId: '', loginPassword: '', note: '' }
+    {
+      id: createId(),
+      brandName: "",
+      domain: "",
+      solution: "",
+      loginId: "",
+      loginPassword: "",
+      type: "",
+      note: "",
+    },
   ]);
-  const [attachments, setAttachments] = useState<Array<{ fileUrl: string; fileName: string; fileType: 'business_registration' | 'signature' }>>([]);
+  const [attachments, setAttachments] = useState<
+    Array<{
+      fileUrl: string;
+      fileName: string;
+      fileType: "business_registration" | "signature";
+    }>
+  >([]);
   // 선택한 파일을 임시로 저장 (아직 업로드 안 함)
-  const [pendingFiles, setPendingFiles] = useState<Array<{ file: File; fileType: 'business_registration' | 'signature' }>>([]);
+  const [pendingFiles, setPendingFiles] = useState<
+    Array<{ file: File; fileType: "business_registration" | "signature" }>
+  >([]);
   // 사업자 상태 (API에서 가져온 정보)
-  const [businessStatus, setBusinessStatus] = useState<'정상' | '휴업' | '폐업' | null>(null);
+  const [businessStatus, setBusinessStatus] = useState<
+    "정상" | "휴업" | "폐업" | null
+  >(null);
 
   const addContact = () =>
-    setContacts((prev) => [...prev, { id: createId(), name: '', phone: '', email: '', title: '', note: '' }]);
-  const removeContact = (id: string) => setContacts((prev) => prev.filter((contact) => contact.id !== id));
+    setContacts((prev) => [
+      ...prev,
+      { id: createId(), name: "", phone: "", email: "", title: "", note: "" },
+    ]);
+  const removeContact = (id: string) =>
+    setContacts((prev) => prev.filter((contact) => contact.id !== id));
 
   const addSite = () =>
-    setSites((prev) => [...prev, { id: createId(), brandName: '', domain: '', solution: '', loginId: '', loginPassword: '', note: '' }]);
-  const removeSite = (id: string) => setSites((prev) => prev.filter((site) => site.id !== id));
+    setSites((prev) => [
+      ...prev,
+      {
+        id: createId(),
+        brandName: "",
+        domain: "",
+        solution: "",
+        loginId: "",
+        loginPassword: "",
+        type: "",
+        note: "",
+      },
+    ]);
+  const removeSite = (id: string) =>
+    setSites((prev) => prev.filter((site) => site.id !== id));
 
   // 중복확인
   const handleCheckDuplicate = async () => {
-    const input = document.querySelector('input[name="businessRegistrationNumber"]') as HTMLInputElement;
+    const input = document.querySelector(
+      'input[name="businessRegistrationNumber"]'
+    ) as HTMLInputElement;
     const businessNumber = input?.value.trim();
 
     if (!businessNumber) {
-      alert('사업자등록번호를 입력해주세요.');
+      alert("사업자등록번호를 입력해주세요.");
       return;
     }
 
     setCheckingDuplicate(true);
-    setDuplicateCheckResult('');
+    setDuplicateCheckResult("");
 
     const result = await checkBusinessRegistrationNumber(businessNumber);
 
     setCheckingDuplicate(false);
 
     if (result.success && !result.isDuplicate) {
-      let message = '사용 가능한 사업자등록번호입니다.';
+      let message = "사용 가능한 사업자등록번호입니다.";
       if (result.businessStatus) {
         // 상태 자동 반영
-        const statusMap: Record<string, '정상' | '휴업' | '폐업'> = {
-          approved: '정상',
-          suspended: '휴업',
-          closed: '폐업',
+        const statusMap: Record<string, "정상" | "휴업" | "폐업"> = {
+          approved: "정상",
+          suspended: "휴업",
+          closed: "폐업",
         };
-        const newStatus = statusMap[result.businessStatus.status] || '정상';
+        const newStatus = statusMap[result.businessStatus.status] || "정상";
         setBusinessStatus(newStatus);
-        
+
         // 숨겨진 input에 상태 저장 (제출 시 사용)
-        const statusInput = document.querySelector('input[name="status"]') as HTMLInputElement;
+        const statusInput = document.querySelector(
+          'input[name="status"]'
+        ) as HTMLInputElement;
         if (statusInput) {
           statusInput.value = newStatus;
         }
-        
-        message += `\n사업자 상태: ${result.businessStatus.statusText} (자동 반영됨)`;
       }
       setDuplicateCheckResult(message);
       alert(message);
     } else {
       // 에러 발생 시 상태 초기화
       setBusinessStatus(null);
-      
+
       // 숨겨진 input의 value도 초기화
-      const statusInput = document.querySelector('input[name="status"]') as HTMLInputElement;
+      const statusInput = document.querySelector(
+        'input[name="status"]'
+      ) as HTMLInputElement;
       if (statusInput) {
-        statusInput.value = '정상'; // 기본값으로 초기화
+        statusInput.value = "정상"; // 기본값으로 초기화
       }
-      
+
       // 에러 메시지 우선 표시 (error 필드가 있으면 사용)
-      const errorMessage = result.error || result.message || '이미 등록된 사업자등록번호이거나 확인할 수 없습니다.';
+      const errorMessage =
+        result.error ||
+        result.message ||
+        "이미 등록된 사업자등록번호이거나 확인할 수 없습니다.";
       setDuplicateCheckResult(errorMessage);
       alert(errorMessage);
     }
   };
 
   // 파일 선택 시 state에 저장 (아직 업로드 안 함)
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, fileType: 'business_registration' | 'signature') => {
+  const handleFileSelect = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    fileType: "business_registration" | "signature"
+  ) => {
     const file = e.target.files?.[0];
     if (file) {
       // 파일 크기 검증 (30MB)
       if (file.size > 30 * 1024 * 1024) {
-        alert('파일 크기는 30MB 이하여야 합니다.');
+        alert("파일 크기는 30MB 이하여야 합니다.");
         return;
       }
-      
+
       // 같은 타입의 기존 파일 제거하고 새 파일 추가
       setPendingFiles((prev) => [
         ...prev.filter((f) => f.fileType !== fileType),
         { file, fileType },
       ]);
-      
+
       // input 초기화 (같은 파일을 다시 선택할 수 있도록)
-      e.target.value = '';
+      e.target.value = "";
     }
   };
 
   // 파일 업로드 (저장/수정 버튼 클릭 시 호출)
-  const uploadPendingFiles = async (): Promise<Array<{ fileUrl: string; fileName: string; fileType: 'business_registration' | 'signature' }>> => {
+  const uploadPendingFiles = async (): Promise<
+    Array<{
+      fileUrl: string;
+      fileName: string;
+      fileType: "business_registration" | "signature";
+    }>
+  > => {
     if (pendingFiles.length === 0) return [];
 
     setUploading(true);
-    const uploadedFiles: Array<{ fileUrl: string; fileName: string; fileType: 'business_registration' | 'signature' }> = [];
+    const uploadedFiles: Array<{
+      fileUrl: string;
+      fileName: string;
+      fileType: "business_registration" | "signature";
+    }> = [];
 
     try {
       for (const { file, fileType } of pendingFiles) {
         const formData = new FormData();
-        formData.append('file', file);
-        formData.append('folder', fileType === 'business_registration' ? 'business-registration' : 'signature');
+        formData.append("file", file);
+        formData.append(
+          "folder",
+          fileType === "business_registration"
+            ? "business-registration"
+            : "signature"
+        );
 
-        const response = await fetch('/api/files/upload', {
-          method: 'POST',
+        const response = await fetch("/api/files/upload", {
+          method: "POST",
           body: formData,
         });
 
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ error: `HTTP ${response.status}: ${response.statusText}` }));
+          const errorData = await response.json().catch(() => ({
+            error: `HTTP ${response.status}: ${response.statusText}`,
+          }));
           throw new Error(errorData.error || `서버 오류 (${response.status})`);
         }
 
@@ -165,14 +235,17 @@ export function ClientForm() {
             fileType,
           });
         } else {
-          throw new Error(result.error || '파일 업로드 실패');
+          throw new Error(result.error || "파일 업로드 실패");
         }
       }
 
       return uploadedFiles;
     } catch (error) {
-      console.error('파일 업로드 오류:', error);
-      const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.';
+      console.error("파일 업로드 오류:", error);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "알 수 없는 오류가 발생했습니다.";
       throw new Error(`파일 업로드 실패: ${errorMessage}`);
     } finally {
       setUploading(false);
@@ -186,28 +259,40 @@ export function ClientForm() {
     try {
       // 1. 선택한 파일들 먼저 업로드
       const uploadedFiles = await uploadPendingFiles();
-      
+
       // 2. 업로드된 파일들을 attachments에 추가 (기존 파일과 병합)
       const allAttachments = [
-        ...attachments.filter((a) => !pendingFiles.some((pf) => pf.fileType === a.fileType)), // 기존 파일 중 pendingFiles와 타입이 다른 것만 유지
+        ...attachments.filter(
+          (a) => !pendingFiles.some((pf) => pf.fileType === a.fileType)
+        ), // 기존 파일 중 pendingFiles와 타입이 다른 것만 유지
         ...uploadedFiles,
       ];
 
-      const formData = new FormData(e.currentTarget);
+      // form element 직접 가져오기
+      const formElement = document.getElementById(
+        "clientForm"
+      ) as HTMLFormElement;
+      if (!formElement) {
+        throw new Error("Form element not found");
+      }
+      const formData = new FormData(formElement);
 
       // 기본 정보 수집
       const clientData = {
-        businessRegistrationNumber: formData.get('businessRegistrationNumber') as string,
-        name: formData.get('name') as string,
-        ceoName: formData.get('ceoName') as string,
-        address: formData.get('address') as string,
-        addressDetail: formData.get('addressDetail') as string,
-        businessType: formData.get('businessType') as string,
-        businessItem: formData.get('businessItem') as string,
-        loginId: formData.get('loginId') as string,
-        loginPassword: formData.get('loginPassword') as string,
-        note: formData.get('note') as string,
-        status: (formData.get('status') as string) || '정상', // API에서 가져온 상태 또는 기본값
+        businessRegistrationNumber: formData.get(
+          "businessRegistrationNumber"
+        ) as string,
+        name: formData.get("name") as string,
+        ceoName: formData.get("ceoName") as string,
+        postalCode: formData.get("postalCode") as string,
+        address: formData.get("address") as string,
+        addressDetail: formData.get("addressDetail") as string,
+        businessType: formData.get("businessType") as string,
+        businessItem: formData.get("businessItem") as string,
+        loginId: formData.get("loginId") as string,
+        loginPassword: formData.get("loginPassword") as string,
+        note: formData.get("note") as string,
+        status: (formData.get("status") as string) || "정상", // API에서 가져온 상태 또는 기본값
       };
 
       // 담당자 정보 수집
@@ -226,6 +311,7 @@ export function ClientForm() {
         solution: formData.get(`site_${site.id}_solution`) as string,
         loginId: formData.get(`site_${site.id}_loginId`) as string,
         loginPassword: formData.get(`site_${site.id}_loginPassword`) as string,
+        type: formData.get(`site_${site.id}_type`) as string,
         note: formData.get(`site_${site.id}_note`) as string,
       }));
 
@@ -238,473 +324,680 @@ export function ClientForm() {
       });
 
       if (result.success) {
-        alert('거래처가 등록되었습니다.');
-        router.push('/clients');
+        alert("거래처가 등록되었습니다.");
+        router.push("/clients");
       } else {
-        alert('등록 실패: ' + result.error);
+        alert("등록 실패: " + result.error);
       }
     } catch (error) {
-      console.error('등록 오류:', error);
-      alert(error instanceof Error ? error.message : '등록 중 오류가 발생했습니다.');
+      console.error("등록 오류:", error);
+      alert(
+        error instanceof Error ? error.message : "등록 중 오류가 발생했습니다."
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
-      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <header>
-          <h2 className="text-lg font-semibold text-slate-900">기본 정보</h2>
-          <p className="mt-1 text-sm text-slate-500">사업자 및 로그인 정보를 입력합니다.</p>
-        </header>
-        <div className="mt-6 grid gap-4 md:grid-cols-2">
-          <div className="flex gap-2">
-            <div className="flex-1">
-              <Field name="businessRegistrationNumber" label="사업자 등록번호" placeholder="123-45-67890" required className="w-full" />
-              {duplicateCheckResult && (
-                <p className={`mt-1 text-xs ${duplicateCheckResult.includes('사용 가능') ? 'text-green-600' : 'text-red-600'}`}>
-                  {duplicateCheckResult}
-                </p>
-              )}
-            </div>
-            <button
-              type="button"
-              onClick={handleCheckDuplicate}
-              disabled={checkingDuplicate}
-              className="mt-6 h-10 rounded-md border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
-            >
-              {checkingDuplicate ? '확인 중...' : '중복확인'}
-            </button>
-          </div>
-          <Field name="name" label="상호(법인명)" required />
-          <Field name="ceoName" label="대표자명" />
-          <div className="flex gap-2">
-            <Field name="address" label="사업자 주소" className="flex-1" />
-            <AddressSearch
-              onComplete={(data) => {
-                const addressInput = document.querySelector('input[name="address"]') as HTMLInputElement;
-                const postalCodeInput = document.querySelector('input[name="postalCode"]') as HTMLInputElement;
-                if (addressInput) {
-                  addressInput.value = data.address + (data.buildingName ? ` ${data.buildingName}` : '');
-                  // input 이벤트 발생시켜서 React가 인식하도록
-                  addressInput.dispatchEvent(new Event('input', { bubbles: true }));
-                }
-                if (postalCodeInput) {
-                  postalCodeInput.value = data.zonecode;
-                  postalCodeInput.dispatchEvent(new Event('input', { bubbles: true }));
-                }
-              }}
-            >
-              <button
-                type="button"
-                className="mt-6 h-10 rounded-md border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 hover:bg-slate-50"
-              >
-                주소검색
-              </button>
-            </AddressSearch>
-          </div>
-          <Field name="postalCode" label="우편번호" className="opacity-75" readOnly />
-          <Field name="addressDetail" label="상세 주소" />
-          <Field name="businessType" label="업태" />
-          <Field name="businessItem" label="종목" />
-          <Field name="loginId" label="거래처 아이디" />
-          <Field name="loginPassword" label="거래처 비밀번호" type="password" />
-        </div>
-        {/* 숨겨진 상태 필드 (API 결과 저장용) */}
-        <input type="hidden" name="status" value={businessStatus || '정상'} />
-        {businessStatus && (
-          <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-3">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold text-blue-700">사업자 상태:</span>
-              <span className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${
-                businessStatus === '정상' ? 'bg-blue-50 text-blue-600' :
-                businessStatus === '폐업' ? 'bg-red-50 text-red-600' :
-                'bg-slate-100 text-slate-600'
-              }`}>
-                {businessStatus}
-              </span>
-              <span className="text-xs text-blue-500">(국세청 API 기준, 자동 반영됨)</span>
-            </div>
-          </div>
-        )}
-        <div className="mt-6">
-          <label className="block text-sm font-semibold text-slate-700">사업자 등록증 첨부</label>
-          <div className="mt-2 space-y-2">
-            {/* 이미 업로드된 파일 */}
-            {attachments
-              .filter((a) => a.fileType === 'business_registration')
-              .map((attachment, index) => {
-                const isImage = attachment.fileName.match(/\.(jpg|jpeg|png|gif|webp)$/i);
-                const fileSize = attachment.fileUrl ? '업로드됨' : '';
-                return (
-                  <div key={index} className="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
-                    {isImage && attachment.fileUrl ? (
-                      <img
-                        src={attachment.fileUrl}
-                        alt={attachment.fileName}
-                        className="h-10 w-10 rounded object-cover"
-                        onClick={() => window.open(attachment.fileUrl, '_blank')}
-                        style={{ cursor: 'pointer' }}
-                      />
-                    ) : (
-                      <div className="flex h-10 w-10 items-center justify-center rounded bg-slate-200">
-                        <span className="text-xs text-slate-500">📄</span>
-                      </div>
-                    )}
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        {attachment.fileUrl ? (
-                          <a
-                            href={attachment.fileUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm font-medium text-slate-700 hover:text-primary hover:underline"
-                          >
-                            {attachment.fileName}
-                          </a>
-                        ) : (
-                          <span className="text-sm text-slate-600">{attachment.fileName}</span>
-                        )}
-                        {fileSize && <span className="text-xs text-slate-400">({fileSize})</span>}
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setAttachments((prev) => prev.filter((a, i) => !(a.fileType === 'business_registration' && i === index)))}
-                      className="text-slate-400 hover:text-red-500"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                );
-              })}
-            {/* 선택한 파일 (아직 업로드 안 함) */}
-            {pendingFiles
-              .filter((f) => f.fileType === 'business_registration')
-              .map((pendingFile, index) => {
-                const isImage = pendingFile.file.type.startsWith('image/');
-                const fileSize = (pendingFile.file.size / 1024 / 1024).toFixed(2) + ' MB';
-                const previewUrl = isImage ? URL.createObjectURL(pendingFile.file) : null;
-                return (
-                  <div key={index} className="flex items-center gap-3 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2">
-                    {isImage && previewUrl ? (
-                      <img
-                        src={previewUrl}
-                        alt={pendingFile.file.name}
-                        className="h-10 w-10 rounded object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-10 w-10 items-center justify-center rounded bg-blue-200">
-                        <span className="text-xs text-blue-600">📄</span>
-                      </div>
-                    )}
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-blue-700">{pendingFile.file.name}</span>
-                        <span className="text-xs text-blue-500">({fileSize})</span>
-                        <span className="text-xs text-blue-500">업로드 대기 중</span>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (previewUrl) URL.revokeObjectURL(previewUrl);
-                        setPendingFiles((prev) => prev.filter((f, i) => !(f.fileType === 'business_registration' && i === index)));
-                      }}
-                      className="text-slate-400 hover:text-red-500"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                );
-              })}
-            <div
-              className="flex items-center gap-3 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-500 cursor-pointer hover:bg-slate-100 transition"
-              onClick={() => businessRegistrationFileInputRef.current?.click()}
-            >
-              <Upload size={16} className="text-slate-400" />
-              <span className="font-medium text-slate-600">파일을 드래그하거나 클릭하여 선택</span>
-              <input
-                ref={businessRegistrationFileInputRef}
-                type="file"
-                accept="image/*,.pdf"
-                className="hidden"
-                onChange={(e) => handleFileSelect(e, 'business_registration')}
-                disabled={uploading || loading}
-              />
-              <button
-                type="button"
-                disabled={uploading || loading}
-                className="rounded-md border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-50"
-              >
-                파일 선택
-              </button>
-            </div>
-          </div>
-        </div>
-        <div className="mt-6">
-          <label className="block text-sm font-semibold text-slate-700">서명 등록</label>
-          <div className="mt-2 space-y-2">
-            {/* 이미 업로드된 파일 */}
-            {attachments
-              .filter((a) => a.fileType === 'signature')
-              .map((attachment, index) => {
-                const isImage = attachment.fileName.match(/\.(jpg|jpeg|png|gif|webp)$/i);
-                const fileSize = attachment.fileUrl ? '업로드됨' : '';
-                return (
-                  <div key={index} className="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
-                    {isImage && attachment.fileUrl ? (
-                      <img
-                        src={attachment.fileUrl}
-                        alt={attachment.fileName}
-                        className="h-10 w-10 rounded object-cover"
-                        onClick={() => window.open(attachment.fileUrl, '_blank')}
-                        style={{ cursor: 'pointer' }}
-                      />
-                    ) : (
-                      <div className="flex h-10 w-10 items-center justify-center rounded bg-slate-200">
-                        <span className="text-xs text-slate-500">📄</span>
-                      </div>
-                    )}
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        {attachment.fileUrl ? (
-                          <a
-                            href={attachment.fileUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm font-medium text-slate-700 hover:text-primary hover:underline"
-                          >
-                            {attachment.fileName}
-                          </a>
-                        ) : (
-                          <span className="text-sm text-slate-600">{attachment.fileName}</span>
-                        )}
-                        {fileSize && <span className="text-xs text-slate-400">({fileSize})</span>}
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setAttachments((prev) => prev.filter((a, i) => !(a.fileType === 'signature' && i === index)))}
-                      className="text-slate-400 hover:text-red-500"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                );
-              })}
-            {/* 선택한 파일 (아직 업로드 안 함) */}
-            {pendingFiles
-              .filter((f) => f.fileType === 'signature')
-              .map((pendingFile, index) => {
-                const isImage = pendingFile.file.type.startsWith('image/');
-                const fileSize = (pendingFile.file.size / 1024 / 1024).toFixed(2) + ' MB';
-                const previewUrl = isImage ? URL.createObjectURL(pendingFile.file) : null;
-                return (
-                  <div key={index} className="flex items-center gap-3 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2">
-                    {isImage && previewUrl ? (
-                      <img
-                        src={previewUrl}
-                        alt={pendingFile.file.name}
-                        className="h-10 w-10 rounded object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-10 w-10 items-center justify-center rounded bg-blue-200">
-                        <span className="text-xs text-blue-600">📄</span>
-                      </div>
-                    )}
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-blue-700">{pendingFile.file.name}</span>
-                        <span className="text-xs text-blue-500">({fileSize})</span>
-                        <span className="text-xs text-blue-500">업로드 대기 중</span>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (previewUrl) URL.revokeObjectURL(previewUrl);
-                        setPendingFiles((prev) => prev.filter((f, i) => !(f.fileType === 'signature' && i === index)));
-                      }}
-                      className="text-slate-400 hover:text-red-500"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                );
-              })}
-            <div
-              className="flex items-center gap-3 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-500 cursor-pointer hover:bg-slate-100 transition"
-              onClick={() => signatureFileInputRef.current?.click()}
-            >
-              <Upload size={16} className="text-slate-400" />
-              <span className="font-medium text-slate-600">파일을 드래그하거나 클릭하여 선택</span>
-              <input
-                ref={signatureFileInputRef}
-                type="file"
-                accept="image/*,.pdf"
-                className="hidden"
-                onChange={(e) => handleFileSelect(e, 'signature')}
-                disabled={uploading || loading}
-              />
-              <button
-                type="button"
-                disabled={uploading || loading}
-                className="rounded-md border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-50"
-              >
-                파일 선택
-              </button>
-            </div>
-          </div>
-        </div>
-        <div className="mt-6">
-          <label className="block text-sm font-semibold text-slate-700">비고</label>
-          <textarea
-            name="note"
-            rows={4}
-            className="mt-1 w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-            placeholder="추가 정보를 입력하세요"
-          />
-        </div>
-      </section>
-
-      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <header className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-slate-900">담당자 정보</h2>
-            <p className="mt-1 text-sm text-slate-500">담당자는 여러 명을 등록할 수 있습니다.</p>
-          </div>
+    <section className={`${styles.clientRegist} page_section`}>
+      <div className="page_title">
+        <h1>거래처 등록</h1>
+        <div className="btn_wrap">
           <button
             type="button"
-            onClick={addContact}
-            className="inline-flex items-center gap-2 rounded-md border border-slate-200 px-3 py-1.5 text-sm font-semibold text-slate-600 hover:bg-slate-100"
+            onClick={() => {
+              setPendingFiles([]);
+              router.back();
+            }}
+            className="btn btn_lg normal"
           >
-            <Plus size={16} />
-            담당자 추가
+            취소
           </button>
-        </header>
-        <div className="mt-6 space-y-6">
-          {contacts.map((contact, index) => (
-            <div key={contact.id} className="rounded-lg border border-slate-200 p-4">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold text-slate-700">담당자 {index + 1}</p>
-                {contacts.length > 1 ? (
-                  <button
-                    type="button"
-                    onClick={() => removeContact(contact.id)}
-                    className="inline-flex items-center gap-1 text-xs font-medium text-red-500 hover:text-red-600"
-                  >
-                    <Trash2 size={14} />
-                    삭제
-                  </button>
-                ) : null}
-              </div>
-              <div className="mt-4 grid gap-4 md:grid-cols-2">
-                <Field name={`contact_${contact.id}_name`} label="이름" required />
-                <Field name={`contact_${contact.id}_phone`} label="연락처" placeholder="010-1234-5678" />
-                <Field name={`contact_${contact.id}_email`} label="이메일" type="email" />
-                <Field name={`contact_${contact.id}_title`} label="직책" />
-                <Field name={`contact_${contact.id}_note`} label="비고" className="md:col-span-2" />
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <header className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-slate-900">거래처 사이트</h2>
-            <p className="mt-1 text-sm text-slate-500">브랜드별 사이트 정보를 관리합니다.</p>
-          </div>
           <button
-            type="button"
-            onClick={addSite}
-            className="inline-flex items-center gap-2 rounded-md border border-slate-200 px-3 py-1.5 text-sm font-semibold text-slate-600 hover:bg-slate-100"
+            type="submit"
+            form="clientForm"
+            disabled={loading || uploading}
+            className="btn btn_lg primary disabled:opacity-50"
           >
-            <Plus size={16} />
-            사이트 추가
+            {loading || uploading
+              ? uploading
+                ? "파일 업로드 중..."
+                : "등록 중..."
+              : "등록"}
           </button>
-        </header>
-        <div className="mt-6 space-y-6">
-          {sites.map((site, index) => (
-            <div key={site.id} className="rounded-lg border border-slate-200 p-4">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold text-slate-700">사이트 {index + 1}</p>
-                {sites.length > 1 ? (
-                  <button
-                    type="button"
-                    onClick={() => removeSite(site.id)}
-                    className="inline-flex items-center gap-1 text-xs font-medium text-red-500 hover:text-red-600"
-                  >
-                    <Trash2 size={14} />
-                    삭제
-                  </button>
-                ) : null}
+        </div>
+      </div>
+      <form id="clientForm" onSubmit={handleSubmit}>
+        <div className="white_box">
+          <div className={styles.boxInner}>
+            <div className="table_group">
+              {/* ERP 정보 */}
+              <div className="table_item">
+                <h2 className="table_title">ERP 정보</h2>
+                <ul className="table_row">
+                  <li className="row_group">
+                    <div className="table_head">아이디</div>
+                    <div className="table_data pd12">
+                      <input
+                        name="loginId"
+                        type="text"
+                        placeholder="거래처 아이디"
+                      />
+                    </div>
+                  </li>
+                  <li className="row_group">
+                    <div className="table_head">패스워드</div>
+                    <div className="table_data pd12">
+                      <input
+                        name="loginPassword"
+                        type="password"
+                        placeholder="거래처 비밀번호"
+                      />
+                    </div>
+                  </li>
+                </ul>
               </div>
-              <div className="mt-4 grid gap-4 md:grid-cols-2">
-                <Field name={`site_${site.id}_brandName`} label="브랜드명" />
-                <Field name={`site_${site.id}_domain`} label="도메인" placeholder="https://example.com" />
-                <Field name={`site_${site.id}_solution`} label="솔루션" placeholder="Cafe24, 고도몰 등" />
-                <Field name={`site_${site.id}_loginId`} label="사이트 아이디" />
-                <Field name={`site_${site.id}_loginPassword`} label="사이트 비밀번호" type="password" />
-                <Field name={`site_${site.id}_note`} label="비고" className="md:col-span-2" />
+
+              {/* 기본 정보 */}
+              <div className="table_item">
+                <h2 className="table_title">기본 정보</h2>
+                <ul className="table_row">
+                  <li className="row_group">
+                    <div className="table_head">거래처 사업자등록번호</div>
+                    <div className="table_data pd12">
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "8px",
+                          alignItems: "center",
+                        }}
+                      >
+                        <input
+                          name="businessRegistrationNumber"
+                          type="text"
+                          placeholder="123-45-67890"
+                          required
+                          style={{ flex: 1 }}
+                        />
+                        <button
+                          type="button"
+                          onClick={handleCheckDuplicate}
+                          disabled={checkingDuplicate}
+                          className="btn btn_md normal"
+                        >
+                          {checkingDuplicate ? "확인 중..." : "중복확인"}
+                        </button>
+                        {duplicateCheckResult && (
+                          <span
+                            style={{
+                              fontSize: "12px",
+                              whiteSpace: "nowrap",
+                              color: duplicateCheckResult.includes("사용 가능")
+                                ? "#10b981"
+                                : "#ef4444",
+                            }}
+                          >
+                            {duplicateCheckResult}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+                <ul className="table_row">
+                  <li className="row_group">
+                    <div className="table_head">상호(법인명)</div>
+                    <div className="table_data pd12">
+                      <input
+                        name="name"
+                        type="text"
+                        required
+                        placeholder="상호(법인명)"
+                      />
+                    </div>
+                  </li>
+                  <li className="row_group">
+                    <div className="table_head">대표자</div>
+                    <div className="table_data pd12">
+                      <input
+                        name="ceoName"
+                        type="text"
+                        placeholder="대표자명"
+                      />
+                    </div>
+                  </li>
+                </ul>
+                <ul className="table_row">
+                  <li className="row_group">
+                    <div className="table_head">사업자 주소</div>
+                    <div className="table_data pd12">
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "8px",
+                          alignItems: "center",
+                        }}
+                      >
+                        <input
+                          name="address"
+                          type="text"
+                          style={{ flex: 1 }}
+                          placeholder="사업자 주소"
+                        />
+                        <AddressSearch
+                          onComplete={(data) => {
+                            const addressInput = document.querySelector(
+                              'input[name="address"]'
+                            ) as HTMLInputElement;
+                            const postalCodeInput = document.querySelector(
+                              'input[name="postalCode"]'
+                            ) as HTMLInputElement;
+                            if (addressInput) {
+                              addressInput.value =
+                                data.address +
+                                (data.buildingName
+                                  ? ` ${data.buildingName}`
+                                  : "");
+                              addressInput.dispatchEvent(
+                                new Event("input", { bubbles: true })
+                              );
+                            }
+                            if (postalCodeInput) {
+                              postalCodeInput.value = data.zonecode;
+                              postalCodeInput.dispatchEvent(
+                                new Event("input", { bubbles: true })
+                              );
+                            }
+                          }}
+                        >
+                          <button type="button" className="btn btn_md normal">
+                            주소검색
+                          </button>
+                        </AddressSearch>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+                <ul className="table_row">
+                  <li className="row_group">
+                    <div className="table_head">우편번호</div>
+                    <div className="table_data pd12">
+                      <input
+                        name="postalCode"
+                        type="text"
+                        readOnly
+                        style={{ opacity: 0.75 }}
+                        placeholder="우편번호"
+                      />
+                    </div>
+                  </li>
+                  <li className="row_group">
+                    <div className="table_head">상세 주소</div>
+                    <div className="table_data pd12">
+                      <input
+                        name="addressDetail"
+                        type="text"
+                        placeholder="상세 주소"
+                      />
+                    </div>
+                  </li>
+                </ul>
+                <ul className="table_row">
+                  <li className="row_group">
+                    <div className="table_head">업태</div>
+                    <div className="table_data pd12">
+                      <input
+                        name="businessType"
+                        type="text"
+                        placeholder="업태명"
+                      />
+                    </div>
+                  </li>
+                  <li className="row_group">
+                    <div className="table_head">종목</div>
+                    <div className="table_data pd12">
+                      <input
+                        name="businessItem"
+                        type="text"
+                        placeholder="종목명"
+                      />
+                    </div>
+                  </li>
+                </ul>
+                <ul className={`table_row ${styles.lastRow}`}>
+                  <li className="row_group">
+                    <div className="table_head">사업자 등록증 첨부</div>
+                    <div className="table_data pd12">
+                      <div className="file-upload-box">
+                        <input
+                          ref={businessRegistrationFileInputRef}
+                          type="file"
+                          accept="image/*,.pdf"
+                          className="fileInput"
+                          style={{ display: "none" }}
+                          onChange={(e) =>
+                            handleFileSelect(e, "business_registration")
+                          }
+                          disabled={uploading || loading}
+                        />
+                        {attachments.filter(
+                          (a) => a.fileType === "business_registration"
+                        ).length === 0 &&
+                          pendingFiles.filter(
+                            (f) => f.fileType === "business_registration"
+                          ).length === 0 && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                businessRegistrationFileInputRef.current?.click()
+                              }
+                              disabled={uploading || loading}
+                              className="file-upload-btn"
+                            >
+                              첨부파일{" "}
+                              <img src="/images/attach_icon.svg" alt="첨부" />
+                            </button>
+                          )}
+                        {attachments
+                          .filter((a) => a.fileType === "business_registration")
+                          .map((attachment, index) => (
+                            <span key={index} className="fileName">
+                              {attachment.fileName}
+                              {attachment.fileUrl && (
+                                <>
+                                  {" "}
+                                  <a
+                                    href={attachment.fileUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{
+                                      marginLeft: "8px",
+                                      color: "var(--primary)",
+                                    }}
+                                  >
+                                    보기
+                                  </a>
+                                </>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setAttachments((prev) =>
+                                    prev.filter(
+                                      (a, i) =>
+                                        !(
+                                          a.fileType ===
+                                            "business_registration" &&
+                                          i === index
+                                        )
+                                    )
+                                  )
+                                }
+                                style={{
+                                  marginLeft: "8px",
+                                  color: "#ef4444",
+                                  cursor: "pointer",
+                                }}
+                              >
+                                삭제
+                              </button>
+                            </span>
+                          ))}
+                        {pendingFiles
+                          .filter((f) => f.fileType === "business_registration")
+                          .map((pendingFile, index) => (
+                            <span key={index} className="fileName textBlue">
+                              {pendingFile.file.name}
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setPendingFiles((prev) =>
+                                    prev.filter(
+                                      (f, i) =>
+                                        !(
+                                          f.fileType ===
+                                            "business_registration" &&
+                                          i === index
+                                        )
+                                    )
+                                  )
+                                }
+                                style={{
+                                  marginLeft: "8px",
+                                  color: "#ef4444",
+                                  cursor: "pointer",
+                                }}
+                              >
+                                삭제
+                              </button>
+                            </span>
+                          ))}
+                      </div>
+                    </div>
+                  </li>
+                  <li className="row_group">
+                    <div className="table_head">서명 등록</div>
+                    <div className="table_data pd12">
+                      <div className="file-upload-box">
+                        <input
+                          ref={signatureFileInputRef}
+                          type="file"
+                          accept="image/*,.pdf"
+                          className="fileInput"
+                          style={{ display: "none" }}
+                          onChange={(e) => handleFileSelect(e, "signature")}
+                          disabled={uploading || loading}
+                        />
+                        {attachments.filter((a) => a.fileType === "signature")
+                          .length === 0 &&
+                          pendingFiles.filter((f) => f.fileType === "signature")
+                            .length === 0 && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                signatureFileInputRef.current?.click()
+                              }
+                              disabled={uploading || loading}
+                              className="file-upload-btn"
+                            >
+                              첨부파일{" "}
+                              <img src="/images/attach_icon.svg" alt="첨부" />
+                            </button>
+                          )}
+                        {attachments
+                          .filter((a) => a.fileType === "signature")
+                          .map((attachment, index) => (
+                            <span key={index} className="fileName">
+                              {attachment.fileName}
+                              {attachment.fileUrl && (
+                                <>
+                                  {" "}
+                                  <a
+                                    href={attachment.fileUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    보기
+                                  </a>
+                                </>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setAttachments((prev) =>
+                                    prev.filter(
+                                      (a, i) =>
+                                        !(
+                                          a.fileType === "signature" &&
+                                          i === index
+                                        )
+                                    )
+                                  )
+                                }
+                              >
+                                삭제
+                              </button>
+                            </span>
+                          ))}
+                        {pendingFiles
+                          .filter((f) => f.fileType === "signature")
+                          .map((pendingFile, index) => (
+                            <span key={index} className="fileName textBlue">
+                              {pendingFile.file.name}
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setPendingFiles((prev) =>
+                                    prev.filter(
+                                      (f, i) =>
+                                        !(
+                                          f.fileType === "signature" &&
+                                          i === index
+                                        )
+                                    )
+                                  )
+                                }
+                              >
+                                삭제
+                              </button>
+                            </span>
+                          ))}
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+                <input
+                  type="hidden"
+                  name="status"
+                  value={businessStatus || "정상"}
+                />
+              </div>
+
+              {/* 담당자 정보 */}
+              <div className="table_item">
+                <h2 className={`table_title ${styles.contactTitle}`}>
+                  담당자 정보
+                  <span
+                    className="plus_btn"
+                    onClick={addContact}
+                    style={{ marginLeft: "10px", cursor: "pointer" }}
+                  >
+                    + 담당자 추가
+                  </span>
+                </h2>
+                <div className="table_wrap">
+                  {contacts.map((contact, index) => (
+                    <div
+                      key={contact.id}
+                      style={{ marginTop: index > 0 ? "30px" : "0" }}
+                    >
+                      <div
+                        className={styles.contactHeader}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <h3 className="table_title_sub">담당자{index + 1}</h3>
+                        {contacts.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeContact(contact.id)}
+                            style={{
+                              color: "#ef4444",
+                              cursor: "pointer",
+                              background: "none",
+                              border: "none",
+                              fontSize: "18px",
+                            }}
+                            title="삭제"
+                          >
+                            <X size={18} />
+                          </button>
+                        )}
+                      </div>
+                      <ul className="table_row">
+                        <li className="row_group">
+                          <div className="table_head">이름</div>
+                          <div className="table_data pd12">
+                            <input
+                              name={`contact_${contact.id}_name`}
+                              type="text"
+                              required
+                              placeholder="이름"
+                            />
+                          </div>
+                        </li>
+                        <li className="row_group">
+                          <div className="table_head">연락처</div>
+                          <div className="table_data pd12">
+                            <input
+                              name={`contact_${contact.id}_phone`}
+                              type="text"
+                              placeholder="010-1234-5678"
+                            />
+                          </div>
+                        </li>
+                      </ul>
+                      <ul className="table_row">
+                        <li className="row_group">
+                          <div className="table_head">이메일</div>
+                          <div className="table_data pd12">
+                            <input
+                              name={`contact_${contact.id}_email`}
+                              type="email"
+                              placeholder="이메일"
+                            />
+                          </div>
+                        </li>
+                        <li className="row_group">
+                          <div className="table_head">비고</div>
+                          <div className="table_data pd12">
+                            <input
+                              name={`contact_${contact.id}_note`}
+                              type="text"
+                              placeholder="특이사항"
+                            />
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 사이트 정보 */}
+              <div className="table_item table_item2">
+                <h2 className="table_title">
+                  사이트 정보
+                  <span
+                    className="plus_btn"
+                    onClick={addSite}
+                    style={{ marginLeft: "10px", cursor: "pointer" }}
+                  >
+                    + 사이트 추가
+                  </span>
+                </h2>
+                <div className="table_wrap">
+                  <table className={styles.siteTable}>
+                    <colgroup>
+                      <col style={{ width: "15%" }} />
+                      <col style={{ width: "auto" }} />
+                      <col style={{ width: "15%" }} />
+                      <col style={{ width: "15%" }} />
+                      <col style={{ width: "15%" }} />
+                      <col style={{ width: "15%" }} />
+                      <col style={{ width: "5%" }} />
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th>브랜드</th>
+                        <th>도메인</th>
+                        <th>솔루션</th>
+                        <th>아이디</th>
+                        <th>패스워드</th>
+                        <th>유형</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sites.map((site, index) => (
+                        <tr key={site.id} className="site-row">
+                          <td data-th="브랜드">
+                            <input
+                              name={`site_${site.id}_brandName`}
+                              type="text"
+                              placeholder="브랜드명"
+                            />
+                          </td>
+                          <td data-th="도메인">
+                            <input
+                              name={`site_${site.id}_domain`}
+                              type="text"
+                              placeholder="https://example.com"
+                            />
+                          </td>
+                          <td data-th="솔루션">
+                            <select name={`site_${site.id}_solution`}>
+                              <option value="">선택</option>
+                              <option value="카페24">카페24</option>
+                              <option value="고도몰">고도몰</option>
+                              <option value="메이크샵">메이크샵</option>
+                              <option value="기타">기타</option>
+                            </select>
+                          </td>
+                          <td data-th="아이디">
+                            <input
+                              name={`site_${site.id}_loginId`}
+                              type="text"
+                              placeholder="아이디"
+                            />
+                          </td>
+                          <td data-th="패스워드">
+                            <input
+                              name={`site_${site.id}_loginPassword`}
+                              type="password"
+                              placeholder="패스워드"
+                            />
+                          </td>
+                          <td data-th="유형">
+                            <select name={`site_${site.id}_type`}>
+                              <option value="">선택</option>
+                              <option value="신규">신규</option>
+                              <option value="리뉴얼">리뉴얼</option>
+                              <option value="이전">이전</option>
+                              <option value="개발">개발</option>
+                              <option value="유지보수">유지보수</option>
+                              <option value="기타">기타</option>
+                            </select>
+                          </td>
+                          <td className="right">
+                            {sites.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => removeSite(site.id)}
+                                style={{
+                                  background: "none",
+                                  border: "none",
+                                  color: "#ef4444",
+                                  cursor: "pointer",
+                                  padding: "0",
+                                }}
+                                title="삭제"
+                              >
+                                <X size={18} />
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* 비고 */}
+              <div className="table_item">
+                <h2 className="table_title">비고</h2>
+                <div className="table_wrap">
+                  <textarea
+                    name="note"
+                    placeholder="추가 정보를 입력하세요"
+                    style={{
+                      width: "100%",
+                      border: "none",
+                      resize: "none",
+                      outline: "none",
+                    }}
+                  />
+                </div>
               </div>
             </div>
-          ))}
+          </div>
         </div>
-      </section>
-
-      <section className="flex items-center justify-end gap-3">
-        <button
-          type="button"
-          onClick={() => {
-            setPendingFiles([]);
-            router.back();
-          }}
-          className="inline-flex items-center rounded-md border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100"
-        >
-          취소
-        </button>
-        <button
-          type="submit"
-          disabled={loading || uploading}
-          className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50"
-        >
-          {loading || uploading ? (uploading ? '파일 업로드 중...' : '등록 중...') : '거래처 등록'}
-        </button>
-      </section>
-    </form>
+      </form>
+    </section>
   );
 }
-
-type FieldProps = {
-  name?: string;
-  label: string;
-  required?: boolean;
-  type?: string;
-  placeholder?: string;
-  className?: string;
-  readOnly?: boolean;
-};
-
-function Field({ name, label, required, type = 'text', placeholder, className, readOnly }: FieldProps) {
-  return (
-    <label className={`block text-sm ${className || ''}`}>
-      <span className="font-semibold text-slate-700">
-        {label}
-        {required ? <span className="ml-1 text-red-500">*</span> : null}
-      </span>
-      <input
-        name={name}
-        type={type}
-        placeholder={placeholder}
-        required={required}
-        readOnly={readOnly}
-        className="mt-1 w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:bg-slate-100 disabled:cursor-not-allowed"
-      />
-    </label>
-  );
-}
-

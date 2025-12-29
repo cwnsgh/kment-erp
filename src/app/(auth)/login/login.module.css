@@ -1,0 +1,306 @@
+/* 로그인 페이지 스타일 */
+
+.loginPage {
+  display: flex;
+  align-items: center;
+  max-width: 1300px;
+  margin: 0 auto;
+  position: relative;
+  min-height: 100%;
+  width: 100%;
+}
+
+.loginPage::after {
+  content: "";
+  display: block;
+  width: 1px;
+  height: 100%;
+  position: absolute;
+  left: 50%;
+  top: 0;
+  background-color: var(--border-color);
+}
+
+.loginPage > div {
+  width: 50%;
+}
+
+.loginLeft {
+  box-sizing: border-box;
+  padding: 0 50px;
+}
+
+.loginLeft h1 {
+  font-size: 32px;
+  font-weight: var(--font-weight-bold);
+  margin-bottom: 100px;
+  line-height: 1.4;
+}
+
+.csBox {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.csBox span {
+  font-size: 18px;
+  font-weight: var(--font-weight-bold);
+  margin-bottom: 24px;
+  color: var(--text-gray);
+  display: block;
+  line-height: 1;
+}
+
+.csBox h2 {
+  font-size: 24px;
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+}
+
+.loginRight {
+  padding: 0 8%;
+  box-sizing: border-box;
+}
+
+.loginRight h3 {
+  font-size: 24px;
+  font-weight: var(--font-weight-bold);
+  margin-bottom: 40px;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.loginRight input[type="text"],
+.loginRight input[type="password"] {
+  height: 50px;
+  display: block;
+  width: 100%;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  border: 1px solid var(--border-color);
+  padding: 4px 14px;
+  box-sizing: border-box;
+  font-family: "Pretendard Variable", Pretendard, -apple-system,
+    BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI",
+    "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+  font-size: 15px;
+}
+
+.loginRight input[type="text"]:focus,
+.loginRight input[type="password"]:focus {
+  border: 2px solid var(--primary);
+  outline: none;
+}
+
+.loginRight label {
+  line-height: 1;
+  cursor: pointer;
+  margin-left: 6px;
+  font-weight: var(--font-weight-medium);
+  font-size: 14px;
+  color: var(--text-gray);
+}
+
+.helpBox {
+  position: relative;
+}
+
+.helpBox > p {
+  font-size: 13px;
+  font-weight: var(--font-weight-medium);
+  color: var(--text-gray);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+  cursor: pointer;
+}
+
+.helpBox img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.boxContent {
+  position: absolute;
+  left: 0;
+  top: 30px;
+  background-color: #fff;
+  padding: 20px 50px 20px 20px;
+  border-radius: 6px;
+  min-width: 350px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-color);
+  display: none;
+  z-index: 10;
+}
+
+.boxContent.open {
+  display: block;
+}
+
+.boxContent > p {
+  font-size: 13px;
+  color: var(--text-gray);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.8;
+}
+
+.boxContent span {
+  display: block;
+  color: var(--primary);
+  font-weight: var(--font-weight-semibold);
+  margin-top: 8px;
+}
+
+.closeBtn {
+  position: absolute;
+  right: 14px;
+  top: 18px;
+  width: 12px;
+  height: 12px;
+  object-fit: contain;
+  cursor: pointer;
+  padding: 6px;
+}
+
+.btnWrap {
+  flex-direction: column;
+  margin-top: 60px;
+  display: flex;
+  gap: 10px;
+}
+
+/* 버튼 공통 스타일 - ERP 완성본과 동일하게 login.module.css에 직접 정의 */
+.btnWrap :global(.btn) {
+  border: none;
+  border-radius: 6px;
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  font-size: 15px;
+  transition: all 0.2s;
+  width: 100%;
+  text-align: center;
+  height: 50px;
+  line-height: 50px;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
+.btnWrap :global(.btn.primary) {
+  background-color: var(--primary);
+  color: #fff;
+  border: none;
+}
+
+.btnWrap :global(.btn.normal) {
+  background-color: #fff;
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+}
+
+.btnWrap :global(.btn.normal:hover) {
+  background-color: var(--background-color);
+}
+
+.btnWrap :global(.btn:disabled) {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.inputBot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
+.inputBot > div {
+  display: flex;
+  align-items: center;
+}
+
+.errorMessage {
+  background-color: #fee;
+  border: 1px solid #fcc;
+  border-radius: 6px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  color: var(--negative);
+  font-size: 13px;
+  font-weight: var(--font-weight-medium);
+}
+
+/* 체크박스 스타일 */
+.loginRight input[type="checkbox"] {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  position: relative;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.loginRight input[type="checkbox"]:checked {
+  border-color: var(--primary);
+  background: var(--primary);
+}
+
+.loginRight input[type="checkbox"]:checked::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  background: url("/images/check_icon.svg") center center no-repeat;
+  background-size: contain;
+  z-index: 10;
+}
+
+/* 반응형 */
+@media (max-width: 1024px) {
+  .loginPage {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    max-width: 600px;
+    gap: 50px;
+    padding: 20px 0;
+  }
+
+  .loginPage::after {
+    display: none;
+  }
+
+  .loginPage > div {
+    width: 100%;
+  }
+
+  .loginLeft {
+    border-bottom: 1px solid var(--border-color);
+    padding: 0 8% 50px;
+  }
+
+  .loginLeft h1 {
+    margin-bottom: 40px;
+  }
+
+  .csBox {
+    gap: 20px;
+  }
+
+  .loginRight {
+    padding: 0 8%;
+  }
+}

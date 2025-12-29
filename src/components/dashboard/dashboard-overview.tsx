@@ -1,52 +1,45 @@
-import { ArrowLeft, ArrowRight, ArrowUpRight, Plus } from "lucide-react";
+"use client";
+
+import Image from "next/image";
 import Link from "next/link";
+import styles from "./dashboard-overview.module.css";
 
 const quickActions = [
   { label: "거래처 등록", href: "/clients/new" },
   { label: "계약 등록", href: "/contracts/new" },
   { label: "일정 등록", href: "/schedule" },
-  { label: "관리고객 등록", href: "/operations/clients" },
+  { label: "관리 고객등록", href: "/operations/clients" },
   { label: "업무 등록 (관리고객)", href: "/operations/new" },
   { label: "업무 등록 (계약고객)", href: "/operations/tasks" },
   { label: "직원 등록", href: "/staff" },
-  { label: "월차 신청", href: "/vacations" },
-  { label: "월차 신청 조회", href: "/vacations" },
+  { label: "연차 신청", href: "/vacations" },
+  { label: "연차 신청 조회", href: "/vacations" },
 ];
 
 const summary = [
   {
     title: "연차 신청 현황",
-    total: "3건",
+    total: "5",
+    totalUnit: "건",
     period: "2025.10",
     items: [
-      { label: "승인", value: 3 },
-      { label: "대기", value: 1 },
-      { label: "반려", value: 0 },
+      { label: "승인", value: "3" },
+      { label: "대기", value: "1" },
+      { label: "반려", value: "0" },
     ],
   },
   {
-    title: "이번달 계약 현황",
-    total: "4건",
+    title: "이번달 상담/계약 현황",
+    total: "4",
+    totalUnit: "건",
     period: "2025.10",
     items: [
-      { label: "신규 거래처 등록", value: 3 },
-      { label: "계약 고객 등록", value: 1 },
-      { label: "관리 고객 등록", value: 0 },
-      { label: "미납 거래처", value: 3 },
-      { label: "분납 거래처", value: 1 },
+      { label: "신규 상담 등록", value: "3" },
+      { label: "신규 거래처 등록", value: "1" },
+      { label: "미납 거래처", value: "0" },
+      { label: "계약 고객 등록", value: "3" },
+      { label: "관리 고객 등록", value: "1" },
       { label: "총 매출", value: "10,000,000원" },
-    ],
-  },
-  {
-    title: "CS 업무 현황",
-    total: "12건",
-    period: "2025.10",
-    items: [
-      { label: "진행 중", value: 5 },
-      { label: "대기 중", value: 4 },
-      { label: "완료", value: 3 },
-      { label: "관리고객 업무", value: 8 },
-      { label: "계약고객 업무", value: 4 },
     ],
   },
 ];
@@ -72,118 +65,165 @@ export function DashboardOverview() {
   ).padStart(2, "0")}`;
 
   return (
-    <section className="space-y-8">
+    <section className={styles.mainSection}>
       {/* 환영 메시지 */}
-      <div>
-        <h1 className="text-3xl font-bold text-slate-900">
-          케이먼트님, 안녕하세요!
+      <div className={styles.pageTitle}>
+        <h1>
+          <span>케이먼트</span>님, 안녕하세요!
         </h1>
       </div>
 
       {/* 일정 섹션 */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-4">
-          <span className="inline-flex items-center rounded-full bg-accent px-4 py-1.5 text-sm font-medium text-white">
-            {currentMonth}
-          </span>
+      <div className={styles.mainSchedule}>
+        <div className={styles.scheduleTop}>
+          <h4 className={styles.today}>{currentMonth}</h4>
+          <div className={styles.rightControl}>
+            <div className={styles.arrowL}>
+              <Image
+                src="/images/arrow_icon.svg"
+                alt="이전"
+                width={12}
+                height={12}
+              />
+            </div>
+            <div className={styles.arrowR}>
+              <Image
+                src="/images/arrow_icon.svg"
+                alt="다음"
+                width={12}
+                height={12}
+              />
+            </div>
+            <div className={styles.plusIcon}>
+              <Image
+                src="/images/plus_icon.svg"
+                alt="추가"
+                width={12}
+                height={12}
+              />
+            </div>
+          </div>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex gap-4">
-            {scheduleData.map((schedule, idx) => (
-              <div
-                key={idx}
-                className={`flex flex-col rounded-lg p-4 ${
-                  idx === 0
-                    ? "bg-slate-800 text-white"
-                    : "bg-slate-100 text-slate-800"
-                }`}
-                style={{ minWidth: "160px" }}
-              >
-                <div className="text-sm font-semibold">
-                  {schedule.day} {schedule.date}
-                </div>
-                <div className="mt-3 space-y-1.5 text-xs">
-                  {schedule.events.length > 0 ? (
-                    schedule.events.map((event, eventIdx) => (
-                      <div key={eventIdx} className="flex items-start gap-1.5">
-                        <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-current" />
-                        <span>{event}</span>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-slate-500">일정이 없습니다.</div>
-                  )}
-                </div>
+        <div className={styles.scheduleContent}>
+          {scheduleData.map((schedule, idx) => (
+            <div
+              key={idx}
+              className={`${styles.scheduleBox} ${
+                schedule.events.length === 0 ? styles.noSchedule : ""
+              }`}
+            >
+              <div className={styles.dateBox}>
+                <span className={styles.day}>{schedule.day}</span>
+                <span className={styles.date}>{schedule.date}</span>
               </div>
-            ))}
-          </div>
-          <div className="flex items-center gap-2">
-            <button className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white hover:bg-slate-50">
-              <ArrowLeft size={18} className="text-slate-600" />
-            </button>
-            <button className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white hover:bg-slate-50">
-              <ArrowRight size={18} className="text-slate-600" />
-            </button>
-            <button className="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-white hover:bg-accent/90">
-              <Plus size={18} />
-            </button>
-          </div>
+              {idx === 0 && schedule.events.length > 1 && (
+                <div className={styles.totalCount}>
+                  +{schedule.events.length}
+                </div>
+              )}
+              <ul className={styles.scheduleList}>
+                {schedule.events.length > 0 ? (
+                  schedule.events.map((event, eventIdx) => (
+                    <li key={eventIdx}>{event}</li>
+                  ))
+                ) : (
+                  <li>일정이 없습니다.</li>
+                )}
+              </ul>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* 빠른 액세스 카드들 - 3x3 그리드 */}
-      <div className="grid grid-cols-3 gap-4">
+      {/* 빠른 액세스 카드들 */}
+      <div className={styles.mainList}>
         {quickActions.map((action) => (
-          <Link
-            key={action.label}
-            href={action.href}
-            className="group relative flex items-center justify-between rounded-lg border border-slate-200 bg-white px-5 py-4 shadow-sm transition hover:border-accent hover:shadow-md"
-          >
-            <span className="text-sm font-medium text-slate-700">
-              {action.label}
-            </span>
-            <span className="absolute bottom-3 right-3 flex h-7 w-7 items-center justify-center rounded-full bg-accent text-white transition group-hover:bg-accent/90">
-              <ArrowUpRight size={14} />
-            </span>
-          </Link>
+          <div key={action.label} className={styles.cardBox}>
+            <h3>{action.label}</h3>
+            <div className={styles.mainBtn}>
+              <Link href={action.href}>
+                <Image
+                  src="/images/arrow_icon2.svg"
+                  alt="이동"
+                  width={10}
+                  height={10}
+                />
+              </Link>
+            </div>
+          </div>
         ))}
       </div>
 
       {/* 요약 위젯들 */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        {summary.map((section) => (
-          <div
-            key={section.title}
-            className="relative rounded-lg border border-slate-200 bg-white p-6 shadow-sm"
-          >
-            <button className="absolute top-4 right-4 flex h-6 w-6 items-center justify-center rounded-full bg-accent text-white hover:bg-accent/90">
-              <ArrowUpRight size={12} />
-            </button>
-            <div className="mb-4">
-              <h3 className="text-base font-semibold text-slate-900">
-                {section.title} {section.period}
-              </h3>
-            </div>
-            <div className="mb-4 text-4xl font-bold text-accent">
-              {section.total}
-            </div>
-            <ul className="space-y-2.5 text-sm text-slate-600">
-              {section.items.map((item) => (
-                <li
-                  key={item.label}
-                  className="flex items-center justify-between"
-                >
+      <div className={styles.managerList}>
+        <div className={`${styles.cardBox} ${styles.left}`}>
+          <div className={styles.mainBtn}>
+            <Link href="#">
+              <Image
+                src="/images/arrow_icon2.svg"
+                alt="이동"
+                width={10}
+                height={10}
+              />
+            </Link>
+          </div>
+          <h3>
+            {summary[0].title}
+            <span className={styles.date}>{summary[0].period}</span>
+          </h3>
+          <div className={styles.numArea}>
+            <p className={styles.num}>{summary[0].total}</p>
+            <p>{summary[0].totalUnit}</p>
+          </div>
+          <div className={styles.listGroup}>
+            <ul className={styles.detailList}>
+              {summary[0].items.map((item) => (
+                <li key={item.label}>
                   <span>{item.label}</span>
-                  <span className="font-semibold text-slate-900">
-                    {typeof item.value === "number"
-                      ? `${item.value}`
-                      : item.value}
-                  </span>
+                  <span className={styles.num}>{item.value}</span>
                 </li>
               ))}
             </ul>
           </div>
-        ))}
+        </div>
+        <div className={`${styles.cardBox} ${styles.right}`}>
+          <div className={styles.mainBtn}>
+            <Link href="#">
+              <Image
+                src="/images/arrow_icon2.svg"
+                alt="이동"
+                width={10}
+                height={10}
+              />
+            </Link>
+          </div>
+          <h3>
+            {summary[1].title}
+            <span className={styles.date}>{summary[1].period}</span>
+          </h3>
+          <div className={styles.numArea}>
+            <p className={styles.num}>{summary[1].total}</p>
+            <p>{summary[1].totalUnit}</p>
+          </div>
+          <div className={styles.listGroup}>
+            <ul className={styles.detailList}>
+              {summary[1].items.slice(0, 3).map((item) => (
+                <li key={item.label}>
+                  <span>{item.label}</span>
+                  <span className={styles.num}>{item.value}</span>
+                </li>
+              ))}
+            </ul>
+            <ul className={styles.detailList}>
+              {summary[1].items.slice(3).map((item) => (
+                <li key={item.label}>
+                  <span>{item.label}</span>
+                  <span className={styles.num}>{item.value}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
       </div>
     </section>
   );

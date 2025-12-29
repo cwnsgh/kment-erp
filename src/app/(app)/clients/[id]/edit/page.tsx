@@ -17,14 +17,12 @@ export default async function ClientEditPage({ params }: ClientEditPageProps) {
   }
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="거래처 수정"
-        description="거래처 정보를 수정합니다."
-      />
+    <div className="page_section">
       <ClientEditForm client={result.client} clientId={params.id} />
     </div>
   );
 }
+
+
 
 

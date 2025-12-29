@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { signup } from "@/app/actions/signup";
 import {
   checkBusinessNumber,
@@ -32,7 +33,8 @@ type SiteField =
   | "domain"
   | "solution"
   | "loginId"
-  | "loginPassword";
+  | "loginPassword"
+  | "type";
 
 type Site = {
   id: string;
@@ -41,6 +43,7 @@ type Site = {
   solution: string;
   loginId: string;
   loginPassword: string;
+  type: string;
 };
 
 const agreementItems: {
@@ -136,6 +139,7 @@ export default function SignUpPage() {
       solution: "",
       loginId: "",
       loginPassword: "",
+      type: "",
     },
   ]);
 
@@ -280,6 +284,7 @@ export default function SignUpPage() {
         solution: "",
         loginId: "",
         loginPassword: "",
+        type: "",
       },
     ]);
   };
@@ -395,6 +400,7 @@ export default function SignUpPage() {
           solution: s.solution,
           loginId: s.loginId,
           loginPassword: s.loginPassword,
+          type: s.type,
         })),
         businessRegistrationFileUrl,
         businessRegistrationFileName,
@@ -825,6 +831,26 @@ export default function SignUpPage() {
                     placeholder="관리자 로그인 패스워드"
                     type="password"
                   />
+                  <div className="grid grid-cols-[140px_1fr] items-center gap-4">
+                    <label className="text-sm font-medium text-slate-700">
+                      유형
+                    </label>
+                    <select
+                      value={site.type}
+                      onChange={(event) =>
+                        handleSiteChange(site.id, "type", event.target.value)
+                      }
+                      className="w-full rounded border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                    >
+                      <option value="">선택하세요</option>
+                      <option value="신규">신규</option>
+                      <option value="리뉴얼">리뉴얼</option>
+                      <option value="이전">이전</option>
+                      <option value="개발">개발</option>
+                      <option value="유지보수">유지보수</option>
+                      <option value="기타">기타</option>
+                    </select>
+                  </div>
                 </div>
               </div>
             ))}

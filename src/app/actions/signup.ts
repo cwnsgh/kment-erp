@@ -25,6 +25,7 @@ type SignupData = {
     solution?: string;
     loginId?: string;
     loginPassword?: string;
+    type?: string;
   }>;
   businessRegistrationFileUrl?: string;
   businessRegistrationFileName?: string;
@@ -138,6 +139,7 @@ export async function signup(data: SignupData) {
           solution: site.solution,
           login_id: site.loginId,
           login_password: site.loginPassword,
+          type: site.type,
         }));
 
       if (sitesData.length > 0) {

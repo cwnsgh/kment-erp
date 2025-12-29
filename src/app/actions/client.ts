@@ -8,6 +8,7 @@ type ClientData = {
   businessRegistrationNumber: string;
   name: string;
   ceoName?: string;
+  postalCode?: string;
   address?: string;
   addressDetail?: string;
   businessType?: string;
@@ -29,6 +30,7 @@ type ClientData = {
     solution?: string;
     loginId?: string;
     loginPassword?: string;
+    type?: string;
     note?: string;
   }>;
   attachments: Array<{
@@ -65,6 +67,7 @@ export async function createClient(data: ClientData) {
         business_registration_number: data.businessRegistrationNumber,
         name: data.name,
         ceo_name: data.ceoName,
+        postal_code: data.postalCode,
         address: data.address,
         address_detail: data.addressDetail,
         business_type: data.businessType,
@@ -113,6 +116,7 @@ export async function createClient(data: ClientData) {
           solution: site.solution,
           login_id: site.loginId,
           login_password: site.loginPassword,
+          type: site.type,
           note: site.note,
         }));
 
@@ -261,7 +265,9 @@ export async function getClientDetail(clientId: string) {
         loginPassword: "", // 보안상 빈 문자열 반환
         businessRegistrationNumber: client.business_registration_number,
         name: client.name,
+        postalCode: client.postal_code || "",
         address: client.address || "",
+        addressDetail: client.address_detail || "",
         ceoName: client.ceo_name || "",
         businessType: client.business_type || "",
         businessItem: client.business_item || "",
@@ -284,7 +290,7 @@ export async function getClientDetail(clientId: string) {
             domain: s.domain || "",
             loginId: s.login_id || "",
             loginPassword: s.login_password || "",
-            type: "", // DB에 type 필드가 없으면 빈 문자열
+            type: s.type || "",
           })) || [],
         note: client.note || "",
       },
@@ -331,6 +337,7 @@ export async function updateClient(clientId: string, data: ClientData) {
         business_registration_number: data.businessRegistrationNumber,
         name: data.name,
         ceo_name: data.ceoName,
+        postal_code: data.postalCode,
         address: data.address,
         address_detail: data.addressDetail,
         business_type: data.businessType,
@@ -384,6 +391,7 @@ export async function updateClient(clientId: string, data: ClientData) {
           solution: site.solution,
           login_id: site.loginId,
           login_password: site.loginPassword,
+          type: site.type,
           note: site.note,
         }));
 

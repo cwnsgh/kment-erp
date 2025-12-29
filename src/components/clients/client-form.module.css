@@ -1,0 +1,168 @@
+/* client_regist 페이지 전용 스타일 */
+
+.clientRegist :global(.table_group) {
+  padding: 0 40px;
+  box-sizing: border-box;
+}
+
+.clientRegist textarea {
+  width: 100%;
+  min-height: 190px;
+  padding: 20px;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 4px;
+  box-sizing: border-box;
+  resize: none;
+}
+
+/* 파일 업로드 박스 스타일 */
+.clientRegist :global(.file-upload-box) {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 36px;
+  justify-content: center;
+}
+
+.clientRegist :global(.file-upload-btn) {
+  background: var(--text-gray);
+  color: #fff;
+  border: none;
+  padding: 0 14px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  height: 36px;
+  line-height: 36px;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.clientRegist :global(.file-upload-btn > img) {
+  width: 12px;
+  filter: invert(1);
+}
+
+.clientRegist :global(.fileName) {
+  font-size: 13px;
+  color: var(--text-color);
+  display: block;
+  margin-top: 4px;
+  line-height: 1.5;
+}
+
+.clientRegist :global(.fileName a) {
+  margin-left: 8px;
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.clientRegist :global(.fileName button) {
+  margin-left: 8px;
+  color: #ef4444;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-size: 13px;
+  padding: 0;
+}
+
+.clientRegist :global(.fileName.textBlue) {
+  color: #3b82f6 !important;
+}
+
+.clientRegist :global(.table_wrap) {
+  display: block !important;
+  margin-top: 20px;
+  overflow: hidden;
+}
+
+/* 마지막 행에 border-bottom 적용 */
+.lastRow {
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+.clientRegist :global(.table_group h2.table_title) {
+  display: flex;
+  align-items: center;
+}
+
+.clientRegist :global(.table_group h2.table_title .plus_btn) {
+  font-size: 13px;
+  color: var(--text-gray);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
+
+/* 담당자 정보 제목 - margin-bottom 제거 */
+.contactTitle {
+  margin-bottom: 0 !important;
+}
+
+/* 담당자 헤더(담당자1, 담당자2 등) - margin-bottom 제거 */
+.contactHeader {
+  margin-bottom: 0 !important;
+}
+
+/* box_inner 스타일 */
+.boxInner {
+  width: 100%;
+}
+
+/* site-table 스타일 */
+.siteTable {
+  display: table;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.siteTable thead {
+  display: table-header-group;
+}
+
+.siteTable th {
+  padding: 14px 10px;
+  font-weight: 600;
+  border-bottom: 1px solid #ddd;
+  text-align: center;
+  background: #f8f9fc;
+}
+
+.siteTable td {
+  padding: 18px 10px !important;
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+  font-weight: var(--font-weight-semibold) !important;
+}
+
+.siteTable tr {
+  display: table-row;
+  text-align: left;
+}
+
+.siteTable tr:hover {
+  background-color: transparent !important;
+}
+
+.siteTable td input,
+.siteTable td select,
+.siteTable td textarea {
+  height: 36px;
+  resize: none;
+  vertical-align: middle;
+  width: 100%;
+  border: 1px solid var(--line-color);
+  border-radius: 4px;
+  padding: 4px 4px 4px 14px;
+  box-sizing: border-box;
+  font-size: 14px;
+}
+
+.siteTable td.right {
+  text-align: right;
+}

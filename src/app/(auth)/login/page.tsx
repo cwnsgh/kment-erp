@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
 import { login } from "@/app/actions/auth";
+import styles from "./login.module.css";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [form, setForm] = useState({
     username: "", // 아이디 또는 이메일
     password: "",
@@ -14,6 +14,7 @@ export default function LoginPage() {
   });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showHelpBox, setShowHelpBox] = useState(false);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -34,82 +35,59 @@ export default function LoginPage() {
     }
   };
 
+  const toggleHelpBox = () => {
+    setShowHelpBox(!showHelpBox);
+  };
+
   return (
-    <div className="relative flex w-full min-h-full flex-col items-center justify-center md:flex-row">
-      <span className="pointer-events-none absolute left-1/2 top-[-5%] hidden h-[120%] w-[1px] -translate-x-1/2 rounded-full bg-slate-200 md:block" />
-
-      <section className="flex flex-1 flex-col justify-center gap-12 px-10 py-16 md:px-16">
-        <div className="space-y-6">
-          <p className="max-w-xl text-[32px] font-bold leading-relaxed text-slate-900">
-            본 사이트는 케이멘트 고객 전용입니다.
-            <br />
-            회원가입 후 이용해 주세요.
-          </p>
-        </div>
-        <div className="space-y-6 text-sm text-slate-600">
+    <section className={styles.loginPage}>
+      <div className={styles.loginLeft}>
+        <h1>
+          본 사이트는 케이먼트 고객 전용입니다.
+          <br />
+          회원가입 후 이용해 주세요.
+        </h1>
+        <div className={styles.csBox}>
           <div>
-            <p className="font-semibold text-slate-500">대표전화</p>
-            <p className="mt-1 text-lg font-semibold text-slate-900">
-              1800 - 8413
-            </p>
+            <span>대표전화</span>
+            <h2>1800-8413</h2>
           </div>
           <div>
-            <p className="font-semibold text-slate-500">대표메일</p>
-            <p className="mt-1 text-lg font-semibold text-slate-900">
-              kment@kmentcorp.co.kr
-            </p>
+            <span>대표메일</span>
+            <h2>kment@kmentcorp.co.kr</h2>
           </div>
         </div>
-      </section>
+      </div>
+      <div className={styles.loginRight}>
+        <h3>LOGIN</h3>
+        <form onSubmit={handleSubmit}>
+          {error && <div className={styles.errorMessage}>{error}</div>}
 
-      <section className="flex flex-1 flex-col justify-center px-10 py-16 md:px-16">
-        <h2 className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-500">
-          LOGIN
-        </h2>
-        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-          {error && (
-            <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
-              {error}
-            </div>
-          )}
-
-          <label className="block text-sm font-medium text-slate-700">
-            아이디 또는 이메일
-            <input
-              type="text"
-              value={form.username}
-              onChange={(event) =>
-                setForm((prev) => ({ ...prev, username: event.target.value }))
-              }
-              placeholder="직원은 이메일, 사업자는 아이디를 입력하세요"
-              required
-              disabled={isLoading}
-              className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:bg-slate-100 disabled:cursor-not-allowed"
-            />
-            <p className="mt-1 text-xs text-slate-500">
-              직원: 아이디 또는 이메일 | 사업자: 아이디
-            </p>
-          </label>
-
-          <label className="block text-sm font-medium text-slate-700">
-            비밀번호
-            <input
-              type="password"
-              value={form.password}
-              onChange={(event) =>
-                setForm((prev) => ({ ...prev, password: event.target.value }))
-              }
-              placeholder="비밀번호를 입력하세요"
-              required
-              disabled={isLoading}
-              className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:bg-slate-100 disabled:cursor-not-allowed"
-            />
-          </label>
-
-          <div className="flex items-center justify-between text-xs text-slate-500">
-            <label className="inline-flex items-center gap-2 font-medium text-slate-600">
+          <input
+            type="text"
+            placeholder="아이디"
+            value={form.username}
+            onChange={(event) =>
+              setForm((prev) => ({ ...prev, username: event.target.value }))
+            }
+            required
+            disabled={isLoading}
+          />
+          <input
+            type="password"
+            placeholder="비밀번호"
+            value={form.password}
+            onChange={(event) =>
+              setForm((prev) => ({ ...prev, password: event.target.value }))
+            }
+            required
+            disabled={isLoading}
+          />
+          <div className={styles.inputBot}>
+            <div>
               <input
                 type="checkbox"
+                id="remember_id"
                 checked={form.remember}
                 onChange={(event) =>
                   setForm((prev) => ({
@@ -117,30 +95,81 @@ export default function LoginPage() {
                     remember: event.target.checked,
                   }))
                 }
-                className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
+                disabled={isLoading}
               />
-              아이디 기억하기
-            </label>
-            <button type="button" className="text-slate-400 hover:text-primary">
-              비밀번호 변경하기
-            </button>
+              <label htmlFor="remember_id">아이디 기억하기</label>
+            </div>
+            <div className={styles.helpBox}>
+              <p onClick={toggleHelpBox}>
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  style={{ flexShrink: 0 }}
+                >
+                  <circle
+                    cx="8"
+                    cy="8"
+                    r="7"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                  />
+                  <text
+                    x="8"
+                    y="11.5"
+                    textAnchor="middle"
+                    fontSize="10"
+                    fill="currentColor"
+                    fontWeight="bold"
+                  >
+                    ?
+                  </text>
+                </svg>
+                비밀번호를 분실했어요
+              </p>
+              <div
+                className={`${styles.boxContent} ${
+                  showHelpBox ? styles.open : ""
+                }`}
+              >
+                <p>
+                  비밀번호 분실 시, 케이먼트 대표 이메일로 아래 내용을
+                  보내주세요.
+                  <span>1. 사업자 등록증</span>
+                  <span>2. 보내시는 분의 명함 이미지</span>
+                  제출된 내용 확인 후, 임시 비밀번호를 안내해드립니다.
+                </p>
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 12 12"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className={styles.closeBtn}
+                  onClick={toggleHelpBox}
+                >
+                  <path
+                    d="M1 1L11 11M11 1L1 11"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </div>
+            </div>
           </div>
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full rounded-[7px] bg-primary py-3 text-sm font-semibold text-white shadow-lg shadow-primary/30 transition hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isLoading ? "로그인 중..." : "로그인"}
-          </button>
-          <Link
-            href="/signup"
-            className="flex w-full items-center justify-center rounded-[7px] border border-slate-200 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-800"
-          >
-            회원가입
-          </Link>
+          <div className={styles.btnWrap}>
+            <button type="submit" className="btn primary" disabled={isLoading}>
+              {isLoading ? "로그인 중..." : "로그인"}
+            </button>
+            <Link href="/signup" className="btn normal">
+              회원가입
+            </Link>
+          </div>
         </form>
-      </section>
-    </div>
+      </div>
+    </section>
   );
 }

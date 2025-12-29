@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Trash2, X, Upload } from "lucide-react";
+import { Plus, X, Upload } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -8,6 +8,7 @@ import {
   checkBusinessRegistrationNumber,
 } from "@/app/actions/client";
 import AddressSearch from "@/components/common/address-search";
+import styles from "./client-form.module.css";
 
 type ClientDetail = {
   id: string;
@@ -15,7 +16,9 @@ type ClientDetail = {
   loginPassword?: string;
   businessRegistrationNumber: string;
   name: string;
+  postalCode?: string;
   address?: string;
+  addressDetail?: string;
   ceoName?: string;
   businessType?: string;
   businessItem?: string;
@@ -62,6 +65,7 @@ type Site = {
   solution: string;
   loginId: string;
   loginPassword: string;
+  type: string;
   note: string;
 };
 
@@ -133,6 +137,7 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
               solution: s.solution || "",
               loginId: s.loginId || "",
               loginPassword: s.loginPassword || "",
+              type: s.type || "",
               note: "",
             }))
           : [
@@ -143,6 +148,7 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
                 solution: "",
                 loginId: "",
                 loginPassword: "",
+                type: "",
                 note: "",
               },
             ];
@@ -190,6 +196,7 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
         solution: "",
         loginId: "",
         loginPassword: "",
+        type: "",
         note: "",
       },
     ]);
@@ -241,8 +248,6 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
         if (statusRadio) {
           statusRadio.checked = true;
         }
-
-        message += `\n사업자 상태: ${result.businessStatus.statusText} (자동 반영됨)`;
       }
       setDuplicateCheckResult(message);
       alert(message);
@@ -382,7 +387,14 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
         ...uploadedFiles,
       ];
 
-      const formData = new FormData(e.currentTarget);
+      // form element 직접 가져오기
+      const formElement = document.getElementById(
+        "clientEditForm"
+      ) as HTMLFormElement;
+      if (!formElement) {
+        throw new Error("Form element not found");
+      }
+      const formData = new FormData(formElement);
 
       // 기본 정보 수집
       const clientData = {
@@ -391,6 +403,7 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
         ) as string,
         name: formData.get("name") as string,
         ceoName: formData.get("ceoName") as string,
+        postalCode: formData.get("postalCode") as string,
         address: formData.get("address") as string,
         addressDetail: formData.get("addressDetail") as string,
         businessType: formData.get("businessType") as string,
@@ -419,6 +432,7 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
         solution: formData.get(`site_${site.id}_solution`) as string,
         loginId: formData.get(`site_${site.id}_loginId`) as string,
         loginPassword: formData.get(`site_${site.id}_loginPassword`) as string,
+        type: formData.get(`site_${site.id}_type`) as string,
         note: formData.get(`site_${site.id}_note`) as string,
       }));
 
@@ -454,726 +468,22 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
-      {/* ERP 정보 */}
-      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <header>
-          <h2 className="text-lg font-semibold text-slate-900">ERP 정보</h2>
-          <p className="mt-1 text-sm text-slate-500">
-            거래처 로그인 정보를 관리합니다.
-          </p>
-        </header>
-        <div className="mt-6 grid gap-4 md:grid-cols-2">
-          <div className="flex items-center gap-2">
-            <Field
-              name="loginId"
-              label="아이디"
-              defaultValue={client.loginId || ""}
-              readOnly
-              className="flex-1"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <Field
-              name="loginPassword"
-              label="패스워드"
-              type="password"
-              placeholder={passwordChangeMode ? "새 비밀번호 입력" : "••••••••"}
-              readOnly={!passwordChangeMode}
-              className="flex-1"
-            />
-            <button
-              type="button"
-              onClick={() => setPasswordChangeMode(!passwordChangeMode)}
-              className="mt-6 h-10 rounded-md border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 hover:bg-slate-50"
-            >
-              {passwordChangeMode ? "취소" : "변경"}
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* 기본 정보 */}
-      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <header>
-          <h2 className="text-lg font-semibold text-slate-900">기본 정보</h2>
-          <p className="mt-1 text-sm text-slate-500">
-            사업자 및 로그인 정보를 입력합니다.
-          </p>
-        </header>
-        <div className="mt-6 grid gap-4 md:grid-cols-2">
-          <div className="flex gap-2">
-            <div className="flex-1">
-              <Field
-                name="businessRegistrationNumber"
-                label="거래처 사업자등록번호"
-                defaultValue={client.businessRegistrationNumber}
-                required
-                className="w-full"
-              />
-              {duplicateCheckResult && (
-                <p
-                  className={`mt-1 text-xs ${
-                    duplicateCheckResult.includes("사용 가능")
-                      ? "text-green-600"
-                      : "text-red-600"
-                  }`}
-                >
-                  {duplicateCheckResult}
-                </p>
-              )}
-            </div>
-            <button
-              type="button"
-              onClick={handleCheckDuplicate}
-              disabled={checkingDuplicate}
-              className="mt-6 h-10 rounded-md border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
-            >
-              {checkingDuplicate ? "확인 중..." : "중복확인"}
-            </button>
-          </div>
-          <Field
-            name="name"
-            label="상호(법인명)"
-            defaultValue={client.name}
-            required
-          />
-          <Field
-            name="ceoName"
-            label="대표자"
-            defaultValue={client.ceoName || ""}
-          />
-          <div className="flex gap-2">
-            <Field
-              name="address"
-              label="사업자주소"
-              defaultValue={client.address || ""}
-              className="flex-1"
-            />
-            <AddressSearch
-              onComplete={(data) => {
-                const addressInput = document.querySelector(
-                  'input[name="address"]'
-                ) as HTMLInputElement;
-                const postalCodeInput = document.querySelector(
-                  'input[name="postalCode"]'
-                ) as HTMLInputElement;
-                if (addressInput) {
-                  addressInput.value =
-                    data.address +
-                    (data.buildingName ? ` ${data.buildingName}` : "");
-                  addressInput.dispatchEvent(
-                    new Event("input", { bubbles: true })
-                  );
-                }
-                if (postalCodeInput) {
-                  postalCodeInput.value = data.zonecode;
-                  postalCodeInput.dispatchEvent(
-                    new Event("input", { bubbles: true })
-                  );
-                }
-              }}
-            >
-              <button
-                type="button"
-                className="mt-6 h-10 rounded-md border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 hover:bg-slate-50"
-              >
-                주소검색
-              </button>
-            </AddressSearch>
-          </div>
-          <Field
-            name="postalCode"
-            label="우편번호"
-            className="opacity-75"
-            readOnly
-          />
-          <Field name="addressDetail" label="상세 주소" />
-          <Field
-            name="businessType"
-            label="업태"
-            defaultValue={client.businessType || ""}
-          />
-          <Field
-            name="businessItem"
-            label="종목"
-            defaultValue={client.businessItem || ""}
-          />
-        </div>
-        <div className="mt-6">
-          <label className="block text-sm font-semibold text-slate-700">
-            사업자 등록증 첨부
-          </label>
-          <div className="mt-2 space-y-2">
-            {/* 이미 업로드된 파일 */}
-            {attachments
-              .filter((a) => a.fileType === "business_registration")
-              .map((attachment, index) => {
-                const isImage = attachment.fileName.match(
-                  /\.(jpg|jpeg|png|gif|webp)$/i
-                );
-                const fileSize = attachment.fileUrl ? "업로드됨" : "";
-                return (
-                  <div
-                    key={index}
-                    className="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2"
-                  >
-                    {isImage && attachment.fileUrl ? (
-                      <img
-                        src={attachment.fileUrl}
-                        alt={attachment.fileName}
-                        className="h-10 w-10 rounded object-cover"
-                        onClick={() =>
-                          window.open(attachment.fileUrl, "_blank")
-                        }
-                        style={{ cursor: "pointer" }}
-                      />
-                    ) : (
-                      <div className="flex h-10 w-10 items-center justify-center rounded bg-slate-200">
-                        <span className="text-xs text-slate-500">📄</span>
-                      </div>
-                    )}
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        {attachment.fileUrl ? (
-                          <a
-                            href={attachment.fileUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm font-medium text-slate-700 hover:text-primary hover:underline"
-                          >
-                            {attachment.fileName}
-                          </a>
-                        ) : (
-                          <span className="text-sm text-slate-600">
-                            {attachment.fileName}
-                          </span>
-                        )}
-                        {fileSize && (
-                          <span className="text-xs text-slate-400">
-                            ({fileSize})
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        removeAttachment(
-                          attachments.findIndex((a) => a === attachment)
-                        )
-                      }
-                      className="text-slate-400 hover:text-red-500"
-                    >
-                      <X size={16} />
-                    </button>
-                  </div>
-                );
-              })}
-            {/* 선택한 파일 (아직 업로드 안 함) */}
-            {pendingFiles
-              .filter((f) => f.fileType === "business_registration")
-              .map((pendingFile, index) => {
-                const isImage = pendingFile.file.type.startsWith("image/");
-                const fileSize =
-                  (pendingFile.file.size / 1024 / 1024).toFixed(2) + " MB";
-                const previewUrl = isImage
-                  ? URL.createObjectURL(pendingFile.file)
-                  : null;
-                return (
-                  <div
-                    key={index}
-                    className="flex items-center gap-3 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2"
-                  >
-                    {isImage && previewUrl ? (
-                      <img
-                        src={previewUrl}
-                        alt={pendingFile.file.name}
-                        className="h-10 w-10 rounded object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-10 w-10 items-center justify-center rounded bg-blue-200">
-                        <span className="text-xs text-blue-600">📄</span>
-                      </div>
-                    )}
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-blue-700">
-                          {pendingFile.file.name}
-                        </span>
-                        <span className="text-xs text-blue-500">
-                          ({fileSize})
-                        </span>
-                        <span className="text-xs text-blue-500">
-                          업로드 대기 중
-                        </span>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (previewUrl) URL.revokeObjectURL(previewUrl);
-                        setPendingFiles((prev) =>
-                          prev.filter(
-                            (f, i) =>
-                              !(
-                                f.fileType === "business_registration" &&
-                                i === index
-                              )
-                          )
-                        );
-                      }}
-                      className="text-slate-400 hover:text-red-500"
-                    >
-                      <X size={16} />
-                    </button>
-                  </div>
-                );
-              })}
-            <div
-              className="flex items-center gap-3 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-500 cursor-pointer hover:bg-slate-100 transition"
-              onClick={() => businessRegistrationFileInputRef.current?.click()}
-            >
-              <Upload size={16} className="text-slate-400" />
-              <span className="font-medium text-slate-600">
-                파일을 드래그하거나 클릭하여 선택
-              </span>
-              <input
-                ref={businessRegistrationFileInputRef}
-                type="file"
-                accept="image/*,.pdf"
-                className="hidden"
-                onChange={(e) => handleFileSelect(e, "business_registration")}
-                disabled={uploading || loading}
-              />
-              <button
-                type="button"
-                disabled={uploading || loading}
-                className="rounded-md border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-50"
-              >
-                파일 선택
-              </button>
-            </div>
-          </div>
-        </div>
-        <div className="mt-6">
-          <label className="block text-sm font-semibold text-slate-700">
-            서명 등록
-          </label>
-          <div className="mt-2 space-y-2">
-            {/* 이미 업로드된 파일 */}
-            {attachments
-              .filter((a) => a.fileType === "signature")
-              .map((attachment, index) => {
-                const isImage = attachment.fileName.match(
-                  /\.(jpg|jpeg|png|gif|webp)$/i
-                );
-                const fileSize = attachment.fileUrl ? "업로드됨" : "";
-                return (
-                  <div
-                    key={index}
-                    className="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2"
-                  >
-                    {isImage && attachment.fileUrl ? (
-                      <img
-                        src={attachment.fileUrl}
-                        alt={attachment.fileName}
-                        className="h-10 w-10 rounded object-cover"
-                        onClick={() =>
-                          window.open(attachment.fileUrl, "_blank")
-                        }
-                        style={{ cursor: "pointer" }}
-                      />
-                    ) : (
-                      <div className="flex h-10 w-10 items-center justify-center rounded bg-slate-200">
-                        <span className="text-xs text-slate-500">📄</span>
-                      </div>
-                    )}
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        {attachment.fileUrl ? (
-                          <a
-                            href={attachment.fileUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm font-medium text-slate-700 hover:text-primary hover:underline"
-                          >
-                            {attachment.fileName}
-                          </a>
-                        ) : (
-                          <span className="text-sm text-slate-600">
-                            {attachment.fileName}
-                          </span>
-                        )}
-                        {fileSize && (
-                          <span className="text-xs text-slate-400">
-                            ({fileSize})
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        removeAttachment(
-                          attachments.findIndex((a) => a === attachment)
-                        )
-                      }
-                      className="text-slate-400 hover:text-red-500"
-                    >
-                      <X size={16} />
-                    </button>
-                  </div>
-                );
-              })}
-            {/* 선택한 파일 (아직 업로드 안 함) */}
-            {pendingFiles
-              .filter((f) => f.fileType === "signature")
-              .map((pendingFile, index) => {
-                const isImage = pendingFile.file.type.startsWith("image/");
-                const fileSize =
-                  (pendingFile.file.size / 1024 / 1024).toFixed(2) + " MB";
-                const previewUrl = isImage
-                  ? URL.createObjectURL(pendingFile.file)
-                  : null;
-                return (
-                  <div
-                    key={index}
-                    className="flex items-center gap-3 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2"
-                  >
-                    {isImage && previewUrl ? (
-                      <img
-                        src={previewUrl}
-                        alt={pendingFile.file.name}
-                        className="h-10 w-10 rounded object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-10 w-10 items-center justify-center rounded bg-blue-200">
-                        <span className="text-xs text-blue-600">📄</span>
-                      </div>
-                    )}
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-blue-700">
-                          {pendingFile.file.name}
-                        </span>
-                        <span className="text-xs text-blue-500">
-                          ({fileSize})
-                        </span>
-                        <span className="text-xs text-blue-500">
-                          업로드 대기 중
-                        </span>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (previewUrl) URL.revokeObjectURL(previewUrl);
-                        setPendingFiles((prev) =>
-                          prev.filter(
-                            (f, i) =>
-                              !(f.fileType === "signature" && i === index)
-                          )
-                        );
-                      }}
-                      className="text-slate-400 hover:text-red-500"
-                    >
-                      <X size={16} />
-                    </button>
-                  </div>
-                );
-              })}
-            <div
-              className="flex items-center gap-3 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-500 cursor-pointer hover:bg-slate-100 transition"
-              onClick={() => signatureFileInputRef.current?.click()}
-            >
-              <Upload size={16} className="text-slate-400" />
-              <span className="font-medium text-slate-600">
-                파일을 드래그하거나 클릭하여 선택
-              </span>
-              <input
-                ref={signatureFileInputRef}
-                type="file"
-                accept="image/*,.pdf"
-                className="hidden"
-                onChange={(e) => handleFileSelect(e, "signature")}
-                disabled={uploading || loading}
-              />
-              <button
-                type="button"
-                disabled={uploading || loading}
-                className="rounded-md border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-50"
-              >
-                파일 선택
-              </button>
-            </div>
-          </div>
-        </div>
-        <div className="mt-6">
-          <label className="block text-sm font-semibold text-slate-700 mb-2">
-            휴·폐업 상태
-            {businessStatus && (
-              <span className="ml-2 text-xs text-slate-500 font-normal">
-                (국세청 API 기준)
-              </span>
-            )}
-          </label>
-          <div className="flex gap-4">
-            <label className="flex items-center gap-2">
-              <input
-                type="radio"
-                name="status"
-                value="정상"
-                defaultChecked={
-                  businessStatus
-                    ? businessStatus === "정상"
-                    : client.status === "정상"
-                }
-                disabled
-                className="h-4 w-4 text-primary focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
-              />
-              <span className="text-sm text-slate-700">정상</span>
-            </label>
-            <label className="flex items-center gap-2">
-              <input
-                type="radio"
-                name="status"
-                value="휴업"
-                defaultChecked={
-                  businessStatus
-                    ? businessStatus === "휴업"
-                    : client.status === "휴업"
-                }
-                disabled
-                className="h-4 w-4 text-primary focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
-              />
-              <span className="text-sm text-slate-700">휴업</span>
-            </label>
-            <label className="flex items-center gap-2">
-              <input
-                type="radio"
-                name="status"
-                value="폐업"
-                defaultChecked={
-                  businessStatus
-                    ? businessStatus === "폐업"
-                    : client.status === "폐업"
-                }
-                disabled
-                className="h-4 w-4 text-primary focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
-              />
-              <span className="text-sm text-slate-700">폐업</span>
-            </label>
-          </div>
-          {businessStatus && (
-            <p className="mt-2 text-xs text-slate-500">
-              💡 사업자등록번호 중복확인 시 국세청 API에서 자동으로 조회된
-              상태입니다.
-            </p>
-          )}
-        </div>
-        <div className="mt-6">
-          <label className="block text-sm font-semibold text-slate-700">
-            비고
-          </label>
-          <textarea
-            name="note"
-            rows={4}
-            defaultValue={client.note || ""}
-            className="mt-1 w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-            placeholder="추가 정보를 입력하세요"
-          />
-        </div>
-      </section>
-
-      {/* 담당자 정보 */}
-      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <header className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-slate-900">
-              담당자 정보
-            </h2>
-            <p className="mt-1 text-sm text-slate-500">
-              담당자는 여러 명을 등록할 수 있습니다.
-            </p>
-          </div>
+    <section className={`${styles.clientRegist} page_section`}>
+      <div className="page_title">
+        <h1>거래처 수정</h1>
+        <div className="btn_wrap">
           <button
             type="button"
-            onClick={addContact}
-            className="inline-flex items-center gap-2 rounded-md border border-slate-200 px-3 py-1.5 text-sm font-semibold text-slate-600 hover:bg-slate-100"
+            onClick={handleDelete}
+            className="btn btn_lg normal"
           >
-            <Plus size={16} />
-            담당자 추가
-          </button>
-        </header>
-        <div className="mt-6 space-y-6">
-          {contacts.map((contact, index) => (
-            <div
-              key={contact.id}
-              className="rounded-lg border border-slate-200 p-4"
-            >
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold text-slate-700">
-                  담당자 {index + 1}
-                </p>
-                {contacts.length > 1 ? (
-                  <button
-                    type="button"
-                    onClick={() => removeContact(contact.id)}
-                    className="inline-flex items-center gap-1 text-xs font-medium text-red-500 hover:text-red-600"
-                  >
-                    <Trash2 size={14} />
-                    삭제
-                  </button>
-                ) : null}
-              </div>
-              <div className="mt-4 grid gap-4 md:grid-cols-2">
-                <Field
-                  name={`contact_${contact.id}_name`}
-                  label="이름"
-                  defaultValue={contact.name}
-                  required
-                />
-                <Field
-                  name={`contact_${contact.id}_phone`}
-                  label="연락처"
-                  placeholder="010-1234-5678"
-                  defaultValue={contact.phone}
-                />
-                <Field
-                  name={`contact_${contact.id}_email`}
-                  label="이메일"
-                  type="email"
-                  defaultValue={contact.email}
-                />
-                <Field
-                  name={`contact_${contact.id}_title`}
-                  label="직책"
-                  defaultValue={contact.title}
-                />
-                <Field
-                  name={`contact_${contact.id}_note`}
-                  label="비고"
-                  defaultValue={contact.note}
-                  className="md:col-span-2"
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* 사이트 정보 */}
-      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <header className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-slate-900">
-              사이트 정보
-            </h2>
-            <p className="mt-1 text-sm text-slate-500">
-              브랜드별 사이트 정보를 관리합니다.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={addSite}
-            className="inline-flex items-center gap-2 rounded-md border border-slate-200 px-3 py-1.5 text-sm font-semibold text-slate-600 hover:bg-slate-100"
-          >
-            <Plus size={16} />
-            사이트 추가
-          </button>
-        </header>
-        <div className="mt-6 space-y-4">
-          {sites.map((site, index) => (
-            <div
-              key={site.id}
-              className="rounded-lg border border-slate-200 p-4"
-            >
-              <div className="grid grid-cols-7 gap-4 items-end">
-                <Field
-                  name={`site_${site.id}_brandName`}
-                  label="브랜드"
-                  defaultValue={site.brandName}
-                  className="col-span-1"
-                />
-                <Field
-                  name={`site_${site.id}_domain`}
-                  label="도메인"
-                  defaultValue={site.domain}
-                  className="col-span-1"
-                />
-                <Field
-                  name={`site_${site.id}_solution`}
-                  label="솔루션"
-                  defaultValue={site.solution}
-                  className="col-span-1"
-                />
-                <Field
-                  name={`site_${site.id}_loginId`}
-                  label="아이디"
-                  defaultValue={site.loginId}
-                  className="col-span-1"
-                />
-                <Field
-                  name={`site_${site.id}_loginPassword`}
-                  label="패스워드"
-                  type="password"
-                  defaultValue={site.loginPassword}
-                  className="col-span-1"
-                />
-                <Field
-                  name={`site_${site.id}_type`}
-                  label="유형"
-                  defaultValue={site.note}
-                  className="col-span-1"
-                />
-                <div className="flex gap-2">
-                  {index < sites.length - 1 ? (
-                    <button
-                      type="button"
-                      className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-600 hover:bg-slate-50"
-                    >
-                      수정
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      className="h-10 rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
-                    >
-                      저장
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* 하단 버튼 */}
-      <section className="flex items-center justify-between">
-        <button
-          type="button"
-          onClick={handleDelete}
-          className="inline-flex items-center rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-100"
-        >
-          삭제
-        </button>
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => {
-              setPendingFiles([]);
-              router.back();
-            }}
-            className="inline-flex items-center rounded-md border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100"
-          >
-            취소
+            삭제
           </button>
           <button
             type="submit"
+            form="clientEditForm"
             disabled={loading || uploading}
-            className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50"
+            className="btn btn_lg primary disabled:opacity-50"
           >
             {loading || uploading
               ? uploading
@@ -1182,8 +492,655 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
               : "수정"}
           </button>
         </div>
-      </section>
-    </form>
+      </div>
+      <form id="clientEditForm" onSubmit={handleSubmit}>
+        <div className="white_box">
+          <div className={styles.boxInner}>
+            <div className="table_group">
+              {/* ERP 정보 */}
+              <div className="table_item">
+                <h2 className="table_title">ERP 정보</h2>
+                <ul className="table_row">
+                  <li className="row_group">
+                    <div className="table_head">아이디</div>
+                    <div className="table_data pd12">
+                      <input
+                        name="loginId"
+                        type="text"
+                        defaultValue={client.loginId || ""}
+                        readOnly
+                      />
+                    </div>
+                  </li>
+                  <li className="row_group">
+                    <div className="table_head">패스워드</div>
+                    <div className="table_data pd12">
+                      <div className="flex gap-2 items-center">
+                        <input
+                          name="loginPassword"
+                          type="password"
+                          placeholder={
+                            passwordChangeMode ? "새 비밀번호 입력" : "••••••••"
+                          }
+                          readOnly={!passwordChangeMode}
+                          className="flex-1"
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setPasswordChangeMode(!passwordChangeMode)
+                          }
+                          className="btn btn_md normal"
+                        >
+                          {passwordChangeMode ? "취소" : "변경"}
+                        </button>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+
+              {/* 기본 정보 */}
+              <div className="table_item">
+                <h2 className="table_title">기본 정보</h2>
+                <ul className="table_row">
+                  <li className="row_group">
+                    <div className="table_head">거래처 사업자등록번호</div>
+                    <div className="table_data pd12">
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "8px",
+                          alignItems: "center",
+                        }}
+                      >
+                        <input
+                          name="businessRegistrationNumber"
+                          type="text"
+                          defaultValue={client.businessRegistrationNumber}
+                          required
+                          style={{ flex: 1 }}
+                          placeholder="123-45-67890"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleCheckDuplicate}
+                          disabled={checkingDuplicate}
+                          className="btn btn_md normal"
+                        >
+                          {checkingDuplicate ? "확인 중..." : "중복확인"}
+                        </button>
+                        {duplicateCheckResult && (
+                          <span
+                            style={{
+                              fontSize: "12px",
+                              whiteSpace: "nowrap",
+                              color: duplicateCheckResult.includes("사용 가능")
+                                ? "#10b981"
+                                : "#ef4444",
+                            }}
+                          >
+                            {duplicateCheckResult}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+                <ul className="table_row">
+                  <li className="row_group">
+                    <div className="table_head">상호(법인명)</div>
+                    <div className="table_data pd12">
+                      <input
+                        name="name"
+                        type="text"
+                        defaultValue={client.name}
+                        required
+                        placeholder="상호(법인명)"
+                      />
+                    </div>
+                  </li>
+                  <li className="row_group">
+                    <div className="table_head">대표자</div>
+                    <div className="table_data pd12">
+                      <input
+                        name="ceoName"
+                        type="text"
+                        defaultValue={client.ceoName || ""}
+                        placeholder="대표자명"
+                      />
+                    </div>
+                  </li>
+                </ul>
+                <ul className="table_row">
+                  <li className="row_group">
+                    <div className="table_head">사업자 주소</div>
+                    <div className="table_data pd12">
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "8px",
+                          alignItems: "center",
+                        }}
+                      >
+                        <input
+                          name="address"
+                          type="text"
+                          defaultValue={client.address || ""}
+                          readOnly
+                          style={{ flex: 1, opacity: 0.75 }}
+                          placeholder="사업자 주소"
+                        />
+                        <AddressSearch
+                          onComplete={(data) => {
+                            const addressInput = document.querySelector(
+                              'input[name="address"]'
+                            ) as HTMLInputElement;
+                            const postalCodeInput = document.querySelector(
+                              'input[name="postalCode"]'
+                            ) as HTMLInputElement;
+                            if (addressInput) {
+                              addressInput.value =
+                                data.address +
+                                (data.buildingName
+                                  ? ` ${data.buildingName}`
+                                  : "");
+                              addressInput.dispatchEvent(
+                                new Event("input", { bubbles: true })
+                              );
+                            }
+                            if (postalCodeInput) {
+                              postalCodeInput.value = data.zonecode;
+                              postalCodeInput.dispatchEvent(
+                                new Event("input", { bubbles: true })
+                              );
+                            }
+                          }}
+                        >
+                          <button type="button" className="btn btn_md normal">
+                            주소검색
+                          </button>
+                        </AddressSearch>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+                <ul className="table_row">
+                  <li className="row_group">
+                    <div className="table_head">우편번호</div>
+                    <div className="table_data pd12">
+                      <input
+                        name="postalCode"
+                        type="text"
+                        readOnly
+                        defaultValue={client.postalCode || ""}
+                        style={{ opacity: 0.75 }}
+                        placeholder="우편번호"
+                      />
+                    </div>
+                  </li>
+                  <li className="row_group">
+                    <div className="table_head">상세 주소</div>
+                    <div className="table_data pd12">
+                      <input
+                        name="addressDetail"
+                        type="text"
+                        defaultValue={client.addressDetail || ""}
+                        placeholder="상세 주소"
+                      />
+                    </div>
+                  </li>
+                </ul>
+                <ul className="table_row">
+                  <li className="row_group">
+                    <div className="table_head">업태</div>
+                    <div className="table_data pd12">
+                      <input
+                        name="businessType"
+                        type="text"
+                        defaultValue={client.businessType || ""}
+                        placeholder="업태명"
+                      />
+                    </div>
+                  </li>
+                  <li className="row_group">
+                    <div className="table_head">종목</div>
+                    <div className="table_data pd12">
+                      <input
+                        name="businessItem"
+                        type="text"
+                        defaultValue={client.businessItem || ""}
+                        placeholder="종목명"
+                      />
+                    </div>
+                  </li>
+                </ul>
+                <ul className={`table_row ${styles.lastRow}`}>
+                  <li className="row_group">
+                    <div className="table_head">사업자 등록증 첨부</div>
+                    <div className="table_data pd12">
+                      <div className="space-y-2">
+                        {attachments
+                          .filter((a) => a.fileType === "business_registration")
+                          .map((attachment, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center gap-2 text-sm"
+                            >
+                              <span>{attachment.fileName}</span>
+                              {attachment.fileUrl && (
+                                <a
+                                  href={attachment.fileUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-primary hover:underline"
+                                >
+                                  보기
+                                </a>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  removeAttachment(
+                                    attachments.findIndex(
+                                      (a) => a === attachment
+                                    )
+                                  )
+                                }
+                                className="text-red-500 hover:text-red-600"
+                              >
+                                <X size={14} />
+                              </button>
+                            </div>
+                          ))}
+                        {pendingFiles
+                          .filter((f) => f.fileType === "business_registration")
+                          .map((pendingFile, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center gap-2 text-sm text-blue-600"
+                            >
+                              <span>
+                                {pendingFile.file.name} (업로드 대기 중)
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setPendingFiles((prev) =>
+                                    prev.filter(
+                                      (f, i) =>
+                                        !(
+                                          f.fileType ===
+                                            "business_registration" &&
+                                          i === index
+                                        )
+                                    )
+                                  );
+                                }}
+                                className="text-red-500 hover:text-red-600"
+                              >
+                                <X size={14} />
+                              </button>
+                            </div>
+                          ))}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            businessRegistrationFileInputRef.current?.click()
+                          }
+                          disabled={uploading || loading}
+                          className="btn btn_md normal"
+                        >
+                          <Upload size={14} className="inline mr-1" />
+                          파일 선택
+                        </button>
+                        <input
+                          ref={businessRegistrationFileInputRef}
+                          type="file"
+                          accept="image/*,.pdf"
+                          className="hidden"
+                          onChange={(e) =>
+                            handleFileSelect(e, "business_registration")
+                          }
+                          disabled={uploading || loading}
+                        />
+                      </div>
+                    </div>
+                  </li>
+                  <li className="row_group">
+                    <div className="table_head">서명 등록</div>
+                    <div className="table_data pd12">
+                      <div className="space-y-2">
+                        {attachments
+                          .filter((a) => a.fileType === "signature")
+                          .map((attachment, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center gap-2 text-sm"
+                            >
+                              <span>{attachment.fileName}</span>
+                              {attachment.fileUrl && (
+                                <a
+                                  href={attachment.fileUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-primary hover:underline"
+                                >
+                                  보기
+                                </a>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  removeAttachment(
+                                    attachments.findIndex(
+                                      (a) => a === attachment
+                                    )
+                                  )
+                                }
+                                className="text-red-500 hover:text-red-600"
+                              >
+                                <X size={14} />
+                              </button>
+                            </div>
+                          ))}
+                        {pendingFiles
+                          .filter((f) => f.fileType === "signature")
+                          .map((pendingFile, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center gap-2 text-sm text-blue-600"
+                            >
+                              <span>
+                                {pendingFile.file.name} (업로드 대기 중)
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setPendingFiles((prev) =>
+                                    prev.filter(
+                                      (f, i) =>
+                                        !(
+                                          f.fileType === "signature" &&
+                                          i === index
+                                        )
+                                    )
+                                  );
+                                }}
+                                className="text-red-500 hover:text-red-600"
+                              >
+                                <X size={14} />
+                              </button>
+                            </div>
+                          ))}
+                        <button
+                          type="button"
+                          onClick={() => signatureFileInputRef.current?.click()}
+                          disabled={uploading || loading}
+                          className="btn btn_md normal"
+                        >
+                          <Upload size={14} className="inline mr-1" />
+                          파일 선택
+                        </button>
+                        <input
+                          ref={signatureFileInputRef}
+                          type="file"
+                          accept="image/*,.pdf"
+                          className="hidden"
+                          onChange={(e) => handleFileSelect(e, "signature")}
+                          disabled={uploading || loading}
+                        />
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+
+              {/* 담당자 정보 */}
+              <div className="table_item">
+                <div className="flex items-center justify-between mb-8">
+                  <h2 className={`table_title ${styles.contactTitle}`}>
+                    담당자 정보
+                  </h2>
+                  <button
+                    type="button"
+                    onClick={addContact}
+                    className="btn btn_md normal"
+                  >
+                    <Plus size={16} className="inline mr-1" />
+                    담당자 추가
+                  </button>
+                </div>
+                {contacts.map((contact, index) => (
+                  <div
+                    key={contact.id}
+                    style={{ marginTop: index > 0 ? "30px" : "0" }}
+                  >
+                    <div
+                      className={styles.contactHeader}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <h3 className="table_title_sub">담당자{index + 1}</h3>
+                      {contacts.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeContact(contact.id)}
+                          style={{
+                            color: "#ef4444",
+                            cursor: "pointer",
+                            background: "none",
+                            border: "none",
+                            fontSize: "18px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            padding: "0",
+                          }}
+                          title="삭제"
+                        >
+                          <X size={18} />
+                        </button>
+                      )}
+                    </div>
+                    <ul className="table_row">
+                      <li className="row_group">
+                        <div className="table_head">이름</div>
+                        <div className="table_data pd12">
+                          <input
+                            name={`contact_${contact.id}_name`}
+                            type="text"
+                            defaultValue={contact.name}
+                            required
+                            placeholder="이름"
+                          />
+                        </div>
+                      </li>
+                      <li className="row_group">
+                        <div className="table_head">연락처</div>
+                        <div className="table_data pd12">
+                          <input
+                            name={`contact_${contact.id}_phone`}
+                            type="text"
+                            defaultValue={contact.phone}
+                            placeholder="010-1234-5678"
+                          />
+                        </div>
+                      </li>
+                    </ul>
+                    <ul className="table_row">
+                      <li className="row_group">
+                        <div className="table_head">이메일</div>
+                        <div className="table_data pd12">
+                          <input
+                            name={`contact_${contact.id}_email`}
+                            type="email"
+                            defaultValue={contact.email}
+                            placeholder="이메일"
+                          />
+                        </div>
+                      </li>
+                      <li className="row_group">
+                        <div className="table_head">비고</div>
+                        <div className="table_data pd12">
+                          <input
+                            name={`contact_${contact.id}_note`}
+                            type="text"
+                            defaultValue={contact.note}
+                            placeholder="특이사항"
+                          />
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+                ))}
+              </div>
+
+              {/* 사이트 정보 */}
+              <div className="table_item table_item2">
+                <h2 className="table_title">
+                  사이트 정보
+                  <span
+                    className="plus_btn"
+                    onClick={addSite}
+                    style={{ marginLeft: "10px", cursor: "pointer" }}
+                  >
+                    + 사이트 추가
+                  </span>
+                </h2>
+                <div className="table_wrap">
+                  <table className={styles.siteTable}>
+                    <colgroup>
+                      <col style={{ width: "15%" }} />
+                      <col style={{ width: "auto" }} />
+                      <col style={{ width: "15%" }} />
+                      <col style={{ width: "15%" }} />
+                      <col style={{ width: "15%" }} />
+                      <col style={{ width: "15%" }} />
+                      <col style={{ width: "5%" }} />
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th>브랜드</th>
+                        <th>도메인</th>
+                        <th>솔루션</th>
+                        <th>아이디</th>
+                        <th>패스워드</th>
+                        <th>유형</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sites.map((site, index) => (
+                        <tr key={site.id} className="site-row">
+                          <td data-th="브랜드">
+                            <input
+                              name={`site_${site.id}_brandName`}
+                              type="text"
+                              defaultValue={site.brandName}
+                              placeholder="브랜드명"
+                            />
+                          </td>
+                          <td data-th="도메인">
+                            <input
+                              name={`site_${site.id}_domain`}
+                              type="text"
+                              defaultValue={site.domain}
+                              placeholder="https://example.com"
+                            />
+                          </td>
+                          <td data-th="솔루션">
+                            <select
+                              name={`site_${site.id}_solution`}
+                              defaultValue={site.solution || ""}
+                            >
+                              <option value="">선택</option>
+                              <option value="카페24">카페24</option>
+                              <option value="고도몰">고도몰</option>
+                              <option value="메이크샵">메이크샵</option>
+                              <option value="기타">기타</option>
+                            </select>
+                          </td>
+                          <td data-th="아이디">
+                            <input
+                              name={`site_${site.id}_loginId`}
+                              type="text"
+                              defaultValue={site.loginId}
+                              placeholder="아이디"
+                            />
+                          </td>
+                          <td data-th="패스워드">
+                            <input
+                              name={`site_${site.id}_loginPassword`}
+                              type="text"
+                              defaultValue={site.loginPassword}
+                              placeholder="패스워드"
+                            />
+                          </td>
+                          <td data-th="유형">
+                            <select
+                              name={`site_${site.id}_type`}
+                              defaultValue={site.type || ""}
+                            >
+                              <option value="">선택</option>
+                              <option value="신규">신규</option>
+                              <option value="리뉴얼">리뉴얼</option>
+                              <option value="이전">이전</option>
+                              <option value="개발">개발</option>
+                              <option value="유지보수">유지보수</option>
+                              <option value="기타">기타</option>
+                            </select>
+                          </td>
+                          <td className="right">
+                            {sites.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => removeSite(site.id)}
+                                style={{
+                                  background: "none",
+                                  border: "none",
+                                  color: "#ef4444",
+                                  cursor: "pointer",
+                                  padding: "0",
+                                }}
+                                title="삭제"
+                              >
+                                <X size={18} />
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* 비고 */}
+              <div className="table_item">
+                <h2 className="table_title">비고</h2>
+                <div className="table_wrap">
+                  <textarea
+                    name="note"
+                    defaultValue={client.note || ""}
+                    placeholder="추가 정보를 입력하세요"
+                    style={{
+                      width: "100%",
+                      border: "none",
+                      resize: "none",
+                      outline: "none",
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </section>
   );
 }
 

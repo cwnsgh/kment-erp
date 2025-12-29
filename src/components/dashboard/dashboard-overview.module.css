@@ -1,0 +1,340 @@
+/* 대시보드 스타일 */
+
+.mainSection {
+}
+
+.pageTitle {
+  margin-bottom: 50px;
+}
+
+.pageTitle h1 {
+  font-weight: var(--font-weight-medium);
+  font-size: 32px;
+}
+
+.pageTitle h1 > span {
+  font-weight: var(--font-weight-bold);
+}
+
+/* 일정 섹션 */
+.mainSchedule {
+  margin-bottom: 50px;
+}
+
+.scheduleTop {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.scheduleTop .today {
+  font-size: 22px;
+  font-weight: var(--font-weight-bold);
+}
+
+.rightControl {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rightControl > div {
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
+  padding: 10px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.arrowL {
+  background: var(--gray_bg);
+  transform: rotate(180deg);
+}
+
+.arrowR {
+  background: var(--gray_bg);
+}
+
+.plusIcon {
+  background: var(--primary);
+}
+
+.plusIcon img {
+  filter: invert(1);
+  width: 12px;
+  height: 12px;
+}
+
+.scheduleContent {
+  display: flex;
+  gap: 20px;
+}
+
+.scheduleBox {
+  width: calc(100% / 2);
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 30px;
+  cursor: pointer;
+  position: relative;
+  padding: 30px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+  box-sizing: border-box;
+}
+
+.dateBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background-color: var(--text-color);
+  border-radius: 6px;
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+}
+
+.dateBox .day {
+  font-size: 12px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.dateBox .date {
+  font-size: 28px;
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+}
+
+.scheduleBox .totalCount {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  font-size: 14px;
+  font-weight: var(--font-weight-semibold);
+  padding: 8px 10px;
+  box-sizing: border-box;
+  border-radius: 4px;
+  background: var(--gray_bg);
+}
+
+.scheduleList {
+  font-size: 16px;
+  font-weight: var(--font-weight-semibold);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex: 1;
+}
+
+.scheduleBox.noSchedule .dateBox {
+  background-color: var(--text-gray);
+}
+
+.scheduleBox.noSchedule .scheduleList {
+  color: var(--text-gray);
+}
+
+.scheduleList li {
+  padding-left: 10px;
+  position: relative;
+  margin-bottom: 4px;
+}
+
+.scheduleList li:last-child {
+  margin-bottom: 0;
+}
+
+.scheduleList li::before {
+  content: '';
+  display: block;
+  width: 4px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--text-color);
+  position: absolute;
+  left: 0;
+  top: calc(50% - 2px);
+}
+
+.scheduleBox.noSchedule .scheduleList li::before {
+  background: var(--text-gray);
+}
+
+/* 빠른 액세스 카드들 */
+.mainList {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.mainList .cardBox {
+  width: calc(100% / 3 - 14px);
+  height: 120px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+  padding: 30px;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.mainList .cardBox h3 {
+  font-size: 20px;
+  font-weight: var(--font-weight-bold);
+}
+
+.mainBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  background: var(--gray_bg);
+  cursor: pointer;
+  transition: all 0.3s;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.mainBtn > a {
+  display: block;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.mainBtn > a > img {
+  width: 10px;
+  height: 10px;
+  object-fit: contain;
+  transition: all 0.3s;
+}
+
+.mainBtn:hover {
+  background-color: var(--primary);
+}
+
+.mainBtn:hover img {
+  filter: invert(1);
+}
+
+/* 요약 위젯들 */
+.managerList {
+  margin-top: 80px;
+  padding-top: 80px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  gap: 20px;
+}
+
+.managerList .cardBox {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+  padding: 30px;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.managerList .cardBox .mainBtn {
+  top: 20px;
+  right: 20px;
+}
+
+.managerList .cardBox.left {
+  width: 33%;
+}
+
+.managerList .cardBox.right {
+  width: 67%;
+}
+
+.managerList .cardBox h3 {
+  font-size: 20px;
+  font-weight: var(--font-weight-bold);
+}
+
+.managerList .cardBox h3 > span {
+  color: var(--text-gray);
+  font-size: 14px;
+  margin-left: 14px;
+  display: inline-block;
+  font-weight: var(--font-weight-medium);
+}
+
+.managerList .cardBox h3 .date {
+  color: var(--text-gray);
+  font-size: 14px;
+  margin-left: 14px;
+  display: inline-block;
+  font-weight: var(--font-weight-medium);
+}
+
+.managerList .cardBox .numArea {
+  margin-top: 40px;
+}
+
+.managerList .cardBox .numArea p:not(.num) {
+  display: inline-block;
+  font-weight: var(--font-weight-bold);
+  font-size: 20px;
+}
+
+.managerList .cardBox .numArea .num {
+  font-size: 40px;
+  font-weight: 800;
+  display: inline-block;
+  line-height: 1;
+  color: var(--primary);
+}
+
+.managerList .cardBox .listGroup {
+  margin-top: 40px;
+  display: flex;
+  gap: 15px;
+}
+
+.managerList .cardBox .listGroup .detailList {
+  flex: 1;
+  background: var(--background-color);
+  border-radius: 10px;
+  padding: 20px 24px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  list-style: none;
+  padding-left: 24px;
+  margin: 0;
+}
+
+.managerList .cardBox .listGroup .detailList li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 15px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.managerList .cardBox .listGroup .detailList li > .num {
+  font-size: 16px;
+  font-weight: var(--font-weight-bold);
+}
+

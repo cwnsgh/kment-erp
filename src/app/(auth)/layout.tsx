@@ -20,9 +20,11 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         <div className="text-sm text-white/70">{formattedDate}</div>
       </header>
       <main className="flex flex-1 items-center justify-center px-4 py-12 md:px-8">
-        <div className="w-full" style={{ maxWidth: '1440px' }}>{children}</div>
+        <div className="w-full" style={{ maxWidth: "1440px" }}>
+          {children}
+        </div>
       </main>
-      <footer className="bg-brand-dark px-8 py-5 text-xs text-white/50">
+      <footer className="bg-brand-dark px-4 py-5 text-xs text-white/50">
         © KMENT Corp.
       </footer>
     </div>

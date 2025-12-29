@@ -1,19 +1,5 @@
-import { DashboardOverview } from '@/components/dashboard/dashboard-overview';
-import { RecentActivity } from '@/components/dashboard/recent-activity';
+import { DashboardOverview } from "@/components/dashboard/dashboard-overview";
 
 export default function DashboardPage() {
-  return (
-    <div className="space-y-10">
-      <DashboardOverview />
-      <RecentActivity />
-    </div>
-  );
+  return <DashboardOverview />;
 }
-
-
-
-
-
-
-
-

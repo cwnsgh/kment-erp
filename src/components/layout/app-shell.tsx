@@ -1,41 +1,51 @@
-'use client';
-import { Bell, LogOut, Menu, User } from 'lucide-react';
-import Link from 'next/link';
-import { ReactNode, useState, useRef, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+"use client";
+import { Bell, LogOut, Menu, User } from "lucide-react";
+import Link from "next/link";
+import { ReactNode, useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
-import { mainNav } from '@/config/navigation';
-import { EmployeeSession } from '@/lib/auth';
-import { logout } from '@/app/actions/auth';
+import { mainNav } from "@/config/navigation";
+import { EmployeeSession } from "@/lib/auth";
+import { logout } from "@/app/actions/auth";
 
-import { ComingSoon } from './coming-soon';
-import { NavigationGroup } from './navigation-group';
+import { ComingSoon } from "./coming-soon";
+import { NavigationGroup } from "./navigation-group";
+import styles from "./app-shell.module.css";
 
 type AppShellProps = {
   children: ReactNode;
   session: EmployeeSession;
+  pendingApprovalCount?: number;
 };
 
-export function AppShell({ children, session }: AppShellProps) {
+export function AppShell({
+  children,
+  session,
+  pendingApprovalCount = 0,
+}: AppShellProps) {
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarMini, setSidebarMini] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
 
   // 프로필 메뉴 외부 클릭 시 닫기
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
+      if (
+        profileMenuRef.current &&
+        !profileMenuRef.current.contains(event.target as Node)
+      ) {
         setProfileMenuOpen(false);
       }
     }
 
     if (profileMenuOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [profileMenuOpen]);
 
@@ -51,13 +61,24 @@ export function AppShell({ children, session }: AppShellProps) {
         <div className="flex items-center gap-4">
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/10 text-white transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/10 text-white transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 lg:hidden"
             onClick={() => setSidebarOpen((prev) => !prev)}
           >
             <Menu size={18} />
             <span className="sr-only">메뉴 열기</span>
           </button>
-          <Link href="/dashboard" className="text-xl font-semibold tracking-wide text-white">
+          <button
+            type="button"
+            className="hidden lg:inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/10 text-white transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
+            onClick={() => setSidebarMini((prev) => !prev)}
+          >
+            <Menu size={18} />
+            <span className="sr-only">사이드바 축소</span>
+          </button>
+          <Link
+            href="/dashboard"
+            className="text-xl font-semibold tracking-wide text-white"
+          >
             KMENT
           </Link>
         </div>
@@ -70,23 +91,23 @@ export function AppShell({ children, session }: AppShellProps) {
             <span className="sr-only">알림</span>
           </button>
           <div className="text-sm text-white">
-            {new Date().toLocaleDateString('ko-KR', {
-              year: 'numeric',
-              month: '2-digit',
-              day: '2-digit',
-              weekday: 'short'
+            {new Date().toLocaleDateString("ko-KR", {
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+              weekday: "short",
             })}
           </div>
-          <div className="text-sm font-medium text-white">
-            {session.name}님
-          </div>
+          <div className="text-sm font-medium text-white">{session.name}님</div>
           <div className="relative" ref={profileMenuRef}>
             <button
               type="button"
               onClick={() => setProfileMenuOpen(!profileMenuOpen)}
               className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition hover:bg-white/20"
             >
-              <span className="text-sm font-semibold">{session.name.charAt(0).toUpperCase()}</span>
+              <span className="text-sm font-semibold">
+                {session.name.charAt(0).toUpperCase()}
+              </span>
             </button>
 
             {profileMenuOpen && (
@@ -98,8 +119,12 @@ export function AppShell({ children, session }: AppShellProps) {
                       <User size={20} />
                     </div>
                     <div>
-                      <div className="text-sm font-semibold text-slate-900">{session.name}</div>
-                      <div className="text-xs text-slate-500">{session.roleName || '관리자'}</div>
+                      <div className="text-sm font-semibold text-slate-900">
+                        {session.name}
+                      </div>
+                      <div className="text-xs text-slate-500">
+                        {session.roleName || "관리자"}
+                      </div>
                     </div>
                   </div>
 
@@ -146,21 +171,51 @@ export function AppShell({ children, session }: AppShellProps) {
         {/* 사이드바 */}
         <aside
           className={[
-            'flex w-72 flex-col border-r border-slate-200 bg-slate-100 text-slate-700 shadow-sm transition-transform duration-200',
-            sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-          ].join(' ')}
+            styles.sidebar,
+            sidebarMini && styles.sidebarMini,
+            sidebarOpen
+              ? "translate-x-0"
+              : "-translate-x-full lg:translate-x-0",
+          ]
+            .filter(Boolean)
+            .join(" ")}
         >
-          <nav className="flex flex-1 flex-col gap-1 overflow-y-auto px-4 py-4">
-            {mainNav.map((group) => (
-              <NavigationGroup key={group.label} item={group} onNavigate={() => setSidebarOpen(false)} />
-            ))}
+          <nav className={styles.sidebarNav}>
+            <ul className={styles.menuList}>
+              {mainNav.map((group) => {
+                // 회원가입 승인 관리 메뉴에 뱃지 숫자 전달
+                const item =
+                  group.label === "관리자 페이지" && group.children
+                    ? {
+                        ...group,
+                        children: group.children.map((child) => {
+                          if (child.href === "/staff/approvals") {
+                            return { ...child, badge: pendingApprovalCount };
+                          }
+                          return child;
+                        }),
+                      }
+                    : group;
+
+                return (
+                  <NavigationGroup
+                    key={group.label}
+                    item={item}
+                    isMini={sidebarMini}
+                    onNavigate={() => setSidebarOpen(false)}
+                  />
+                );
+              })}
+            </ul>
           </nav>
         </aside>
 
         {/* 메인 컨텐츠 영역 */}
         <div className="flex flex-1 flex-col overflow-hidden">
           <main className="flex-1 overflow-y-auto bg-white px-6 py-10 lg:px-12">
-            <div className="mx-auto w-full max-w-6xl space-y-10">{children}</div>
+            <div className="mx-auto w-full max-w-6xl space-y-10">
+              {children}
+            </div>
           </main>
         </div>
       </div>
@@ -176,4 +231,3 @@ export function AppShell({ children, session }: AppShellProps) {
     </div>
   );
 }
-
