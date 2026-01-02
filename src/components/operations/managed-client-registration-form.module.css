@@ -1,0 +1,14 @@
+/* table_toggle 스타일 - 글로벌 CSS 오버라이드 */
+.tableToggle {
+  width: 16px !important;
+  height: 16px !important;
+  cursor: pointer !important;
+  margin-left: 8px !important;
+  vertical-align: middle !important;
+  flex-shrink: 0 !important;
+  transition: transform 0.3s ease !important;
+}
+
+.tableToggle.rotated {
+  transform: rotate(180deg) !important;
+}

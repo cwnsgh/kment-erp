@@ -7,6 +7,7 @@ import { login } from "@/app/actions/auth";
 import styles from "./login.module.css";
 
 export default function LoginPage() {
+  const [userType, setUserType] = useState<'employee' | 'client'>('client');
   const [form, setForm] = useState({
     username: "", // 아이디 또는 이메일
     password: "",
@@ -22,7 +23,7 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const result = await login(form.username, form.password);
+      const result = await login(form.username, form.password, userType);
 
       if (!result.success) {
         setError(result.error || "로그인에 실패했습니다.");
@@ -60,12 +61,30 @@ export default function LoginPage() {
       </div>
       <div className={styles.loginRight}>
         <h3>LOGIN</h3>
+        <div className={styles.loginTabs}>
+          <button
+            type="button"
+            className={`${styles.loginTab} ${userType === 'client' ? styles.active : ''}`}
+            onClick={() => setUserType('client')}
+            disabled={isLoading}
+          >
+            사업자 로그인
+          </button>
+          <button
+            type="button"
+            className={`${styles.loginTab} ${userType === 'employee' ? styles.active : ''}`}
+            onClick={() => setUserType('employee')}
+            disabled={isLoading}
+          >
+            직원 로그인
+          </button>
+        </div>
         <form onSubmit={handleSubmit}>
           {error && <div className={styles.errorMessage}>{error}</div>}
 
           <input
             type="text"
-            placeholder="아이디"
+            placeholder={userType === 'employee' ? '이메일' : '아이디'}
             value={form.username}
             onChange={(event) =>
               setForm((prev) => ({ ...prev, username: event.target.value }))

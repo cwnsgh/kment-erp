@@ -12,11 +12,12 @@ export interface LoginResult {
 
 /**
  * 로그인 (직원 또는 사업자)
- * 이메일 형식이면 직원을 찾고, 아니면 사업자 로그인 ID로 찾음
+ * userType에 따라 해당 테이블에서만 조회
  */
 export async function login(
   username: string,
-  password: string
+  password: string,
+  userType: 'employee' | 'client' = 'client'
 ): Promise<LoginResult> {
   try {
     // 입력 검증
@@ -30,29 +31,23 @@ export async function login(
     const supabase = await getSupabaseServerClient();
     const trimmedUsername = username.trim();
 
-    // 1. 먼저 직원 정보 조회 (login_id 또는 email로 검색)
-    // 하위 호환성을 위해 login_id와 email 모두 확인
-    let employee = null;
-    let employeeError = null;
+    // 직원 로그인
+    if (userType === 'employee') {
+      const { data: employee, error: employeeError } = await supabase
+        .from("employee")
+        .select("id, email, password_hash, name, is_active")
+        .eq("is_active", true)
+        .eq("email", trimmedUsername.toLowerCase())
+        .maybeSingle();
 
-    // 먼저 email로 검색 (가장 확실한 방법)
-    // login_id 필드가 없을 수 있으므로 email만 선택
-    const { data: employeeByEmail, error: errorByEmail } = await supabase
-      .from("employee")
-      .select("id, email, password_hash, name, is_active")
-      .eq("is_active", true)
-      .eq("email", trimmedUsername.toLowerCase())
-      .maybeSingle();
+      if (employeeError || !employee) {
+        return {
+          success: false,
+          error: "아이디 또는 비밀번호가 올바르지 않습니다.",
+        };
+      }
 
-    if (employeeByEmail && !errorByEmail) {
-      employee = employeeByEmail;
-    } else {
-      // email로 찾지 못했으므로 에러 설정
-      employeeError = errorByEmail;
-    }
-
-    if (employee) {
-      // 직원 로그인 처리
+      // 비밀번호 확인
       const isPasswordValid = await bcrypt.compare(
         password,
         employee.password_hash
@@ -78,7 +73,7 @@ export async function login(
       redirect("/dashboard");
     }
 
-    // 2. 직원이 아니면 사업자(거래처) 로그인 시도
+    // 사업자 로그인
     const { data: client, error: clientError } = await supabase
       .from("client")
       .select("id, login_id, login_password, name, status")

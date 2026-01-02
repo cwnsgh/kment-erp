@@ -167,7 +167,7 @@ export function NavigationGroup({ item, isMini = false, onNavigate }: Navigation
             
             return (
               <li key={child.href} className={childActive ? styles.active : ''}>
-                {hasGrandchildren ? (
+                {hasGrandchildren && child.children ? (
                   <>
                     <Link href={child.href} onClick={onNavigate}>
                       {child.label}

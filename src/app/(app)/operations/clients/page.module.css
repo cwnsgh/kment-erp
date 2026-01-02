@@ -1,0 +1,812 @@
+/* 관리고객 조회 페이지 전용 CSS 모듈 */
+/* HTML 구조에 맞춰 스타일 적용 및 글로벌 CSS 충돌 방지 */
+
+.manageClientList {
+  /* page_section 스타일 */
+  max-width: 1100px !important;
+  margin: 80px auto 100px !important;
+  padding: 0 24px !important;
+  box-sizing: border-box !important;
+}
+
+/* 페이지 타이틀 영역 */
+.pageTitle {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  margin-bottom: 40px !important;
+}
+
+.pageTitle h1 {
+  font-size: 28px !important;
+  font-weight: var(--font-weight-bold) !important;
+  color: var(--text-color) !important;
+  margin: 0 !important;
+}
+
+.pageTitle .btnWrap {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+/* 테이블 그룹 스타일 */
+.tableGroup {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 40px !important;
+  width: 100% !important;
+}
+
+.tableItem {
+  width: 100% !important;
+}
+
+.tableItem2 {
+  width: 100% !important;
+}
+
+.tableTitle {
+  font-size: 18px !important;
+  font-weight: var(--font-weight-bold) !important;
+  color: var(--text-color) !important;
+  margin-bottom: 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.tableTitleSub {
+  font-size: 16px !important;
+  font-weight: var(--font-weight-semibold) !important;
+  color: var(--text-color) !important;
+  margin-bottom: 15px !important;
+  margin-top: 20px !important;
+}
+
+.tableTitleSub:first-child {
+  margin-top: 0 !important;
+}
+
+.tableRow {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  border-top: 1px solid var(--border-color) !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  list-style: none !important;
+}
+
+.rowGroup {
+  flex: 1 !important;
+  display: flex !important;
+  width: 100% !important;
+  position: relative !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+.rowGroup:last-child {
+  border-bottom: none !important;
+}
+
+.tableHead {
+  width: 180px !important;
+  padding: 20px 20px !important;
+  background: var(--background-color) !important;
+  box-sizing: border-box !important;
+  z-index: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  font-weight: var(--font-weight-semibold) !important;
+  color: var(--text-color) !important;
+}
+
+.tableData {
+  padding: 18px 10px 18px 20px !important;
+  box-sizing: border-box !important;
+  word-break: break-all !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  width: calc(100% - 180px) !important;
+  line-height: 25px !important;
+}
+
+.tableData.attach {
+  color: var(--primary) !important;
+  text-decoration: underline !important;
+  cursor: pointer !important;
+}
+
+.tableWrap {
+  width: 100% !important;
+}
+
+/* 상태 뱃지 스타일 */
+.status_badge {
+  display: inline-block !important;
+  font-size: 13px !important;
+  font-weight: var(--font-weight-bold) !important;
+  padding: 5px 10px !important;
+  border-radius: 4px !important;
+  line-height: 1 !important;
+}
+
+.status_badge.ongoing {
+  color: var(--primary) !important;
+  background-color: var(--status-blue) !important;
+}
+
+.status_badge.wait {
+  color: var(--neutral) !important;
+  background-color: var(--status-yellow) !important;
+}
+
+.status_badge.end {
+  color: var(--text-gray) !important;
+  background-color: var(--status-gray) !important;
+}
+
+.status_badge.unpaid {
+  color: var(--negative) !important;
+  background-color: var(--status-red) !important;
+}
+
+/* 토글 이미지 스타일 오버라이드 */
+.rotated {
+  transform: rotate(180deg) !important;
+}
+
+/* 글로벌 table_toggle 오버라이드 - 로컬 클래스와 함께 사용 */
+.manageClientList :global(.table_toggle) {
+  width: 16px !important;
+  height: 16px !important;
+  cursor: pointer !important;
+  margin-left: 8px !important;
+  vertical-align: middle !important;
+  flex-shrink: 0 !important;
+  transition: transform 0.3s ease !important;
+}
+
+.whiteBox {
+  /* white_box 스타일 */
+  background: #fff !important;
+  border-radius: 10px !important;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.08) !important;
+  width: 100% !important;
+  padding: 60px 0px 100px !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+}
+
+.boxInner {
+  /* box_inner 스타일 */
+  width: 100% !important;
+  padding: 0 40px !important;
+  box-sizing: border-box !important;
+}
+
+/* 검색 영역 */
+.searchBox {
+  /* search_box.table_group 스타일 */
+  box-sizing: border-box !important;
+  padding: 0 40px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 40px !important;
+  width: 100% !important;
+  font-size: 14px !important;
+  font-weight: var(--font-weight-semibold) !important;
+}
+
+.searchBox .tableItem {
+  /* table_item 스타일 */
+  width: 100% !important;
+}
+
+.searchBox .tableRow {
+  /* table_row 스타일 */
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  border-top: 1px solid var(--border-color) !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  list-style: none !important;
+}
+
+.searchBox .rowGroup {
+  /* row_group 스타일 */
+  flex: 1 !important;
+  display: flex !important;
+  width: 100% !important;
+  position: relative !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+.searchBox .rowGroup:last-child {
+  border-bottom: none !important;
+}
+
+.searchBox .tableHead {
+  /* table_head 스타일 */
+  width: 180px !important;
+  padding: 20px 20px !important;
+  background: var(--background-color) !important;
+  box-sizing: border-box !important;
+  z-index: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  font-weight: var(--font-weight-semibold) !important;
+  color: var(--text-color) !important;
+}
+
+.searchBox .tableData {
+  /* table_data 스타일 */
+  padding: 18px 10px 18px 20px !important;
+  box-sizing: border-box !important;
+  word-break: break-all !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  width: calc(100% - 180px) !important;
+  line-height: 25px !important;
+}
+
+.searchBox .tableData.pd12 {
+  padding-top: 12px !important;
+  padding-bottom: 12px !important;
+  flex-direction: column !important;
+}
+
+.searchBox .tableData.pd12 .dateGroup {
+  flex-direction: row !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.searchBox .dateGroup {
+  /* date_group 스타일 */
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 10px !important;
+  flex-wrap: nowrap !important;
+  width: 100% !important;
+}
+
+.searchBox .dateGroup > span {
+  margin: 0 10px !important;
+  color: var(--text-gray) !important;
+  font-size: 14px !important;
+}
+
+.searchBox .dateGroup label {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  margin-left: 8px !important;
+  line-height: 1 !important;
+  vertical-align: middle !important;
+}
+
+.searchBox .dateGroup label img {
+  width: 24px !important;
+  height: 24px !important;
+  min-width: 24px !important;
+  min-height: 24px !important;
+  object-fit: contain !important;
+  display: block !important;
+  vertical-align: middle !important;
+  flex-shrink: 0 !important;
+}
+
+.searchBox .btnWrap {
+  /* btn_wrap 스타일 */
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  justify-content: center !important;
+  margin-top: 20px !important;
+}
+
+/* 라디오 버튼 스타일 */
+.searchBox input[type="radio"] {
+  appearance: none !important;
+  width: 16px !important;
+  height: 16px !important;
+  border: 1px solid #ddd !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  position: relative !important;
+  margin-right: 10px !important;
+}
+
+.searchBox input[type="radio"]:checked {
+  border-color: var(--positive) !important;
+  background: var(--positive) !important;
+}
+
+.searchBox input[type="radio"]:checked::before {
+  content: "" !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: 10px !important;
+  height: 10px !important;
+  background: url('/images/check_icon.svg') center center no-repeat !important;
+  background-size: contain !important;
+  z-index: 10 !important;
+}
+
+.searchBox input[type="radio"]:checked + label {
+  color: var(--text-color) !important;
+}
+
+.searchBox label {
+  font-size: 14px !important;
+  color: var(--text-gray) !important;
+  vertical-align: text-bottom !important;
+  margin-right: 20px !important;
+  line-height: 1.6 !important;
+  cursor: pointer !important;
+}
+
+/* 검색 영역 input 스타일 */
+.searchBox input[type="text"],
+.searchBox .searchInput {
+  border: 1px solid var(--border-color) !important;
+  border-radius: 4px !important;
+  height: 36px !important;
+  padding: 4px 4px 4px 14px !important;
+  box-sizing: border-box !important;
+  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif !important;
+  font-size: 14px !important;
+  max-width: 300px !important;
+  width: 100% !important;
+}
+
+.searchBox .dateInput {
+  border: 1px solid var(--border-color) !important;
+  border-radius: 4px !important;
+  height: 36px !important;
+  padding: 4px 4px 4px 14px !important;
+  box-sizing: border-box !important;
+  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif !important;
+  font-size: 14px !important;
+  max-width: 150px !important;
+  width: auto !important;
+  min-width: 120px !important;
+}
+
+.searchBox input[type="text"]:focus,
+.searchBox input[type="date"]:focus {
+  border: 2px solid var(--primary) !important;
+  outline: none !important;
+}
+
+.searchBox input[type="date"]::-webkit-calendar-picker-indicator {
+  display: none !important;
+}
+
+.searchBox input[type="date"]::-moz-focus-outer {
+  border: none !important;
+}
+
+.searchBox input[type="date"] {
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  padding: 14px !important;
+  border: 1px solid #ddd !important;
+  height: 36px !important;
+  border-radius: 4px !important;
+  box-sizing: border-box !important;
+}
+
+/* date input과 label 스타일은 dateGroup 내부에서 처리 */
+
+/* 리스트 테이블 영역 */
+.listTable {
+  /* list_table 스타일 */
+  margin-top: 80px !important;
+}
+
+.listTable .tableTop {
+  /* table_top 스타일 */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  margin-bottom: 20px !important;
+  padding: 0 40px !important;
+}
+
+.listTable .topTotal {
+  /* top_total 스타일 */
+  display: flex !important;
+  align-items: center !important;
+}
+
+.listTable .topTotal p {
+  font-size: 13px !important;
+  font-weight: var(--font-weight-semibold) !important;
+  color: var(--text-gray) !important;
+}
+
+.listTable .topTotal p > span {
+  color: var(--primary) !important;
+  font-weight: var(--font-weight-bold) !important;
+}
+
+.listTable .topBtnGroup {
+  /* top_btn_group 스타일 */
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.listTable .deleteBtn {
+  /* delete_btn 스타일 */
+  position: relative !important;
+}
+
+.listTable .deleteBtn.show .deleteGroup {
+  display: block !important;
+}
+
+.listTable .deleteBtn.show #deleteClick {
+  display: none !important;
+}
+
+.listTable .deleteBtn {
+  position: relative !important;
+}
+
+.show {
+  /* show 클래스 추가 */
+}
+
+.listTable .deleteBtn.show .deleteGroup {
+  display: block !important;
+}
+
+.listTable .deleteBtn.show button#deleteClick {
+  display: none !important;
+}
+
+.listTable .deleteBtn .deleteGroup {
+  display: none !important;
+  position: absolute !important;
+  top: 100% !important;
+  left: 0 !important;
+  margin-top: 4px !important;
+  background: #fff !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 4px !important;
+  padding: 4px !important;
+  z-index: 10 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  list-style: none !important;
+  min-width: 100px !important;
+}
+
+.listTable .deleteBtn .deleteGroup li {
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.listTable .excelBtn {
+  /* excel_btn 스타일 */
+  background: url('/images/excel_icon.png') no-repeat !important;
+  background-size: 16px !important;
+  background-position: center left 10px !important;
+  padding-left: 30px !important;
+  background-color: var(--background-color) !important;
+}
+
+.listTable .viewSelect {
+  /* view_select 스타일 */
+  appearance: none !important;
+  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif !important;
+  background: url('/images/select_arrow.svg') no-repeat center right 10px !important;
+  background-size: 12px 8px !important;
+  height: 30px !important;
+  padding: 0 26px 0 14px !important;
+  border-color: var(--border-color) !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  border: 1px solid var(--border-color) !important;
+  font-size: 13px !important;
+  font-weight: var(--font-weight-medium) !important;
+}
+
+.listTable .tableWrap {
+  /* table_wrap 스타일 */
+  padding: 0 40px !important;
+}
+
+.listTable .tableWrap table {
+  text-align: center !important;
+  width: 100% !important;
+  border-collapse: collapse !important;
+}
+
+.listTable .tableWrap table colgroup col {
+  width: auto !important;
+}
+
+.listTable .tableWrap table colgroup col:nth-child(1) {
+  width: 5% !important;
+}
+
+.listTable .tableWrap table colgroup col:nth-child(2) {
+  width: 6% !important;
+}
+
+.listTable .tableWrap table colgroup col:nth-child(3) {
+  width: 19% !important;
+}
+
+.listTable .tableWrap table colgroup col:nth-child(4) {
+  width: 15% !important;
+}
+
+.listTable .tableWrap table colgroup col:nth-child(5) {
+  width: 13% !important;
+}
+
+.listTable .tableWrap table colgroup col:nth-child(6) {
+  width: 20% !important;
+}
+
+.listTable .tableWrap table colgroup col:nth-child(7) {
+  width: 10% !important;
+}
+
+.listTable .tableWrap table colgroup col:nth-child(8) {
+  width: auto !important;
+}
+
+.listTable .tableWrap table th {
+  padding: 24px 0 !important;
+  font-weight: var(--font-weight-semibold) !important;
+  color: var(--text-gray) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+.listTable .tableWrap table tr {
+  cursor: pointer !important;
+  border-top: 1px solid var(--border-color) !important;
+}
+
+.listTable .tableWrap table tbody tr:hover {
+  background-color: var(--hover_blue) !important;
+}
+
+.listTable .tableWrap table tr:last-child {
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+.listTable .tableWrap table td {
+  padding: 16px 10px !important;
+  font-size: 14px !important;
+  font-weight: var(--font-weight-medium) !important;
+  vertical-align: middle !important;
+  word-break: keep-all !important;
+  box-sizing: border-box !important;
+}
+
+.listTable .tableWrap table td .manageBtn {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  align-items: center !important;
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.listTable .tableWrap table td .manageBtn li {
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+}
+
+.listTable .tableWrap table td .manageBtn li .btn {
+  font-size: 13px !important;
+  line-height: 24px !important;
+  border-radius: 4px !important;
+  width: 70px !important;
+  height: 24px !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: var(--font-weight-semibold) !important;
+}
+
+/* 체크박스 스타일 */
+.listTable .tableWrap table input[type="checkbox"] {
+  appearance: none !important;
+  width: 16px !important;
+  height: 16px !important;
+  border: 1px solid #ddd !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  position: relative !important;
+  vertical-align: middle !important;
+  margin: 0 !important;
+}
+
+.listTable .tableWrap table input[type="checkbox"]:checked {
+  border-color: var(--positive) !important;
+  background: var(--positive) !important;
+}
+
+.listTable .tableWrap table input[type="checkbox"]:checked::before {
+  content: "" !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: 10px !important;
+  height: 10px !important;
+  background: url('/images/check_icon.svg') center center no-repeat !important;
+  background-size: contain !important;
+  z-index: 10 !important;
+}
+
+/* 상태 뱃지 스타일 */
+.statusOngoing {
+  display: inline-block !important;
+  font-size: 13px !important;
+  color: var(--primary) !important;
+  font-weight: var(--font-weight-bold) !important;
+  background-color: var(--status-blue) !important;
+  padding: 5px 10px !important;
+  border-radius: 4px !important;
+  line-height: 1 !important;
+}
+
+.statusEnd {
+  display: inline-block !important;
+  font-size: 13px !important;
+  color: var(--text-gray) !important;
+  font-weight: var(--font-weight-bold) !important;
+  background-color: var(--status-gray) !important;
+  padding: 5px 10px !important;
+  border-radius: 4px !important;
+  line-height: 1 !important;
+}
+
+.statusUnpaid {
+  display: inline-block !important;
+  font-size: 13px !important;
+  color: var(--negative) !important;
+  font-weight: var(--font-weight-bold) !important;
+  background-color: var(--status-red) !important;
+  padding: 5px 10px !important;
+  border-radius: 4px !important;
+  line-height: 1 !important;
+}
+
+.statusWait {
+  display: inline-block !important;
+  font-size: 13px !important;
+  color: var(--neutral) !important;
+  font-weight: var(--font-weight-bold) !important;
+  background-color: var(--status-yellow) !important;
+  padding: 5px 10px !important;
+  border-radius: 4px !important;
+  line-height: 1 !important;
+}
+
+/* 페이지네이션 스타일 */
+.pagination {
+  margin-top: 60px !important;
+  text-align: center !important;
+}
+
+.pagination ul {
+  display: inline-flex !important;
+  gap: 6px !important;
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.pagination .page {
+  min-width: 26px !important;
+  height: 26px !important;
+  font-size: 15px !important;
+  font-weight: var(--font-weight-bold) !important;
+  opacity: 0.4 !important;
+  line-height: 26px !important;
+  cursor: pointer !important;
+  border: none !important;
+  background: none !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.pagination .page.active {
+  opacity: 1 !important;
+}
+
+.pagination .page.disabled {
+  opacity: 0.4 !important;
+  cursor: not-allowed !important;
+}
+
+.pagination .page.first {
+  background: url('/images/page_last_icon.svg') no-repeat center center !important;
+  transform: rotate(180deg) !important;
+  background-size: 12px !important;
+  opacity: 1 !important;
+}
+
+.pagination .page.prev {
+  background: url('/images/arrow_icon.svg') no-repeat center center !important;
+  transform: rotate(180deg) !important;
+  background-size: 12px !important;
+  opacity: 1 !important;
+}
+
+.pagination .page.next {
+  background: url('/images/arrow_icon.svg') no-repeat center center !important;
+  background-size: 12px !important;
+  opacity: 1 !important;
+}
+
+.pagination .page.last {
+  background: url('/images/page_last_icon.svg') no-repeat center center !important;
+  background-size: 12px !important;
+  opacity: 1 !important;
+}
+
+/* 버튼 스타일 오버라이드 - 글로벌 manageBtn 클래스 */
+.listTable .tableWrap table td :global(.manageBtn) {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  align-items: center !important;
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.listTable .tableWrap table td :global(.manageBtn li) {
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+}
+
+.listTable .tableWrap table td :global(.manageBtn li .btn) {
+  font-size: 13px !important;
+  line-height: 24px !important;
+  border-radius: 4px !important;
+  width: 70px !important;
+  height: 24px !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: var(--font-weight-semibold) !important;
+}
+

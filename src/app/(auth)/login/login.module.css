@@ -66,9 +66,48 @@
 .loginRight h3 {
   font-size: 24px;
   font-weight: var(--font-weight-bold);
-  margin-bottom: 40px;
+  margin-bottom: 30px;
   line-height: 1;
   text-transform: uppercase;
+}
+
+/* 로그인 탭 스타일 */
+.loginTabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 30px;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.loginTab {
+  flex: 1;
+  padding: 12px 20px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: var(--font-weight-medium);
+  color: var(--text-gray);
+  transition: all 0.2s;
+  text-align: center;
+  position: relative;
+}
+
+.loginTab:hover:not(:disabled) {
+  color: var(--primary);
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.loginTab.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.loginTab:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .loginRight input[type="text"],

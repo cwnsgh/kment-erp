@@ -51,13 +51,16 @@ export async function createSession(employeeId: string) {
     return null;
   }
 
+  // role이 배열일 수도 있고 객체일 수도 있으므로 처리
+  const role = Array.isArray(employee.role) ? employee.role[0] : employee.role;
+
   const session: EmployeeSession = {
     id: employee.id,
     email: employee.email,
     name: employee.name,
     roleId: employee.role_id,
-    roleLevel: employee.role?.level || null,
-    roleName: employee.role?.name || null,
+    roleLevel: role?.level || null,
+    roleName: role?.name || null,
     type: 'employee',
   };
 
@@ -193,6 +196,7 @@ export async function clearClientSession() {
 
 /**
  * 인증 확인 (미들웨어에서 사용)
+ * 직원 세션만 허용
  */
 export async function requireAuth(): Promise<EmployeeSession> {
   const session = await getSession();
@@ -201,6 +205,12 @@ export async function requireAuth(): Promise<EmployeeSession> {
     throw new Error('인증이 필요합니다.');
   }
 
+  // ClientSession인 경우 에러
+  if (session.type !== 'employee') {
+    throw new Error('직원 권한이 필요합니다.');
+  }
+
+  // 이 시점에서 session은 EmployeeSession으로 좁혀짐
   return session;
 }
 
