@@ -1,0 +1,207 @@
+/* 관리 업무 등록 페이지 전체 너비 조정 */
+.manageWorkRegist {
+  max-width: 100% !important;
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+/* 거래처 불러오기 버튼 래퍼 */
+.importBtnWrapper {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 30px;
+}
+
+/* 토글 버튼 스타일 */
+.toggleBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+}
+
+/* 테이블 토글 아이콘 */
+.tableToggle {
+  width: 16px !important;
+  height: 16px !important;
+  cursor: pointer !important;
+  margin-left: 8px !important;
+  vertical-align: middle !important;
+  flex-shrink: 0 !important;
+  transition: transform 0.3s ease !important;
+  opacity: 0.5;
+  transform: rotate(90deg);
+}
+
+.tableToggle.rotated {
+  transform: rotate(-90deg) !important;
+  opacity: 0.5;
+}
+
+/* 업무 등록 섹션 */
+.workRegistration {
+  overflow-x: auto;
+  min-width: 0;
+}
+
+.workRegistration .table_wrap {
+  overflow-x: auto;
+  width: 100%;
+}
+
+/* 업무 테이블 */
+.workTable {
+  width: 100%;
+  min-width: 1000px;
+  border-collapse: collapse;
+  font-size: 14px;
+  border-top: none !important;
+  border-bottom: none !important;
+  display: table;
+}
+
+.workTable thead {
+  display: table-header-group;
+}
+
+.workTable th {
+  padding: 12px 8px;
+  font-weight: 600;
+  border-bottom: 1px solid #ddd;
+  text-align: center;
+  background: #f8fafc;
+  font-weight: var(--font-weight-semibold);
+  font-size: 13px;
+}
+
+.workTable td {
+  padding: 14px 8px !important;
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+  font-weight: var(--font-weight-semibold) !important;
+}
+
+.workTable tr {
+  display: table-row;
+  border-top: 1px solid var(--border-color);
+}
+
+.workTable tr:hover {
+  background-color: transparent !important;
+}
+
+.workTable td input,
+.workTable td select,
+.workTable td textarea {
+  height: 36px;
+  resize: none;
+  vertical-align: middle;
+  width: 100%;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 0 10px;
+  box-sizing: border-box;
+  font-size: 14px;
+}
+
+.workTable td textarea {
+  height: auto;
+  min-height: 36px;
+  padding: 8px 10px;
+  resize: vertical;
+}
+
+.workTable td select {
+  cursor: pointer;
+}
+
+/* 날짜 그룹 */
+.dateGroup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dateGroup label {
+  line-height: 1;
+  margin-right: 0;
+  cursor: pointer;
+}
+
+.dateGroup label img {
+  width: 16px;
+}
+
+.dateRange {
+  flex: 1;
+  width: 100%;
+}
+
+/* 날짜 입력 필드 스타일 */
+.workTable td input[type="date"] {
+  cursor: pointer;
+  padding: 0 8px;
+}
+
+.workTable td input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+.workTable td input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+/* 텍스트 영역 */
+.textArea {
+  min-height: 60px;
+  resize: vertical;
+}
+
+/* 승인 버튼 스타일 */
+.approvalRequest {
+  display: inline-block;
+  padding: 6px 12px;
+  background-color: var(--primary);
+  color: #fff;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
+
+.approvalWait {
+  display: inline-block;
+  padding: 6px 12px;
+  background-color: var(--status-yellow);
+  color: var(--neutral);
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: var(--font-weight-semibold);
+}
+
+/* 유지보수형 테이블 여백 */
+.maintenanceTable {
+  margin-top: 10px;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+  .workTable {
+    font-size: 12px;
+  }
+
+  .workTable th,
+  .workTable td {
+    padding: 12px 8px !important;
+  }
+
+  .workTable td input,
+  .workTable td select,
+  .workTable td textarea {
+    font-size: 12px;
+  }
+}

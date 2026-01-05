@@ -4,6 +4,10 @@ import Image from "next/image";
 import Link from "next/link";
 import styles from "./dashboard-overview.module.css";
 
+type DashboardOverviewProps = {
+  employeeName: string;
+};
+
 const quickActions = [
   { label: "거래처 등록", href: "/clients/new" },
   { label: "계약 등록", href: "/contracts/new" },
@@ -58,7 +62,7 @@ const scheduleData = [
   },
 ];
 
-export function DashboardOverview() {
+export function DashboardOverview({ employeeName }: DashboardOverviewProps) {
   const today = new Date();
   const currentMonth = `${today.getFullYear()}.${String(
     today.getMonth() + 1
@@ -69,7 +73,7 @@ export function DashboardOverview() {
       {/* 환영 메시지 */}
       <div className={styles.pageTitle}>
         <h1>
-          <span>케이먼트</span>님, 안녕하세요!
+          <span>{employeeName}</span>님, 안녕하세요!
         </h1>
       </div>
 

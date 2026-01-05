@@ -29,8 +29,14 @@ export default function LoginPage() {
         setError(result.error || "로그인에 실패했습니다.");
         setIsLoading(false);
       }
-      // 성공 시 login 함수에서 redirect 처리
+      // 성공 시 login 함수에서 redirect 처리 (redirect는 예외를 던지므로 여기서는 처리하지 않음)
     } catch (err) {
+      // Next.js redirect는 예외를 던져서 리다이렉트를 수행합니다
+      // redirect 관련 예외는 그대로 전파하고, 실제 에러만 처리합니다
+      if (err && typeof err === 'object' && 'digest' in err) {
+        // redirect 예외는 무시하고 전파
+        throw err;
+      }
       setError("로그인 처리 중 오류가 발생했습니다.");
       setIsLoading(false);
     }

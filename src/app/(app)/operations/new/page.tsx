@@ -1,14 +1,17 @@
-import { OperationRequestForm } from '@/components/operations/operation-request-form';
-import { PageHeader } from '@/components/layout/page-header';
+import { getSession } from '@/lib/auth';
+import { redirect } from 'next/navigation';
+import { ManageWorkRegistrationForm } from '@/components/operations/manage-work-registration-form';
 
-export default function OperationRequestPage() {
+export default async function OperationRequestPage() {
+  const session = await getSession();
+  
+  if (!session || session.type !== 'employee') {
+    redirect('/login');
+  }
+
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="관리업무 등록"
-        description="진행 예정 업무를 계획하고 고객 승인을 요청합니다."
-      />
-      <OperationRequestForm />
+    <div style={{ maxWidth: "1600px", width: "100%", margin: "0 auto" }}>
+      <ManageWorkRegistrationForm employeeName={session.name} />
     </div>
   );
 }

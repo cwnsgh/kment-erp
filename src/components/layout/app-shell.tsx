@@ -10,6 +10,7 @@ import { logout } from "@/app/actions/auth";
 
 import { ComingSoon } from "./coming-soon";
 import { NavigationGroup } from "./navigation-group";
+import { PasswordChangeModal } from "./password-change-modal";
 import styles from "./app-shell.module.css";
 
 type AppShellProps = {
@@ -27,6 +28,7 @@ export function AppShell({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarMini, setSidebarMini] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
 
   // 프로필 메뉴 외부 클릭 시 닫기
@@ -136,6 +138,10 @@ export function AppShell({
                     <button
                       type="button"
                       className="w-full rounded-md px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-slate-100"
+                      onClick={() => {
+                        setProfileMenuOpen(false);
+                        setPasswordModalOpen(true);
+                      }}
                     >
                       개인정보 수정
                     </button>
@@ -228,6 +234,10 @@ export function AppShell({
       </footer>
 
       <ComingSoon feature="모바일 사이드바" hidden />
+      <PasswordChangeModal
+        isOpen={passwordModalOpen}
+        onClose={() => setPasswordModalOpen(false)}
+      />
     </div>
   );
 }
