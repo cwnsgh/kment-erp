@@ -41,26 +41,106 @@
   opacity: 0.5;
 }
 
-/* 업무 등록 섹션 */
+/* 업무 등록 섹션 - table_item2의 overflow-x: hidden 오버라이드 */
 .workRegistration {
-  overflow-x: auto;
-  min-width: 0;
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
 }
 
 .workRegistration .table_wrap {
-  overflow-x: auto;
-  width: 100%;
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  position: relative;
 }
 
-/* 업무 테이블 */
+/* 업무 테이블 - 공통 스타일 */
 .workTable {
   width: 100%;
-  min-width: 1000px;
   border-collapse: collapse;
   font-size: 14px;
   border-top: none !important;
   border-bottom: none !important;
   display: table;
+  table-layout: fixed;
+}
+
+/* 금액차감형 테이블 (7개 컬럼) - 독립적인 스타일 */
+.deductTable {
+  min-width: 900px;
+}
+
+.deductTable thead {
+  display: table-header-group;
+}
+
+.deductTable th {
+  padding: 12px 8px;
+  font-weight: 600;
+  border-bottom: 1px solid #ddd;
+  text-align: center;
+  background: #f8fafc;
+  font-weight: var(--font-weight-semibold);
+  font-size: 13px;
+}
+
+.deductTable td {
+  padding: 14px 8px !important;
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+  font-weight: var(--font-weight-semibold) !important;
+  text-align: center;
+}
+
+.deductTable tr {
+  display: table-row;
+  border-top: 1px solid var(--border-color);
+}
+
+.deductTable tr:hover {
+  background-color: transparent !important;
+}
+
+/* 유지보수형 테이블 (8개 컬럼) - 독립적인 스타일 */
+.maintenanceTable {
+  min-width: 1000px;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.maintenanceTable thead {
+  display: table-header-group;
+}
+
+.maintenanceTable th {
+  padding: 12px 8px;
+  font-weight: 600;
+  border-bottom: 1px solid #ddd;
+  text-align: center;
+  background: #f8fafc;
+  font-weight: var(--font-weight-semibold);
+  font-size: 13px;
+}
+
+.maintenanceTable td {
+  padding: 14px 8px !important;
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+  font-weight: var(--font-weight-semibold) !important;
+  text-align: center;
+}
+
+.maintenanceTable tr {
+  display: table-row;
+  border-top: 1px solid var(--border-color);
+}
+
+.maintenanceTable tr:hover {
+  background-color: transparent !important;
 }
 
 .workTable thead {
@@ -82,6 +162,7 @@
   border-bottom: 1px solid var(--border-color);
   vertical-align: middle;
   font-weight: var(--font-weight-semibold) !important;
+  text-align: center;
 }
 
 .workTable tr {
@@ -105,6 +186,48 @@
   padding: 0 10px;
   box-sizing: border-box;
   font-size: 14px;
+  text-align: left;
+}
+
+/* 입력 필드가 있는 셀은 왼쪽 정렬 */
+.workTable td.inputCell,
+.workTable td.selectCell,
+.workTable td.textareaCell {
+  text-align: left;
+}
+
+/* 금액차감형 테이블의 비용 셀은 가운데 정렬 */
+.deductTable td[data-th="비용"] {
+  text-align: center;
+}
+
+.deductTable td[data-th="비용"] input {
+  text-align: center;
+}
+
+/* inputCell 내부의 file-upload-box는 중앙 정렬 */
+.workTable td.inputCell .file-upload-box {
+  text-align: center;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.workTable td.inputCell .file-upload-btn {
+  margin: 0 auto;
+}
+
+/* 숫자 입력 필드는 가운데 정렬 */
+.workTable td.numberCell {
+  text-align: center;
+}
+
+.workTable td.numberCell input[type="number"] {
+  text-align: center;
+}
+
+/* 날짜 입력 필드가 있는 셀 */
+.workTable td.dateCell {
+  text-align: left;
 }
 
 .workTable td textarea {
@@ -112,6 +235,7 @@
   min-height: 36px;
   padding: 8px 10px;
   resize: vertical;
+  text-align: left;
 }
 
 .workTable td select {
@@ -123,32 +247,40 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  width: 100%;
 }
 
 .dateGroup label {
   line-height: 1;
   margin-right: 0;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .dateGroup label img {
   width: 16px;
+  height: 16px;
 }
 
 .dateRange {
   flex: 1;
   width: 100%;
+  min-width: 0;
 }
 
 /* 날짜 입력 필드 스타일 */
 .workTable td input[type="date"] {
   cursor: pointer;
   padding: 0 8px;
+  text-align: left;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .workTable td input[type="date"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
   opacity: 0.6;
+  margin-left: 4px;
 }
 
 .workTable td input[type="date"]::-webkit-calendar-picker-indicator:hover {
@@ -159,6 +291,9 @@
 .textArea {
   min-height: 60px;
   resize: vertical;
+  text-align: left;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* 승인 버튼 스타일 */
@@ -171,6 +306,8 @@
   font-size: 13px;
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
+  white-space: nowrap;
+  text-align: center;
 }
 
 .approvalWait {
@@ -181,6 +318,8 @@
   border-radius: 4px;
   font-size: 13px;
   font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+  text-align: center;
 }
 
 /* 유지보수형 테이블 여백 */
@@ -188,20 +327,204 @@
   margin-top: 10px;
 }
 
+/* 파일 업로드 박스 - 전역 클래스로 처리 */
+.workTable td :global(.file-upload-box) {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 36px;
+}
+
+/* inputCell 내부의 file-upload-box는 중앙 정렬 */
+.workTable td.inputCell :global(.file-upload-box) {
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center;
+}
+
+.workTable td.inputCell :global(.file-upload-btn) {
+  margin: 0 auto;
+}
+
+.workTable td :global(.file-upload-btn) {
+  background: var(--text-gray) !important;
+  color: #fff !important;
+  border: none !important;
+  padding: 0 14px !important;
+  border-radius: 4px !important;
+  font-size: 12px !important;
+  cursor: pointer !important;
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+  height: 36px !important;
+  gap: 6px !important;
+  box-sizing: border-box !important;
+  transition: background-color 0.2s !important;
+  white-space: nowrap !important;
+  margin: 0 auto !important;
+}
+
+.workTable td :global(.file-upload-btn:hover) {
+  background: #475569 !important;
+}
+
+/* 텍스트 span */
+.workTable td :global(.file-upload-btn > span:first-child) {
+  display: inline-block !important;
+  line-height: 1 !important;
+  height: auto !important;
+  color: #fff !important;
+  flex-shrink: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Next.js Image 컴포넌트는 span으로 감싸져서 렌더링됨 - 두 번째 span이 Image */
+.workTable td :global(.file-upload-btn > span:last-child:not(:first-child)),
+.workTable td :global(.file-upload-btn > span:nth-child(2)) {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  line-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.workTable td :global(.file-upload-btn img),
+.workTable td :global(.file-upload-btn span img) {
+  width: 12px !important;
+  height: 12px !important;
+  filter: invert(1) !important;
+  flex-shrink: 0 !important;
+  display: inline-block !important;
+  margin: 0 !important;
+  vertical-align: middle !important;
+  object-fit: contain !important;
+}
+
+.workTable td .fileNameContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 4px;
+}
+
+.workTable td .fileName {
+  font-size: 12px;
+  color: var(--text-color);
+  word-break: break-all;
+  flex: 1;
+  line-height: 1.4;
+  text-align: center;
+  min-height: 16px;
+}
+
+.workTable td .fileRemoveBtn {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  width: 22px;
+  height: 22px;
+}
+
+.workTable td .fileRemoveBtn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.workTable td .fileRemoveBtn img {
+  width: 14px;
+  height: 14px;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.workTable td .fileRemoveBtn:hover img {
+  opacity: 1;
+}
+
+/* 버튼 컨테이너 정렬 */
+.workTable td.buttonCell {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.workTable td.buttonCell > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.workTable td.buttonCell button,
+.workTable td.buttonCell span {
+  width: 100%;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* 금액차감형: buttonCell에 직접 span이 있는 경우 */
+.deductTable td.buttonCell > span.approvalRequest,
+.deductTable td.buttonCell > span.approvalWait {
+  display: inline-block !important;
+  width: auto !important;
+  min-width: 80px;
+  text-align: center !important;
+  margin: 0 auto !important;
+}
+
+/* 유지보수형: buttonCell 내부의 div와 버튼들 */
+.maintenanceTable td.buttonCell > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.maintenanceTable td.buttonCell button,
+.maintenanceTable td.buttonCell span {
+  width: 100%;
+  text-align: center;
+  white-space: nowrap;
+}
+
 /* 반응형 */
 @media (max-width: 768px) {
   .workTable {
     font-size: 12px;
+    min-width: 800px;
   }
 
   .workTable th,
   .workTable td {
-    padding: 12px 8px !important;
+    padding: 12px 6px !important;
   }
 
   .workTable td input,
   .workTable td select,
   .workTable td textarea {
     font-size: 12px;
+    padding: 0 8px;
   }
 }

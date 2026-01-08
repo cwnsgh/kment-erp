@@ -1,0 +1,364 @@
+/* 작업 현황 페이지 */
+.customerWorkList {
+  /* 기본 스타일은 전역 CSS 사용 */
+}
+
+.boxInner {
+  padding: 24px;
+}
+
+/* 검색 박스 */
+.searchBox {
+  margin-bottom: 24px;
+}
+
+.pageSubTitle {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 24px;
+  color: #1e293b;
+}
+
+.companyName {
+  color: #3b82f6;
+  font-weight: 700;
+}
+
+.workCount {
+  color: #64748b;
+  font-weight: 400;
+}
+
+/* 테이블 아이템 (라디오 버튼 그룹) */
+.tableItem {
+  margin-bottom: 20px;
+}
+
+.tableRow {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.rowGroup {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+.tableHead {
+  min-width: 120px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.tableData {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  flex: 1;
+}
+
+.tableData input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  cursor: pointer;
+  accent-color: #3b82f6;
+}
+
+.tableData label {
+  font-size: 14px;
+  color: #475569;
+  cursor: pointer;
+  margin: 0;
+  user-select: none;
+}
+
+/* 버튼 래퍼 */
+.btnWrap {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.btnWrap .btn_lg {
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btnWrap .btn_lg.primary {
+  background: #3b82f6;
+  color: #fff;
+}
+
+.btnWrap .btn_lg.primary:hover {
+  background: #2563eb;
+}
+
+.btnWrap .btn_lg.normal {
+  background: #fff;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.btnWrap .btn_lg.normal:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+/* 리스트 테이블 컨테이너 */
+.listTable {
+  margin-top: 24px !important;
+  width: 100% !important;
+}
+
+/* 테이블 상단 툴바 */
+.tableTop {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 20px !important;
+  gap: 12px !important;
+}
+
+.topTotal {
+  font-size: 14px !important;
+  color: #64748b !important;
+}
+
+.topTotal p {
+  margin: 0 !important;
+}
+
+.topTotal span {
+  color: #3b82f6 !important;
+  font-weight: 600 !important;
+}
+
+.topBtnGroup {
+  display: flex !important;
+  gap: 12px !important;
+  align-items: center !important;
+}
+
+.excelBtn {
+  cursor: pointer !important;
+}
+
+.viewSelect {
+  padding: 8px 12px !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 6px !important;
+  background: #fff !important;
+  font-size: 14px !important;
+  color: #374151 !important;
+  cursor: pointer !important;
+  outline: none !important;
+}
+
+.viewSelect:hover {
+  border-color: #9ca3af !important;
+}
+
+.viewSelect:focus {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+}
+
+/* 테이블 래퍼 (모듈 CSS) */
+.tableWrap {
+  overflow-x: auto !important;
+  margin-top: 0 !important;
+  width: 100% !important;
+}
+
+.tableWrap table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  background: #fff !important;
+}
+
+.tableWrap thead th {
+  background: var(--background-color, #f8fafc) !important;
+  padding: 14px 12px !important;
+  text-align: center !important;
+  font-weight: var(--font-weight-semibold, 600) !important;
+  font-size: 13px !important;
+  color: var(--text-color, #1e293b) !important;
+  border-bottom: 1px solid var(--border-color, #e5e7eb) !important;
+  border-right: 1px solid var(--border-color, #e5e7eb) !important;
+}
+
+.tableWrap thead th:last-child {
+  border-right: none !important;
+}
+
+.tableWrap tbody tr {
+  border-bottom: 1px solid var(--border-color, #e5e7eb) !important;
+  transition: background-color 0.2s !important;
+}
+
+.tableWrap tbody tr:last-child {
+  border-bottom: none !important;
+}
+
+.tableWrap tbody tr:hover {
+  background: var(--hover-bg, #f8fafc) !important;
+}
+
+.tableWrap tbody td {
+  padding: 14px 12px !important;
+  text-align: center !important;
+  font-size: 13px !important;
+  color: var(--text-color, #475569) !important;
+  border-right: 1px solid var(--border-color, #e5e7eb) !important;
+}
+
+.tableWrap tbody td:last-child {
+  border-right: none !important;
+}
+
+.text_overflow {
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.text_overflow p {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 작업 상태 뱃지 */
+.work_ongoing {
+  display: inline-block;
+  padding: 4px 12px;
+  background: #fef3c7;
+  color: #92400e;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.work_complete {
+  display: inline-block;
+  padding: 4px 12px;
+  background: #ecfdf5;
+  color: #065f46;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.approval_request {
+  display: inline-block;
+  padding: 4px 12px;
+  background: #eff6ff;
+  color: #1e40af;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.approval_complete {
+  display: inline-block;
+  padding: 4px 12px;
+  background: #f0fdf4;
+  color: #166534;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.approval_refusal {
+  display: inline-block;
+  padding: 4px 12px;
+  background: #fef2f2;
+  color: #991b1b;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* 페이지네이션 */
+.pagination {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.pagination ul {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.pagination .page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  color: #374151;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.pagination .page:hover:not(.disabled):not(.active) {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.pagination .page.active {
+  background: #3b82f6;
+  color: #fff;
+  border-color: #3b82f6;
+  font-weight: 600;
+}
+
+.pagination .page.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pagination .page.first::before {
+  content: "«";
+  font-size: 18px;
+}
+
+.pagination .page.prev::before {
+  content: "‹";
+  font-size: 18px;
+}
+
+.pagination .page.next::before {
+  content: "›";
+  font-size: 18px;
+}
+
+.pagination .page.last::before {
+  content: "»";
+  font-size: 18px;
+}

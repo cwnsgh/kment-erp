@@ -1,0 +1,397 @@
+/* 승인 현황 페이지 */
+.approvalList {
+  /* 기본 스타일은 전역 CSS 사용 */
+}
+
+.boxInner {
+  padding: 24px;
+}
+
+.pageSubTitle {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 24px;
+  color: #1e293b;
+}
+
+.companyName {
+  color: #3b82f6;
+  font-weight: 700;
+}
+
+.workCount {
+  color: #64748b;
+  font-weight: 400;
+}
+
+/* 상태 통계 박스 */
+.statusBox {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.statusBox > div {
+  flex: 1;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.statusBox .request {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+}
+
+.statusBox .request span {
+  display: block;
+  font-size: 14px;
+  color: #1e40af;
+  margin-bottom: 8px;
+}
+
+.statusBox .request p {
+  font-size: 24px;
+  color: #1e40af;
+  margin: 0;
+}
+
+.statusBox .refusal {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+}
+
+.statusBox .refusal span {
+  display: block;
+  font-size: 14px;
+  color: #991b1b;
+  margin-bottom: 8px;
+}
+
+.statusBox .refusal p {
+  font-size: 24px;
+  color: #991b1b;
+  margin: 0;
+}
+
+.statusBox .complete {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+
+.statusBox .complete span {
+  display: block;
+  font-size: 14px;
+  color: #166534;
+  margin-bottom: 8px;
+}
+
+.statusBox .complete p {
+  font-size: 24px;
+  color: #166534;
+  margin: 0;
+}
+
+/* 리스트 테이블 컨테이너 */
+.listTable {
+  margin-top: 24px !important;
+  width: 100% !important;
+}
+
+/* 테이블 상단 툴바 */
+.tableTop {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 20px !important;
+  gap: 12px !important;
+}
+
+.topTotal {
+  font-size: 14px !important;
+  color: #64748b !important;
+}
+
+.topTotal p {
+  margin: 0 !important;
+}
+
+.topTotal span {
+  color: #3b82f6 !important;
+  font-weight: 600 !important;
+}
+
+.topBtnGroup {
+  display: flex !important;
+  gap: 12px !important;
+  align-items: center !important;
+}
+
+.deleteBtn {
+  display: flex !important;
+}
+
+.deleteGroup {
+  display: flex !important;
+  gap: 8px !important;
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.deleteGroup li {
+  cursor: pointer !important;
+  list-style: none !important;
+}
+
+.excelBtn {
+  cursor: pointer !important;
+}
+
+.viewSelect {
+  padding: 8px 12px !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 6px !important;
+  background: #fff !important;
+  font-size: 14px !important;
+  color: #374151 !important;
+  cursor: pointer !important;
+  outline: none !important;
+}
+
+.viewSelect:hover {
+  border-color: #9ca3af !important;
+}
+
+.viewSelect:focus {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+}
+
+/* 테이블 래퍼 (모듈 CSS) */
+.tableWrap {
+  overflow-x: auto !important;
+  margin-top: 0 !important;
+  width: 100% !important;
+}
+
+.tableWrap table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  background: #fff !important;
+}
+
+.tableWrap thead th {
+  background: var(--background-color, #f8fafc) !important;
+  padding: 14px 12px !important;
+  text-align: center !important;
+  font-weight: var(--font-weight-semibold, 600) !important;
+  font-size: 13px !important;
+  color: var(--text-color, #1e293b) !important;
+  border-bottom: 1px solid var(--border-color, #e5e7eb) !important;
+  border-right: 1px solid var(--border-color, #e5e7eb) !important;
+}
+
+.tableWrap thead th:last-child {
+  border-right: none !important;
+}
+
+.tableWrap tbody tr {
+  border-bottom: 1px solid var(--border-color, #e5e7eb) !important;
+  transition: background-color 0.2s !important;
+}
+
+.tableWrap tbody tr:last-child {
+  border-bottom: none !important;
+}
+
+.tableWrap tbody tr:hover {
+  background: var(--hover-bg, #f8fafc) !important;
+}
+
+.tableWrap tbody td {
+  padding: 14px 12px !important;
+  text-align: center !important;
+  font-size: 13px !important;
+  color: var(--text-color, #475569) !important;
+  border-right: 1px solid var(--border-color, #e5e7eb) !important;
+}
+
+.tableWrap tbody td:last-child {
+  border-right: none !important;
+}
+
+.text_overflow {
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.text_overflow p {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 승인 상태 뱃지 */
+.approval_request {
+  display: inline-block;
+  padding: 4px 12px;
+  background: #eff6ff;
+  color: #1e40af;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.approval_complete {
+  display: inline-block;
+  padding: 4px 12px;
+  background: #f0fdf4;
+  color: #166534;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.approval_refusal {
+  display: inline-block;
+  padding: 4px 12px;
+  background: #fef2f2;
+  color: #991b1b;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.work_ongoing {
+  display: inline-block;
+  padding: 4px 12px;
+  background: #fef3c7;
+  color: #92400e;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.work_complete {
+  display: inline-block;
+  padding: 4px 12px;
+  background: #ecfdf5;
+  color: #065f46;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* 액션 버튼 */
+.actionButtons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.actionButtons .btnSm {
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.actionButtons .btnSm.primary {
+  background: #3b82f6;
+  color: #fff;
+}
+
+.actionButtons .btnSm.primary:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.actionButtons .btnSm.danger {
+  background: #ef4444;
+  color: #fff;
+}
+
+.actionButtons .btnSm.danger:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.actionButtons .btnSm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 페이지네이션 */
+.pagination {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.pagination ul {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.pagination .page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  color: #374151;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.pagination .page:hover:not(.disabled):not(.active) {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.pagination .page.active {
+  background: #3b82f6;
+  color: #fff;
+  border-color: #3b82f6;
+  font-weight: 600;
+}
+
+.pagination .page.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pagination .page.first::before {
+  content: "«";
+  font-size: 18px;
+}
+
+.pagination .page.prev::before {
+  content: "‹";
+  font-size: 18px;
+}
+
+.pagination .page.next::before {
+  content: "›";
+  font-size: 18px;
+}
+
+.pagination .page.last::before {
+  content: "»";
+  font-size: 18px;
+}

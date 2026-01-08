@@ -118,8 +118,8 @@ export async function login(
       };
     }
 
-    // 사업자 로그인 성공 - 사업자용 대시보드로 리다이렉트 (또는 메인 페이지)
-    redirect("/dashboard");
+    // 사업자 로그인 성공 - 사업자용 대시보드로 리다이렉트
+    redirect("/client/dashboard");
   } catch (error) {
     // redirect가 발생한 경우는 그대로 전파
     if (error && typeof error === "object" && "digest" in error) {

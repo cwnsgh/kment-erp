@@ -2,13 +2,13 @@
 
 import bcrypt from "bcryptjs";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
+import { getSession } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
 type ClientData = {
   businessRegistrationNumber: string;
   name: string;
   ceoName?: string;
-  postalCode?: string;
   address?: string;
   addressDetail?: string;
   businessType?: string;
@@ -16,7 +16,7 @@ type ClientData = {
   loginId?: string;
   loginPassword?: string;
   note?: string;
-  status?: string; // 휴·폐업 상태 (정상, 휴업, 폐업) - UI 상태
+  status?: string; // 휴·폐업 상태 (정상, 휴업, 폐업)
   contacts: Array<{
     name: string;
     phone?: string;
@@ -30,7 +30,6 @@ type ClientData = {
     solution?: string;
     loginId?: string;
     loginPassword?: string;
-    type?: string;
     note?: string;
   }>;
   attachments: Array<{
@@ -50,16 +49,6 @@ export async function createClient(data: ClientData) {
       hashedPassword = await bcrypt.hash(data.loginPassword, 10);
     }
 
-    // status 매핑 (UI 상태를 DB 상태로 변환)
-    const statusMap: Record<string, string> = {
-      정상: "approved",
-      휴업: "suspended",
-      폐업: "closed",
-    };
-    const dbStatus = data.status
-      ? statusMap[data.status] || "approved"
-      : "approved";
-
     // 1. 거래처 메인 정보 저장
     const { data: client, error: clientError } = await supabase
       .from("client")
@@ -67,14 +56,13 @@ export async function createClient(data: ClientData) {
         business_registration_number: data.businessRegistrationNumber,
         name: data.name,
         ceo_name: data.ceoName,
-        postal_code: data.postalCode,
         address: data.address,
         address_detail: data.addressDetail,
         business_type: data.businessType,
         business_item: data.businessItem,
         login_id: data.loginId,
         login_password: hashedPassword,
-        status: dbStatus, // API에서 가져온 상태 또는 기본값
+        status: "approved", // 관리자가 등록한 경우 바로 승인
         note: data.note,
       })
       .select()
@@ -116,7 +104,6 @@ export async function createClient(data: ClientData) {
           solution: site.solution,
           login_id: site.loginId,
           login_password: site.loginPassword,
-          type: site.type,
           note: site.note,
         }));
 
@@ -171,7 +158,7 @@ export async function getClients() {
       .select(
         "id, business_registration_number, name, ceo_name, status, created_at"
       )
-      .in("status", ["approved", "suspended", "closed"]) // 승인된 거래처만 조회 (정상, 휴업, 폐업)
+      .eq("status", "approved") // 승인된 거래처만 조회
       .order("created_at", { ascending: false });
 
     if (error) throw error;
@@ -265,9 +252,7 @@ export async function getClientDetail(clientId: string) {
         loginPassword: "", // 보안상 빈 문자열 반환
         businessRegistrationNumber: client.business_registration_number,
         name: client.name,
-        postalCode: client.postal_code || "",
         address: client.address || "",
-        addressDetail: client.address_detail || "",
         ceoName: client.ceo_name || "",
         businessType: client.business_type || "",
         businessItem: client.business_item || "",
@@ -290,7 +275,7 @@ export async function getClientDetail(clientId: string) {
             domain: s.domain || "",
             loginId: s.login_id || "",
             loginPassword: s.login_password || "",
-            type: s.type || "",
+            type: "", // DB에 type 필드가 없으면 빈 문자열
           })) || [],
         note: client.note || "",
       },
@@ -337,7 +322,6 @@ export async function updateClient(clientId: string, data: ClientData) {
         business_registration_number: data.businessRegistrationNumber,
         name: data.name,
         ceo_name: data.ceoName,
-        postal_code: data.postalCode,
         address: data.address,
         address_detail: data.addressDetail,
         business_type: data.businessType,
@@ -391,7 +375,6 @@ export async function updateClient(clientId: string, data: ClientData) {
           solution: site.solution,
           login_id: site.loginId,
           login_password: site.loginPassword,
-          type: site.type,
           note: site.note,
         }));
 
@@ -433,7 +416,7 @@ export async function updateClient(clientId: string, data: ClientData) {
 }
 
 /**
- * 사업자등록번호 중복 확인 및 상태 확인
+ * 사업자등록번호 중복 확인
  */
 export async function checkBusinessRegistrationNumber(
   businessRegistrationNumber: string,
@@ -442,7 +425,6 @@ export async function checkBusinessRegistrationNumber(
   const supabase = await getSupabaseServerClient();
 
   try {
-    // 1. DB에서 중복 확인
     let query = supabase
       .from("client")
       .select("id, name")
@@ -466,84 +448,10 @@ export async function checkBusinessRegistrationNumber(
       };
     }
 
-    // 2. 국세청 API로 상태 확인 (내부 API Route 사용)
-    let businessStatus: {
-      status: "approved" | "suspended" | "closed";
-      statusText: string;
-    } | null = null;
-
-    try {
-      // 내부 API Route 호출 (서버 사이드이므로 절대 URL 필요)
-      const baseUrl =
-        process.env.NEXT_PUBLIC_APP_URL ||
-        (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
-        "http://localhost:3000";
-
-      const verifyResponse = await fetch(`${baseUrl}/api/business/verify`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          businessNumber: businessRegistrationNumber,
-        }),
-      });
-
-      if (!verifyResponse.ok) {
-        const errorData = await verifyResponse.json().catch(() => ({
-          error: `HTTP ${verifyResponse.status}: ${verifyResponse.statusText}`,
-        }));
-        return {
-          success: false,
-          isDuplicate: false,
-          error: errorData.error || "사업자등록번호 확인에 실패했습니다.",
-          businessStatus: null,
-        };
-      }
-
-      const verifyData = await verifyResponse.json();
-
-      if (verifyData.success) {
-        businessStatus = {
-          status: verifyData.status,
-          statusText: verifyData.statusText,
-        };
-      } else {
-        return {
-          success: false,
-          isDuplicate: false,
-          error: verifyData.error || "사업자등록번호를 확인할 수 없습니다.",
-          businessStatus: null,
-        };
-      }
-    } catch (statusError) {
-      // API 호출 실패 시 에러 반환
-      console.error("사업자 상태 확인 오류:", statusError);
-      return {
-        success: false,
-        isDuplicate: false,
-        error: `사업자등록번호 확인 중 오류가 발생했습니다: ${
-          statusError instanceof Error ? statusError.message : "알 수 없는 오류"
-        }`,
-        businessStatus: null,
-      };
-    }
-
-    // businessStatus가 null이면 API 호출이 실패한 것
-    if (!businessStatus) {
-      return {
-        success: false,
-        isDuplicate: false,
-        error: "사업자등록번호 상태를 확인할 수 없습니다. 다시 시도해주세요.",
-        businessStatus: null,
-      };
-    }
-
     return {
       success: true,
       isDuplicate: false,
       message: "사용 가능한 사업자등록번호입니다.",
-      businessStatus, // 상태 정보 포함
     };
   } catch (error) {
     console.error("중복 확인 오류:", error);
@@ -557,179 +465,90 @@ export async function checkBusinessRegistrationNumber(
 }
 
 /**
- * 거래처 상태 일괄 새로고침 (국세청 API 사용)
- * @param clientIds - 새로고침할 거래처 ID 배열 (빈 배열이면 전체)
+ * 클라이언트 비밀번호 변경
  */
-export async function refreshBusinessStatus(clientIds: string[] = []) {
-  const supabase = await getSupabaseServerClient();
-
+export async function changeClientPassword(data: {
+  clientId: string;
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}) {
   try {
-    // 1. 거래처 목록 조회 (승인된 거래처만 - pending, rejected는 제외)
-    let query = supabase
-      .from("client")
-      .select("id, business_registration_number, status")
-      .in("status", ["approved", "suspended", "closed"]); // 승인된 거래처만 (승인 상태)
-
-    if (clientIds.length > 0) {
-      query = query.in("id", clientIds);
-    }
-
-    const { data: clients, error: clientsError } = await query;
-
-    if (clientsError) throw clientsError;
-    if (!clients || clients.length === 0) {
+    const session = await getSession();
+    if (!session || session.type !== "client" || session.id !== data.clientId) {
       return {
-        success: true,
-        message: "새로고침할 거래처가 없습니다.",
-        updated: 0,
-        failed: 0,
+        success: false,
+        error: "클라이언트 인증이 필요합니다.",
       };
     }
 
-    // 2. 사업자등록번호 수집 (하이픈 제거)
-    const businessNumbers = clients.map((c) =>
-      c.business_registration_number.replace(/-/g, "")
+    if (data.newPassword !== data.confirmPassword) {
+      return {
+        success: false,
+        error: "새 비밀번호가 일치하지 않습니다.",
+      };
+    }
+
+    if (data.newPassword.length < 6) {
+      return {
+        success: false,
+        error: "새 비밀번호는 최소 6자 이상이어야 합니다.",
+      };
+    }
+
+    const supabase = await getSupabaseServerClient();
+
+    const { data: client, error: fetchError } = await supabase
+      .from("client")
+      .select("login_password")
+      .eq("id", data.clientId)
+      .single();
+
+    if (fetchError || !client) {
+      return {
+        success: false,
+        error: "클라이언트 정보를 찾을 수 없습니다.",
+      };
+    }
+
+    const isCurrentPasswordValid = await bcrypt.compare(
+      data.currentPassword,
+      client.login_password
     );
 
-    // 3. 국세청 API 호출 (100개씩 배치 처리)
-    const batchSize = 100;
-    const batches: string[][] = [];
-    for (let i = 0; i < businessNumbers.length; i += batchSize) {
-      batches.push(businessNumbers.slice(i, i + batchSize));
+    if (!isCurrentPasswordValid) {
+      return {
+        success: false,
+        error: "현재 비밀번호가 올바르지 않습니다.",
+      };
     }
 
-    let totalUpdated = 0;
-    let totalFailed = 0;
-    const updateResults: Array<{
-      clientId: string;
-      oldStatus: string;
-      newStatus: string;
-      success: boolean;
-    }> = [];
+    const hashedPassword = await bcrypt.hash(data.newPassword, 10);
 
-    // 내부 API Route 호출 (배치 처리)
-    const baseUrl =
-      process.env.NEXT_PUBLIC_APP_URL ||
-      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
-      "http://localhost:3000";
+    const { error: updateError } = await supabase
+      .from("client")
+      .update({
+        login_password: hashedPassword,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", data.clientId);
 
-    for (const batch of batches) {
-      try {
-        const verifyResponse = await fetch(`${baseUrl}/api/business/verify`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            businessNumbers: batch,
-          }),
-        });
-
-        if (!verifyResponse.ok) {
-          console.error(`배치 API 호출 실패: ${verifyResponse.status}`);
-          totalFailed += batch.length;
-          continue;
-        }
-
-        const verifyData = await verifyResponse.json();
-
-        if (verifyData.success && verifyData.results) {
-          // 4. API 응답과 거래처 매칭하여 상태 업데이트
-          // API Route에서 이미 매핑된 상태를 반환하므로 그대로 사용
-          for (const result of verifyData.results) {
-            const businessNumber = result.businessNumber;
-            const newBusinessStatus = result.status; // 이미 "approved", "suspended", "closed" 형식
-
-            // 해당 사업자등록번호를 가진 거래처 찾기
-            const client = clients.find(
-              (c) =>
-                c.business_registration_number.replace(/-/g, "") ===
-                businessNumber
-            );
-
-            if (client) {
-              const oldStatus = client.status;
-
-              // 승인 상태 확인: approved, suspended, closed만 휴·폐업 상태 업데이트 가능
-              // pending, rejected는 승인 상태이므로 건드리지 않음
-              const isApprovedStatus = [
-                "approved",
-                "suspended",
-                "closed",
-              ].includes(oldStatus);
-
-              if (!isApprovedStatus) {
-                // 승인되지 않은 거래처는 건너뛰기
-                console.log(
-                  `거래처 ${client.id}는 승인되지 않아 상태를 업데이트하지 않습니다. (현재 상태: ${oldStatus})`
-                );
-                continue;
-              }
-
-              // 휴·폐업 상태가 변경된 경우만 업데이트
-              // 예: approved → suspended (정상에서 휴업으로)
-              // 예: suspended → approved (휴업에서 정상으로)
-              // 예: approved → closed (정상에서 폐업으로)
-              if (oldStatus !== newBusinessStatus) {
-                const { error: updateError } = await supabase
-                  .from("client")
-                  .update({
-                    status: newBusinessStatus,
-                    updated_at: new Date().toISOString(),
-                  })
-                  .eq("id", client.id);
-
-                if (updateError) {
-                  console.error(
-                    `거래처 ${client.id} 업데이트 실패:`,
-                    updateError
-                  );
-                  totalFailed++;
-                  updateResults.push({
-                    clientId: client.id,
-                    oldStatus,
-                    newStatus: newBusinessStatus,
-                    success: false,
-                  });
-                } else {
-                  totalUpdated++;
-                  updateResults.push({
-                    clientId: client.id,
-                    oldStatus,
-                    newStatus: newBusinessStatus,
-                    success: true,
-                  });
-                }
-              }
-            }
-          }
-        }
-      } catch (batchError) {
-        console.error("배치 처리 오류:", batchError);
-        totalFailed += batch.length;
-      }
+    if (updateError) {
+      return {
+        success: false,
+        error: "비밀번호 변경에 실패했습니다.",
+      };
     }
-
-    // 5. 캐시 재검증
-    revalidatePath("/clients");
 
     return {
       success: true,
-      message: `총 ${totalUpdated}건의 상태가 업데이트되었습니다.`,
-      updated: totalUpdated,
-      failed: totalFailed,
-      results: updateResults,
+      message: "비밀번호가 성공적으로 변경되었습니다.",
     };
   } catch (error) {
-    console.error("상태 새로고침 오류:", error);
+    console.error("클라이언트 비밀번호 변경 오류:", error);
     return {
       success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "상태 새로고침에 실패했습니다.",
-      updated: 0,
-      failed: 0,
+      error: "비밀번호 변경 중 오류가 발생했습니다.",
     };
   }
 }

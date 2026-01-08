@@ -49,9 +49,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!folder || (folder !== 'business-registration' && folder !== 'signature')) {
+    if (!folder || (folder !== 'business-registration' && folder !== 'signature' && folder !== 'work-attachment')) {
       return NextResponse.json(
-        { success: false, error: '올바른 폴더를 지정해주세요. (business-registration 또는 signature)' },
+        { success: false, error: '올바른 폴더를 지정해주세요. (business-registration, signature, work-attachment)' },
         { status: 400 }
       );
     }

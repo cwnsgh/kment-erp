@@ -25,11 +25,8 @@ export default async function AppLayout({ children }: AppLayoutProps) {
   }
 
   // ClientSession인 경우 거래처용 레이아웃으로 리다이렉트
-  // TODO: 거래처용 레이아웃 생성 후 리다이렉트 경로 변경 필요
   if (!isEmployeeSession(session)) {
-    // 임시로 로그인 페이지로 리다이렉트
-    // 나중에 거래처용 레이아웃이 생성되면 해당 경로로 변경 (예: '/client/dashboard')
-    redirect('/login');
+    redirect('/client/dashboard');
   }
 
   // 승인 대기 건수 가져오기

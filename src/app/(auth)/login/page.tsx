@@ -7,7 +7,7 @@ import { login } from "@/app/actions/auth";
 import styles from "./login.module.css";
 
 export default function LoginPage() {
-  const [userType, setUserType] = useState<'employee' | 'client'>('client');
+  const [userType, setUserType] = useState<"employee" | "client">("client");
   const [form, setForm] = useState({
     username: "", // 아이디 또는 이메일
     password: "",
@@ -25,18 +25,29 @@ export default function LoginPage() {
     try {
       const result = await login(form.username, form.password, userType);
 
-      if (!result.success) {
+      // result가 undefined인 경우 redirect가 발생한 것으로 간주 (redirect는 예외를 던지므로 result를 반환하지 않음)
+      if (result && !result.success) {
         setError(result.error || "로그인에 실패했습니다.");
         setIsLoading(false);
       }
-      // 성공 시 login 함수에서 redirect 처리 (redirect는 예외를 던지므로 여기서는 처리하지 않음)
-    } catch (err) {
+      // 성공 시 login 함수에서 redirect 처리됨 (redirect는 예외를 던지므로 여기서는 처리하지 않음)
+    } catch (err: any) {
       // Next.js redirect는 예외를 던져서 리다이렉트를 수행합니다
       // redirect 관련 예외는 그대로 전파하고, 실제 에러만 처리합니다
-      if (err && typeof err === 'object' && 'digest' in err) {
-        // redirect 예외는 무시하고 전파
-        throw err;
+      const isRedirectError =
+        err &&
+        typeof err === "object" &&
+        ("digest" in err ||
+          err.message?.includes("NEXT_REDIRECT") ||
+          err.code === "NEXT_REDIRECT");
+
+      if (isRedirectError) {
+        // redirect 예외는 무시하고 아무것도 하지 않음 (리다이렉트가 처리됨)
+        // 상태 업데이트를 하지 않음으로써 UI에 에러 메시지가 나타나지 않도록 함
+        return;
       }
+
+      // 실제 에러인 경우에만 에러 메시지 표시
       setError("로그인 처리 중 오류가 발생했습니다.");
       setIsLoading(false);
     }
@@ -70,16 +81,20 @@ export default function LoginPage() {
         <div className={styles.loginTabs}>
           <button
             type="button"
-            className={`${styles.loginTab} ${userType === 'client' ? styles.active : ''}`}
-            onClick={() => setUserType('client')}
+            className={`${styles.loginTab} ${
+              userType === "client" ? styles.active : ""
+            }`}
+            onClick={() => setUserType("client")}
             disabled={isLoading}
           >
             사업자 로그인
           </button>
           <button
             type="button"
-            className={`${styles.loginTab} ${userType === 'employee' ? styles.active : ''}`}
-            onClick={() => setUserType('employee')}
+            className={`${styles.loginTab} ${
+              userType === "employee" ? styles.active : ""
+            }`}
+            onClick={() => setUserType("employee")}
             disabled={isLoading}
           >
             직원 로그인
@@ -90,7 +105,7 @@ export default function LoginPage() {
 
           <input
             type="text"
-            placeholder={userType === 'employee' ? '이메일' : '아이디'}
+            placeholder={userType === "employee" ? "이메일" : "아이디"}
             value={form.username}
             onChange={(event) =>
               setForm((prev) => ({ ...prev, username: event.target.value }))

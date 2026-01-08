@@ -556,9 +556,7 @@ export default function ManagedClientListPage() {
                                 type="button"
                                 className="btn normal"
                                 onClick={() => {
-                                  alert(
-                                    "업무조회 기능은 추후 구현 예정입니다."
-                                  );
+                                  router.push(`/operations/clients/${mc.id}/tasks`);
                                 }}
                               >
                                 업무조회

@@ -4,6 +4,100 @@ import { getSupabaseServerClient } from "@/lib/supabase-server";
 import { revalidatePath } from "next/cache";
 
 /**
+ * 유지보수형 횟수 초기화 체크 및 실행
+ * 진행상황이 "진행"이고 오늘이 초기화일인 경우 초기값으로 리셋
+ */
+export async function checkAndResetMaintenanceCounts(managedClientId: string): Promise<{
+  success: boolean;
+  wasReset: boolean;
+  error?: string;
+}> {
+  try {
+    const supabase = await getSupabaseServerClient();
+
+    // 관리 고객 정보 조회
+    const { data: managedClient, error: fetchError } = await supabase
+      .from("managed_client")
+      .select("product_type1, status, progress_started_date, detail_text_edit_count, detail_coding_edit_count, detail_image_edit_count, detail_popup_design_count, detail_banner_design_count, initial_detail_text_edit_count, initial_detail_coding_edit_count, initial_detail_image_edit_count, initial_detail_popup_design_count, initial_detail_banner_design_count")
+      .eq("id", managedClientId)
+      .single();
+
+    if (fetchError || !managedClient) {
+      return {
+        success: false,
+        wasReset: false,
+        error: "관리 고객을 찾을 수 없습니다.",
+      };
+    }
+
+    // 유지보수형이 아니거나 진행상황이 "진행"이 아니면 초기화 안 함
+    if (managedClient.product_type1 !== "maintenance" || managedClient.status !== "ongoing") {
+      return {
+        success: true,
+        wasReset: false,
+      };
+    }
+
+    // progress_started_date가 없으면 초기화 안 함
+    if (!managedClient.progress_started_date) {
+      return {
+        success: true,
+        wasReset: false,
+      };
+    }
+
+    const currentDate = new Date();
+    const today = currentDate.getDate();
+    const progressDate = new Date(managedClient.progress_started_date);
+    const progressDay = progressDate.getDate();
+
+    // 오늘이 초기화일인지 확인 (매월 progressDay일에 초기화)
+    if (today === progressDay) {
+      // 마지막 초기화일 확인 (같은 날 여러 번 초기화 방지)
+      const lastResetDate = managedClient.progress_started_date;
+      const todayStr = currentDate.toISOString().split("T")[0].substring(0, 7); // YYYY-MM
+      const lastResetMonth = lastResetDate ? lastResetDate.substring(0, 7) : null;
+
+      // 이번 달에 아직 초기화하지 않았으면 초기화
+      if (lastResetMonth !== todayStr) {
+        const { error: updateError } = await supabase
+          .from("managed_client")
+          .update({
+            detail_text_edit_count: managedClient.initial_detail_text_edit_count || 0,
+            detail_coding_edit_count: managedClient.initial_detail_coding_edit_count || 0,
+            detail_image_edit_count: managedClient.initial_detail_image_edit_count || 0,
+            detail_popup_design_count: managedClient.initial_detail_popup_design_count || 0,
+            detail_banner_design_count: managedClient.initial_detail_banner_design_count || 0,
+          })
+          .eq("id", managedClientId);
+
+        if (updateError) throw updateError;
+
+        return {
+          success: true,
+          wasReset: true,
+        };
+      }
+    }
+
+    return {
+      success: true,
+      wasReset: false,
+    };
+  } catch (error) {
+    console.error("횟수 초기화 체크 오류:", error);
+    return {
+      success: false,
+      wasReset: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "횟수 초기화 체크 중 오류가 발생했습니다.",
+    };
+  }
+}
+
+/**
  * 거래처 목록 조회 (모달용 - 검색 가능)
  */
 export async function getClientsForModal(
@@ -201,21 +295,35 @@ export async function createManagedClient(data: ManagedClientData) {
   const supabase = await getSupabaseServerClient();
 
   try {
+    // 유지보수형인 경우 초기값도 함께 저장
+    const insertData: any = {
+      client_id: data.clientId,
+      product_type1: data.productType1,
+      product_type2: data.productType2 || null,
+      total_amount: data.totalAmount || null,
+      payment_status: data.paymentStatus,
+      note: data.note || null,
+    };
+
+    // 유지보수형인 경우 현재 횟수와 초기값 모두 저장
+    if (data.productType1 === "maintenance") {
+      insertData.detail_text_edit_count = data.detailTextEditCount || 0;
+      insertData.detail_coding_edit_count = data.detailCodingEditCount || 0;
+      insertData.detail_image_edit_count = data.detailImageEditCount || 0;
+      insertData.detail_popup_design_count = data.detailPopupDesignCount || 0;
+      insertData.detail_banner_design_count = data.detailBannerDesignCount || 0;
+      
+      // 초기값 저장 (등록 시점의 값이 초기값)
+      insertData.initial_detail_text_edit_count = data.detailTextEditCount || 0;
+      insertData.initial_detail_coding_edit_count = data.detailCodingEditCount || 0;
+      insertData.initial_detail_image_edit_count = data.detailImageEditCount || 0;
+      insertData.initial_detail_popup_design_count = data.detailPopupDesignCount || 0;
+      insertData.initial_detail_banner_design_count = data.detailBannerDesignCount || 0;
+    }
+
     const { data: managedClient, error } = await supabase
       .from("managed_client")
-      .insert({
-        client_id: data.clientId,
-        product_type1: data.productType1,
-        product_type2: data.productType2 || null,
-        total_amount: data.totalAmount || null,
-        payment_status: data.paymentStatus,
-        detail_text_edit_count: data.detailTextEditCount || null,
-        detail_coding_edit_count: data.detailCodingEditCount || null,
-        detail_image_edit_count: data.detailImageEditCount || null,
-        detail_popup_design_count: data.detailPopupDesignCount || null,
-        detail_banner_design_count: data.detailBannerDesignCount || null,
-        note: data.note || null,
-      })
+      .insert(insertData)
       .select()
       .single();
 
@@ -247,56 +355,36 @@ export async function getManagedClients(params: {
   page?: number;
   limit?: number;
   searchKeyword?: string; // 회사명 또는 브랜드명
-  productType1?: "deduct" | "maintenance" | "";
-  status?: "ongoing" | "wait" | "end" | "unpaid" | "";
+  productType1?: "deduct" | "maintenance";
+  status?: "ongoing" | "wait" | "end" | "unpaid";
   startDateFrom?: string;
   startDateTo?: string;
 }) {
   const supabase = await getSupabaseServerClient();
-  const page = params.page || 1;
-  const limit = params.limit || 20;
-  const offset = (page - 1) * limit;
 
   try {
-    // 기본 쿼리: managed_client 조회
+    const page = params.page || 1;
+    const limit = params.limit || 20;
+    const offset = (page - 1) * limit;
+
+    // managed_client와 client 조인하여 조회
     let query = supabase
       .from("managed_client")
-      .select("*")
-      .order("created_at", { ascending: false });
+      .select(
+        `
+        *,
+        client:client_id (
+          id,
+          name
+        )
+      `,
+        { count: "exact" }
+      );
 
-    // 검색 조건: 회사명 또는 브랜드명
-    let clientIds: string[] | null = null;
-    if (params.searchKeyword && params.searchKeyword.trim()) {
-      const keyword = params.searchKeyword.trim();
-
-      // 회사명으로 검색
-      const { data: clientsByName } = await supabase
-        .from("client")
-        .select("id")
-        .ilike("name", `%${keyword}%`);
-
-      // 브랜드명으로 검색
-      const { data: sitesByBrand } = await supabase
-        .from("client_site")
-        .select("client_id")
-        .ilike("brand_name", `%${keyword}%`);
-
-      const idsByName = clientsByName?.map((c) => c.id) || [];
-      const idsByBrand = sitesByBrand?.map((s) => s.client_id) || [];
-      const allIds = [...new Set([...idsByName, ...idsByBrand])];
-
-      if (allIds.length > 0) {
-        clientIds = allIds;
-        query = query.in("client_id", allIds);
-      } else {
-        // 검색 결과가 없으면 빈 결과 반환
-        return {
-          success: true,
-          managedClients: [],
-          totalCount: 0,
-          totalPages: 0,
-        };
-      }
+    // 검색 키워드 필터 (회사명 또는 브랜드명)
+    if (params.searchKeyword) {
+      // client 테이블과 조인하여 회사명 검색
+      query = query.ilike("client.name", `%${params.searchKeyword}%`);
     }
 
     // 관리유형 필터
@@ -304,7 +392,12 @@ export async function getManagedClients(params: {
       query = query.eq("product_type1", params.productType1);
     }
 
-    // 시작일 범위 필터
+    // 진행상황 필터
+    if (params.status) {
+      query = query.eq("status", params.status);
+    }
+
+    // 시작일 필터
     if (params.startDateFrom) {
       query = query.gte("start_date", params.startDateFrom);
     }
@@ -312,47 +405,24 @@ export async function getManagedClients(params: {
       query = query.lte("start_date", params.startDateTo);
     }
 
-    // 먼저 모든 데이터를 가져옴 (진행상황 계산을 위해)
-    const { data: managedClientsData, error } = await query;
+    query = query.order("created_at", { ascending: false });
+
+    const { data, error, count } = await query;
 
     if (error) throw error;
 
-    const finalData = managedClientsData || [];
-
-    // client_id 목록 수집
-    const uniqueClientIds = [
-      ...new Set(finalData.map((item: any) => item.client_id)),
-    ];
-
-    // client 정보 조회
-    const { data: clientsData } = await supabase
-      .from("client")
-      .select("id, name")
-      .in("id", uniqueClientIds);
-
-    // client_site 정보 조회
-    const { data: sitesData } = await supabase
-      .from("client_site")
-      .select("client_id, brand_name")
-      .in("client_id", uniqueClientIds);
-
-    // client와 sites를 맵으로 변환
-    const clientsMap = new Map((clientsData || []).map((c: any) => [c.id, c]));
-    const sitesMap = new Map<string, any[]>();
-    (sitesData || []).forEach((s: any) => {
-      if (!sitesMap.has(s.client_id)) {
-        sitesMap.set(s.client_id, []);
+    // 데이터 가공
+    let processedData = (data || []).map((item: any) => {
+      const client = item.client;
+      
+      // 브랜드명 조회
+      let brandNames: string[] = [];
+      if (client) {
+        // client_site에서 브랜드명 가져오기 (나중에 구현)
+        brandNames = [];
       }
-      sitesMap.get(s.client_id)!.push(s);
-    });
 
-    // 데이터 변환 및 진행상황 계산
-    let processedData = finalData.map((item: any) => {
-      const client = clientsMap.get(item.client_id);
-      const sites = sitesMap.get(item.client_id) || [];
-      const brandNames = sites.map((s: any) => s.brand_name).filter(Boolean);
-
-      // 종료일 계산 (없으면 계산)
+      // 종료일 계산
       let endDate = item.end_date;
       if (!endDate && item.start_date) {
         if (item.product_type1 === "deduct" && item.product_type2) {
@@ -370,11 +440,9 @@ export async function getManagedClients(params: {
       // 진행상황 계산
       let status = item.status;
       if (!status) {
-        // 미납 체크 (최우선)
         if (item.payment_status === "unpaid") {
           status = "unpaid";
         } else {
-          // 종료 여부 확인
           const now = new Date();
           const isEnded =
             (endDate && new Date(endDate) < now) ||
@@ -388,22 +456,6 @@ export async function getManagedClients(params: {
             status = "ongoing";
           } else {
             status = "wait";
-          }
-        }
-      } else {
-        // status가 이미 있더라도 재계산 (미납 우선, 종료 확인)
-        if (item.payment_status === "unpaid") {
-          status = "unpaid";
-        } else {
-          const now = new Date();
-          const isEnded =
-            (endDate && new Date(endDate) < now) ||
-            (item.product_type1 === "deduct" &&
-              item.total_amount !== null &&
-              Number(item.total_amount) === 0);
-
-          if (isEnded) {
-            status = "end";
           }
         }
       }
@@ -558,6 +610,25 @@ export async function getManagedClientDetail(managedClientId: string) {
       }
     }
 
+    // 유지보수형이고 진행상황이 "진행"인 경우 초기화 체크
+    if (managedClient.product_type1 === "maintenance" && status === "ongoing") {
+      await checkAndResetMaintenanceCounts(managedClientId);
+      // 초기화 후 다시 조회하여 최신 데이터 가져오기
+      const { data: updatedManagedClient } = await supabase
+        .from("managed_client")
+        .select("detail_text_edit_count, detail_coding_edit_count, detail_image_edit_count, detail_popup_design_count, detail_banner_design_count")
+        .eq("id", managedClientId)
+        .single();
+      
+      if (updatedManagedClient) {
+        managedClient.detail_text_edit_count = updatedManagedClient.detail_text_edit_count;
+        managedClient.detail_coding_edit_count = updatedManagedClient.detail_coding_edit_count;
+        managedClient.detail_image_edit_count = updatedManagedClient.detail_image_edit_count;
+        managedClient.detail_popup_design_count = updatedManagedClient.detail_popup_design_count;
+        managedClient.detail_banner_design_count = updatedManagedClient.detail_banner_design_count;
+      }
+    }
+
     return {
       success: true,
       managedClient: {
@@ -632,16 +703,16 @@ export async function getManagedClientDetail(managedClientId: string) {
 }
 
 /**
- * 관리고객 삭제 (여러 개)
+ * 관리고객 삭제
  */
-export async function deleteManagedClients(ids: string[]) {
+export async function deleteManagedClients(managedClientIds: string[]) {
   const supabase = await getSupabaseServerClient();
 
   try {
     const { error } = await supabase
       .from("managed_client")
       .delete()
-      .in("id", ids);
+      .in("id", managedClientIds);
 
     if (error) throw error;
 

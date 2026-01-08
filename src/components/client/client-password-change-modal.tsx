@@ -1,18 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { changePassword } from "@/app/actions/employee";
-import styles from "./password-change-modal.module.css";
+import { changeClientPassword } from "@/app/actions/client";
+import styles from "./client-password-change-modal.module.css";
 
-type PasswordChangeModalProps = {
+type ClientPasswordChangeModalProps = {
   isOpen: boolean;
   onClose: () => void;
+  clientId: string;
 };
 
-export function PasswordChangeModal({
+export function ClientPasswordChangeModal({
   isOpen,
   onClose,
-}: PasswordChangeModalProps) {
+  clientId,
+}: ClientPasswordChangeModalProps) {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -25,7 +27,6 @@ export function PasswordChangeModal({
     setError("");
     setSuccess(false);
 
-    // 유효성 검사
     if (!currentPassword || !newPassword || !confirmPassword) {
       setError("모든 필드를 입력해주세요.");
       return;
@@ -43,7 +44,8 @@ export function PasswordChangeModal({
 
     setIsLoading(true);
 
-    const result = await changePassword({
+    const result = await changeClientPassword({
+      clientId,
       currentPassword,
       newPassword,
       confirmPassword,
@@ -53,7 +55,6 @@ export function PasswordChangeModal({
 
     if (result.success) {
       setSuccess(true);
-      // 2초 후 모달 닫기
       setTimeout(() => {
         handleClose();
       }, 2000);
@@ -159,7 +160,4 @@ export function PasswordChangeModal({
     </div>
   );
 }
-
-
-
 
