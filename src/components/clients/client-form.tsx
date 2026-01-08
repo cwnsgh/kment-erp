@@ -120,7 +120,7 @@ export function ClientForm() {
 
     if (result.success && !result.isDuplicate) {
       let message = "사용 가능한 사업자등록번호입니다.";
-      if (result.businessStatus) {
+      if ("businessStatus" in result && result.businessStatus) {
         // 상태 자동 반영
         const statusMap: Record<string, "정상" | "휴업" | "폐업"> = {
           approved: "정상",
@@ -154,8 +154,8 @@ export function ClientForm() {
 
       // 에러 메시지 우선 표시 (error 필드가 있으면 사용)
       const errorMessage =
-        result.error ||
-        result.message ||
+        ("error" in result ? result.error : undefined) ||
+        ("message" in result ? result.message : undefined) ||
         "이미 등록된 사업자등록번호이거나 확인할 수 없습니다.";
       setDuplicateCheckResult(errorMessage);
       alert(errorMessage);

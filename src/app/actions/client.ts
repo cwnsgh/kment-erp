@@ -415,13 +415,34 @@ export async function updateClient(clientId: string, data: ClientData) {
   }
 }
 
+type CheckBusinessRegistrationNumberResult =
+  | {
+      success: true;
+      isDuplicate: false;
+      message: string;
+      businessStatus?: {
+        status: string;
+      };
+    }
+  | {
+      success: false;
+      isDuplicate: true;
+      existingClient: { id: any; name: any };
+      message: string;
+    }
+  | {
+      success: false;
+      isDuplicate: false;
+      error: string;
+    };
+
 /**
  * 사업자등록번호 중복 확인
  */
 export async function checkBusinessRegistrationNumber(
   businessRegistrationNumber: string,
   excludeClientId?: string
-) {
+): Promise<CheckBusinessRegistrationNumberResult> {
   const supabase = await getSupabaseServerClient();
 
   try {
@@ -448,10 +469,13 @@ export async function checkBusinessRegistrationNumber(
       };
     }
 
+    // TODO: 실제 사업자등록번호 API를 호출하여 businessStatus를 조회해야 함
+    // 현재는 기본값으로 반환
     return {
       success: true,
       isDuplicate: false,
       message: "사용 가능한 사업자등록번호입니다.",
+      businessStatus: undefined, // 사업자 상태 정보 (필요시 API 연동)
     };
   } catch (error) {
     console.error("중복 확인 오류:", error);
@@ -549,6 +573,73 @@ export async function changeClientPassword(data: {
     return {
       success: false,
       error: "비밀번호 변경 중 오류가 발생했습니다.",
+    };
+  }
+}
+
+/**
+ * 거래처 사업자 상태 새로고침
+ */
+export async function refreshBusinessStatus(clientIds: string[] = []) {
+  const supabase = await getSupabaseServerClient();
+
+  try {
+    let query = supabase
+      .from("client")
+      .select("id, business_registration_number");
+
+    // 특정 거래처만 조회하는 경우
+    if (clientIds.length > 0) {
+      query = query.in("id", clientIds);
+    }
+
+    const { data: clients, error } = await query;
+
+    if (error) throw error;
+
+    if (!clients || clients.length === 0) {
+      return {
+        success: true,
+        message: "업데이트할 거래처가 없습니다.",
+        updated: 0,
+      };
+    }
+
+    // TODO: 실제 사업자등록번호 API를 호출하여 상태를 조회하고 업데이트해야 함
+    // 현재는 기본 구현만 제공
+    let updatedCount = 0;
+
+    // 예시: 각 거래처의 상태를 조회하고 업데이트
+    // for (const client of clients) {
+    //   const businessStatus = await fetchBusinessStatusFromAPI(client.business_registration_number);
+    //   if (businessStatus) {
+    //     const statusMap: Record<string, string> = {
+    //       approved: "approved",
+    //       suspended: "suspended",
+    //       closed: "closed",
+    //     };
+    //     await supabase
+    //       .from("client")
+    //       .update({ status: statusMap[businessStatus.status] || "approved" })
+    //       .eq("id", client.id);
+    //     updatedCount++;
+    //   }
+    // }
+
+    return {
+      success: true,
+      message: `총 ${updatedCount}건의 상태가 업데이트되었습니다.`,
+      updated: updatedCount,
+    };
+  } catch (error) {
+    console.error("상태 새로고침 오류:", error);
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "상태 새로고침에 실패했습니다.",
+      updated: 0,
     };
   }
 }
