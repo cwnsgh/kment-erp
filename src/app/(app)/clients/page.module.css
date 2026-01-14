@@ -1,0 +1,55 @@
+/* 거래처 조회 페이지 */
+.clientsPage {
+  max-width: 1100px;
+  margin: 80px auto 100px;
+}
+
+/* Button Styles */
+.clientsPage :global(.btn) {
+  border: none;
+  border-radius: 6px;
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  font-size: 15px;
+  display: inline-block;
+  transition: all 0.2s;
+}
+
+.clientsPage :global(.btn.primary) {
+  background-color: var(--primary);
+  color: #fff;
+}
+
+.clientsPage :global(.btn_lg) {
+  height: 42px;
+  padding: 0 20px;
+  line-height: 42px;
+  font-size: 15px;
+}
+
+.clientsPage :global(.btn_wrap) {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Page Section Styles */
+.clientsPage :global(.page_section) {
+  max-width: 1100px;
+  margin: 80px auto 100px;
+}
+
+.clientsPage :global(.page_title) {
+  text-align: left;
+  margin: 0 auto 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.clientsPage :global(.page_title h1) {
+  font-size: 32px;
+  font-weight: var(--font-weight-bold);
+}
+
+

@@ -158,7 +158,7 @@ export async function getClients() {
       .select(
         "id, business_registration_number, name, ceo_name, status, created_at"
       )
-      .eq("status", "approved") // 승인된 거래처만 조회
+      // status 필터 제거: 모든 상태의 거래처를 조회 (정상, 휴업, 폐업, 확인불가 등)
       .order("created_at", { ascending: false });
 
     if (error) throw error;
@@ -437,7 +437,9 @@ type CheckBusinessRegistrationNumberResult =
     };
 
 /**
- * 사업자등록번호 중복 확인
+ * 사업자등록번호 중복 확인 및 유효성 검증
+ * 1. 먼저 사업자등록번호가 유효한지 API로 확인
+ * 2. 그 다음 중복 여부 확인
  */
 export async function checkBusinessRegistrationNumber(
   businessRegistrationNumber: string,
@@ -446,6 +448,58 @@ export async function checkBusinessRegistrationNumber(
   const supabase = await getSupabaseServerClient();
 
   try {
+    // 1. 먼저 사업자등록번호가 유효한지 API로 확인
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL 
+      ? `https://${process.env.VERCEL_URL}` 
+      : 'http://localhost:3000';
+    
+    let businessStatus: { status: string; statusText?: string } | undefined;
+    
+    try {
+      const response = await fetch(`${baseUrl}/api/business/verify`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          businessNumber: businessRegistrationNumber,
+        }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          businessStatus = {
+            status: result.status,
+            statusText: result.statusText,
+          };
+        } else {
+          // API 호출은 성공했지만 사업자등록번호를 확인할 수 없는 경우
+          return {
+            success: false,
+            isDuplicate: false,
+            error: result.error || "사업자등록번호를 확인할 수 없습니다.",
+          };
+        }
+      } else {
+        // API 호출 실패
+        const errorData = await response.json().catch(() => ({}));
+        return {
+          success: false,
+          isDuplicate: false,
+          error: errorData.error || "사업자등록번호 유효성 검증에 실패했습니다.",
+        };
+      }
+    } catch (apiError) {
+      console.error("사업자등록번호 API 호출 오류:", apiError);
+      return {
+        success: false,
+        isDuplicate: false,
+        error: "사업자등록번호 유효성 검증 중 오류가 발생했습니다.",
+      };
+    }
+
+    // 2. 유효한 사업자등록번호인 경우, 중복 여부 확인
     let query = supabase
       .from("client")
       .select("id, name")
@@ -469,21 +523,22 @@ export async function checkBusinessRegistrationNumber(
       };
     }
 
-    // TODO: 실제 사업자등록번호 API를 호출하여 businessStatus를 조회해야 함
-    // 현재는 기본값으로 반환
+    // 유효하고 중복되지 않은 경우
     return {
       success: true,
       isDuplicate: false,
       message: "사용 가능한 사업자등록번호입니다.",
-      businessStatus: undefined, // 사업자 상태 정보 (필요시 API 연동)
+      businessStatus: businessStatus,
     };
   } catch (error) {
-    console.error("중복 확인 오류:", error);
+    console.error("사업자등록번호 중복 확인 오류:", error);
     return {
       success: false,
       isDuplicate: false,
       error:
-        error instanceof Error ? error.message : "중복 확인에 실패했습니다.",
+        error instanceof Error
+          ? error.message
+          : "사업자등록번호 중복 확인 중 오류가 발생했습니다.",
     };
   }
 }
@@ -605,26 +660,80 @@ export async function refreshBusinessStatus(clientIds: string[] = []) {
       };
     }
 
-    // TODO: 실제 사업자등록번호 API를 호출하여 상태를 조회하고 업데이트해야 함
-    // 현재는 기본 구현만 제공
+    // 사업자등록번호로 실제 상태를 조회하고 업데이트
     let updatedCount = 0;
 
-    // 예시: 각 거래처의 상태를 조회하고 업데이트
-    // for (const client of clients) {
-    //   const businessStatus = await fetchBusinessStatusFromAPI(client.business_registration_number);
-    //   if (businessStatus) {
-    //     const statusMap: Record<string, string> = {
-    //       approved: "approved",
-    //       suspended: "suspended",
-    //       closed: "closed",
-    //     };
-    //     await supabase
-    //       .from("client")
-    //       .update({ status: statusMap[businessStatus.status] || "approved" })
-    //       .eq("id", client.id);
-    //     updatedCount++;
-    //   }
-    // }
+    for (const client of clients) {
+      try {
+        // 사업자등록번호 검증 API 호출
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL 
+          ? `https://${process.env.VERCEL_URL}` 
+          : 'http://localhost:3000';
+        
+        const response = await fetch(`${baseUrl}/api/business/verify`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            businessNumber: client.business_registration_number,
+          }),
+        });
+
+        let dbStatus: string;
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          console.error(
+            `사업자등록번호 ${client.business_registration_number} 검증 실패:`,
+            errorData.error || response.statusText
+          );
+          // API 호출 실패 시 "확인불가" 상태로 업데이트
+          dbStatus = "unavailable";
+        } else {
+          const result = await response.json();
+          
+          // API 응답이 실패한 경우
+          if (!result.success) {
+            console.error(
+              `사업자등록번호 ${client.business_registration_number} 검증 실패:`,
+              result.error
+            );
+            // API 응답 실패 시 "확인불가" 상태로 업데이트
+            dbStatus = "unavailable";
+          } else {
+            // API 응답에서 상태를 매핑
+            // API는 "approved" | "suspended" | "closed" 형식으로 반환
+            dbStatus = result.status;
+
+            // 상태가 없거나 유효하지 않은 경우 "확인불가"로 처리
+            if (!dbStatus || !["approved", "suspended", "closed"].includes(dbStatus)) {
+              console.error(
+                `사업자등록번호 ${client.business_registration_number}의 상태가 유효하지 않습니다:`,
+                dbStatus
+              );
+              dbStatus = "unavailable";
+            }
+          }
+        }
+
+        // 상태 업데이트
+        const { error: updateError } = await supabase
+          .from("client")
+          .update({ status: dbStatus })
+          .eq("id", client.id);
+
+        if (updateError) {
+          console.error(`거래처 ${client.id} 상태 업데이트 실패:`, updateError);
+          continue;
+        }
+
+        updatedCount++;
+      } catch (error) {
+        console.error(`거래처 ${client.id} 상태 조회 중 오류:`, error);
+        continue;
+      }
+    }
 
     return {
       success: true,

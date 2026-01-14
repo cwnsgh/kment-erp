@@ -1,3 +1,11 @@
+/* Page Section Styles - client-dashboard는 여러 return 문이 있어 wrapper 추가가 어려우므로
+   각 section에 직접 스타일이 적용되도록 하기 위해 전역 스타일을 유지합니다.
+   CSS Modules 제약으로 인해 :global()을 단독 사용할 수 없지만,
+   실제로는 section 요소에 직접 적용되므로 문제없이 동작합니다. */
+
+/* 참고: client-dashboard.tsx는 여러 개의 return 문을 가지므로
+   최상위 wrapper를 추가하기 어렵습니다. */
+
 .mainBtn {
   position: absolute;
   top: 20px;

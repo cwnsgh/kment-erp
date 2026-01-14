@@ -1,8 +1,104 @@
 /* Client List Styles */
 
+/* Button Styles */
+.clientTableWrapper :global(.btn) {
+  border: none;
+  border-radius: 6px;
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  font-size: 15px;
+  display: inline-block;
+  transition: all 0.2s;
+}
+
+.clientTableWrapper :global(.btn.primary) {
+  background-color: var(--primary);
+  color: #fff;
+}
+
+.clientTableWrapper :global(.btn.normal) {
+  background-color: #fff;
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+}
+
+.clientTableWrapper :global(.btn.normal:hover) {
+  background-color: var(--background-color);
+}
+
+.clientTableWrapper :global(.btn_lg) {
+  height: 42px;
+  padding: 0 20px;
+  line-height: 42px;
+  font-size: 15px;
+}
+
+.clientTableWrapper :global(.btn_md) {
+  height: 30px;
+  line-height: 30px;
+  padding: 0 10px;
+  font-size: 13px;
+  border-radius: 4px;
+}
+
+.clientTableWrapper :global(.white_box) {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  padding: 60px 50px 100px;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.clientTableWrapper :global(.box_inner) {
+  width: 100%;
+}
+
 .searchBox {
   box-sizing: border-box;
   padding: 0 40px;
+}
+
+/* 검색 영역 내에서 버튼 스타일 적용 */
+.searchBox :global(.btn) {
+  border: none;
+  border-radius: 6px;
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  font-size: 15px;
+  display: inline-block;
+  transition: all 0.2s;
+}
+
+.searchBox :global(.btn.primary) {
+  background-color: var(--primary);
+  color: #fff;
+}
+
+.searchBox :global(.btn.normal) {
+  background-color: #fff;
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+}
+
+.searchBox :global(.btn.normal:hover) {
+  background-color: var(--background-color);
+}
+
+.searchBox :global(.btn_lg) {
+  height: 42px;
+  padding: 0 20px;
+  line-height: 42px;
+  font-size: 15px;
+}
+
+.searchBox :global(.btn_md) {
+  height: 30px;
+  line-height: 30px;
+  padding: 0 10px;
+  font-size: 13px;
+  border-radius: 4px;
 }
 
 .searchBox .searchFlex {
@@ -192,4 +288,3 @@
   border-radius: 4px;
   line-height: 1;
 }
-

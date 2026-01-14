@@ -1,16 +1,16 @@
-import '@/app/globals.css';
+import "@/app/globals.css";
 
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import { ReactNode } from 'react';
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import { ReactNode } from "react";
 
 const inter = Inter({
-  subsets: ['latin']
+  subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: 'KMENT ERP',
-  description: '사내 거래처 · 계약 · 관리업무 관리를 위한 ERP'
+  title: "KMENT ERP",
+  description: "사내 거래처 · 계약 · 관리업무 관리를 위한 ERP",
 };
 
 type RootLayoutProps = {

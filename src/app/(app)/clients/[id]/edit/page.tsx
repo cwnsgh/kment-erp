@@ -2,6 +2,7 @@ import { ClientEditForm } from '@/components/clients/client-edit-form';
 import { PageHeader } from '@/components/layout/page-header';
 import { getClientDetail } from '@/app/actions/client';
 import { notFound } from 'next/navigation';
+import styles from './page.module.css';
 
 type ClientEditPageProps = {
   params: {
@@ -17,7 +18,7 @@ export default async function ClientEditPage({ params }: ClientEditPageProps) {
   }
 
   return (
-    <div className="page_section">
+    <div className={`${styles.clientEditPage} page_section`}>
       <ClientEditForm client={result.client} clientId={params.id} />
     </div>
   );

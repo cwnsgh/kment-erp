@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { WorkRequest } from "@/app/actions/work-request";
+import {
+  WorkRequest,
+  getWorkRequestDetailForClient,
+} from "@/app/actions/work-request";
 import styles from "./client-work-list.module.css";
 
 type WorkRequestWithEmployee = WorkRequest & {
@@ -23,13 +26,58 @@ export function ClientWorkList({
     initialWorkRequests as WorkRequestWithEmployee[]
   );
   const [totalCount, setTotalCount] = useState(initialTotalCount);
-  const [statusFilter, setStatusFilter] = useState<"all" | "in_progress" | "completed">("all");
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "in_progress" | "completed"
+  >("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [isPending, startTransition] = useTransition();
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const itemsPerPageOptions = [10, 50, 100, 200];
+  const [detailModal, setDetailModal] = useState<{
+    isOpen: boolean;
+    workRequest:
+      | (WorkRequest & {
+          employee_name?: string | null;
+          client_name?: string | null;
+          approved_by_client_name?: string | null;
+          approved_by_signature_url?: string | null;
+          approval_deducted_amount?: number | null;
+          approval_remaining_amount?: number | null;
+          approval_text_edit_count?: number | null;
+          approval_coding_edit_count?: number | null;
+          approval_image_edit_count?: number | null;
+          approval_popup_design_count?: number | null;
+          approval_banner_design_count?: number | null;
+          cost?: number | null;
+          approved_at?: string | null;
+          count?: number | null;
+          managed_client?: {
+            productType1: string;
+            productType2: string;
+            totalAmount: number | null;
+            startDate: string | null;
+            endDate: string | null;
+            status: string;
+            detailTextEditCount: number;
+            detailCodingEditCount: number;
+            detailImageEditCount: number;
+            detailPopupDesignCount: number;
+            detailBannerDesignCount: number;
+          } | null;
+        })
+      | null;
+    isLoading: boolean;
+  }>({
+    isOpen: false,
+    workRequest: null,
+    isLoading: false,
+  });
 
-  const loadData = async (page: number, filter: typeof statusFilter, limit: number) => {
+  const loadData = async (
+    page: number,
+    filter: typeof statusFilter,
+    limit: number
+  ) => {
     startTransition(async () => {
       try {
         const response = await fetch(
@@ -65,7 +113,9 @@ export function ClientWorkList({
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return `${String(date.getFullYear()).slice(-2)}.${String(date.getMonth() + 1).padStart(2, "0")}.${String(date.getDate()).padStart(2, "0")}`;
+    return `${String(date.getFullYear()).slice(-2)}.${String(
+      date.getMonth() + 1
+    ).padStart(2, "0")}.${String(date.getDate()).padStart(2, "0")}`;
   };
 
   const formatWorkPeriod = (request: WorkRequestWithEmployee) => {
@@ -80,11 +130,11 @@ export function ClientWorkList({
 
   const getStatusClass = (status: string) => {
     const classMap: Record<string, string> = {
-      pending: "approval_request",
-      approved: "approval_complete",
-      rejected: "approval_refusal",
-      in_progress: "work_ongoing",
-      completed: "work_complete",
+      pending: styles.approvalRequest,
+      approved: styles.approvalComplete,
+      rejected: styles.approvalRefusal,
+      in_progress: styles.workOngoing,
+      completed: styles.workComplete,
     };
     return classMap[status] || "";
   };
@@ -100,9 +150,77 @@ export function ClientWorkList({
     return statusMap[status] || status;
   };
 
+  // 업무 상세 모달 열기
+  const handleOpenDetailModal = async (workRequestId: string) => {
+    setDetailModal({
+      isOpen: true,
+      workRequest: null,
+      isLoading: true,
+    });
+
+    try {
+      const result = await getWorkRequestDetailForClient(workRequestId);
+      if (result.success && result.data) {
+        setDetailModal({
+          isOpen: true,
+          workRequest: result.data as any,
+          isLoading: false,
+        });
+      } else {
+        alert(`업무 상세 정보를 불러올 수 없습니다: ${result.error}`);
+        setDetailModal({
+          isOpen: false,
+          workRequest: null,
+          isLoading: false,
+        });
+      }
+    } catch (error) {
+      console.error("업무 상세 정보 조회 오류:", error);
+      alert("업무 상세 정보를 불러오는 중 오류가 발생했습니다.");
+      setDetailModal({
+        isOpen: false,
+        workRequest: null,
+        isLoading: false,
+      });
+    }
+  };
+
+  // 업무 상세 모달 닫기
+  const handleCloseDetailModal = () => {
+    setDetailModal({
+      isOpen: false,
+      workRequest: null,
+      isLoading: false,
+    });
+  };
+
+  // 날짜 포맷 (모달용)
+  const formatDateForModal = (dateStr: string | null | undefined) => {
+    if (!dateStr) return "-";
+    const date = new Date(dateStr);
+    return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(
+      2,
+      "0"
+    )}.${String(date.getDate()).padStart(2, "0")}`;
+  };
+
+  // 작업기간 포맷 (모달용)
+  const formatWorkPeriodForModal = (
+    startDate: string | null | undefined,
+    endDate: string | null | undefined
+  ) => {
+    if (!startDate && !endDate) return "-";
+    const start = formatDateForModal(startDate);
+    const end = formatDateForModal(endDate);
+    return `${start} ~ ${end}`;
+  };
+
   // 필터링된 작업만 표시 (approved, in_progress, completed)
   const filteredRequests = workRequests.filter(
-    (r) => r.status === "approved" || r.status === "in_progress" || r.status === "completed"
+    (r) =>
+      r.status === "approved" ||
+      r.status === "in_progress" ||
+      r.status === "completed"
   );
 
   const paginatedRequests = filteredRequests.slice(
@@ -121,15 +239,20 @@ export function ClientWorkList({
         <div className={styles.boxInner}>
           <div className={`${styles.searchBox} table_group`}>
             <h2 className={styles.pageSubTitle}>
-              <span className={styles.companyName}>{clientName || "(주)케이먼트코퍼레이션"}</span> 업무 내역{" "}
-              <span className={styles.workCount}>({filteredRequests.length}건)</span>
+              <span className={styles.companyName}>
+                {clientName || "(주)케이먼트코퍼레이션"}
+              </span>{" "}
+              업무 내역{" "}
+              <span className={styles.workCount}>
+                ({filteredRequests.length}건)
+              </span>
             </h2>
 
-            <div className={styles.tableItem}>
-              <ul className={styles.tableRow}>
-                <li className={styles.rowGroup}>
-                  <div className={styles.tableHead}>진행상황</div>
-                  <div className={styles.tableData}>
+            <div className={styles.searchTableItem}>
+              <ul className={styles.searchTableRow}>
+                <li className={styles.searchRowGroup}>
+                  <div className={styles.searchTableHead}>진행상황</div>
+                  <div className={styles.searchTableData}>
                     <input
                       type="radio"
                       id="search_type_all"
@@ -178,7 +301,8 @@ export function ClientWorkList({
             <div className={styles.tableTop}>
               <div className={styles.topTotal}>
                 <p>
-                  총 <span>{filteredRequests.length}건</span>의 작업 현황이 조회되었습니다.
+                  총 <span>{filteredRequests.length}건</span>의 작업 현황이
+                  조회되었습니다.
                 </p>
               </div>
               <div className={styles.topBtnGroup}>
@@ -226,13 +350,20 @@ export function ClientWorkList({
                 <tbody>
                   {paginatedRequests.length === 0 ? (
                     <tr>
-                      <td colSpan={6} style={{ textAlign: "center", padding: "40px" }}>
+                      <td
+                        colSpan={6}
+                        style={{ textAlign: "center", padding: "40px" }}
+                      >
                         작업 내역이 없습니다.
                       </td>
                     </tr>
                   ) : (
                     paginatedRequests.map((request, index) => (
-                      <tr key={request.id}>
+                      <tr
+                        key={request.id}
+                        onClick={() => handleOpenDetailModal(request.id)}
+                        style={{ cursor: "pointer" }}
+                      >
                         <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
                         <td>{request.brand_name}</td>
                         <td>{request.employee_name || "-"}</td>
@@ -261,14 +392,17 @@ export function ClientWorkList({
                 className={`${styles.page} ${styles.first} ${
                   currentPage === 1 ? styles.disabled : ""
                 }`}
-                onClick={() => currentPage > 1 && loadData(1, statusFilter, itemsPerPage)}
+                onClick={() =>
+                  currentPage > 1 && loadData(1, statusFilter, itemsPerPage)
+                }
               ></li>
               <li
                 className={`${styles.page} ${styles.prev} ${
                   currentPage === 1 ? styles.disabled : ""
                 }`}
                 onClick={() =>
-                  currentPage > 1 && loadData(currentPage - 1, statusFilter, itemsPerPage)
+                  currentPage > 1 &&
+                  loadData(currentPage - 1, statusFilter, itemsPerPage)
                 }
               ></li>
 
@@ -289,7 +423,9 @@ export function ClientWorkList({
                     className={`${styles.page} ${
                       currentPage === pageNum ? styles.active : ""
                     }`}
-                    onClick={() => loadData(pageNum, statusFilter, itemsPerPage)}
+                    onClick={() =>
+                      loadData(pageNum, statusFilter, itemsPerPage)
+                    }
                   >
                     {pageNum}
                   </li>
@@ -310,13 +446,466 @@ export function ClientWorkList({
                   currentPage === totalPages ? styles.disabled : ""
                 }`}
                 onClick={() =>
-                  currentPage < totalPages && loadData(totalPages, statusFilter, itemsPerPage)
+                  currentPage < totalPages &&
+                  loadData(totalPages, statusFilter, itemsPerPage)
                 }
               ></li>
             </ul>
           </div>
         )}
       </div>
+
+      {/* 업무 상세 모달 */}
+      {detailModal.isOpen && (
+        <div
+          className={styles.detailModalOverlay}
+          onClick={handleCloseDetailModal}
+        >
+          <div
+            className={styles.detailModalInner}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={styles.detailModalHeader}>
+              <h3>관리 업무 상세조회</h3>
+              <button
+                type="button"
+                className={styles.detailModalClose}
+                onClick={handleCloseDetailModal}
+              >
+                ×
+              </button>
+            </div>
+
+            <div className={`${styles.detailModalBody} ${styles.scroll}`}>
+              {detailModal.isLoading ? (
+                <div style={{ textAlign: "center", padding: "40px 0" }}>
+                  로딩 중...
+                </div>
+              ) : detailModal.workRequest ? (
+                <div className={styles.tableGroup}>
+                  {/* 관리 상품 정보 */}
+                  {detailModal.workRequest.managed_client && (
+                    <div className={styles.tableItem}>
+                      <h2 className={styles.tableTitle}>관리 상품 정보</h2>
+                      <ul className={styles.tableRow}>
+                        <li className={styles.rowGroup}>
+                          <div className={styles.tableHead}>
+                            관리 상품 유형1
+                          </div>
+                          <div className={styles.tableData}>
+                            {detailModal.workRequest.managed_client
+                              .productType1 === "deduct"
+                              ? "금액차감형"
+                              : "유지보수형"}
+                          </div>
+                        </li>
+                        <li className={styles.rowGroup}>
+                          <div className={styles.tableHead}>
+                            관리 상품 유형2
+                          </div>
+                          <div className={styles.tableData}>
+                            {detailModal.workRequest.managed_client
+                              .productType1 === "deduct"
+                              ? detailModal.workRequest.managed_client
+                                  .productType2 === "3m"
+                                ? "3개월"
+                                : detailModal.workRequest.managed_client
+                                    .productType2 === "6m"
+                                ? "6개월"
+                                : detailModal.workRequest.managed_client
+                                    .productType2 === "9m"
+                                ? "9개월"
+                                : detailModal.workRequest.managed_client
+                                    .productType2 === "12m"
+                                ? "12개월"
+                                : detailModal.workRequest.managed_client
+                                    .productType2
+                              : detailModal.workRequest.managed_client
+                                  .productType2 === "standard"
+                              ? "스탠다드"
+                              : detailModal.workRequest.managed_client
+                                  .productType2 === "premium"
+                              ? "프리미엄"
+                              : detailModal.workRequest.managed_client
+                                  .productType2}
+                          </div>
+                        </li>
+                      </ul>
+                      {/* 금액차감형: 총 금액, 차감 금액, 잔여 금액 */}
+                      {detailModal.workRequest.managed_client.productType1 ===
+                        "deduct" && (
+                        <>
+                          <ul className={styles.tableRow}>
+                            <li className={styles.rowGroup}>
+                              <div className={styles.tableHead}>총 금액</div>
+                              <div
+                                className={`${styles.tableData} ${styles.fontB}`}
+                              >
+                                {detailModal.workRequest.managed_client
+                                  .totalAmount
+                                  ? detailModal.workRequest.managed_client.totalAmount.toLocaleString()
+                                  : "-"}
+                              </div>
+                            </li>
+                            <li className={styles.rowGroup}>
+                              <div className={styles.tableHead}>차감 금액</div>
+                              <div
+                                className={`${styles.tableData} ${styles.fontB}`}
+                              >
+                                {detailModal.workRequest
+                                  .approval_deducted_amount !== null &&
+                                detailModal.workRequest
+                                  .approval_deducted_amount !== undefined
+                                  ? detailModal.workRequest.approval_deducted_amount.toLocaleString()
+                                  : "-"}
+                              </div>
+                            </li>
+                          </ul>
+                          <ul className={styles.tableRow}>
+                            <li className={styles.rowGroup}>
+                              <div className={styles.tableHead}>잔여 금액</div>
+                              <div
+                                className={`${styles.tableData} ${styles.fontB}`}
+                              >
+                                {detailModal.workRequest
+                                  .approval_remaining_amount !== null &&
+                                detailModal.workRequest
+                                  .approval_remaining_amount !== undefined
+                                  ? detailModal.workRequest.approval_remaining_amount.toLocaleString()
+                                  : "-"}
+                              </div>
+                            </li>
+                          </ul>
+                        </>
+                      )}
+
+                      {/* 유지보수형: 세부 네영 (잔여) - 승인 시점 정보 */}
+                      {detailModal.workRequest.managed_client.productType1 ===
+                        "maintenance" && (
+                        <ul className={styles.tableRow}>
+                          <li className={styles.rowGroup}>
+                            <div className={styles.tableHead}>
+                              세부 네영 (잔여)
+                            </div>
+                            <div className={styles.tableData}>
+                              <ul className={styles.detailList}>
+                                <li>
+                                  영역 텍스트 수정
+                                  <span>
+                                    <b className={styles.fontB}>
+                                      {detailModal.workRequest
+                                        .approval_text_edit_count !== null &&
+                                      detailModal.workRequest
+                                        .approval_text_edit_count !== undefined
+                                        ? detailModal.workRequest
+                                            .approval_text_edit_count
+                                        : "-"}
+                                    </b>
+                                    회
+                                  </span>
+                                </li>
+                                <li>
+                                  코딩 수정
+                                  <span>
+                                    <b className={styles.fontB}>
+                                      {detailModal.workRequest
+                                        .approval_coding_edit_count !== null &&
+                                      detailModal.workRequest
+                                        .approval_coding_edit_count !==
+                                        undefined
+                                        ? detailModal.workRequest
+                                            .approval_coding_edit_count
+                                        : "-"}
+                                    </b>
+                                    회
+                                  </span>
+                                </li>
+                                <li>
+                                  기존 결과물 이미지 수정
+                                  <span>
+                                    <b className={styles.fontB}>
+                                      {detailModal.workRequest
+                                        .approval_image_edit_count !== null &&
+                                      detailModal.workRequest
+                                        .approval_image_edit_count !== undefined
+                                        ? detailModal.workRequest
+                                            .approval_image_edit_count
+                                        : "-"}
+                                    </b>
+                                    회
+                                  </span>
+                                </li>
+                                <li>
+                                  팝업 디자인
+                                  <span>
+                                    <b className={styles.fontB}>
+                                      {detailModal.workRequest
+                                        .approval_popup_design_count !== null &&
+                                      detailModal.workRequest
+                                        .approval_popup_design_count !==
+                                        undefined
+                                        ? detailModal.workRequest
+                                            .approval_popup_design_count
+                                        : "-"}
+                                    </b>
+                                    회
+                                  </span>
+                                </li>
+                                {detailModal.workRequest.managed_client
+                                  .productType2 === "premium" && (
+                                  <li>
+                                    배너 디자인
+                                    <span>
+                                      <b className={styles.fontB}>
+                                        {detailModal.workRequest
+                                          .approval_banner_design_count !==
+                                          null &&
+                                        detailModal.workRequest
+                                          .approval_banner_design_count !==
+                                          undefined
+                                          ? detailModal.workRequest
+                                              .approval_banner_design_count
+                                          : "-"}
+                                      </b>
+                                      회
+                                    </span>
+                                  </li>
+                                )}
+                              </ul>
+                            </div>
+                          </li>
+                        </ul>
+                      )}
+                      <ul className={styles.tableRow}>
+                        <li className={styles.rowGroup}>
+                          <div className={styles.tableHead}>
+                            시작일 ~ 종료일
+                          </div>
+                          <div className={styles.tableData}>
+                            {detailModal.workRequest.managed_client.startDate &&
+                            detailModal.workRequest.managed_client.endDate
+                              ? `${formatWorkPeriodForModal(
+                                  detailModal.workRequest.managed_client
+                                    .startDate,
+                                  detailModal.workRequest.managed_client.endDate
+                                )}`
+                              : "-"}
+                          </div>
+                        </li>
+                      </ul>
+                      <ul className={styles.tableRow}>
+                        <li className={styles.rowGroup}>
+                          <div className={styles.tableHead}>진행상황</div>
+                          <div className={styles.tableData}>
+                            <span
+                              className={
+                                detailModal.workRequest.managed_client
+                                  .status === "ongoing"
+                                  ? styles.statusOngoing
+                                  : detailModal.workRequest.managed_client
+                                      .status === "wait"
+                                  ? styles.statusWait
+                                  : detailModal.workRequest.managed_client
+                                      .status === "end"
+                                  ? styles.statusEnd
+                                  : detailModal.workRequest.managed_client
+                                      .status === "unpaid"
+                                  ? styles.statusUnpaid
+                                  : ""
+                              }
+                            >
+                              {detailModal.workRequest.managed_client.status ===
+                              "ongoing"
+                                ? "진행"
+                                : detailModal.workRequest.managed_client
+                                    .status === "wait"
+                                ? "대기"
+                                : detailModal.workRequest.managed_client
+                                    .status === "end"
+                                ? "종료"
+                                : detailModal.workRequest.managed_client
+                                    .status === "unpaid"
+                                ? "미납"
+                                : detailModal.workRequest.managed_client.status}
+                            </span>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* 상세 내역 */}
+                  <div className={styles.tableItem}>
+                    <h2 className={styles.tableTitle}>상세 내역</h2>
+                    <ul className={styles.tableRow}>
+                      <li className={styles.rowGroup}>
+                        <div className={styles.tableHead}>브랜드</div>
+                        <div className={styles.tableData}>
+                          {detailModal.workRequest.brand_name || "-"}
+                        </div>
+                      </li>
+                    </ul>
+                    <ul className={styles.tableRow}>
+                      <li className={styles.rowGroup}>
+                        <div className={styles.tableHead}>담당자</div>
+                        <div className={styles.tableData}>
+                          {detailModal.workRequest.employee_name || "-"}
+                        </div>
+                      </li>
+                      <li className={styles.rowGroup}>
+                        <div className={styles.tableHead}>작업기간</div>
+                        <div className={styles.tableData}>
+                          {formatWorkPeriodForModal(
+                            detailModal.workRequest.start_date,
+                            detailModal.workRequest.end_date
+                          )}
+                        </div>
+                      </li>
+                    </ul>
+                    {/* 금액차감형: 비용, 승인날짜, 작업여부, 작업내용 */}
+                    {detailModal.workRequest.managed_client?.productType1 ===
+                      "deduct" && (
+                      <>
+                        <ul className={styles.tableRow}>
+                          <li className={styles.rowGroup}>
+                            <div className={styles.tableHead}>비용</div>
+                            <div className={styles.tableData}>
+                              {detailModal.workRequest.cost
+                                ? Number(
+                                    detailModal.workRequest.cost
+                                  ).toLocaleString()
+                                : "-"}
+                            </div>
+                          </li>
+                          <li className={styles.rowGroup}>
+                            <div className={styles.tableHead}>승인날짜</div>
+                            <div
+                              className={`${styles.tableData} ${styles.column}`}
+                            >
+                              {detailModal.workRequest.approved_at
+                                ? formatDateForModal(
+                                    detailModal.workRequest.approved_at
+                                  )
+                                : "-"}
+                              {detailModal.workRequest
+                                .approved_by_signature_url && (
+                                <img
+                                  src={
+                                    detailModal.workRequest
+                                      .approved_by_signature_url
+                                  }
+                                  alt="서명"
+                                  className={styles.signImg}
+                                />
+                              )}
+                            </div>
+                          </li>
+                        </ul>
+                        <ul className={styles.tableRow}>
+                          <li className={styles.rowGroup}>
+                            <div className={styles.tableHead}>작업여부</div>
+                            <div className={styles.tableData}>
+                              <span
+                                className={getStatusClass(
+                                  detailModal.workRequest.status
+                                )}
+                              >
+                                {getStatusLabel(detailModal.workRequest.status)}
+                              </span>
+                            </div>
+                          </li>
+                        </ul>
+                        <ul className={styles.tableRow}>
+                          <li className={styles.rowGroup}>
+                            <div className={styles.tableHead}>작업내용</div>
+                            <div className={styles.tableData}>
+                              {detailModal.workRequest.work_content || "-"}
+                            </div>
+                          </li>
+                        </ul>
+                      </>
+                    )}
+
+                    {/* 유지보수형: 승인날짜, 작업여부, 작업내용, 횟수 */}
+                    {detailModal.workRequest.managed_client?.productType1 ===
+                      "maintenance" && (
+                      <>
+                        <ul className={styles.tableRow}>
+                          <li className={styles.rowGroup}>
+                            <div className={styles.tableHead}>승인날짜</div>
+                            <div
+                              className={`${styles.tableData} ${styles.center}`}
+                            >
+                              {detailModal.workRequest.approved_at
+                                ? formatDateForModal(
+                                    detailModal.workRequest.approved_at
+                                  )
+                                : "-"}
+                              {detailModal.workRequest
+                                .approved_by_signature_url && (
+                                <img
+                                  src={
+                                    detailModal.workRequest
+                                      .approved_by_signature_url
+                                  }
+                                  alt="서명"
+                                  className={styles.signImg}
+                                />
+                              )}
+                            </div>
+                          </li>
+                        </ul>
+                        <ul className={styles.tableRow}>
+                          <li className={styles.rowGroup}>
+                            <div className={styles.tableHead}>작업여부</div>
+                            <div className={styles.tableData}>
+                              <span
+                                className={getStatusClass(
+                                  detailModal.workRequest.status
+                                )}
+                              >
+                                {getStatusLabel(detailModal.workRequest.status)}
+                              </span>
+                            </div>
+                          </li>
+                        </ul>
+                        <ul className={styles.tableRow}>
+                          <li className={styles.rowGroup}>
+                            <div className={styles.tableHead}>작업내용</div>
+                            <div className={styles.tableData}>
+                              {detailModal.workRequest.work_content || "-"}
+                            </div>
+                          </li>
+                          <li className={styles.rowGroup}>
+                            <div className={styles.tableHead}>횟수</div>
+                            <div className={styles.tableData}>
+                              {detailModal.workRequest.count || "-"}
+                            </div>
+                          </li>
+                        </ul>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div style={{ textAlign: "center", padding: "40px 0" }}>
+                  업무 정보를 불러올 수 없습니다.
+                </div>
+              )}
+            </div>
+
+            <div className={styles.detailModalFooter}>
+              <button
+                type="button"
+                className={`${styles.btn} ${styles.btnLg} ${styles.normal}`}
+                onClick={handleCloseDetailModal}
+              >
+                닫기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

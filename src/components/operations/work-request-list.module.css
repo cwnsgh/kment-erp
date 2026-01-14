@@ -1,4 +1,64 @@
 /* 관리 업무 조회 페이지 */
+/* Button Styles */
+.manageWorkList :global(.btn) {
+  border: none;
+  border-radius: 6px;
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  font-size: 15px;
+  display: inline-block;
+  transition: all 0.2s;
+}
+
+.manageWorkList :global(.btn.primary) {
+  background-color: var(--primary);
+  color: #fff;
+}
+
+.manageWorkList :global(.btn.normal) {
+  background-color: #fff;
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+}
+
+.manageWorkList :global(.btn.normal:hover) {
+  background-color: var(--background-color);
+}
+
+.manageWorkList :global(.btn_lg) {
+  height: 42px;
+  padding: 0 20px;
+  line-height: 42px;
+  font-size: 15px;
+}
+
+.manageWorkList :global(.btn_md) {
+  height: 30px;
+  line-height: 30px;
+  padding: 0 10px;
+  font-size: 13px;
+  border-radius: 4px;
+}
+
+/* Page Section Styles */
+.manageWorkList :global(.page_section) {
+  max-width: 1100px;
+  margin: 80px auto 100px;
+}
+
+.manageWorkList :global(.page_title) {
+  text-align: left;
+  margin: 0 auto 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.manageWorkList :global(.page_title h1) {
+  font-size: 32px;
+  font-weight: var(--font-weight-bold);
+}
+
 .manageWorkList {
   /* 기본 스타일은 전역 CSS 사용 */
 }
@@ -300,71 +360,106 @@
   opacity: 0.9;
 }
 
-/* 승인 상태 */
+/* 승인여부 라벨 스타일 - 원본 CSS에 맞춤 */
 .approvalRequest {
-  background: #fef3c7;
-  color: #92400e;
+  display: inline-block;
+  font-size: 14px;
+  color: #fff;
+  font-weight: 600;
+  background-color: #3b82f6;
+  padding: 5px 7px;
+  border-radius: 4px;
+  line-height: 1;
 }
 
 .approvalComplete {
-  background: #d1fae5;
-  color: #065f46;
+  display: inline-block;
+  font-size: 14px;
+  color: #fff;
+  font-weight: 600;
+  background-color: #64748b;
+  padding: 5px 7px;
+  border-radius: 4px;
+  line-height: 1;
 }
 
 .approvalRefusal {
-  background: #fee2e2;
-  color: #991b1b;
+  display: inline-block;
+  font-size: 14px;
+  color: #fff;
+  font-weight: 600;
+  background-color: #dc2626;
+  padding: 5px 7px;
+  border-radius: 4px;
+  line-height: 1;
 }
 
+/* 작업 상태 뱃지 - 원본 CSS에 맞춤 */
 .workOngoing {
-  background: #dbeafe;
-  color: #1e40af;
+  display: inline-block;
+  font-size: 14px;
+  color: #1e293b;
+  font-weight: 600;
+  background-color: #e5e7eb;
+  padding: 5px 7px;
+  border-radius: 4px;
+  line-height: 1;
 }
 
 .workComplete {
-  background: #e0e7ff;
-  color: #3730a3;
+  display: inline-block;
+  font-size: 14px;
+  color: #fff;
+  font-weight: 600;
+  background-color: #64748b;
+  padding: 5px 7px;
+  border-radius: 4px;
+  line-height: 1;
 }
 
-/* 진행상황 상태 배지 (관리 상품 정보용) */
+/* 진행상황 상태 배지 (관리 상품 정보용) - 원본 CSS에 맞춤 */
 .statusOngoing {
   display: inline-block;
-  padding: 4px 12px;
+  font-size: 13px;
+  color: #3b82f6;
+  font-weight: 700;
+  background-color: rgba(59, 130, 246, 0.15);
+  padding: 5px 10px;
   border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-  background: #d1fae5;
-  color: #065f46;
+  line-height: 1;
 }
 
 .statusWait {
   display: inline-block;
-  padding: 4px 12px;
+  font-size: 13px;
+  color: #f59e0b;
+  font-weight: 700;
+  background-color: rgba(245, 158, 11, 0.15);
+  padding: 5px 10px;
   border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-  background: #fef3c7;
-  color: #92400e;
+  line-height: 1;
 }
 
 .statusEnd {
   display: inline-block;
-  padding: 4px 12px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-  background: #f1f5f9;
+  font-size: 13px;
   color: #64748b;
+  font-weight: 700;
+  background-color: rgba(100, 116, 139, 0.15);
+  padding: 5px 10px;
+  border-radius: 4px;
+  line-height: 1;
 }
 
 .statusUnpaid {
   display: inline-block;
-  padding: 4px 12px;
+  font-size: 13px;
+  color: #dc2626;
+  font-weight: 700;
+  background-color: rgba(220, 38, 38, 0.15);
+  padding: 5px 10px;
   border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-  background: #fee2e2;
-  color: #991b1b;
+  line-height: 1;
 }
 
 /* 드롭다운 메뉴 */
@@ -616,6 +711,17 @@
   animation: modalFadeIn 0.2s ease-out;
 }
 
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 .detailModalHeader {
   padding: 20px 24px;
   border-bottom: 1px solid #e5e7eb;
@@ -664,28 +770,29 @@
   max-height: calc(90vh - 160px);
 }
 
-/* 테이블 그룹 스타일 */
+/* 테이블 그룹 스타일 - 원본 CSS에 맞춤 */
 .tableGroup {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 60px;
+  width: 100%;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .tableItem {
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  overflow: hidden;
+  /* 원본에는 배경색, 테두리, border-radius 없음 - 스타일 없음 */
+  display: block;
 }
 
 .tableTitle {
-  margin: 0;
-  padding: 16px 20px;
-  font-size: 16px;
-  font-weight: 600;
-  color: #1e293b;
-  background: #f8fafc;
-  border-bottom: 1px solid #e5e7eb;
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 20px 0;
+  padding: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .tableRow {
@@ -693,38 +800,55 @@
   padding: 0;
   margin: 0;
   display: flex;
-  flex-wrap: wrap;
+  align-items: stretch;
+  border-top: 1px solid #e5e7eb;
+  width: 100%;
+}
+
+.tableRow:last-child {
+  border-bottom: 1px solid #e5e7eb;
+  box-sizing: border-box;
 }
 
 .rowGroup {
+  flex: 1;
   display: flex;
   width: 100%;
-  border-bottom: 1px solid #f1f5f9;
+  position: relative;
 }
 
-.rowGroup:last-child {
-  border-bottom: none;
+.rowGroup::after {
+  content: "";
+  display: block;
+  width: 180px;
+  height: 100%;
+  background-color: #f8fafc;
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: -1;
 }
 
 .tableHead {
-  min-width: 150px;
-  padding: 14px 20px;
+  width: 180px;
+  padding: 20px;
   background: #f8fafc;
-  font-size: 14px;
-  font-weight: 600;
-  color: #475569;
-  border-right: 1px solid #e5e7eb;
+  box-sizing: border-box;
+  z-index: 1;
   display: flex;
   align-items: center;
+  justify-content: flex-start;
 }
 
 .tableData {
-  flex: 1;
-  padding: 14px 20px;
-  font-size: 14px;
-  color: #1e293b;
+  padding: 18px 10px 18px 20px;
+  box-sizing: border-box;
+  word-break: break-all;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  justify-content: flex-start;
+  width: calc(100% - 180px);
+  line-height: 25px;
 }
 
 .tableData.fontB {
@@ -734,6 +858,12 @@
 
 .tableData.center {
   justify-content: center;
+}
+
+.tableData.column {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
 }
 
 .tableData.attach {
@@ -778,6 +908,40 @@
   flex-shrink: 0;
 }
 
+.detailModalFooter .btn {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+
+.detailModalFooter .btnLg {
+  padding: 12px 24px;
+}
+
+.detailModalFooter .btn.normal {
+  background: #fff;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.detailModalFooter .btn.normal:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.detailModalFooter .btn.primary {
+  background: #3b82f6;
+  color: #fff;
+}
+
+.detailModalFooter .btn.primary:hover {
+  background: #2563eb;
+}
+
 /* 유지보수형 세부 내용 리스트 */
 .detailList {
   list-style: none;
@@ -785,34 +949,23 @@
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 20px;
+  width: 100%;
 }
 
 .detailList li {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid #f1f5f9;
-  font-size: 14px;
-  color: #475569;
-}
-
-.detailList li:last-child {
-  border-bottom: none;
-}
-
-.detailList li span {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-weight: 500;
-  color: #1e293b;
 }
 
 .detailList li span b {
+  margin-right: 14px;
+}
+
+/* font_b 클래스 (글로벌 클래스 사용을 위해 유지) */
+.fontB {
   color: #3b82f6;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 /* 서명 이미지 */
@@ -822,4 +975,3 @@
   margin-left: 8px;
   object-fit: contain;
 }
-

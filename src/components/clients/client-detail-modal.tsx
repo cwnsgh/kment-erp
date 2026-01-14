@@ -1,6 +1,7 @@
 "use client";
 
 import { X, Download, Eye } from "lucide-react";
+import styles from "./client-detail-modal.module.css";
 
 type ClientDetail = {
   id: string;
@@ -65,7 +66,7 @@ export function ClientDetailModal({
         </div>
 
         {/* 내용 */}
-        <div className="white_box" style={{ paddingBottom: "80px" }}>
+        <div className={`${styles.clientDetailModalWrapper} white_box`} style={{ paddingBottom: "80px" }}>
           <div className="table_group">
             {/* ERP 정보 */}
             <div className="table_item">

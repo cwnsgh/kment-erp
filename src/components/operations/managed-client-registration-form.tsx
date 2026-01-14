@@ -185,7 +185,7 @@ export function ManagedClientRegistrationForm() {
   );
 
   return (
-    <section className="manageClient_regist page_section">
+    <section className={`manageClient_regist page_section ${styles.manageClientRegist}`}>
       <div className="page_title">
         <h1>관리 고객 등록</h1>
         <div className="btn_wrap">

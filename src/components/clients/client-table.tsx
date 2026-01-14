@@ -3,7 +3,7 @@
 import { Download, RefreshCw } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { ClientDetailModal } from "./client-detail-modal";
-import { getClientDetail, refreshBusinessStatus } from "@/app/actions/client";
+import { getClientDetail, refreshBusinessStatus, getClients } from "@/app/actions/client";
 import { useRouter } from "next/navigation";
 import styles from "./client-table.module.css";
 
@@ -23,23 +23,29 @@ type ClientTableProps = {
 type SearchType = "company" | "ceo" | "business_number";
 
 // DB status를 UI status로 변환
-const mapStatus = (status: string): "정상" | "휴업" | "폐업" => {
-  const statusMap: Record<string, "정상" | "휴업" | "폐업"> = {
+const mapStatus = (status: string | null | undefined): "정상" | "휴업" | "폐업" | "확인불가" => {
+  if (!status) {
+    return "확인불가";
+  }
+  const statusMap: Record<string, "정상" | "휴업" | "폐업" | "확인불가"> = {
     approved: "정상",
     suspended: "휴업",
     closed: "폐업",
+    unavailable: "확인불가",
+    unknown: "확인불가",
   };
-  return statusMap[status] || "정상";
+  return statusMap[status] || "확인불가";
 };
 
 // Status CSS 클래스 매핑
-const getStatusClassName = (status: "정상" | "휴업" | "폐업"): string => {
+const getStatusClassName = (status: "정상" | "휴업" | "폐업" | "확인불가"): string => {
   const statusMap: Record<string, string> = {
     정상: styles.statusOngoing,
     휴업: styles.statusEnd,
     폐업: styles.statusUnpaid,
+    확인불가: styles.statusEnd, // 확인불가는 휴업과 같은 스타일 사용
   };
-  return statusMap[status] || styles.statusOngoing;
+  return statusMap[status] || styles.statusEnd;
 };
 
 export function ClientTable({ initialClients }: ClientTableProps) {
@@ -146,6 +152,11 @@ export function ClientTable({ initialClients }: ClientTableProps) {
           result.message ||
             `총 ${result.updated}건의 상태가 업데이트되었습니다.`
         );
+        // 클라이언트 목록 다시 로드
+        const clientsResult = await getClients();
+        if (clientsResult.success && clientsResult.clients) {
+          setClients(clientsResult.clients);
+        }
         // 페이지 새로고침
         router.refresh();
       } else {
@@ -160,7 +171,7 @@ export function ClientTable({ initialClients }: ClientTableProps) {
   };
 
   return (
-    <>
+    <div className={styles.clientTableWrapper}>
       <div className="white_box">
         <div className="box_inner">
           {/* 검색 필터 */}
@@ -393,6 +404,6 @@ export function ClientTable({ initialClients }: ClientTableProps) {
           }}
         />
       )}
-    </>
+    </div>
   );
 }

@@ -261,6 +261,47 @@ export async function getPendingWorkRequestsByClientId(clientId: string) {
 }
 
 /**
+ * 클라이언트의 모든 업무 요청 조회 (승인 페이지용 - 모든 상태 포함)
+ */
+export async function getAllWorkRequestsByClientId(clientId: string) {
+  try {
+    const supabase = await getSupabaseServerClient();
+
+    const { data, error } = await supabase
+      .from("work_request")
+      .select(`
+        *,
+        employee:employee_id (
+          id,
+          name
+        )
+      `)
+      .eq("client_id", clientId)
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    // employee 정보를 workRequest에 포함
+    const workRequests = (data || []).map((wr: any) => ({
+      ...wr,
+      employee_name: wr.employee?.name || null,
+    })) as (WorkRequest & { employee_name: string | null })[];
+
+    return {
+      success: true,
+      data: workRequests as WorkRequest[],
+    };
+  } catch (error) {
+    console.error("클라이언트 업무 요청 조회 오류:", error);
+    return {
+      success: false,
+      error: "업무 요청을 조회하는 중 오류가 발생했습니다.",
+      data: [],
+    };
+  }
+}
+
+/**
  * 클라이언트의 읽지 않은 알림 개수 조회
  */
 export async function getClientUnreadNotificationCount() {
@@ -294,6 +335,147 @@ export async function getClientUnreadNotificationCount() {
       success: false,
       error: "알림 개수를 조회하는 중 오류가 발생했습니다.",
       count: 0,
+    };
+  }
+}
+
+/**
+ * 클라이언트 알림 읽음 처리
+ */
+export async function markClientNotificationAsRead(
+  notificationId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const session = await getSession();
+    if (!session || session.type !== "client") {
+      return {
+        success: false,
+        error: "클라이언트 로그인이 필요합니다.",
+      };
+    }
+
+    const supabase = await getSupabaseServerClient();
+
+    // 알림이 해당 클라이언트의 것인지 확인
+    const { data: notification, error: fetchError } = await supabase
+      .from("notification")
+      .select("id, client_id")
+      .eq("id", notificationId)
+      .eq("client_id", session.id)
+      .single();
+
+    if (fetchError || !notification) {
+      return {
+        success: false,
+        error: "알림을 찾을 수 없습니다.",
+      };
+    }
+
+    // 읽음 처리
+    const { error: updateError } = await supabase
+      .from("notification")
+      .update({ is_read: true })
+      .eq("id", notificationId)
+      .eq("client_id", session.id);
+
+    if (updateError) throw updateError;
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error("알림 읽음 처리 오류:", error);
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "알림 읽음 처리 중 오류가 발생했습니다.",
+    };
+  }
+}
+
+/**
+ * 클라이언트의 모든 알림 읽음 처리
+ */
+export async function markAllClientNotificationsAsRead(): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  try {
+    const session = await getSession();
+    if (!session || session.type !== "client") {
+      return {
+        success: false,
+        error: "클라이언트 로그인이 필요합니다.",
+      };
+    }
+
+    const supabase = await getSupabaseServerClient();
+
+    // 해당 클라이언트의 모든 읽지 않은 알림을 읽음 처리
+    const { error: updateError } = await supabase
+      .from("notification")
+      .update({ is_read: true })
+      .eq("client_id", session.id)
+      .eq("is_read", false);
+
+    if (updateError) throw updateError;
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error("모든 알림 읽음 처리 오류:", error);
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "알림 읽음 처리 중 오류가 발생했습니다.",
+    };
+  }
+}
+
+/**
+ * 클라이언트 알림 목록 조회
+ */
+export async function getClientNotifications(): Promise<{
+  success: boolean;
+  data?: Notification[];
+  error?: string;
+}> {
+  try {
+    const session = await getSession();
+    if (!session || session.type !== "client") {
+      return {
+        success: false,
+        error: "클라이언트 로그인이 필요합니다.",
+      };
+    }
+
+    const supabase = await getSupabaseServerClient();
+
+    const { data: notifications, error } = await supabase
+      .from("notification")
+      .select("*")
+      .eq("client_id", session.id)
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    return {
+      success: true,
+      data: (notifications || []) as Notification[],
+    };
+  } catch (error) {
+    console.error("알림 조회 오류:", error);
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "알림을 조회하는 중 오류가 발생했습니다.",
     };
   }
 }
@@ -586,6 +768,15 @@ export async function getWorkRequestDetailForEmployee(
     employee_name?: string | null;
     client_name?: string | null;
     client_id?: string;
+    approved_by_client_name?: string | null;
+    approved_by_signature_url?: string | null;
+    approval_deducted_amount?: number | null;
+    approval_remaining_amount?: number | null;
+    approval_text_edit_count?: number | null;
+    approval_coding_edit_count?: number | null;
+    approval_image_edit_count?: number | null;
+    approval_popup_design_count?: number | null;
+    approval_banner_design_count?: number | null;
     managed_client?: {
       productType1: string;
       productType2: string;
@@ -648,11 +839,50 @@ export async function getWorkRequestDetailForEmployee(
       .eq("client_id", workRequest.client_id)
       .single();
 
+    // 승인한 클라이언트의 서명 이미지 조회
+    let approvedByClientName: string | null = null;
+    let approvedBySignatureUrl: string | null = null;
+
+    if (workRequest.approved_by) {
+      // 승인한 클라이언트 정보 조회
+      const { data: approvedByClient, error: approvedByClientError } = await supabase
+        .from("client")
+        .select("id, name")
+        .eq("id", workRequest.approved_by)
+        .single();
+
+      if (!approvedByClientError && approvedByClient) {
+        approvedByClientName = approvedByClient.name || null;
+
+        // 승인한 클라이언트의 서명 이미지 조회
+        const { data: signatureAttachments, error: signatureError } = await supabase
+          .from("client_attachment")
+          .select("file_url")
+          .eq("client_id", workRequest.approved_by)
+          .eq("file_type", "signature")
+          .order("created_at", { ascending: false })
+          .limit(1);
+
+        if (!signatureError && signatureAttachments && signatureAttachments.length > 0) {
+          approvedBySignatureUrl = signatureAttachments[0].file_url;
+        }
+      }
+    }
+
     // 관리 고객 정보가 없어도 업무 정보는 반환
     const formattedWorkRequest = {
       ...workRequest,
       employee_name: (workRequest as any).employee?.name || null,
       client_name: (workRequest as any).client?.name || null,
+      approved_by_client_name: approvedByClientName,
+      approved_by_signature_url: approvedBySignatureUrl,
+      approval_deducted_amount: workRequest.approval_deducted_amount ? Number(workRequest.approval_deducted_amount) : null,
+      approval_remaining_amount: workRequest.approval_remaining_amount ? Number(workRequest.approval_remaining_amount) : null,
+      approval_text_edit_count: workRequest.approval_text_edit_count || null,
+      approval_coding_edit_count: workRequest.approval_coding_edit_count || null,
+      approval_image_edit_count: workRequest.approval_image_edit_count || null,
+      approval_popup_design_count: workRequest.approval_popup_design_count || null,
+      approval_banner_design_count: workRequest.approval_banner_design_count || null,
       managed_client: managedClient
         ? {
             productType1: managedClient.product_type1,
@@ -686,6 +916,165 @@ export async function getWorkRequestDetailForEmployee(
 }
 
 /**
+ * 클라이언트용 업무 상세 조회
+ */
+export async function getWorkRequestDetailForClient(
+  workRequestId: string
+): Promise<{
+  success: boolean;
+  data?: WorkRequest & {
+    employee_name?: string | null;
+    client_name?: string | null;
+    client_id?: string;
+    approved_by_client_name?: string | null;
+    approved_by_signature_url?: string | null;
+    approval_deducted_amount?: number | null;
+    approval_remaining_amount?: number | null;
+    approval_text_edit_count?: number | null;
+    approval_coding_edit_count?: number | null;
+    approval_image_edit_count?: number | null;
+    approval_popup_design_count?: number | null;
+    approval_banner_design_count?: number | null;
+    managed_client?: {
+      productType1: string;
+      productType2: string;
+      totalAmount: number | null;
+      startDate: string | null;
+      endDate: string | null;
+      status: string;
+      detailTextEditCount: number;
+      detailCodingEditCount: number;
+      detailImageEditCount: number;
+      detailPopupDesignCount: number;
+      detailBannerDesignCount: number;
+    } | null;
+  };
+  error?: string;
+}> {
+  try {
+    const session = await getSession();
+    if (!session || session.type !== "client") {
+      return {
+        success: false,
+        error: "클라이언트 로그인이 필요합니다.",
+      };
+    }
+
+    const supabase = await getSupabaseServerClient();
+
+    // 업무 요청 및 관련 정보 조회 (승인 시점 스냅샷 정보 포함)
+    const { data: workRequest, error: workRequestError } = await supabase
+      .from("work_request")
+      .select(
+        `
+        *,
+        employee:employee_id (
+          id,
+          name
+        ),
+        client:client_id (
+          id,
+          name
+        )
+      `
+      )
+      .eq("id", workRequestId)
+      .eq("client_id", session.id) // 자신의 업무만 조회 가능
+      .single();
+
+    if (workRequestError || !workRequest) {
+      return {
+        success: false,
+        error: "업무 요청을 찾을 수 없습니다.",
+      };
+    }
+
+    // 관리 고객 정보 조회
+    const { data: managedClient, error: managedClientError } = await supabase
+      .from("managed_client")
+      .select(
+        "product_type1, product_type2, total_amount, start_date, end_date, status, detail_text_edit_count, detail_coding_edit_count, detail_image_edit_count, detail_popup_design_count, detail_banner_design_count"
+      )
+      .eq("client_id", workRequest.client_id)
+      .single();
+
+    // 승인한 클라이언트의 서명 이미지 조회
+    let approvedByClientName: string | null = null;
+    let approvedBySignatureUrl: string | null = null;
+
+    if (workRequest.approved_by) {
+      // 승인한 클라이언트 정보 조회
+      const { data: approvedByClient, error: approvedByClientError } = await supabase
+        .from("client")
+        .select("id, name")
+        .eq("id", workRequest.approved_by)
+        .single();
+
+      if (!approvedByClientError && approvedByClient) {
+        approvedByClientName = approvedByClient.name || null;
+
+        // 승인한 클라이언트의 서명 이미지 조회
+        const { data: signatureAttachments, error: signatureError } = await supabase
+          .from("client_attachment")
+          .select("file_url")
+          .eq("client_id", workRequest.approved_by)
+          .eq("file_type", "signature")
+          .order("created_at", { ascending: false })
+          .limit(1);
+
+        if (!signatureError && signatureAttachments && signatureAttachments.length > 0) {
+          approvedBySignatureUrl = signatureAttachments[0].file_url;
+        }
+      }
+    }
+
+    // 관리 고객 정보가 없어도 업무 정보는 반환
+    const formattedWorkRequest = {
+      ...workRequest,
+      employee_name: (workRequest as any).employee?.name || null,
+      client_name: (workRequest as any).client?.name || null,
+      approved_by_client_name: approvedByClientName,
+      approved_by_signature_url: approvedBySignatureUrl,
+      approval_deducted_amount: workRequest.approval_deducted_amount ? Number(workRequest.approval_deducted_amount) : null,
+      approval_remaining_amount: workRequest.approval_remaining_amount ? Number(workRequest.approval_remaining_amount) : null,
+      approval_text_edit_count: workRequest.approval_text_edit_count || null,
+      approval_coding_edit_count: workRequest.approval_coding_edit_count || null,
+      approval_image_edit_count: workRequest.approval_image_edit_count || null,
+      approval_popup_design_count: workRequest.approval_popup_design_count || null,
+      approval_banner_design_count: workRequest.approval_banner_design_count || null,
+      managed_client: managedClient
+        ? {
+            productType1: managedClient.product_type1,
+            productType2: managedClient.product_type2 || "",
+            totalAmount: managedClient.total_amount
+              ? Number(managedClient.total_amount)
+              : null,
+            startDate: managedClient.start_date,
+            endDate: managedClient.end_date,
+            status: managedClient.status,
+            detailTextEditCount: managedClient.detail_text_edit_count || 0,
+            detailCodingEditCount: managedClient.detail_coding_edit_count || 0,
+            detailImageEditCount: managedClient.detail_image_edit_count || 0,
+            detailPopupDesignCount: managedClient.detail_popup_design_count || 0,
+            detailBannerDesignCount: managedClient.detail_banner_design_count || 0,
+          }
+        : null,
+    };
+
+    return {
+      success: true,
+      data: formattedWorkRequest as any,
+    };
+  } catch (error) {
+    console.error("클라이언트 업무 상세 정보 조회 오류:", error);
+    return {
+      success: false,
+      error: "업무 상세 정보를 조회하는 중 오류가 발생했습니다.",
+    };
+  }
+}
+
+/**
  * 업무 승인
  */
 export async function approveWorkRequest(
@@ -706,10 +1095,10 @@ export async function approveWorkRequest(
 
     const supabase = await getSupabaseServerClient();
 
-    // 업무 요청 조회
+    // 업무 요청 조회 (승인 시점 스냅샷을 위해 추가 정보 필요)
     const { data: workRequest, error: fetchError } = await supabase
       .from("work_request")
-      .select("employee_id, status")
+      .select("employee_id, status, work_type, cost, managed_client_id, work_type_detail")
       .eq("id", workRequestId)
       .eq("client_id", clientId)
       .single();
@@ -728,15 +1117,48 @@ export async function approveWorkRequest(
       };
     }
 
+    // 승인 시점의 상태 스냅샷 준비
+    const updateData: any = {
+      status: "approved",
+      approved_at: new Date().toISOString(),
+      approved_by: clientId,
+      updated_at: new Date().toISOString(),
+    };
+
+    // 관리 고객 정보 조회 (승인 시점 스냅샷 저장용)
+    if (workRequest.managed_client_id) {
+      const { data: managedClient, error: managedClientError } = await supabase
+        .from("managed_client")
+        .select("product_type1, total_amount, detail_text_edit_count, detail_coding_edit_count, detail_image_edit_count, detail_popup_design_count, detail_banner_design_count")
+        .eq("id", workRequest.managed_client_id)
+        .single();
+
+      if (!managedClientError && managedClient) {
+        // 금액차감형: 승인 시점의 차감 금액 및 잔여 금액 저장
+        if (workRequest.work_type === "deduct" && workRequest.cost) {
+          const deductedAmount = Number(workRequest.cost);
+          const totalAmount = managedClient.total_amount ? Number(managedClient.total_amount) : 0;
+          const remainingAmount = Math.max(0, totalAmount - deductedAmount);
+          
+          updateData.approval_deducted_amount = deductedAmount;
+          updateData.approval_remaining_amount = remainingAmount;
+        }
+
+        // 유지보수형: 승인 시점의 횟수 정보 저장
+        if (workRequest.work_type === "maintenance") {
+          updateData.approval_text_edit_count = managedClient.detail_text_edit_count || 0;
+          updateData.approval_coding_edit_count = managedClient.detail_coding_edit_count || 0;
+          updateData.approval_image_edit_count = managedClient.detail_image_edit_count || 0;
+          updateData.approval_popup_design_count = managedClient.detail_popup_design_count || 0;
+          updateData.approval_banner_design_count = managedClient.detail_banner_design_count || 0;
+        }
+      }
+    }
+
     // 상태 업데이트
     const { error: updateError } = await supabase
       .from("work_request")
-      .update({
-        status: "approved",
-        approved_at: new Date().toISOString(),
-        approved_by: clientId,
-        updated_at: new Date().toISOString(),
-      })
+      .update(updateData)
       .eq("id", workRequestId);
 
     if (updateError) throw updateError;

@@ -1,0 +1,13 @@
+/* 거래처 수정 페이지 */
+.clientEditPage {
+  max-width: 1100px;
+  margin: 80px auto 100px;
+}
+
+/* Page Section Styles */
+.clientEditPage :global(.page_section) {
+  max-width: 1100px;
+  margin: 80px auto 100px;
+}
+
+

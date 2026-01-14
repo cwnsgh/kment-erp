@@ -56,6 +56,15 @@ export default function WorkRequestList({
       | (WorkRequest & {
           employee_name?: string | null;
           client_name?: string | null;
+          approved_by_client_name?: string | null;
+          approved_by_signature_url?: string | null;
+          approval_deducted_amount?: number | null;
+          approval_remaining_amount?: number | null;
+          approval_text_edit_count?: number | null;
+          approval_coding_edit_count?: number | null;
+          approval_image_edit_count?: number | null;
+          approval_popup_design_count?: number | null;
+          approval_banner_design_count?: number | null;
           managed_client?: {
             productType1: string;
             productType2: string;
@@ -191,7 +200,7 @@ export default function WorkRequestList({
       setSelectedIds([]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [statusFilter, itemsPerPage]);
+  }, [statusFilter, itemsPerPage, hasInitialLoad]);
 
   // 전체 선택/해제
   const handleSelectAll = (checked: boolean) => {
@@ -850,19 +859,6 @@ export default function WorkRequestList({
                 </div>
               ) : detailModal.workRequest ? (
                 <div className={styles.tableGroup}>
-                  {/* 기본 정보 */}
-                  <div className={styles.tableItem}>
-                    <h2 className={styles.tableTitle}>기본 정보</h2>
-                    <ul className={styles.tableRow}>
-                      <li className={styles.rowGroup}>
-                        <div className={styles.tableHead}>상호(법인명)</div>
-                        <div className={styles.tableData}>
-                          {detailModal.workRequest.client_name || "-"}
-                        </div>
-                      </li>
-                    </ul>
-                  </div>
-
                   {/* 관리 상품 정보 */}
                   {detailModal.workRequest.managed_client && (
                     <div className={styles.tableItem}>
@@ -949,20 +945,27 @@ export default function WorkRequestList({
                         </>
                       )}
 
-                      {/* 유지보수형: 세부 내용 */}
+                      {/* 유지보수형: 세부 네영 (잔여) - 승인 시점 정보 */}
                       {detailModal.workRequest.managed_client.productType1 ===
                         "maintenance" && (
                         <ul className={styles.tableRow}>
                           <li className={styles.rowGroup}>
-                            <div className={styles.tableHead}>세부 내용</div>
+                            <div className={styles.tableHead}>
+                              세부 내용 (잔여)
+                            </div>
                             <div className={styles.tableData}>
                               <ul className={styles.detailList}>
                                 <li>
                                   영역 텍스트 수정
                                   <span>
                                     <b className={styles.fontB}>
-                                      {detailModal.workRequest.managed_client
-                                        .detailTextEditCount || 0}
+                                      {detailModal.workRequest
+                                        .approval_text_edit_count !== null &&
+                                      detailModal.workRequest
+                                        .approval_text_edit_count !== undefined
+                                        ? detailModal.workRequest
+                                            .approval_text_edit_count
+                                        : "-"}
                                     </b>
                                     회
                                   </span>
@@ -971,8 +974,14 @@ export default function WorkRequestList({
                                   코딩 수정
                                   <span>
                                     <b className={styles.fontB}>
-                                      {detailModal.workRequest.managed_client
-                                        .detailCodingEditCount || 0}
+                                      {detailModal.workRequest
+                                        .approval_coding_edit_count !== null &&
+                                      detailModal.workRequest
+                                        .approval_coding_edit_count !==
+                                        undefined
+                                        ? detailModal.workRequest
+                                            .approval_coding_edit_count
+                                        : "-"}
                                     </b>
                                     회
                                   </span>
@@ -981,8 +990,13 @@ export default function WorkRequestList({
                                   기존 결과물 이미지 수정
                                   <span>
                                     <b className={styles.fontB}>
-                                      {detailModal.workRequest.managed_client
-                                        .detailImageEditCount || 0}
+                                      {detailModal.workRequest
+                                        .approval_image_edit_count !== null &&
+                                      detailModal.workRequest
+                                        .approval_image_edit_count !== undefined
+                                        ? detailModal.workRequest
+                                            .approval_image_edit_count
+                                        : "-"}
                                     </b>
                                     회
                                   </span>
@@ -991,8 +1005,14 @@ export default function WorkRequestList({
                                   팝업 디자인
                                   <span>
                                     <b className={styles.fontB}>
-                                      {detailModal.workRequest.managed_client
-                                        .detailPopupDesignCount || 0}
+                                      {detailModal.workRequest
+                                        .approval_popup_design_count !== null &&
+                                      detailModal.workRequest
+                                        .approval_popup_design_count !==
+                                        undefined
+                                        ? detailModal.workRequest
+                                            .approval_popup_design_count
+                                        : "-"}
                                     </b>
                                     회
                                   </span>
@@ -1003,8 +1023,15 @@ export default function WorkRequestList({
                                     배너 디자인
                                     <span>
                                       <b className={styles.fontB}>
-                                        {detailModal.workRequest.managed_client
-                                          .detailBannerDesignCount || 0}
+                                        {detailModal.workRequest
+                                          .approval_banner_design_count !==
+                                          null &&
+                                        detailModal.workRequest
+                                          .approval_banner_design_count !==
+                                          undefined
+                                          ? detailModal.workRequest
+                                              .approval_banner_design_count
+                                          : "-"}
                                       </b>
                                       회
                                     </span>
@@ -1102,32 +1129,49 @@ export default function WorkRequestList({
                         </div>
                       </li>
                     </ul>
-                    <ul className={styles.tableRow}>
-                      <li className={styles.rowGroup}>
-                        <div className={styles.tableHead}>IP</div>
-                        <div className={styles.tableData}>-</div>
-                      </li>
-                      <li className={styles.rowGroup}>
-                        <div className={styles.tableHead}>첨부파일</div>
-                        <div className={`${styles.tableData} ${styles.attach}`}>
-                          -
-                        </div>
-                      </li>
-                    </ul>
-                    {/* 금액차감형: 비용, 승인여부, 작업내용 */}
+                    {/* 금액차감형: 비용, 승인날짜, 작업여부, 작업내용 */}
                     {detailModal.workRequest.managed_client?.productType1 ===
                       "deduct" && (
                       <>
                         <ul className={styles.tableRow}>
                           <li className={styles.rowGroup}>
                             <div className={styles.tableHead}>비용</div>
-                            <div className={styles.tableData}>-</div>
+                            <div className={styles.tableData}>
+                              {(detailModal.workRequest as any).cost
+                                ? Number(
+                                    (detailModal.workRequest as any).cost
+                                  ).toLocaleString()
+                                : "-"}
+                            </div>
                           </li>
                           <li className={styles.rowGroup}>
-                            <div className={styles.tableHead}>승인여부</div>
+                            <div className={styles.tableHead}>승인날짜</div>
                             <div
-                              className={`${styles.tableData} ${styles.center}`}
+                              className={`${styles.tableData} ${styles.column}`}
                             >
+                              {(detailModal.workRequest as any).approved_at
+                                ? formatDate(
+                                    (detailModal.workRequest as any).approved_at
+                                  )
+                                : "-"}
+                              {detailModal.workRequest
+                                .approved_by_signature_url && (
+                                <img
+                                  src={
+                                    detailModal.workRequest
+                                      .approved_by_signature_url
+                                  }
+                                  alt="서명"
+                                  className={styles.signImg}
+                                />
+                              )}
+                            </div>
+                          </li>
+                        </ul>
+                        <ul className={styles.tableRow}>
+                          <li className={styles.rowGroup}>
+                            <div className={styles.tableHead}>작업여부</div>
+                            <div className={styles.tableData}>
                               <span
                                 className={getStatusClass(
                                   detailModal.workRequest.status
@@ -1149,28 +1193,39 @@ export default function WorkRequestList({
                       </>
                     )}
 
-                    {/* 유지보수형: 작업 내용, 횟수, 승인여부 */}
+                    {/* 유지보수형: 승인날짜, 작업여부, 작업내용, 횟수 */}
                     {detailModal.workRequest.managed_client?.productType1 ===
                       "maintenance" && (
                       <>
                         <ul className={styles.tableRow}>
                           <li className={styles.rowGroup}>
-                            <div className={styles.tableHead}>작업 내용</div>
-                            <div className={styles.tableData}>
-                              {detailModal.workRequest.work_content || "-"}
+                            <div className={styles.tableHead}>승인날짜</div>
+                            <div
+                              className={`${styles.tableData} ${styles.center}`}
+                            >
+                              {(detailModal.workRequest as any).approved_at
+                                ? formatDate(
+                                    (detailModal.workRequest as any).approved_at
+                                  )
+                                : "-"}
+                              {detailModal.workRequest
+                                .approved_by_signature_url && (
+                                <img
+                                  src={
+                                    detailModal.workRequest
+                                      .approved_by_signature_url
+                                  }
+                                  alt="서명"
+                                  className={styles.signImg}
+                                />
+                              )}
                             </div>
-                          </li>
-                          <li className={styles.rowGroup}>
-                            <div className={styles.tableHead}>횟수</div>
-                            <div className={styles.tableData}>1</div>
                           </li>
                         </ul>
                         <ul className={styles.tableRow}>
                           <li className={styles.rowGroup}>
-                            <div className={styles.tableHead}>승인여부</div>
-                            <div
-                              className={`${styles.tableData} ${styles.center}`}
-                            >
+                            <div className={styles.tableHead}>작업여부</div>
+                            <div className={styles.tableData}>
                               <span
                                 className={getStatusClass(
                                   detailModal.workRequest.status
@@ -1178,14 +1233,20 @@ export default function WorkRequestList({
                               >
                                 {getStatusLabel(detailModal.workRequest.status)}
                               </span>
-                              {detailModal.workRequest.status ===
-                                "approved" && (
-                                <img
-                                  src="/images/sign.png"
-                                  alt="서명"
-                                  className={styles.signImg}
-                                />
-                              )}
+                            </div>
+                          </li>
+                        </ul>
+                        <ul className={styles.tableRow}>
+                          <li className={styles.rowGroup}>
+                            <div className={styles.tableHead}>작업내용</div>
+                            <div className={styles.tableData}>
+                              {detailModal.workRequest.work_content || "-"}
+                            </div>
+                          </li>
+                          <li className={styles.rowGroup}>
+                            <div className={styles.tableHead}>횟수</div>
+                            <div className={styles.tableData}>
+                              {(detailModal.workRequest as any).count || "-"}
                             </div>
                           </li>
                         </ul>

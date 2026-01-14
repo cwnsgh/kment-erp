@@ -49,7 +49,7 @@ export function ClientShell({ children, session }: ClientShellProps) {
     fetchPendingCount();
   }, [session.id]);
 
-  // 읽지 않은 알림 개수 조회
+  // 읽지 않은 알림 개수 조회 (페이지 로드 시 한 번만)
   useEffect(() => {
     const fetchUnreadCount = async () => {
       try {
@@ -63,9 +63,6 @@ export function ClientShell({ children, session }: ClientShellProps) {
     };
 
     fetchUnreadCount();
-    // 주기적으로 업데이트 (30초마다)
-    const interval = setInterval(fetchUnreadCount, 30000);
-    return () => clearInterval(interval);
   }, []);
 
   // 프로필 메뉴 외부 클릭 시 닫기
@@ -352,10 +349,7 @@ export function ClientShell({ children, session }: ClientShellProps) {
       </div>
 
       {/* 푸터 - 최하단 */}
-      <footer
-        className={styles.footer}
-        style={{ marginLeft: sidebarMini ? "90px" : "280px" }}
-      >
+      <footer className={styles.footer}>
         <div className={styles.footerInner}>
           <p>© {new Date().getFullYear()} KMENT Corp.</p>
         </div>
