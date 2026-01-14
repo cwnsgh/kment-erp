@@ -1,10 +1,10 @@
 "use client";
 import { Bell, LogOut, Menu, User } from "lucide-react";
 import Link from "next/link";
-import { ReactNode, useState, useRef, useEffect } from "react";
+import { ReactNode, useState, useRef, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 
-import { mainNav } from "@/config/navigation";
+import { mainNav, type NavItem } from "@/config/navigation";
 import { EmployeeSession } from "@/lib/auth";
 import { logout } from "@/app/actions/auth";
 
@@ -55,6 +55,40 @@ export function AppShell({
     setProfileMenuOpen(false);
     await logout();
   };
+
+  // roleId에 따라 메뉴를 필터링하는 함수
+  const filterNavByRole = (navItems: NavItem[], roleId: number | null): NavItem[] => {
+    return navItems
+      .filter((item) => {
+        // allowedRoleIds가 없으면 모든 role 접근 가능
+        if (!item.allowedRoleIds || item.allowedRoleIds.length === 0) {
+          return true;
+        }
+        // allowedRoleIds가 있으면 해당 role ID만 허용
+        return roleId !== null && item.allowedRoleIds.includes(roleId);
+      })
+      .map((item) => {
+        // 자식 메뉴가 있으면 재귀적으로 필터링
+        if (item.children) {
+          const filteredChildren = filterNavByRole(item.children, roleId);
+          return {
+            ...item,
+            children: filteredChildren.length > 0 ? filteredChildren : undefined,
+          };
+        }
+        return item;
+      })
+      .filter((item) => {
+        // 자식이 있는 메뉴는 자식이 하나라도 남아있어야 표시
+        return !item.children || item.children.length > 0;
+      });
+  };
+
+  // role에 따라 필터링된 메뉴
+  const filteredNav = useMemo(
+    () => filterNavByRole(mainNav, session.roleId),
+    [session.roleId]
+  );
 
   return (
     <div className="flex min-h-screen flex-col bg-white text-slate-800">
@@ -188,7 +222,7 @@ export function AppShell({
         >
           <nav className={styles.sidebarNav}>
             <ul className={styles.menuList}>
-              {mainNav.map((group) => {
+              {filteredNav.map((group) => {
                 // 회원가입 승인 관리 메뉴에 뱃지 숫자 전달
                 const item =
                   group.label === "관리자 페이지" && group.children
