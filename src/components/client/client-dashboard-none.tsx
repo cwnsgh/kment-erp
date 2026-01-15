@@ -13,10 +13,11 @@ export function ClientDashboardNone({
   unreadNotificationCount = 0,
 }: ClientDashboardNoneProps) {
   return (
-    <section className={`${styles.customerMain} customer_main main page_section`}>
-      <div className="page_title">
-        <h1>
-          <span>{clientName}</span>님, 안녕하세요!
+    <section className={styles.section}>
+      <div className={styles.pageTitle}>
+        <h1 className={styles.pageTitleHeading}>
+          <span className={styles.pageTitleName}>{clientName}</span>님,
+          안녕하세요!
         </h1>
         {unreadNotificationCount > 0 && (
           <Link
@@ -27,13 +28,11 @@ export function ClientDashboardNone({
           </Link>
         )}
       </div>
-      <div className="white_box type_box type_n">
-        <div>
-          <p>등록된 관리 상품이 없습니다.</p>
-        </div>
+      <div
+        className={`${styles.whiteBox} ${styles.typeBox} ${styles.typeNone}`}
+      >
+        <p>등록된 관리 상품이 없습니다.</p>
       </div>
     </section>
   );
 }
-
-

@@ -1,79 +1,65 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
-  getClientNotifications,
-  markClientNotificationAsRead,
-  markAllClientNotificationsAsRead,
+  getEmployeeNotifications,
+  markEmployeeNotificationAsRead,
+  markAllEmployeeNotificationsAsRead,
   Notification,
 } from "@/app/actions/work-request";
-import { useRouter } from "next/navigation";
-import styles from "./client-notifications.module.css";
+import styles from "./employee-notifications.module.css";
 
-export function ClientNotifications() {
+export function EmployeeNotifications() {
   const router = useRouter();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  const notifyUnreadCountUpdated = () => {
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(new CustomEvent("client-notifications:updated"));
-    }
-  };
-
   useEffect(() => {
     fetchNotifications();
   }, []);
 
+  const notifyUnreadCountUpdated = () => {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("employee-notifications:updated"));
+    }
+  };
+
   const fetchNotifications = async () => {
     try {
       setLoading(true);
-      const result = await getClientNotifications();
+      const result = await getEmployeeNotifications();
       if (result.success && result.data) {
         setNotifications(result.data);
         const unread = result.data.filter((n) => !n.is_read).length;
         setUnreadCount(unread);
       }
     } catch (error) {
-      console.error("알림 조회 오류:", error);
+      console.error("직원 알림 조회 오류:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleNotificationClick = async (notification: Notification) => {
-    if (!notification.is_read) {
-      const result = await markClientNotificationAsRead(notification.id);
-      if (result.success) {
-        setNotifications((prev) =>
-          prev.map((n) =>
-            n.id === notification.id ? { ...n, is_read: true } : n
-          )
-        );
-        setUnreadCount((prev) => Math.max(0, prev - 1));
-        notifyUnreadCountUpdated();
-        router.refresh();
-      }
-    }
-
-    if (notification.work_request_id) {
-      router.push(
-        `/client/approvals?workRequestId=${encodeURIComponent(
-          notification.work_request_id
-        )}`
+  const handleMarkAsRead = async (notificationId: string) => {
+    const result = await markEmployeeNotificationAsRead(notificationId);
+    if (result.success) {
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === notificationId ? { ...n, is_read: true } : n))
       );
+      setUnreadCount((prev) => Math.max(0, prev - 1));
+      notifyUnreadCountUpdated();
+      router.refresh();
     }
   };
 
   const handleMarkAllAsRead = async () => {
-    const result = await markAllClientNotificationsAsRead();
+    const result = await markAllEmployeeNotificationsAsRead();
     if (result.success) {
-      // 로컬 상태 업데이트
       setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
       setUnreadCount(0);
       notifyUnreadCountUpdated();
-      // 페이지 새로고침하여 알림 개수 업데이트
       router.refresh();
     }
   };
@@ -117,9 +103,14 @@ export function ClientNotifications() {
               className={`${styles.notificationItem} ${
                 !notification.is_read ? styles.unread : ""
               }`}
-              onClick={() => handleNotificationClick(notification)}
+              onClick={() => handleMarkAsRead(notification.id)}
             >
               <div className={styles.notificationContent}>
+                {notification.title && (
+                  <strong className={styles.titleText}>
+                    {notification.title}
+                  </strong>
+                )}
                 <p className={styles.message}>{notification.message}</p>
                 <span className={styles.date}>
                   {formatDate(notification.created_at)}

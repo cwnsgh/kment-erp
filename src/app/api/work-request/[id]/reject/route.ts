@@ -61,7 +61,9 @@ export async function POST(
     if (workRequest.employee_id) {
       await supabase.from("notification").insert({
         employee_id: workRequest.employee_id,
+        work_request_id: workRequestId,
         type: "work_rejected",
+        title: "업무 반려",
         message: `${workRequest.brand_name} 업무 요청이 반려되었습니다.`,
         is_read: false,
       });

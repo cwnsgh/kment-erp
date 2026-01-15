@@ -1,6 +1,6 @@
 /* 승인 현황 페이지 */
 .approvalList {
-  /* 기본 스타일은 전역 CSS 사용 */
+  display: block;
 }
 
 /* Button Styles */
@@ -356,7 +356,7 @@
   justify-content: center;
 }
 
-.actionButtons .btnSm {
+.btnSm {
   padding: 6px 12px;
   font-size: 13px;
   border-radius: 4px;
@@ -366,25 +366,25 @@
   font-weight: 500;
 }
 
-.actionButtons .btnSm.primary {
+.primary {
   background: #3b82f6;
   color: #fff;
 }
 
-.actionButtons .btnSm.primary:hover:not(:disabled) {
+.primary:hover:not(:disabled) {
   background: #2563eb;
 }
 
-.actionButtons .btnSm.danger {
+.danger {
   background: #ef4444;
   color: #fff;
 }
 
-.actionButtons .btnSm.danger:hover:not(:disabled) {
+.danger:hover:not(:disabled) {
   background: #dc2626;
 }
 
-.actionButtons .btnSm:disabled {
+.btnSm:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
@@ -457,4 +457,242 @@
 .pagination .page.last::before {
   content: "»";
   font-size: 18px;
+}
+
+.clickableRow {
+  cursor: pointer;
+}
+
+.clickableRow:hover {
+  background: var(--hover-bg, #f8fafc) !important;
+}
+
+/* 상세 모달 */
+.detailOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 85;
+  padding: 20px;
+}
+
+.detailModal {
+  width: 100%;
+  max-width: 720px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 28px 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.detailHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.detailTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.detailTitle {
+  font-size: 20px;
+  font-weight: var(--font-weight-bold);
+  margin: 0;
+  color: #1e293b;
+}
+
+.detailSubtitle {
+  margin-top: 6px;
+  font-size: 14px;
+  color: #64748b;
+}
+
+.approvalPhaseBadge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.beforeApproval {
+  background: #eff6ff;
+  color: #1e40af;
+}
+
+.afterApproval {
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.detailGrid {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.detailBody {
+  margin-top: 16px;
+}
+
+.detailLoading {
+  margin-top: 20px;
+  padding: 20px;
+  text-align: center;
+  font-size: 14px;
+  color: #64748b;
+  background: #f8fafc;
+  border-radius: 10px;
+}
+
+.detailLabel {
+  display: block;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.detailValue {
+  margin-top: 6px;
+  font-size: 14px;
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.detailContent {
+  margin-top: 20px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 10px;
+}
+
+.detailText {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #1e293b;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.detailRemaining {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.detailRemainingColumns {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.detailRemainingBox {
+  padding: 12px;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.detailRemainingTitle {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.detailRemainingList {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+  font-size: 13px;
+  color: #475569;
+}
+
+.detailRemainingList li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.detailRemainingList b {
+  font-size: 14px;
+  color: #1e293b;
+}
+
+/* 서명 확인 모달 */
+.signatureOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 80;
+  padding: 20px;
+}
+
+.signatureModal {
+  width: 100%;
+  max-width: 520px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 28px 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.signatureTitle {
+  font-size: 20px;
+  font-weight: var(--font-weight-bold);
+  margin: 0;
+  color: #1e293b;
+}
+
+.signatureDesc {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #64748b;
+}
+
+.signatureBox {
+  margin-top: 20px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.signatureImage {
+  max-width: 100%;
+  max-height: 220px;
+  object-fit: contain;
+}
+
+.signatureState {
+  margin-top: 20px;
+  padding: 18px;
+  font-size: 14px;
+  color: #64748b;
+  background: #f8fafc;
+  border-radius: 10px;
+}
+
+.signatureActions {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
 }

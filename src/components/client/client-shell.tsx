@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useState, useEffect, useRef } from "react";
+import { ReactNode, useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
@@ -10,6 +10,10 @@ import { logout } from "@/app/actions/auth";
 import {
   getPendingWorkRequestsByClientId,
   getClientUnreadNotificationCount,
+  getClientNotifications,
+  markClientNotificationAsRead,
+  markAllClientNotificationsAsRead,
+  Notification,
 } from "@/app/actions/work-request";
 import { ClientPasswordChangeModal } from "@/components/client/client-password-change-modal";
 import styles from "./client-shell.module.css";
@@ -28,7 +32,11 @@ export function ClientShell({ children, session }: ClientShellProps) {
   const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notificationLoading, setNotificationLoading] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
+  const notificationRef = useRef<HTMLDivElement>(null);
 
   // 승인 대기 건수 조회
   useEffect(() => {
@@ -49,21 +57,32 @@ export function ClientShell({ children, session }: ClientShellProps) {
     fetchPendingCount();
   }, [session.id]);
 
-  // 읽지 않은 알림 개수 조회 (페이지 로드 시 한 번만)
-  useEffect(() => {
-    const fetchUnreadCount = async () => {
-      try {
-        const result = await getClientUnreadNotificationCount();
-        if (result.success && result.count !== undefined) {
-          setUnreadNotificationCount(result.count);
-        }
-      } catch (error) {
-        console.error("읽지 않은 알림 개수 조회 오류:", error);
+  const fetchUnreadCount = useCallback(async () => {
+    try {
+      const result = await getClientUnreadNotificationCount();
+      if (result.success && result.count !== undefined) {
+        setUnreadNotificationCount(result.count);
       }
+    } catch (error) {
+      console.error("읽지 않은 알림 개수 조회 오류:", error);
+    }
+  }, []);
+
+  // 읽지 않은 알림 개수 조회 (페이지 로드 시 + 알림 변경 이벤트)
+  useEffect(() => {
+    fetchUnreadCount();
+  }, [fetchUnreadCount]);
+
+  useEffect(() => {
+    const handleNotificationsUpdated = () => {
+      fetchUnreadCount();
     };
 
-    fetchUnreadCount();
-  }, []);
+    window.addEventListener("client-notifications:updated", handleNotificationsUpdated);
+    return () => {
+      window.removeEventListener("client-notifications:updated", handleNotificationsUpdated);
+    };
+  }, [fetchUnreadCount]);
 
   // 프로필 메뉴 외부 클릭 시 닫기
   useEffect(() => {
@@ -85,9 +104,98 @@ export function ClientShell({ children, session }: ClientShellProps) {
     };
   }, [profileMenuOpen]);
 
+  // 알림 드롭다운 외부 클릭 시 닫기
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(event.target as Node)
+      ) {
+        setNotificationOpen(false);
+      }
+    }
+
+    if (notificationOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [notificationOpen]);
+
   const handleLogout = async () => {
     setProfileMenuOpen(false);
     await logout();
+  };
+
+  const notifyUnreadCountUpdated = () => {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("client-notifications:updated"));
+    }
+  };
+
+  const fetchNotifications = async () => {
+    try {
+      setNotificationLoading(true);
+      const result = await getClientNotifications();
+      if (result.success && result.data) {
+        setNotifications(result.data);
+      }
+    } catch (error) {
+      console.error("알림 조회 오류:", error);
+    } finally {
+      setNotificationLoading(false);
+    }
+  };
+
+  const handleToggleNotifications = async () => {
+    setNotificationOpen((prev) => !prev);
+    await fetchNotifications();
+  };
+
+  const handleNotificationClick = async (notification: Notification) => {
+    if (!notification.is_read) {
+      const result = await markClientNotificationAsRead(notification.id);
+      if (result.success) {
+        setNotifications((prev) =>
+          prev.map((n) =>
+            n.id === notification.id ? { ...n, is_read: true } : n
+          )
+        );
+        setUnreadNotificationCount((prev) => Math.max(0, prev - 1));
+        notifyUnreadCountUpdated();
+        router.refresh();
+      }
+    }
+
+    if (notification.work_request_id) {
+      router.push(
+        `/client/approvals?workRequestId=${encodeURIComponent(
+          notification.work_request_id
+        )}`
+      );
+    }
+  };
+
+  const handleAllNotificationsRead = async () => {
+    const result = await markAllClientNotificationsAsRead();
+    if (result.success) {
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+      setUnreadNotificationCount(0);
+      notifyUnreadCountUpdated();
+      router.refresh();
+    }
+  };
+
+  const formatNotificationDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(
+      2,
+      "0"
+    )}.${String(date.getDate()).padStart(2, "0")} ${String(
+      date.getHours()
+    ).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
   };
 
   const formatDate = () => {
@@ -125,18 +233,78 @@ export function ClientShell({ children, session }: ClientShellProps) {
           </Link>
         </div>
         <div className={styles.headerRight}>
-          <Link
-            href="/client/notifications"
-            className={styles.notificationButton}
-          >
-            <Bell size={20} />
-            {unreadNotificationCount > 0 && (
-              <span className={styles.notificationBadge}>
-                {unreadNotificationCount}
-              </span>
+          <div className={styles.notificationWrap} ref={notificationRef}>
+            <button
+              type="button"
+              className={styles.notificationButton}
+              onClick={handleToggleNotifications}
+            >
+              <Bell size={20} />
+              {unreadNotificationCount > 0 && (
+                <span className={styles.notificationBadge}>
+                  {unreadNotificationCount}
+                </span>
+              )}
+              <span className="sr-only">알림</span>
+            </button>
+            {notificationOpen && (
+              <div className={styles.notifyContainer}>
+                <div className={styles.notifyHeader}>
+                  <p className={styles.notifyTitle}>알림</p>
+                  {unreadNotificationCount > 0 && (
+                    <button
+                      type="button"
+                      className={styles.notifyAllRead}
+                      onClick={handleAllNotificationsRead}
+                    >
+                      모두 읽음
+                    </button>
+                  )}
+                </div>
+                <div className={styles.notifyContent}>
+                  {notificationLoading ? (
+                    <div className={styles.notifyEmpty}>
+                      알림을 불러오는 중...
+                    </div>
+                  ) : notifications.length === 0 ? (
+                    <div className={styles.notifyEmpty}>
+                      알림이 없습니다.
+                    </div>
+                  ) : (
+                    <div className={styles.notifyArea}>
+                      {notifications.map((notification) => (
+                        <button
+                          type="button"
+                          key={notification.id}
+                          className={`${styles.notifyItem} ${
+                            !notification.is_read ? styles.notifyUnread : ""
+                          }`}
+                          onClick={() => handleNotificationClick(notification)}
+                        >
+                          <div className={styles.notifyTop}>
+                            <p>{notification.title || "알림"}</p>
+                            {!notification.is_read && (
+                              <img
+                                className={styles.notifyClose}
+                                src="/images/close_icon.svg"
+                                alt=""
+                              />
+                            )}
+                          </div>
+                          <div className={styles.notifyMid}>
+                            <p>{notification.message}</p>
+                          </div>
+                          <div className={styles.notifyBot}>
+                            {formatNotificationDate(notification.created_at)}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
-            <span className="sr-only">알림</span>
-          </Link>
+          </div>
           <div className={styles.dateText}>{formatDate()}</div>
           <div className={styles.userName}>{session.name}님</div>
           <div className={styles.profileMenu} ref={profileMenuRef}>

@@ -1,15 +1,10 @@
 /* 금액차감형 대시보드 */
-.customerMain {
-  /* wrapper 클래스 */
-}
-
-/* Page Section Styles */
-.customerMain :global(.page_section) {
-  max-width: 1100px;
+.section {
+  max-width: 1300px;
   margin: 80px auto 100px;
 }
 
-.customerMain :global(.page_title) {
+.pageTitle {
   text-align: left;
   margin: 0 auto 30px;
   display: flex;
@@ -17,17 +12,17 @@
   justify-content: space-between;
 }
 
-.customerMain :global(.page_title h1) {
+.pageTitleHeading {
   font-size: 32px;
   font-weight: var(--font-weight-bold);
+  margin: 0;
 }
 
-.customerMain :global(.page_title h1 span) {
+.pageTitleName {
   color: var(--primary);
 }
 
-/* White Box Styles */
-.customerMain :global(.white_box) {
+.whiteBox {
   background: #fff;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
@@ -37,71 +32,64 @@
   position: relative;
 }
 
-.customerMain :global(.white_box.type_box) {
+.typeBox {
   margin-bottom: 20px;
 }
 
-.customerMain :global(.white_box.type_box .box_title) {
+.boxTitle {
   font-size: 20px;
   font-weight: var(--font-weight-bold);
-  margin-bottom: 20px;
+  margin: 0 0 20px;
 }
 
-.customerMain :global(.white_box.type_box .type_period) {
+.typePeriod {
   font-size: 16px;
   color: var(--text-gray);
-  margin-bottom: 30px;
+  margin: 0 0 30px;
 }
 
-.customerMain :global(.white_box.type_box .type_content) {
+.typeContent {
   display: flex;
   gap: 40px;
   margin-top: 20px;
 }
 
-.customerMain :global(.white_box.type_box .type_content > div) {
+.typeContent > div {
   flex: 1;
 }
 
-.customerMain :global(.white_box.type_box .type_content .type_head) {
+.typeHead {
   font-size: 14px;
   color: var(--text-gray);
-  margin-bottom: 10px;
+  margin: 0 0 10px;
 }
 
-.customerMain :global(.white_box.type_box .type_content .type_data) {
+.typeData {
   font-size: 24px;
   font-weight: var(--font-weight-semibold);
   color: var(--text-color);
+  margin: 0;
 }
 
-/* Flex Box */
-.customerMain :global(.flex_box) {
+.fontBold {
+  font-weight: var(--font-weight-semibold);
+}
+
+.flexBox {
   display: flex;
   gap: 20px;
   margin-top: 20px;
 }
 
-.customerMain :global(.flex_box .left_box),
-.customerMain :global(.flex_box .right_box) {
+.leftBox,
+.rightBox {
   flex: 1;
 }
 
-.customerMain :global(.flex_box .box_title) {
-  font-size: 18px;
-  font-weight: var(--font-weight-bold);
-  margin-bottom: 20px;
-}
-
-/* Main Button */
-.customerMain :global(.main_btn) {
+.mainBtn {
   position: absolute;
   top: 20px;
   right: 20px;
-}
-
-.customerMain :global(.main_btn a) {
-  display: inline-block;
 }
 
 .arrowIcon {
@@ -110,14 +98,13 @@
   object-fit: contain;
 }
 
-/* Approval Box */
-.customerMain :global(.approval_box) {
+.approvalBox {
   display: flex;
   gap: 20px;
   margin-bottom: 20px;
 }
 
-.customerMain :global(.approval_box > div) {
+.approvalBox > div {
   flex: 1;
   text-align: center;
   padding: 16px;
@@ -125,30 +112,29 @@
   border-radius: 8px;
 }
 
-.customerMain :global(.approval_box > div span) {
+.approvalBox > div span {
   display: block;
   font-size: 14px;
   color: var(--text-gray);
   margin-bottom: 8px;
 }
 
-.customerMain :global(.approval_box > div p) {
+.approvalBox > div p {
   font-size: 20px;
   margin: 0;
 }
 
-/* Table Wrap */
-.customerMain :global(.table_wrap) {
+.tableWrap {
   margin-top: 20px;
   overflow-x: auto;
 }
 
-.customerMain :global(.table_wrap table) {
+.table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.customerMain :global(.table_wrap thead th) {
+.table thead th {
   background: var(--background-color);
   padding: 12px;
   text-align: left;
@@ -157,25 +143,24 @@
   border-bottom: 1px solid var(--border-color);
 }
 
-.customerMain :global(.table_wrap tbody td) {
+.table tbody td {
   padding: 12px;
   font-size: 14px;
   border-bottom: 1px solid var(--border-color);
 }
 
-.customerMain :global(.table_wrap tbody .text_overflow) {
+.textOverflow {
   max-width: 300px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.customerMain :global(.table_wrap tbody .text_overflow p) {
+.textOverflow p {
   margin: 0;
 }
 
-/* Status Badges */
-.customerMain :global(.approval_request) {
+.approvalRequest {
   display: inline-block;
   padding: 4px 12px;
   background: var(--status-yellow);
@@ -185,7 +170,7 @@
   font-weight: var(--font-weight-semibold);
 }
 
-.customerMain :global(.approval_complete) {
+.approvalComplete {
   display: inline-block;
   padding: 4px 12px;
   background: var(--status-blue);
@@ -195,7 +180,7 @@
   font-weight: var(--font-weight-semibold);
 }
 
-.customerMain :global(.approval_refusal) {
+.approvalRefusal {
   display: inline-block;
   padding: 4px 12px;
   background: var(--status-red);
@@ -205,8 +190,7 @@
   font-weight: var(--font-weight-semibold);
 }
 
-/* Work Status Badges */
-.customerMain :global(.work_waiting) {
+.workWaiting {
   display: inline-block;
   padding: 4px 12px;
   background: var(--status-gray);
@@ -216,7 +200,7 @@
   font-weight: var(--font-weight-semibold);
 }
 
-.customerMain :global(.work_ongoing) {
+.workOngoing {
   display: inline-block;
   padding: 4px 12px;
   background: var(--status-yellow);
@@ -226,7 +210,7 @@
   font-weight: var(--font-weight-semibold);
 }
 
-.customerMain :global(.work_complete) {
+.workComplete {
   display: inline-block;
   padding: 4px 12px;
   background: var(--status-blue);
@@ -236,7 +220,6 @@
   font-weight: var(--font-weight-semibold);
 }
 
-/* Notification Badge */
 .notificationBadge {
   display: inline-block;
   padding: 4px 12px;
@@ -251,4 +234,3 @@
 .notificationBadge:hover {
   background: #2563eb;
 }
-

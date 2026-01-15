@@ -62,9 +62,9 @@ export function ClientDashboardDeduct({
 
   const getStatusClass = (status: string) => {
     const classMap: Record<string, string> = {
-      pending: "approval_request",
-      approved: "approval_complete",
-      rejected: "approval_refusal",
+      pending: styles.approvalRequest,
+      approved: styles.approvalComplete,
+      rejected: styles.approvalRefusal,
     };
     return classMap[status] || "";
   };
@@ -80,9 +80,9 @@ export function ClientDashboardDeduct({
 
   const getWorkStatusClass = (status: string) => {
     const classMap: Record<string, string> = {
-      approved: "work_waiting",
-      in_progress: "work_ongoing",
-      completed: "work_complete",
+      approved: styles.workWaiting,
+      in_progress: styles.workOngoing,
+      completed: styles.workComplete,
     };
     return classMap[status] || "";
   };
@@ -103,10 +103,11 @@ export function ClientDashboardDeduct({
     : 0;
 
   return (
-    <section className={`${styles.customerMain} customer_main main page_section`}>
-      <div className="page_title">
-        <h1>
-          <span>{clientName}</span>님, 안녕하세요!
+    <section className={styles.section}>
+      <div className={styles.pageTitle}>
+        <h1 className={styles.pageTitleHeading}>
+          <span className={styles.pageTitleName}>{clientName}</span>님,
+          안녕하세요!
         </h1>
         {unreadNotificationCount > 0 && (
           <Link
@@ -117,41 +118,41 @@ export function ClientDashboardDeduct({
           </Link>
         )}
       </div>
-      <div className="white_box type_box">
-        <h2 className="box_title font_b">
+      <div className={`${styles.whiteBox} ${styles.typeBox}`}>
+        <h2 className={`${styles.boxTitle} ${styles.fontBold}`}>
           금액차감형 ({formatProductType2(managedClient.product_type2)})
         </h2>
-        <h3 className="type_period">
+        <h3 className={styles.typePeriod}>
           {formatDate(managedClient.start_date)} ~{" "}
           {formatDate(managedClient.end_date)}
         </h3>
-        <div className="type_content">
+        <div className={styles.typeContent}>
           <div>
-            <p className="type_head">총 금액</p>
-            <p className="type_data font_b">
+            <p className={styles.typeHead}>총 금액</p>
+            <p className={`${styles.typeData} ${styles.fontBold}`}>
               {managedClient.total_amount
                 ? managedClient.total_amount.toLocaleString()
                 : "-"}
             </p>
           </div>
           <div>
-            <p className="type_head">차감 금액</p>
-            <p className="type_data font_b">
+            <p className={styles.typeHead}>차감 금액</p>
+            <p className={`${styles.typeData} ${styles.fontBold}`}>
               {deductedAmount.toLocaleString()}
             </p>
           </div>
           <div>
-            <p className="type_head">잔여 금액</p>
-            <p className="type_data font_b">
+            <p className={styles.typeHead}>잔여 금액</p>
+            <p className={`${styles.typeData} ${styles.fontBold}`}>
               {remainingAmount.toLocaleString()}
             </p>
           </div>
         </div>
       </div>
-      <div className="flex_box">
-        <div className="white_box left_box">
-          <h2 className="box_title">승인 현황</h2>
-          <div className="main_btn">
+      <div className={styles.flexBox}>
+        <div className={`${styles.whiteBox} ${styles.leftBox}`}>
+          <h2 className={styles.boxTitle}>승인 현황</h2>
+          <div className={styles.mainBtn}>
             <Link href="/client/approvals">
               <img
                 src="/images/arrow_icon2.svg"
@@ -162,22 +163,22 @@ export function ClientDashboardDeduct({
               />
             </Link>
           </div>
-          <div className="approval_box">
+          <div className={styles.approvalBox}>
             <div>
               <span>승인요청</span>
-              <p className="font_b">{approvalStats.pending}건</p>
+              <p className={styles.fontBold}>{approvalStats.pending}건</p>
             </div>
             <div>
               <span>승인반려</span>
-              <p className="font_b">{approvalStats.rejected}건</p>
+              <p className={styles.fontBold}>{approvalStats.rejected}건</p>
             </div>
             <div>
               <span>승인완료</span>
-              <p className="font_b">{approvalStats.approved}건</p>
+              <p className={styles.fontBold}>{approvalStats.approved}건</p>
             </div>
           </div>
-          <div className="table_wrap">
-            <table>
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
               <colgroup>
                 <col style={{ width: "18%" }} />
                 <col style={{ width: "26%" }} />
@@ -207,7 +208,7 @@ export function ClientDashboardDeduct({
                     <tr key={request.id}>
                       <td>{request.brand_name}</td>
                       <td>{formatDate(request.created_at)}</td>
-                      <td className="text_overflow">
+                      <td className={styles.textOverflow}>
                         <p>{request.work_content || "-"}</p>
                       </td>
                       <td>
@@ -222,9 +223,9 @@ export function ClientDashboardDeduct({
             </table>
           </div>
         </div>
-        <div className="white_box right_box">
-          <h2 className="box_title">작업 현황</h2>
-          <div className="main_btn">
+        <div className={`${styles.whiteBox} ${styles.rightBox}`}>
+          <h2 className={styles.boxTitle}>작업 현황</h2>
+          <div className={styles.mainBtn}>
             <Link href="/client/tasks">
               <img
                 src="/images/arrow_icon2.svg"
@@ -235,8 +236,8 @@ export function ClientDashboardDeduct({
               />
             </Link>
           </div>
-          <div className="table_wrap">
-            <table>
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
               <colgroup>
                 <col style={{ width: "18%" }} />
                 <col style={{ width: "26%" }} />
@@ -267,10 +268,12 @@ export function ClientDashboardDeduct({
                       <td>{request.brand_name}</td>
                       <td>
                         {request.start_date && request.end_date
-                          ? `${formatDate(request.start_date)} ~ ${formatDate(request.end_date)}`
+                          ? `${formatDate(request.start_date)} ~ ${formatDate(
+                              request.end_date
+                            )}`
                           : "-"}
                       </td>
-                      <td className="text_overflow">
+                      <td className={styles.textOverflow}>
                         <p>{request.work_content || "-"}</p>
                       </td>
                       <td>
@@ -289,4 +292,3 @@ export function ClientDashboardDeduct({
     </section>
   );
 }
-

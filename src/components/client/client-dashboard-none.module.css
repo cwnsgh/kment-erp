@@ -1,15 +1,10 @@
 /* 관리상품 없음 대시보드 */
-.customerMain {
-  /* wrapper 클래스 */
-}
-
-/* Page Section Styles */
-.customerMain :global(.page_section) {
+.section {
   max-width: 1100px;
   margin: 80px auto 100px;
 }
 
-.customerMain :global(.page_title) {
+.pageTitle {
   text-align: left;
   margin: 0 auto 30px;
   display: flex;
@@ -17,17 +12,17 @@
   justify-content: space-between;
 }
 
-.customerMain :global(.page_title h1) {
+.pageTitleHeading {
   font-size: 32px;
   font-weight: var(--font-weight-bold);
+  margin: 0;
 }
 
-.customerMain :global(.page_title h1 span) {
+.pageTitleName {
   color: var(--primary);
 }
 
-/* White Box Styles */
-.customerMain :global(.white_box) {
+.whiteBox {
   background: #fff;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
@@ -37,22 +32,17 @@
   position: relative;
 }
 
-.customerMain :global(.white_box.type_box.type_n) {
+.typeBox {
+  margin-bottom: 20px;
+}
+
+.typeNone {
   text-align: center;
   padding: 80px 50px;
-}
-
-.customerMain :global(.white_box.type_box.type_n > div) {
-  /* 내용 영역 */
-}
-
-.customerMain :global(.white_box.type_box.type_n p) {
   font-size: 16px;
   color: var(--text-gray);
-  margin: 0;
 }
 
-/* Notification Badge */
 .notificationBadge {
   display: inline-block;
   padding: 4px 12px;
@@ -67,5 +57,3 @@
 .notificationBadge:hover {
   background: #2563eb;
 }
-
-

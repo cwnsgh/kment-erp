@@ -57,6 +57,7 @@ export const mainNav: NavItem[] = [
     href: "/operations/tasks",
     icon: "workflow",
     children: [
+      { label: "관리 업무 현황", href: "/operations/tasks" },
       { label: "관리 고객 조회", href: "/operations/clients" },
       { label: "관리 고객 등록", href: "/operations/clients/new" },
       { label: "관리 업무 등록", href: "/operations/new" },

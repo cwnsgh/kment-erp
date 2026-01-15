@@ -9,6 +9,7 @@ export interface WorkRequest {
   client_id: string;
   employee_id: string | null;
   brand_name: string;
+  manager?: string | null;
   work_content: string | null;
   start_date?: string | null;
   end_date?: string | null;
@@ -22,7 +23,9 @@ export interface Notification {
   id: string;
   employee_id: string | null;
   client_id: string | null;
+  work_request_id?: string | null;
   type: string;
+  title?: string | null;
   message: string;
   is_read: boolean;
   created_at: string;
@@ -63,8 +66,12 @@ export async function createWorkRequest(data: {
 
     // 작업기간 파싱
     const [startDateStr, endDateStr] = data.workPeriod.split(" ~ ");
-    const startDate = startDateStr ? new Date(startDateStr.trim()).toISOString() : null;
-    const endDate = endDateStr ? new Date(endDateStr.trim()).toISOString() : null;
+    const startDate = startDateStr
+      ? new Date(startDateStr.trim()).toISOString()
+      : null;
+    const endDate = endDateStr
+      ? new Date(endDateStr.trim()).toISOString()
+      : null;
 
     // 업무 요청 생성
     const { data: workRequest, error: workRequestError } = await supabase
@@ -93,7 +100,9 @@ export async function createWorkRequest(data: {
     // 관리 고객 정보 조회
     const { data: managedClient, error: managedClientError } = await supabase
       .from("managed_client")
-      .select("product_type1, status, payment_status, progress_started_date, detail_text_edit_count, detail_coding_edit_count, detail_image_edit_count, detail_popup_design_count, detail_banner_design_count, initial_detail_text_edit_count, initial_detail_coding_edit_count, initial_detail_image_edit_count, initial_detail_popup_design_count, initial_detail_banner_design_count")
+      .select(
+        "product_type1, status, payment_status, progress_started_date, detail_text_edit_count, detail_coding_edit_count, detail_image_edit_count, detail_popup_design_count, detail_banner_design_count, initial_detail_text_edit_count, initial_detail_coding_edit_count, initial_detail_image_edit_count, initial_detail_popup_design_count, initial_detail_banner_design_count"
+      )
       .eq("id", data.managedClientId)
       .single();
 
@@ -101,13 +110,18 @@ export async function createWorkRequest(data: {
 
     // 진행상황 업데이트: 관리업무가 있으면 "진행"으로 변경 (미납 상태는 유지)
     const updateData: any = {};
-    
+
     // 진행상황이 "진행"이 아니고, "미납"이 아닌 경우에만 "진행"으로 변경
-    if (managedClient.status !== "ongoing" && managedClient.status !== "unpaid") {
+    if (
+      managedClient.status !== "ongoing" &&
+      managedClient.status !== "unpaid"
+    ) {
       updateData.status = "ongoing";
       // 진행상황이 처음 "진행"으로 변경되는 경우 progress_started_date 설정
       if (!managedClient.progress_started_date) {
-        updateData.progress_started_date = new Date().toISOString().split("T")[0]; // 오늘 날짜
+        updateData.progress_started_date = new Date()
+          .toISOString()
+          .split("T")[0]; // 오늘 날짜
       }
     }
 
@@ -115,25 +129,38 @@ export async function createWorkRequest(data: {
     if (data.workType === "maintenance" && data.workTypeDetail && data.count) {
       const currentDate = new Date();
       const today = currentDate.getDate();
-      
+
       // 초기화 체크: progress_started_date의 날짜와 오늘 날짜 비교
-      if (managedClient.progress_started_date && managedClient.status === "ongoing") {
+      if (
+        managedClient.progress_started_date &&
+        managedClient.status === "ongoing"
+      ) {
         const progressDate = new Date(managedClient.progress_started_date);
         const progressDay = progressDate.getDate();
-        
+
         // 오늘이 초기화일인지 확인 (매월 progressDay일에 초기화)
         // 마지막 초기화일 확인 (같은 날 여러 번 초기화 방지)
         const lastResetDate = managedClient.progress_started_date;
-        const todayStr = currentDate.toISOString().split("T")[0].substring(0, 7); // YYYY-MM
-        const lastResetMonth = lastResetDate ? lastResetDate.substring(0, 7) : null;
-        
+        const todayStr = currentDate
+          .toISOString()
+          .split("T")[0]
+          .substring(0, 7); // YYYY-MM
+        const lastResetMonth = lastResetDate
+          ? lastResetDate.substring(0, 7)
+          : null;
+
         if (today === progressDay && lastResetMonth !== todayStr) {
           // 초기값으로 리셋
-          updateData.detail_text_edit_count = managedClient.initial_detail_text_edit_count || 0;
-          updateData.detail_coding_edit_count = managedClient.initial_detail_coding_edit_count || 0;
-          updateData.detail_image_edit_count = managedClient.initial_detail_image_edit_count || 0;
-          updateData.detail_popup_design_count = managedClient.initial_detail_popup_design_count || 0;
-          updateData.detail_banner_design_count = managedClient.initial_detail_banner_design_count || 0;
+          updateData.detail_text_edit_count =
+            managedClient.initial_detail_text_edit_count || 0;
+          updateData.detail_coding_edit_count =
+            managedClient.initial_detail_coding_edit_count || 0;
+          updateData.detail_image_edit_count =
+            managedClient.initial_detail_image_edit_count || 0;
+          updateData.detail_popup_design_count =
+            managedClient.initial_detail_popup_design_count || 0;
+          updateData.detail_banner_design_count =
+            managedClient.initial_detail_banner_design_count || 0;
         }
       }
 
@@ -142,31 +169,41 @@ export async function createWorkRequest(data: {
         case "textEdit":
           updateData.detail_text_edit_count = Math.max(
             0,
-            (updateData.detail_text_edit_count ?? managedClient.detail_text_edit_count ?? 0) - data.count
+            (updateData.detail_text_edit_count ??
+              managedClient.detail_text_edit_count ??
+              0) - data.count
           );
           break;
         case "codingEdit":
           updateData.detail_coding_edit_count = Math.max(
             0,
-            (updateData.detail_coding_edit_count ?? managedClient.detail_coding_edit_count ?? 0) - data.count
+            (updateData.detail_coding_edit_count ??
+              managedClient.detail_coding_edit_count ??
+              0) - data.count
           );
           break;
         case "imageEdit":
           updateData.detail_image_edit_count = Math.max(
             0,
-            (updateData.detail_image_edit_count ?? managedClient.detail_image_edit_count ?? 0) - data.count
+            (updateData.detail_image_edit_count ??
+              managedClient.detail_image_edit_count ??
+              0) - data.count
           );
           break;
         case "popupDesign":
           updateData.detail_popup_design_count = Math.max(
             0,
-            (updateData.detail_popup_design_count ?? managedClient.detail_popup_design_count ?? 0) - data.count
+            (updateData.detail_popup_design_count ??
+              managedClient.detail_popup_design_count ??
+              0) - data.count
           );
           break;
         case "bannerDesign":
           updateData.detail_banner_design_count = Math.max(
             0,
-            (updateData.detail_banner_design_count ?? managedClient.detail_banner_design_count ?? 0) - data.count
+            (updateData.detail_banner_design_count ??
+              managedClient.detail_banner_design_count ??
+              0) - data.count
           );
           break;
       }
@@ -188,6 +225,7 @@ export async function createWorkRequest(data: {
       .insert({
         client_id: data.clientId,
         employee_id: employeeId, // notification 테이블에 employee_id가 필수이므로 추가
+        work_request_id: workRequest.id,
         type: "work_requested",
         title: "새로운 업무 승인 요청",
         message: `새로운 업무 승인 요청이 등록되었습니다: ${data.brandName}`,
@@ -227,13 +265,15 @@ export async function getPendingWorkRequestsByClientId(clientId: string) {
 
     const { data, error } = await supabase
       .from("work_request")
-      .select(`
+      .select(
+        `
         *,
         employee:employee_id (
           id,
           name
         )
-      `)
+      `
+      )
       .eq("client_id", clientId)
       .eq("status", "pending")
       .order("created_at", { ascending: false });
@@ -269,13 +309,15 @@ export async function getAllWorkRequestsByClientId(clientId: string) {
 
     const { data, error } = await supabase
       .from("work_request")
-      .select(`
+      .select(
+        `
         *,
         employee:employee_id (
           id,
           name
         )
-      `)
+      `
+      )
       .eq("client_id", clientId)
       .order("created_at", { ascending: false });
 
@@ -297,6 +339,47 @@ export async function getAllWorkRequestsByClientId(clientId: string) {
       success: false,
       error: "업무 요청을 조회하는 중 오류가 발생했습니다.",
       data: [],
+    };
+  }
+}
+
+/**
+ * 클라이언트 서명 파일 URL 조회
+ */
+export async function getClientSignatureUrl(): Promise<{
+  success: boolean;
+  url?: string | null;
+  error?: string;
+}> {
+  try {
+    const session = await getSession();
+    if (!session || session.type !== "client") {
+      return {
+        success: false,
+        error: "클라이언트 로그인이 필요합니다.",
+      };
+    }
+
+    const supabase = await getSupabaseServerClient();
+    const { data, error } = await supabase
+      .from("client_attachment")
+      .select("file_url")
+      .eq("client_id", session.id)
+      .eq("file_type", "signature")
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    if (error) throw error;
+
+    return {
+      success: true,
+      url: data && data.length > 0 ? data[0].file_url : null,
+    };
+  } catch (error) {
+    console.error("클라이언트 서명 조회 오류:", error);
+    return {
+      success: false,
+      error: "서명 정보를 불러오는 중 오류가 발생했습니다.",
     };
   }
 }
@@ -331,6 +414,44 @@ export async function getClientUnreadNotificationCount() {
     };
   } catch (error) {
     console.error("읽지 않은 알림 개수 조회 오류:", error);
+    return {
+      success: false,
+      error: "알림 개수를 조회하는 중 오류가 발생했습니다.",
+      count: 0,
+    };
+  }
+}
+
+/**
+ * 직원의 읽지 않은 알림 개수 조회
+ */
+export async function getEmployeeUnreadNotificationCount() {
+  try {
+    const session = await getSession();
+    if (!session || session.type !== "employee") {
+      return {
+        success: false,
+        error: "직원 로그인이 필요합니다.",
+        count: 0,
+      };
+    }
+
+    const supabase = await getSupabaseServerClient();
+
+    const { count, error } = await supabase
+      .from("notification")
+      .select("*", { count: "exact", head: true })
+      .eq("employee_id", session.id)
+      .eq("is_read", false);
+
+    if (error) throw error;
+
+    return {
+      success: true,
+      count: count || 0,
+    };
+  } catch (error) {
+    console.error("직원 읽지 않은 알림 개수 조회 오류:", error);
     return {
       success: false,
       error: "알림 개수를 조회하는 중 오류가 발생했습니다.",
@@ -438,6 +559,101 @@ export async function markAllClientNotificationsAsRead(): Promise<{
 }
 
 /**
+ * 직원 알림 읽음 처리
+ */
+export async function markEmployeeNotificationAsRead(
+  notificationId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const session = await getSession();
+    if (!session || session.type !== "employee") {
+      return {
+        success: false,
+        error: "직원 로그인이 필요합니다.",
+      };
+    }
+
+    const supabase = await getSupabaseServerClient();
+
+    const { data: notification, error: fetchError } = await supabase
+      .from("notification")
+      .select("id, employee_id")
+      .eq("id", notificationId)
+      .eq("employee_id", session.id)
+      .single();
+
+    if (fetchError || !notification) {
+      return {
+        success: false,
+        error: "알림을 찾을 수 없습니다.",
+      };
+    }
+
+    const { error: updateError } = await supabase
+      .from("notification")
+      .update({ is_read: true })
+      .eq("id", notificationId)
+      .eq("employee_id", session.id);
+
+    if (updateError) throw updateError;
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error("직원 알림 읽음 처리 오류:", error);
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "알림 읽음 처리 중 오류가 발생했습니다.",
+    };
+  }
+}
+
+/**
+ * 직원의 모든 알림 읽음 처리
+ */
+export async function markAllEmployeeNotificationsAsRead(): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  try {
+    const session = await getSession();
+    if (!session || session.type !== "employee") {
+      return {
+        success: false,
+        error: "직원 로그인이 필요합니다.",
+      };
+    }
+
+    const supabase = await getSupabaseServerClient();
+
+    const { error: updateError } = await supabase
+      .from("notification")
+      .update({ is_read: true })
+      .eq("employee_id", session.id)
+      .eq("is_read", false);
+
+    if (updateError) throw updateError;
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error("직원 모든 알림 읽음 처리 오류:", error);
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "알림 읽음 처리 중 오류가 발생했습니다.",
+    };
+  }
+}
+
+/**
  * 클라이언트 알림 목록 조회
  */
 export async function getClientNotifications(): Promise<{
@@ -481,12 +697,61 @@ export async function getClientNotifications(): Promise<{
 }
 
 /**
+ * 직원 알림 목록 조회
+ */
+export async function getEmployeeNotifications(): Promise<{
+  success: boolean;
+  data?: Notification[];
+  error?: string;
+}> {
+  try {
+    const session = await getSession();
+    if (!session || session.type !== "employee") {
+      return {
+        success: false,
+        error: "직원 로그인이 필요합니다.",
+      };
+    }
+
+    const supabase = await getSupabaseServerClient();
+
+    const { data: notifications, error } = await supabase
+      .from("notification")
+      .select("*")
+      .eq("employee_id", session.id)
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    return {
+      success: true,
+      data: (notifications || []) as Notification[],
+    };
+  } catch (error) {
+    console.error("직원 알림 조회 오류:", error);
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "알림을 조회하는 중 오류가 발생했습니다.",
+    };
+  }
+}
+
+/**
  * 클라이언트의 업무 요청 조회 (필터링, 페이지네이션 지원)
  */
 export async function getClientWorkRequests(
   clientId: string,
   options?: {
-    statusFilter?: "all" | "pending" | "approved" | "rejected" | "in_progress" | "completed";
+    statusFilter?:
+      | "all"
+      | "pending"
+      | "approved"
+      | "rejected"
+      | "in_progress"
+      | "completed";
     page?: number;
     limit?: number;
   }
@@ -566,7 +831,13 @@ export async function getWorkRequestsByClientIdForEmployee(
   clientId: string,
   currentEmployeeId: string,
   options?: {
-    statusFilter?: "all" | "pending" | "approved" | "rejected" | "in_progress" | "completed";
+    statusFilter?:
+      | "all"
+      | "pending"
+      | "approved"
+      | "rejected"
+      | "in_progress"
+      | "completed";
     searchType?: "brand" | "manager";
     searchKeyword?: string;
     page?: number;
@@ -638,7 +909,10 @@ export async function getWorkRequestsByClientIdForEmployee(
       ...wr,
       employee_name: wr.employee?.name || null,
       client_name: wr.client?.name || null,
-    })) as (WorkRequest & { employee_name: string | null; client_name: string | null })[];
+    })) as (WorkRequest & {
+      employee_name: string | null;
+      client_name: string | null;
+    })[];
 
     return {
       success: true,
@@ -731,6 +1005,7 @@ export async function updateWorkRequestStatus(
       .insert({
         client_id: workRequest.client_id,
         employee_id: workRequest.employee_id, // notification 테이블에 employee_id가 필수이므로 추가
+        work_request_id: workRequestId,
         type: newStatus === "in_progress" ? "work_started" : "work_completed",
         title: newStatus === "in_progress" ? "업무 시작" : "업무 완료",
         message:
@@ -845,25 +1120,31 @@ export async function getWorkRequestDetailForEmployee(
 
     if (workRequest.approved_by) {
       // 승인한 클라이언트 정보 조회
-      const { data: approvedByClient, error: approvedByClientError } = await supabase
-        .from("client")
-        .select("id, name")
-        .eq("id", workRequest.approved_by)
-        .single();
+      const { data: approvedByClient, error: approvedByClientError } =
+        await supabase
+          .from("client")
+          .select("id, name")
+          .eq("id", workRequest.approved_by)
+          .single();
 
       if (!approvedByClientError && approvedByClient) {
         approvedByClientName = approvedByClient.name || null;
 
         // 승인한 클라이언트의 서명 이미지 조회
-        const { data: signatureAttachments, error: signatureError } = await supabase
-          .from("client_attachment")
-          .select("file_url")
-          .eq("client_id", workRequest.approved_by)
-          .eq("file_type", "signature")
-          .order("created_at", { ascending: false })
-          .limit(1);
+        const { data: signatureAttachments, error: signatureError } =
+          await supabase
+            .from("client_attachment")
+            .select("file_url")
+            .eq("client_id", workRequest.approved_by)
+            .eq("file_type", "signature")
+            .order("created_at", { ascending: false })
+            .limit(1);
 
-        if (!signatureError && signatureAttachments && signatureAttachments.length > 0) {
+        if (
+          !signatureError &&
+          signatureAttachments &&
+          signatureAttachments.length > 0
+        ) {
           approvedBySignatureUrl = signatureAttachments[0].file_url;
         }
       }
@@ -876,13 +1157,20 @@ export async function getWorkRequestDetailForEmployee(
       client_name: (workRequest as any).client?.name || null,
       approved_by_client_name: approvedByClientName,
       approved_by_signature_url: approvedBySignatureUrl,
-      approval_deducted_amount: workRequest.approval_deducted_amount ? Number(workRequest.approval_deducted_amount) : null,
-      approval_remaining_amount: workRequest.approval_remaining_amount ? Number(workRequest.approval_remaining_amount) : null,
+      approval_deducted_amount: workRequest.approval_deducted_amount
+        ? Number(workRequest.approval_deducted_amount)
+        : null,
+      approval_remaining_amount: workRequest.approval_remaining_amount
+        ? Number(workRequest.approval_remaining_amount)
+        : null,
       approval_text_edit_count: workRequest.approval_text_edit_count || null,
-      approval_coding_edit_count: workRequest.approval_coding_edit_count || null,
+      approval_coding_edit_count:
+        workRequest.approval_coding_edit_count || null,
       approval_image_edit_count: workRequest.approval_image_edit_count || null,
-      approval_popup_design_count: workRequest.approval_popup_design_count || null,
-      approval_banner_design_count: workRequest.approval_banner_design_count || null,
+      approval_popup_design_count:
+        workRequest.approval_popup_design_count || null,
+      approval_banner_design_count:
+        workRequest.approval_banner_design_count || null,
       managed_client: managedClient
         ? {
             productType1: managedClient.product_type1,
@@ -896,8 +1184,10 @@ export async function getWorkRequestDetailForEmployee(
             detailTextEditCount: managedClient.detail_text_edit_count || 0,
             detailCodingEditCount: managedClient.detail_coding_edit_count || 0,
             detailImageEditCount: managedClient.detail_image_edit_count || 0,
-            detailPopupDesignCount: managedClient.detail_popup_design_count || 0,
-            detailBannerDesignCount: managedClient.detail_banner_design_count || 0,
+            detailPopupDesignCount:
+              managedClient.detail_popup_design_count || 0,
+            detailBannerDesignCount:
+              managedClient.detail_banner_design_count || 0,
           }
         : null,
     };
@@ -911,6 +1201,60 @@ export async function getWorkRequestDetailForEmployee(
     return {
       success: false,
       error: "업무 상세 정보를 조회하는 중 오류가 발생했습니다.",
+    };
+  }
+}
+
+/**
+ * 담당자 기준 관리업무 현황 조회
+ */
+export async function getWorkRequestsForEmployee(): Promise<{
+  success: boolean;
+  data?: (WorkRequest & { client_name?: string | null })[];
+  error?: string;
+}> {
+  try {
+    const session = await getSession();
+    if (!session || session.type !== "employee") {
+      return {
+        success: false,
+        error: "직원 로그인이 필요합니다.",
+      };
+    }
+
+    const supabase = await getSupabaseServerClient();
+
+    const { data: workRequests, error } = await supabase
+      .from("work_request")
+      .select(
+        `
+        *,
+        client:client_id (
+          id,
+          name
+        )
+      `
+      )
+      .eq("employee_id", session.id)
+      .order("updated_at", { ascending: false });
+
+    if (error) throw error;
+
+    const workRequestsWithClient = (workRequests || []).map((wr: any) => ({
+      ...wr,
+      client_name: wr.client?.name || null,
+    })) as (WorkRequest & { client_name?: string | null })[];
+
+    return {
+      success: true,
+      data: workRequestsWithClient,
+    };
+  } catch (error) {
+    console.error("담당자 업무 현황 조회 오류:", error);
+    return {
+      success: false,
+      error: "업무 현황을 조회하는 중 오류가 발생했습니다.",
+      data: [],
     };
   }
 }
@@ -1004,25 +1348,31 @@ export async function getWorkRequestDetailForClient(
 
     if (workRequest.approved_by) {
       // 승인한 클라이언트 정보 조회
-      const { data: approvedByClient, error: approvedByClientError } = await supabase
-        .from("client")
-        .select("id, name")
-        .eq("id", workRequest.approved_by)
-        .single();
+      const { data: approvedByClient, error: approvedByClientError } =
+        await supabase
+          .from("client")
+          .select("id, name")
+          .eq("id", workRequest.approved_by)
+          .single();
 
       if (!approvedByClientError && approvedByClient) {
         approvedByClientName = approvedByClient.name || null;
 
         // 승인한 클라이언트의 서명 이미지 조회
-        const { data: signatureAttachments, error: signatureError } = await supabase
-          .from("client_attachment")
-          .select("file_url")
-          .eq("client_id", workRequest.approved_by)
-          .eq("file_type", "signature")
-          .order("created_at", { ascending: false })
-          .limit(1);
+        const { data: signatureAttachments, error: signatureError } =
+          await supabase
+            .from("client_attachment")
+            .select("file_url")
+            .eq("client_id", workRequest.approved_by)
+            .eq("file_type", "signature")
+            .order("created_at", { ascending: false })
+            .limit(1);
 
-        if (!signatureError && signatureAttachments && signatureAttachments.length > 0) {
+        if (
+          !signatureError &&
+          signatureAttachments &&
+          signatureAttachments.length > 0
+        ) {
           approvedBySignatureUrl = signatureAttachments[0].file_url;
         }
       }
@@ -1035,13 +1385,20 @@ export async function getWorkRequestDetailForClient(
       client_name: (workRequest as any).client?.name || null,
       approved_by_client_name: approvedByClientName,
       approved_by_signature_url: approvedBySignatureUrl,
-      approval_deducted_amount: workRequest.approval_deducted_amount ? Number(workRequest.approval_deducted_amount) : null,
-      approval_remaining_amount: workRequest.approval_remaining_amount ? Number(workRequest.approval_remaining_amount) : null,
+      approval_deducted_amount: workRequest.approval_deducted_amount
+        ? Number(workRequest.approval_deducted_amount)
+        : null,
+      approval_remaining_amount: workRequest.approval_remaining_amount
+        ? Number(workRequest.approval_remaining_amount)
+        : null,
       approval_text_edit_count: workRequest.approval_text_edit_count || null,
-      approval_coding_edit_count: workRequest.approval_coding_edit_count || null,
+      approval_coding_edit_count:
+        workRequest.approval_coding_edit_count || null,
       approval_image_edit_count: workRequest.approval_image_edit_count || null,
-      approval_popup_design_count: workRequest.approval_popup_design_count || null,
-      approval_banner_design_count: workRequest.approval_banner_design_count || null,
+      approval_popup_design_count:
+        workRequest.approval_popup_design_count || null,
+      approval_banner_design_count:
+        workRequest.approval_banner_design_count || null,
       managed_client: managedClient
         ? {
             productType1: managedClient.product_type1,
@@ -1055,8 +1412,10 @@ export async function getWorkRequestDetailForClient(
             detailTextEditCount: managedClient.detail_text_edit_count || 0,
             detailCodingEditCount: managedClient.detail_coding_edit_count || 0,
             detailImageEditCount: managedClient.detail_image_edit_count || 0,
-            detailPopupDesignCount: managedClient.detail_popup_design_count || 0,
-            detailBannerDesignCount: managedClient.detail_banner_design_count || 0,
+            detailPopupDesignCount:
+              managedClient.detail_popup_design_count || 0,
+            detailBannerDesignCount:
+              managedClient.detail_banner_design_count || 0,
           }
         : null,
     };
@@ -1095,80 +1454,36 @@ export async function approveWorkRequest(
 
     const supabase = await getSupabaseServerClient();
 
-    // 업무 요청 조회 (승인 시점 스냅샷을 위해 추가 정보 필요)
-    const { data: workRequest, error: fetchError } = await supabase
-      .from("work_request")
-      .select("employee_id, status, work_type, cost, managed_client_id, work_type_detail")
-      .eq("id", workRequestId)
-      .eq("client_id", clientId)
-      .single();
+    const { data, error } = await supabase.rpc("approve_work_request", {
+      p_work_request_id: workRequestId,
+      p_client_id: clientId,
+    });
 
-    if (fetchError || !workRequest) {
+    if (error) {
       return {
         success: false,
-        error: "업무 요청을 찾을 수 없습니다.",
+        error:
+          error.message?.includes("approve_work_request") ||
+          error.message?.includes("function")
+            ? "DB 함수가 없습니다. db/approve-work-request-transaction.sql을 실행해 주세요."
+            : error.message,
       };
     }
 
-    if (workRequest.status !== "pending") {
+    const result = Array.isArray(data) ? data[0] : data;
+    if (!result || !result.success) {
       return {
         success: false,
-        error: "승인 대기 중인 업무만 승인할 수 있습니다.",
+        error: result?.error || "승인 처리에 실패했습니다.",
       };
     }
-
-    // 승인 시점의 상태 스냅샷 준비
-    const updateData: any = {
-      status: "approved",
-      approved_at: new Date().toISOString(),
-      approved_by: clientId,
-      updated_at: new Date().toISOString(),
-    };
-
-    // 관리 고객 정보 조회 (승인 시점 스냅샷 저장용)
-    if (workRequest.managed_client_id) {
-      const { data: managedClient, error: managedClientError } = await supabase
-        .from("managed_client")
-        .select("product_type1, total_amount, detail_text_edit_count, detail_coding_edit_count, detail_image_edit_count, detail_popup_design_count, detail_banner_design_count")
-        .eq("id", workRequest.managed_client_id)
-        .single();
-
-      if (!managedClientError && managedClient) {
-        // 금액차감형: 승인 시점의 차감 금액 및 잔여 금액 저장
-        if (workRequest.work_type === "deduct" && workRequest.cost) {
-          const deductedAmount = Number(workRequest.cost);
-          const totalAmount = managedClient.total_amount ? Number(managedClient.total_amount) : 0;
-          const remainingAmount = Math.max(0, totalAmount - deductedAmount);
-          
-          updateData.approval_deducted_amount = deductedAmount;
-          updateData.approval_remaining_amount = remainingAmount;
-        }
-
-        // 유지보수형: 승인 시점의 횟수 정보 저장
-        if (workRequest.work_type === "maintenance") {
-          updateData.approval_text_edit_count = managedClient.detail_text_edit_count || 0;
-          updateData.approval_coding_edit_count = managedClient.detail_coding_edit_count || 0;
-          updateData.approval_image_edit_count = managedClient.detail_image_edit_count || 0;
-          updateData.approval_popup_design_count = managedClient.detail_popup_design_count || 0;
-          updateData.approval_banner_design_count = managedClient.detail_banner_design_count || 0;
-        }
-      }
-    }
-
-    // 상태 업데이트
-    const { error: updateError } = await supabase
-      .from("work_request")
-      .update(updateData)
-      .eq("id", workRequestId);
-
-    if (updateError) throw updateError;
 
     // 담당자에게 알림 생성
-    if (workRequest.employee_id) {
+    if (result.employee_id) {
       const { error: notificationError } = await supabase
         .from("notification")
         .insert({
-          employee_id: workRequest.employee_id,
+          employee_id: result.employee_id,
           work_request_id: workRequestId,
           type: "work_approved",
           title: "업무 승인",

@@ -232,6 +232,144 @@
   font-weight: var(--font-weight-bold);
 }
 
+.notificationWrap {
+  position: relative;
+}
+
+.notificationButton {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.notificationButton:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.notificationBadge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.notifyContainer {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  width: 360px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.15);
+  z-index: 60;
+  overflow: hidden;
+}
+
+.notifyHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.notifyTitle {
+  font-size: 16px;
+  font-weight: var(--font-weight-bold);
+  color: #111827;
+}
+
+.notifyAllRead {
+  border: none;
+  background: none;
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
+
+.notifyContent {
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.notifyArea {
+  display: flex;
+  flex-direction: column;
+}
+
+.notifyItem {
+  text-align: left;
+  width: 100%;
+  border: none;
+  background: #fff;
+  padding: 14px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.notifyItem:hover {
+  background: #f8fafc;
+}
+
+.notifyUnread {
+  background: rgba(59, 130, 246, 0.06);
+}
+
+.notifyTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  font-weight: var(--font-weight-semibold);
+  color: #1f2937;
+}
+
+.notifyDot {
+  width: 8px;
+  height: 8px;
+  background: #ef4444;
+  border-radius: 50%;
+}
+
+.notifyMid {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #374151;
+  line-height: 1.5;
+}
+
+.notifyBot {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.notifyEmpty {
+  padding: 20px;
+  text-align: center;
+  font-size: 13px;
+  color: #6b7280;
+}
+
 .submenu > li > a {
   color: var(--text-gray);
   font-size: 16px;

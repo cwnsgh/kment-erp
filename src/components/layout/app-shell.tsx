@@ -1,12 +1,26 @@
 "use client";
 import { Bell, LogOut, Menu, User } from "lucide-react";
 import Link from "next/link";
-import { ReactNode, useState, useRef, useEffect, useMemo } from "react";
+import {
+  ReactNode,
+  useState,
+  useRef,
+  useEffect,
+  useMemo,
+  useCallback,
+} from "react";
 import { useRouter } from "next/navigation";
 
 import { mainNav, type NavItem } from "@/config/navigation";
 import { EmployeeSession } from "@/lib/auth";
 import { logout } from "@/app/actions/auth";
+import {
+  getEmployeeUnreadNotificationCount,
+  getEmployeeNotifications,
+  markEmployeeNotificationAsRead,
+  markAllEmployeeNotificationsAsRead,
+  Notification,
+} from "@/app/actions/work-request";
 
 import { ComingSoon } from "./coming-soon";
 import { NavigationGroup } from "./navigation-group";
@@ -29,7 +43,12 @@ export function AppShell({
   const [sidebarMini, setSidebarMini] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notificationLoading, setNotificationLoading] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
+  const notificationRef = useRef<HTMLDivElement>(null);
 
   // 프로필 메뉴 외부 클릭 시 닫기
   useEffect(() => {
@@ -56,8 +75,125 @@ export function AppShell({
     await logout();
   };
 
+  const fetchNotifications = async () => {
+    try {
+      setNotificationLoading(true);
+      const result = await getEmployeeNotifications();
+      if (result.success && result.data) {
+        setNotifications(result.data);
+      }
+    } catch (error) {
+      console.error("직원 알림 조회 오류:", error);
+    } finally {
+      setNotificationLoading(false);
+    }
+  };
+
+  const handleToggleNotifications = async () => {
+    setNotificationOpen((prev) => !prev);
+    await fetchNotifications();
+  };
+
+  const handleNotificationClick = async (notification: Notification) => {
+    if (!notification.is_read) {
+      const result = await markEmployeeNotificationAsRead(notification.id);
+      if (result.success) {
+        setNotifications((prev) =>
+          prev.map((n) =>
+            n.id === notification.id ? { ...n, is_read: true } : n
+          )
+        );
+        setUnreadNotificationCount((prev) => Math.max(0, prev - 1));
+        window.dispatchEvent(new CustomEvent("employee-notifications:updated"));
+        router.refresh();
+      }
+    }
+
+    if (notification.work_request_id) {
+      router.push(
+        `/operations/tasks?workRequestId=${encodeURIComponent(
+          notification.work_request_id
+        )}`
+      );
+    }
+  };
+
+  const handleAllNotificationsRead = async () => {
+    const result = await markAllEmployeeNotificationsAsRead();
+    if (result.success) {
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+      setUnreadNotificationCount(0);
+      window.dispatchEvent(new CustomEvent("employee-notifications:updated"));
+      router.refresh();
+    }
+  };
+
+  const formatNotificationDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(
+      2,
+      "0"
+    )}.${String(date.getDate()).padStart(2, "0")} ${String(
+      date.getHours()
+    ).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+  };
+
+  const fetchUnreadCount = useCallback(async () => {
+    try {
+      const result = await getEmployeeUnreadNotificationCount();
+      if (result.success && result.count !== undefined) {
+        setUnreadNotificationCount(result.count);
+      }
+    } catch (error) {
+      console.error("직원 알림 개수 조회 오류:", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchUnreadCount();
+  }, [fetchUnreadCount]);
+
+  useEffect(() => {
+    const handleNotificationsUpdated = () => {
+      fetchUnreadCount();
+    };
+
+    window.addEventListener(
+      "employee-notifications:updated",
+      handleNotificationsUpdated
+    );
+    return () => {
+      window.removeEventListener(
+        "employee-notifications:updated",
+        handleNotificationsUpdated
+      );
+    };
+  }, [fetchUnreadCount]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(event.target as Node)
+      ) {
+        setNotificationOpen(false);
+      }
+    }
+
+    if (notificationOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [notificationOpen]);
+
   // roleId에 따라 메뉴를 필터링하는 함수
-  const filterNavByRole = (navItems: NavItem[], roleId: number | null): NavItem[] => {
+  const filterNavByRole = (
+    navItems: NavItem[],
+    roleId: number | null
+  ): NavItem[] => {
     return navItems
       .filter((item) => {
         // allowedRoleIds가 없으면 모든 role 접근 가능
@@ -73,7 +209,8 @@ export function AppShell({
           const filteredChildren = filterNavByRole(item.children, roleId);
           return {
             ...item,
-            children: filteredChildren.length > 0 ? filteredChildren : undefined,
+            children:
+              filteredChildren.length > 0 ? filteredChildren : undefined,
           };
         }
         return item;
@@ -119,13 +256,72 @@ export function AppShell({
           </Link>
         </div>
         <div className="flex items-center gap-6">
-          <button
-            type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full text-white transition hover:bg-white/10"
-          >
-            <Bell size={20} />
-            <span className="sr-only">알림</span>
-          </button>
+          <div className={styles.notificationWrap} ref={notificationRef}>
+            <button
+              type="button"
+              className={styles.notificationButton}
+              onClick={handleToggleNotifications}
+            >
+              <Bell size={20} />
+              {unreadNotificationCount > 0 && (
+                <span className={styles.notificationBadge}>
+                  {unreadNotificationCount}
+                </span>
+              )}
+              <span className="sr-only">알림</span>
+            </button>
+            {notificationOpen && (
+              <div className={styles.notifyContainer}>
+                <div className={styles.notifyHeader}>
+                  <p className={styles.notifyTitle}>알림</p>
+                  {unreadNotificationCount > 0 && (
+                    <button
+                      type="button"
+                      className={styles.notifyAllRead}
+                      onClick={handleAllNotificationsRead}
+                    >
+                      모두 읽음
+                    </button>
+                  )}
+                </div>
+                <div className={styles.notifyContent}>
+                  {notificationLoading ? (
+                    <div className={styles.notifyEmpty}>
+                      알림을 불러오는 중...
+                    </div>
+                  ) : notifications.length === 0 ? (
+                    <div className={styles.notifyEmpty}>알림이 없습니다.</div>
+                  ) : (
+                    <div className={styles.notifyArea}>
+                      {notifications.map((notification) => (
+                        <button
+                          type="button"
+                          key={notification.id}
+                          className={`${styles.notifyItem} ${
+                            !notification.is_read ? styles.notifyUnread : ""
+                          }`}
+                          onClick={() => handleNotificationClick(notification)}
+                        >
+                          <div className={styles.notifyTop}>
+                            <p>{notification.title || "알림"}</p>
+                            {!notification.is_read && (
+                              <span className={styles.notifyDot} />
+                            )}
+                          </div>
+                          <div className={styles.notifyMid}>
+                            <p>{notification.message}</p>
+                          </div>
+                          <div className={styles.notifyBot}>
+                            {formatNotificationDate(notification.created_at)}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
           <div className="text-sm text-white">
             {new Date().toLocaleDateString("ko-KR", {
               year: "numeric",

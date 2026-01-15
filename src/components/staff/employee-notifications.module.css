@@ -1,0 +1,117 @@
+/* 직원 알림 페이지 */
+.notificationsPage {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: var(--font-weight-bold);
+  color: var(--text-color);
+  margin: 0;
+}
+
+.markAllReadButton {
+  padding: 8px 16px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.markAllReadButton:hover {
+  background: #2563eb;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-gray);
+  font-size: 16px;
+}
+
+.empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-gray);
+  font-size: 16px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+}
+
+.notificationList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.notificationItem {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-left: 4px solid transparent;
+}
+
+.notificationItem:hover {
+  background: var(--background-color);
+  transform: translateX(4px);
+}
+
+.notificationItem.unread {
+  border-left-color: var(--primary);
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.notificationContent {
+  flex: 1;
+}
+
+.titleText {
+  display: block;
+  font-size: 15px;
+  color: var(--text-color);
+  margin-bottom: 6px;
+}
+
+.message {
+  font-size: 15px;
+  color: var(--text-color);
+  margin: 0 0 8px 0;
+  line-height: 1.6;
+}
+
+.date {
+  font-size: 13px;
+  color: var(--text-gray);
+}
+
+.unreadBadge {
+  display: inline-block;
+  padding: 4px 10px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: var(--font-weight-semibold);
+  margin-left: 16px;
+}
+
