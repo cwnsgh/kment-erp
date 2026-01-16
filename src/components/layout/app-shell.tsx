@@ -19,6 +19,7 @@ import {
   getEmployeeNotifications,
   markEmployeeNotificationAsRead,
   markAllEmployeeNotificationsAsRead,
+  deleteEmployeeNotification,
   Notification,
 } from "@/app/actions/work-request";
 
@@ -128,6 +129,25 @@ export function AppShell({
     }
   };
 
+  const handleDeleteNotification = async (
+    event: React.MouseEvent<HTMLButtonElement>,
+    notification: Notification
+  ) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const result = await deleteEmployeeNotification(notification.id);
+    if (result.success) {
+      setNotifications((prev) =>
+        prev.filter((item) => item.id !== notification.id)
+      );
+      if (!notification.is_read) {
+        setUnreadNotificationCount((prev) => Math.max(0, prev - 1));
+        window.dispatchEvent(new CustomEvent("employee-notifications:updated"));
+      }
+      router.refresh();
+    }
+  };
+
   const formatNotificationDate = (dateStr: string) => {
     const date = new Date(dateStr);
     return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(
@@ -137,6 +157,32 @@ export function AppShell({
       date.getHours()
     ).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
   };
+
+  const isApprovalNotification = (notification: Notification) =>
+    notification.type === "work_approved" ||
+    notification.type === "work_rejected";
+
+  const getNotificationTagLabel = (notification: Notification) => {
+    switch (notification.type) {
+      case "work_approved":
+        return "승인 완료";
+      case "work_rejected":
+        return "승인 거절";
+      case "work_started":
+        return "업무 시작";
+      case "work_completed":
+        return "업무 완료";
+      case "work_requested":
+        return "승인 필요";
+      default:
+        return "알림";
+    }
+  };
+
+  const approvalNotifications = notifications.filter(isApprovalNotification);
+  const activityNotifications = notifications.filter(
+    (notification) => !isApprovalNotification(notification)
+  );
 
   const fetchUnreadCount = useCallback(async () => {
     try {
@@ -293,29 +339,138 @@ export function AppShell({
                     <div className={styles.notifyEmpty}>알림이 없습니다.</div>
                   ) : (
                     <div className={styles.notifyArea}>
-                      {notifications.map((notification) => (
-                        <button
-                          type="button"
-                          key={notification.id}
-                          className={`${styles.notifyItem} ${
-                            !notification.is_read ? styles.notifyUnread : ""
-                          }`}
-                          onClick={() => handleNotificationClick(notification)}
-                        >
-                          <div className={styles.notifyTop}>
-                            <p>{notification.title || "알림"}</p>
-                            {!notification.is_read && (
-                              <span className={styles.notifyDot} />
-                            )}
+                      {approvalNotifications.length > 0 && (
+                        <div className={styles.notifySection}>
+                          <div className={styles.notifySectionHeader}>
+                            <p className={styles.notifySectionTitle}>
+                              승인 알림
+                            </p>
+                            <span className={styles.notifySectionCount}>
+                              {approvalNotifications.length}
+                            </span>
                           </div>
-                          <div className={styles.notifyMid}>
-                            <p>{notification.message}</p>
+                          <div className={styles.notifySectionBody}>
+                            {approvalNotifications.map((notification) => (
+                              <button
+                                type="button"
+                                key={notification.id}
+                                className={`${styles.notifyItem} ${
+                                  styles.notifyApprovalItem
+                                } ${
+                                  !notification.is_read
+                                    ? styles.notifyUnread
+                                    : ""
+                                }`}
+                                onClick={() =>
+                                  handleNotificationClick(notification)
+                                }
+                              >
+                                <div className={styles.notifyTop}>
+                                  <div className={styles.notifyTitleRow}>
+                                    <p>{notification.title || "알림"}</p>
+                                    <span
+                                      className={`${styles.notifyTag} ${styles.notifyTagApproval}`}
+                                    >
+                                      {getNotificationTagLabel(notification)}
+                                    </span>
+                                  </div>
+                                  <div className={styles.notifyActions}>
+                                    {!notification.is_read && (
+                                      <span className={styles.notifyDot} />
+                                    )}
+                                    <button
+                                      type="button"
+                                      className={styles.notifyDeleteButton}
+                                      aria-label="알림 삭제"
+                                      onClick={(event) =>
+                                        handleDeleteNotification(
+                                          event,
+                                          notification
+                                        )
+                                      }
+                                    >
+                                      x
+                                    </button>
+                                  </div>
+                                </div>
+                                <div className={styles.notifyMid}>
+                                  <p>{notification.message}</p>
+                                </div>
+                                <div className={styles.notifyBot}>
+                                  {formatNotificationDate(
+                                    notification.created_at
+                                  )}
+                                </div>
+                              </button>
+                            ))}
                           </div>
-                          <div className={styles.notifyBot}>
-                            {formatNotificationDate(notification.created_at)}
+                        </div>
+                      )}
+                      {activityNotifications.length > 0 && (
+                        <div className={styles.notifySection}>
+                          <div className={styles.notifySectionHeader}>
+                            <p className={styles.notifySectionTitle}>내 활동</p>
+                            <span className={styles.notifySectionCount}>
+                              {activityNotifications.length}
+                            </span>
                           </div>
-                        </button>
-                      ))}
+                          <div className={styles.notifySectionBody}>
+                            {activityNotifications.map((notification) => (
+                              <button
+                                type="button"
+                                key={notification.id}
+                                className={`${styles.notifyItem} ${
+                                  styles.notifyActivityItem
+                                } ${
+                                  !notification.is_read
+                                    ? styles.notifyUnread
+                                    : ""
+                                }`}
+                                onClick={() =>
+                                  handleNotificationClick(notification)
+                                }
+                              >
+                                <div className={styles.notifyTop}>
+                                  <div className={styles.notifyTitleRow}>
+                                    <p>{notification.title || "알림"}</p>
+                                    <span
+                                      className={`${styles.notifyTag} ${styles.notifyTagActivity}`}
+                                    >
+                                      {getNotificationTagLabel(notification)}
+                                    </span>
+                                  </div>
+                                  <div className={styles.notifyActions}>
+                                    {!notification.is_read && (
+                                      <span className={styles.notifyDot} />
+                                    )}
+                                    <button
+                                      type="button"
+                                      className={styles.notifyDeleteButton}
+                                      aria-label="알림 삭제"
+                                      onClick={(event) =>
+                                        handleDeleteNotification(
+                                          event,
+                                          notification
+                                        )
+                                      }
+                                    >
+                                      x
+                                    </button>
+                                  </div>
+                                </div>
+                                <div className={styles.notifyMid}>
+                                  <p>{notification.message}</p>
+                                </div>
+                                <div className={styles.notifyBot}>
+                                  {formatNotificationDate(
+                                    notification.created_at
+                                  )}
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

@@ -173,6 +173,43 @@
   flex-direction: column;
 }
 
+.notifySection {
+  display: flex;
+  flex-direction: column;
+}
+
+.notifySection + .notifySection {
+  border-top: 1px solid #f1f5f9;
+}
+
+.notifySectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: #f8fafc;
+}
+
+.notifySectionTitle {
+  font-size: 12px;
+  font-weight: var(--font-weight-semibold);
+  color: #64748b;
+}
+
+.notifySectionCount {
+  font-size: 12px;
+  color: #64748b;
+  background: #eef2f7;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.notifySectionBody {
+  display: flex;
+  flex-direction: column;
+}
+
 .notifyItem {
   text-align: left;
   width: 100%;
@@ -182,14 +219,34 @@
   border-bottom: 1px solid #f1f5f9;
   cursor: pointer;
   transition: background-color 0.2s;
+  opacity: 0.92;
 }
 
 .notifyItem:hover {
   background: #f8fafc;
 }
 
+.notifyApprovalItem {
+  background: #fffaf3;
+  border-left: 3px solid #f59e0b;
+}
+
+.notifyActivityItem {
+  background: #fff;
+}
+
 .notifyUnread {
-  background: rgba(59, 130, 246, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.2);
+  opacity: 1;
+}
+
+.notifyUnread .notifyMid {
+  color: #1f2937;
+  font-weight: 500;
+}
+
+.notifyUnread .notifyBot {
+  color: #64748b;
 }
 
 .notifyTop {
@@ -201,10 +258,68 @@
   color: #1f2937;
 }
 
-.notifyClose {
-  width: 14px;
-  height: 14px;
-  opacity: 0.6;
+.notifyActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notifyTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.notifyTitleRow p {
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.notifyTag {
+  font-size: 11px;
+  font-weight: var(--font-weight-semibold);
+  padding: 2px 6px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.notifyTagApproval {
+  color: #b45309;
+  background: #fff3e0;
+  border-color: #fed7aa;
+}
+
+.notifyTagActivity {
+  color: #475569;
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+}
+
+.notifyDot {
+  width: 8px;
+  height: 8px;
+  background: #ef4444;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.notifyDeleteButton {
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.notifyDeleteButton:hover {
+  background: #f1f5f9;
+  color: #475569;
 }
 
 .notifyMid {

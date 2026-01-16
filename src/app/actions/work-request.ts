@@ -740,6 +740,86 @@ export async function getEmployeeNotifications(): Promise<{
 }
 
 /**
+ * 클라이언트 알림 삭제
+ */
+export async function deleteClientNotification(
+  notificationId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const session = await getSession();
+    if (!session || session.type !== "client") {
+      return {
+        success: false,
+        error: "클라이언트 로그인이 필요합니다.",
+      };
+    }
+
+    const supabase = await getSupabaseServerClient();
+
+    const { error: deleteError } = await supabase
+      .from("notification")
+      .delete()
+      .eq("id", notificationId)
+      .eq("client_id", session.id);
+
+    if (deleteError) throw deleteError;
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error("알림 삭제 오류:", error);
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "알림 삭제 중 오류가 발생했습니다.",
+    };
+  }
+}
+
+/**
+ * 직원 알림 삭제
+ */
+export async function deleteEmployeeNotification(
+  notificationId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const session = await getSession();
+    if (!session || session.type !== "employee") {
+      return {
+        success: false,
+        error: "직원 로그인이 필요합니다.",
+      };
+    }
+
+    const supabase = await getSupabaseServerClient();
+
+    const { error: deleteError } = await supabase
+      .from("notification")
+      .delete()
+      .eq("id", notificationId)
+      .eq("employee_id", session.id);
+
+    if (deleteError) throw deleteError;
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error("알림 삭제 오류:", error);
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "알림 삭제 중 오류가 발생했습니다.",
+    };
+  }
+}
+
+/**
  * 클라이언트의 업무 요청 조회 (필터링, 페이지네이션 지원)
  */
 export async function getClientWorkRequests(
@@ -954,7 +1034,7 @@ export async function updateWorkRequestStatus(
     // 업무 요청 조회하여 담당자 확인
     const { data: workRequest, error: fetchError } = await supabase
       .from("work_request")
-      .select("employee_id, client_id, status")
+      .select("employee_id, client_id, status, brand_name")
       .eq("id", workRequestId)
       .single();
 
@@ -1000,6 +1080,7 @@ export async function updateWorkRequestStatus(
     if (updateError) throw updateError;
 
     // 클라이언트에게 알림 생성
+    const brandName = workRequest.brand_name || "업무";
     const { error: notificationError } = await supabase
       .from("notification")
       .insert({
@@ -1010,8 +1091,8 @@ export async function updateWorkRequestStatus(
         title: newStatus === "in_progress" ? "업무 시작" : "업무 완료",
         message:
           newStatus === "in_progress"
-            ? "업무가 작업중으로 변경되었습니다."
-            : "업무가 작업완료로 변경되었습니다.",
+            ? `업무 시작: ${brandName}`
+            : `업무 완료: ${brandName}`,
         is_read: false,
       });
 
@@ -1480,6 +1561,15 @@ export async function approveWorkRequest(
 
     // 담당자에게 알림 생성
     if (result.employee_id) {
+      const { data: workRequest, error: workRequestError } = await supabase
+        .from("work_request")
+        .select("brand_name")
+        .eq("id", workRequestId)
+        .single();
+      const brandName = workRequest?.brand_name || "업무";
+      if (workRequestError) {
+        console.error("업무 정보 조회 오류:", workRequestError);
+      }
       const { error: notificationError } = await supabase
         .from("notification")
         .insert({
@@ -1487,7 +1577,7 @@ export async function approveWorkRequest(
           work_request_id: workRequestId,
           type: "work_approved",
           title: "업무 승인",
-          message: "업무 승인 요청이 승인되었습니다.",
+          message: `업무 승인 완료: ${brandName}`,
           is_read: false,
         });
 
@@ -1536,7 +1626,7 @@ export async function rejectWorkRequest(
     // 업무 요청 조회
     const { data: workRequest, error: fetchError } = await supabase
       .from("work_request")
-      .select("employee_id, status")
+      .select("employee_id, status, brand_name")
       .eq("id", workRequestId)
       .eq("client_id", clientId)
       .single();
@@ -1571,6 +1661,7 @@ export async function rejectWorkRequest(
 
     // 담당자에게 알림 생성
     if (workRequest.employee_id) {
+      const brandName = workRequest.brand_name || "업무";
       const { error: notificationError } = await supabase
         .from("notification")
         .insert({
@@ -1578,7 +1669,7 @@ export async function rejectWorkRequest(
           work_request_id: workRequestId,
           type: "work_rejected",
           title: "업무 거절",
-          message: `업무 승인 요청이 거절되었습니다. 사유: ${rejectionReason}`,
+          message: `업무 승인 거절: ${brandName} (사유: ${rejectionReason})`,
           is_read: false,
         });
 
