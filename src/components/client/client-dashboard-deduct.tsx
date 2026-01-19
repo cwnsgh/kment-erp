@@ -24,6 +24,7 @@ type ApprovalStats = {
 type ClientDashboardDeductProps = {
   clientName: string;
   managedClient: ManagedClient;
+  deductedAmount: number;
   approvalRequests: WorkRequest[]; // 승인 현황 테이블용 (pending, rejected만)
   approvalStats: ApprovalStats; // 승인 통계 (pending, approved, rejected 건수)
   workRequests: WorkRequest[]; // 작업 현황용 (in_progress, completed)
@@ -33,6 +34,7 @@ type ClientDashboardDeductProps = {
 export function ClientDashboardDeduct({
   clientName,
   managedClient,
+  deductedAmount,
   approvalRequests,
   approvalStats,
   workRequests,
@@ -96,11 +98,9 @@ export function ClientDashboardDeduct({
     return statusMap[status] || status;
   };
 
-  // TODO: 차감 금액과 잔여 금액 계산 로직 필요
-  const deductedAmount = 0; // 실제 차감 금액 계산 필요
-  const remainingAmount = managedClient.total_amount
-    ? managedClient.total_amount - deductedAmount
-    : 0;
+  const remainingAmount = managedClient.total_amount ?? null;
+  const totalAmount =
+    remainingAmount !== null ? remainingAmount + deductedAmount : null;
 
   return (
     <section className={styles.section}>
@@ -130,9 +130,7 @@ export function ClientDashboardDeduct({
           <div>
             <p className={styles.typeHead}>총 금액</p>
             <p className={`${styles.typeData} ${styles.fontBold}`}>
-              {managedClient.total_amount
-                ? managedClient.total_amount.toLocaleString()
-                : "-"}
+              {totalAmount !== null ? totalAmount.toLocaleString() : "-"}
             </p>
           </div>
           <div>
@@ -144,7 +142,7 @@ export function ClientDashboardDeduct({
           <div>
             <p className={styles.typeHead}>잔여 금액</p>
             <p className={`${styles.typeData} ${styles.fontBold}`}>
-              {remainingAmount.toLocaleString()}
+              {remainingAmount !== null ? remainingAmount.toLocaleString() : "-"}
             </p>
           </div>
         </div>

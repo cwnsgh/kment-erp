@@ -14,6 +14,7 @@
   "dependencies": {
     "@supabase/supabase-js": "2.44.2",
     "bcryptjs": "^2.4.3",
+    "exceljs": "^4.4.0",
     "lucide-react": "0.372.0",
     "next": "14.2.4",
     "react": "18.3.1",
@@ -31,4 +32,3 @@
     "typescript": "5.4.5"
   }
 }
-

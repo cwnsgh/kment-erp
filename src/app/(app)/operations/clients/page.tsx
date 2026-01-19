@@ -6,6 +6,7 @@ import {
   getManagedClients,
   deleteManagedClients,
 } from "@/app/actions/managed-client";
+import { buildExcelFilename, downloadExcel } from "@/lib/excel-download";
 import styles from "./page.module.css";
 
 type ManagedClient = {
@@ -43,6 +44,20 @@ export default function ManagedClientListPage() {
   const [startDateFrom, setStartDateFrom] = useState("");
   const [startDateTo, setStartDateTo] = useState("");
   const [showDeleteMenu, setShowDeleteMenu] = useState(false);
+
+  const handleExcelDownload = () => {
+    const params = new URLSearchParams();
+    if (searchKeyword.trim()) params.set("searchKeyword", searchKeyword.trim());
+    if (productType1) params.set("productType1", productType1);
+    if (status) params.set("status", status);
+    if (startDateFrom) params.set("startDateFrom", startDateFrom);
+    if (startDateTo) params.set("startDateTo", startDateTo);
+
+    downloadExcel(
+      `/api/operations/clients/export?${params.toString()}`,
+      buildExcelFilename("관리고객-목록")
+    );
+  };
 
   // 데이터 로드
   const loadData = async (page: number = 1) => {
@@ -442,9 +457,7 @@ export default function ManagedClientListPage() {
                 <button
                   type="button"
                   className={`${styles.excelBtn} btn btn_md normal`}
-                  onClick={() => {
-                    alert("엑셀 다운로드 기능은 추후 구현 예정입니다.");
-                  }}
+                  onClick={handleExcelDownload}
                 >
                   엑셀다운로드
                 </button>

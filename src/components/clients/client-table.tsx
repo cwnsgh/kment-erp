@@ -5,6 +5,7 @@ import { useState, useEffect, useMemo } from "react";
 import { ClientDetailModal } from "./client-detail-modal";
 import { getClientDetail, refreshBusinessStatus, getClients } from "@/app/actions/client";
 import { useRouter } from "next/navigation";
+import { buildExcelFilename, downloadExcel } from "@/lib/excel-download";
 import styles from "./client-table.module.css";
 
 type ClientRow = {
@@ -130,6 +131,19 @@ export function ClientTable({ initialClients }: ClientTableProps) {
     setLoading(false);
   };
 
+  const handleExcelDownload = () => {
+    const params = new URLSearchParams();
+    params.set("searchType", searchType);
+    if (searchQuery.trim()) {
+      params.set("searchQuery", searchQuery.trim());
+    }
+
+    downloadExcel(
+      `/api/clients/export?${params.toString()}`,
+      buildExcelFilename("거래처-목록")
+    );
+  };
+
   const handleDeleteSelected = () => {
     if (selectedRows.size === 0) return;
     if (confirm(`선택한 ${selectedRows.size}건을 삭제하시겠습니까?`)) {
@@ -236,7 +250,11 @@ export function ClientTable({ initialClients }: ClientTableProps) {
                 >
                   선택 삭제
                 </button>
-                <button type="button" className="btn btn_md normal excel_btn">
+                <button
+                  type="button"
+                  className="btn btn_md normal excel_btn"
+                  onClick={handleExcelDownload}
+                >
                   <Download size={16} className="inline mr-1" />
                   엑셀다운로드
                 </button>

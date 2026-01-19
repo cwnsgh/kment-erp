@@ -7,6 +7,7 @@ import {
   getWorkRequestDetailForEmployee,
   type WorkRequest,
 } from "@/app/actions/work-request";
+import { buildExcelFilename, downloadExcel } from "@/lib/excel-download";
 import styles from "./work-request-list.module.css";
 
 interface WorkRequestListProps {
@@ -86,6 +87,21 @@ export default function WorkRequestList({
     workRequest: null,
     isLoading: false,
   });
+
+  const handleExcelDownload = () => {
+    const params = new URLSearchParams();
+    params.set("clientId", clientId);
+    params.set("statusFilter", statusFilter);
+    params.set("searchType", searchType);
+    if (searchKeyword.trim()) {
+      params.set("searchKeyword", searchKeyword.trim());
+    }
+
+    downloadExcel(
+      `/api/operations/work-requests/export?${params.toString()}`,
+      buildExcelFilename("관리업무-목록")
+    );
+  };
 
   // 초기 로드 여부 플래그
   const [hasInitialLoad, setHasInitialLoad] = useState(
@@ -507,9 +523,7 @@ export default function WorkRequestList({
                 <button
                   type="button"
                   className={`${styles.excelBtn} ${styles.btn} ${styles.btnMd} ${styles.normal}`}
-                  onClick={() => {
-                    alert("엑셀 다운로드 기능은 추후 구현 예정입니다.");
-                  }}
+                  onClick={handleExcelDownload}
                 >
                   엑셀다운로드
                 </button>
@@ -532,11 +546,14 @@ export default function WorkRequestList({
                 <colgroup>
                   <col style={{ width: "6%" }} />
                   <col style={{ width: "6%" }} />
-                  <col style={{ width: "15%" }} />
-                  <col style={{ width: "13%" }} />
-                  <col style={{ width: "20%" }} />
+                  <col style={{ width: "14%" }} />
+                  <col style={{ width: "10%" }} />
+                  <col style={{ width: "9%" }} />
+                  <col style={{ width: "9%" }} />
+                  <col style={{ width: "9%" }} />
+                  <col style={{ width: "12%" }} />
                   <col style={{ width: "auto" }} />
-                  <col style={{ width: "15%" }} />
+                  <col style={{ width: "10%" }} />
                 </colgroup>
                 <thead>
                   <tr>
@@ -554,6 +571,9 @@ export default function WorkRequestList({
                     <th>번호</th>
                     <th>브랜드명</th>
                     <th>담당자</th>
+                    <th>요청일</th>
+                    <th>승인일</th>
+                    <th>상태변경일</th>
                     <th>작업기간</th>
                     <th>작업내용</th>
                     <th>승인여부</th>
@@ -611,6 +631,9 @@ export default function WorkRequestList({
                           </td>
                           <td>{wr.brand_name || "-"}</td>
                           <td>{wr.employee_name || "-"}</td>
+                          <td>{formatDate(wr.created_at)}</td>
+                          <td>{formatDate((wr as any).approved_at)}</td>
+                          <td>{formatDate(wr.updated_at)}</td>
                           <td>
                             {formatWorkPeriod(wr.start_date, wr.end_date)}
                           </td>
@@ -1117,6 +1140,30 @@ export default function WorkRequestList({
                         <div className={styles.tableHead}>담당자</div>
                         <div className={styles.tableData}>
                           {detailModal.workRequest.employee_name || "-"}
+                        </div>
+                      </li>
+                    </ul>
+                    <ul className={styles.tableRow}>
+                      <li className={styles.rowGroup}>
+                        <div className={styles.tableHead}>요청일</div>
+                        <div className={styles.tableData}>
+                          {formatDate(detailModal.workRequest.created_at)}
+                        </div>
+                      </li>
+                      <li className={styles.rowGroup}>
+                        <div className={styles.tableHead}>승인일</div>
+                        <div className={styles.tableData}>
+                          {formatDate(
+                            (detailModal.workRequest as any).approved_at
+                          )}
+                        </div>
+                      </li>
+                    </ul>
+                    <ul className={styles.tableRow}>
+                      <li className={styles.rowGroup}>
+                        <div className={styles.tableHead}>상태변경일</div>
+                        <div className={styles.tableData}>
+                          {formatDate(detailModal.workRequest.updated_at)}
                         </div>
                       </li>
                       <li className={styles.rowGroup}>

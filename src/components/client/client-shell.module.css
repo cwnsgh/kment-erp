@@ -620,7 +620,8 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   margin-left: 280px;
   transition: margin-left 0.3s ease;
 }
@@ -628,6 +629,7 @@
 .mainContent {
   flex: 1;
   overflow-y: auto;
+  overflow-x: auto;
   background: #fff;
   padding: 40px 48px;
 }

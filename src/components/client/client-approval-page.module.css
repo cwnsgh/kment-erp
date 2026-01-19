@@ -298,6 +298,39 @@
   white-space: nowrap;
 }
 
+@media (max-width: 1024px) {
+  .approvalList :global(.page_section) {
+    margin: 40px auto 60px;
+    max-width: 100%;
+  }
+
+  .approvalList :global(.white_box) {
+    padding: 32px 24px 60px;
+  }
+
+  .statusBox {
+    flex-direction: column;
+  }
+
+  .tableTop {
+    flex-wrap: wrap !important;
+  }
+
+  .topBtnGroup {
+    flex-wrap: wrap !important;
+    justify-content: flex-end;
+  }
+
+  .tableWrap table {
+    min-width: 720px;
+  }
+
+  .btnSm {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+}
+
 /* 승인 상태 뱃지 */
 .approval_request {
   display: inline-block;
@@ -354,6 +387,7 @@
   display: flex;
   gap: 8px;
   justify-content: center;
+  flex-wrap: nowrap;
 }
 
 .btnSm {
@@ -364,6 +398,7 @@
   cursor: pointer;
   transition: all 0.2s;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .primary {

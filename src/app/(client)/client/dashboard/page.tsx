@@ -42,6 +42,31 @@ export default async function ClientDashboardPage() {
   const managedClient =
     managedClients && managedClients.length > 0 ? managedClients[0] : null;
 
+  // 금액차감형 차감 합계 계산 (승인/진행/완료 상태 기준)
+  let deductedAmount = 0;
+  if (managedClient) {
+    const { data: deductedRows, error: deductedError } = await supabase
+      .from("work_request")
+      .select("approval_deducted_amount")
+      .eq("managed_client_id", managedClient.id)
+      .eq("work_type", "deduct")
+      .in("status", ["approved", "in_progress", "completed"])
+      .not("approval_deducted_amount", "is", null);
+
+    if (deductedError) {
+      console.error("차감 금액 합계 조회 오류:", deductedError);
+    } else {
+      deductedAmount = (deductedRows || []).reduce(
+        (sum, row) =>
+          sum +
+          (row.approval_deducted_amount
+            ? Number(row.approval_deducted_amount)
+            : 0),
+        0
+      );
+    }
+  }
+
   // 승인 현황용: pending(승인요청), rejected(승인반려)만 최신순 5개
   const { data: approvalRequests } = await supabase
     .from("work_request")
@@ -106,6 +131,7 @@ export default async function ClientDashboardPage() {
       <ClientDashboardDeduct
         clientName={clientName}
         managedClient={managedClient}
+        deductedAmount={deductedAmount}
         approvalRequests={approvalRequestsList}
         approvalStats={approvalStats}
         workRequests={workRequestsList}

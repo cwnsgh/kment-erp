@@ -5,6 +5,7 @@ import {
   WorkRequest,
   getWorkRequestDetailForClient,
 } from "@/app/actions/work-request";
+import { buildExcelFilename, downloadExcel } from "@/lib/excel-download";
 import styles from "./client-work-list.module.css";
 
 type WorkRequestWithEmployee = WorkRequest & {
@@ -109,6 +110,16 @@ export function ClientWorkList({
   const handleReset = () => {
     setStatusFilter("all");
     loadData(1, "all", itemsPerPage);
+  };
+
+  const handleExcelDownload = () => {
+    const params = new URLSearchParams();
+    params.set("statusFilter", statusFilter);
+
+    downloadExcel(
+      `/api/client/work-requests/export?${params.toString()}`,
+      buildExcelFilename("작업현황-목록")
+    );
   };
 
   const formatDate = (dateStr: string) => {
@@ -306,7 +317,10 @@ export function ClientWorkList({
                 </p>
               </div>
               <div className={styles.topBtnGroup}>
-                <div className={`${styles.excelBtn} btn btn_md normal`}>
+                <div
+                  className={`${styles.excelBtn} btn btn_md normal`}
+                  onClick={handleExcelDownload}
+                >
                   엑셀다운로드
                 </div>
                 <select

@@ -6,6 +6,7 @@ import {
   getClientSignatureUrl,
   getWorkRequestDetailForClient,
 } from "@/app/actions/work-request";
+import { buildExcelFilename, downloadExcel } from "@/lib/excel-download";
 import styles from "./client-approval-page.module.css";
 
 type WorkRequestWithEmployee = WorkRequest & {
@@ -95,6 +96,13 @@ export function ClientApprovalPage({
         console.error("업무 요청 조회 오류:", error);
       }
     });
+  };
+
+  const handleExcelDownload = () => {
+    downloadExcel(
+      "/api/client/approvals/export",
+      buildExcelFilename("승인현황-목록")
+    );
   };
 
   const handleApprove = async (workRequestId: string) => {
@@ -330,7 +338,10 @@ export function ClientApprovalPage({
                     <li className={`btn primary btn_md`}>선택 삭제</li>
                   </ul>
                 </div>
-                <div className={`${styles.excelBtn} btn btn_md normal`}>
+                <div
+                  className={`${styles.excelBtn} btn btn_md normal`}
+                  onClick={handleExcelDownload}
+                >
                   엑셀다운로드
                 </div>
                 <select
