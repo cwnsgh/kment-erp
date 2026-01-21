@@ -6,6 +6,7 @@ import { ClientDetailModal } from "./client-detail-modal";
 import { getClientDetail, refreshBusinessStatus, getClients } from "@/app/actions/client";
 import { useRouter } from "next/navigation";
 import { buildExcelFilename, downloadExcel } from "@/lib/excel-download";
+import { normalizeBusinessNumber } from "@/lib/business-number";
 import styles from "./client-table.module.css";
 
 type ClientRow = {
@@ -82,7 +83,11 @@ export function ClientTable({ initialClients }: ClientTableProps) {
         case "ceo":
           return client.ceo_name?.toLowerCase().includes(query) || false;
         case "business_number":
-          return client.business_registration_number.includes(query);
+          return (
+            normalizeBusinessNumber(client.business_registration_number).includes(
+              normalizeBusinessNumber(query)
+            )
+          );
         default:
           return true;
       }
@@ -129,6 +134,26 @@ export function ClientTable({ initialClients }: ClientTableProps) {
       alert("거래처 정보를 불러오는데 실패했습니다.");
     }
     setLoading(false);
+  };
+
+  const handleRowKeyDown = (
+    event: React.KeyboardEvent<HTMLTableRowElement>,
+    clientId: string
+  ) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      void handleRowClick(clientId);
+    }
+  };
+
+  const handlePageKeyDown = (
+    event: React.KeyboardEvent<HTMLLIElement>,
+    action: () => void
+  ) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      action();
+    }
   };
 
   const handleExcelDownload = () => {
@@ -315,6 +340,9 @@ export function ClientTable({ initialClients }: ClientTableProps) {
                     <tr
                       key={client.id}
                       onClick={() => handleRowClick(client.id)}
+                      onKeyDown={(event) => handleRowKeyDown(event, client.id)}
+                      role="button"
+                      tabIndex={0}
                       className={
                         loading && selectedClientId === client.id
                           ? "opacity-50"
@@ -354,6 +382,11 @@ export function ClientTable({ initialClients }: ClientTableProps) {
                 currentPage === 1 ? styles.disabled : ""
               }`}
               onClick={() => currentPage !== 1 && setCurrentPage(1)}
+              onKeyDown={(event) =>
+                handlePageKeyDown(event, () => currentPage !== 1 && setCurrentPage(1))
+              }
+              role="button"
+              tabIndex={0}
             ></li>
             <li
               className={`${styles.page} ${styles.prev} ${
@@ -362,6 +395,13 @@ export function ClientTable({ initialClients }: ClientTableProps) {
               onClick={() =>
                 currentPage !== 1 && setCurrentPage((p) => Math.max(1, p - 1))
               }
+              onKeyDown={(event) =>
+                handlePageKeyDown(event, () =>
+                  currentPage !== 1 && setCurrentPage((p) => Math.max(1, p - 1))
+                )
+              }
+              role="button"
+              tabIndex={0}
             ></li>
 
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
@@ -383,6 +423,11 @@ export function ClientTable({ initialClients }: ClientTableProps) {
                     currentPage === pageNum ? styles.active : ""
                   }`}
                   onClick={() => setCurrentPage(pageNum)}
+                  onKeyDown={(event) =>
+                    handlePageKeyDown(event, () => setCurrentPage(pageNum))
+                  }
+                  role="button"
+                  tabIndex={0}
                 >
                   {pageNum}
                 </li>
@@ -397,6 +442,14 @@ export function ClientTable({ initialClients }: ClientTableProps) {
                 currentPage !== totalPages &&
                 setCurrentPage((p) => Math.min(totalPages, p + 1))
               }
+              onKeyDown={(event) =>
+                handlePageKeyDown(event, () =>
+                  currentPage !== totalPages &&
+                  setCurrentPage((p) => Math.min(totalPages, p + 1))
+                )
+              }
+              role="button"
+              tabIndex={0}
             ></li>
             <li
               className={`${styles.page} ${styles.last} ${
@@ -405,6 +458,13 @@ export function ClientTable({ initialClients }: ClientTableProps) {
               onClick={() =>
                 currentPage !== totalPages && setCurrentPage(totalPages)
               }
+              onKeyDown={(event) =>
+                handlePageKeyDown(event, () =>
+                  currentPage !== totalPages && setCurrentPage(totalPages)
+                )
+              }
+              role="button"
+              tabIndex={0}
             ></li>
           </ul>
         </div>

@@ -89,7 +89,7 @@
   font-size: 15px;
   font-weight: var(--font-weight-medium);
   color: var(--text-gray);
-  transition: all 0.2s;
+  transition: color 0.2s, background-color 0.2s, border-color 0.2s;
   text-align: center;
   position: relative;
 }
@@ -131,6 +131,7 @@
 .loginRight input[type="password"]:focus {
   border: 2px solid var(--primary);
   outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 20%, transparent);
 }
 
 .loginRight label {
@@ -146,7 +147,7 @@
   position: relative;
 }
 
-.helpBox > p {
+.helpToggle {
   font-size: 13px;
   font-weight: var(--font-weight-medium);
   color: var(--text-gray);
@@ -155,6 +156,10 @@
   gap: 4px;
   position: relative;
   cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
 }
 
 .helpBox img {
@@ -199,11 +204,13 @@
   position: absolute;
   right: 14px;
   top: 18px;
-  width: 12px;
-  height: 12px;
-  object-fit: contain;
   cursor: pointer;
   padding: 6px;
+  border: none;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btnWrap {

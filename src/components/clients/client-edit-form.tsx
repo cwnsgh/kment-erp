@@ -8,6 +8,7 @@ import {
   checkBusinessRegistrationNumber,
 } from "@/app/actions/client";
 import AddressSearch from "@/components/common/address-search";
+import { formatBusinessNumberInput } from "@/lib/business-number";
 import styles from "./client-form.module.css";
 
 type ClientDetail = {
@@ -100,6 +101,12 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
   const [businessStatus, setBusinessStatus] = useState<
     "정상" | "휴업" | "폐업" | null
   >(null);
+
+  const handleBusinessNumberInput = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    event.target.value = formatBusinessNumberInput(event.target.value);
+  };
 
   // 초기 데이터 설정
   useEffect(() => {
@@ -561,6 +568,8 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
                           required
                           style={{ flex: 1 }}
                           placeholder="123-45-67890"
+                          inputMode="numeric"
+                          onChange={handleBusinessNumberInput}
                         />
                         <button
                           type="button"

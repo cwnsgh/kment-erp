@@ -24,10 +24,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const normalizeBusinessNumber = (value: string) => value.replace(/-/g, "");
+    const isValidBusinessNumber = (value: string) => {
+      if (!/^\d{10}$/.test(value)) return false;
+      const digits = value.split("").map((char) => Number(char));
+      const weights = [1, 3, 7, 1, 3, 7, 1, 3, 5];
+      let sum = 0;
+      for (let i = 0; i < weights.length; i += 1) {
+        sum += digits[i] * weights[i];
+      }
+      sum += Math.floor((digits[8] * 5) / 10);
+      const checkDigit = (10 - (sum % 10)) % 10;
+      return checkDigit === digits[9];
+    };
+
     // 단일 또는 배치 처리
     if (businessNumber) {
       // 단일 사업자등록번호 처리
-      const cleanBusinessNumber = businessNumber.replace(/-/g, "");
+      const cleanBusinessNumber = normalizeBusinessNumber(businessNumber);
+      if (!isValidBusinessNumber(cleanBusinessNumber)) {
+        return NextResponse.json(
+          { success: false, error: "유효하지 않은 사업자등록번호입니다." },
+          { status: 400 }
+        );
+      }
 
       const apiUrl = `https://api.odcloud.kr/api/nts-businessman/v1/status?serviceKey=${encodeURIComponent(
         apiKey
@@ -146,13 +166,26 @@ export async function POST(request: NextRequest) {
 
       const results: Array<{
         businessNumber: string;
-        status: "approved" | "suspended" | "closed";
+        status: "approved" | "suspended" | "closed" | "unavailable";
         statusText: string;
         statusCode?: string;
       }> = [];
 
       for (const batch of batches) {
-        const cleanBatch = batch.map((bn: string) => bn.replace(/-/g, ""));
+        const cleanBatch = batch.map((bn: string) => normalizeBusinessNumber(bn));
+        const validBatch = cleanBatch.filter((bn) => isValidBusinessNumber(bn));
+        const invalidBatch = cleanBatch.filter((bn) => !isValidBusinessNumber(bn));
+        for (const invalidNumber of invalidBatch) {
+          results.push({
+            businessNumber: invalidNumber,
+            status: "unavailable",
+            statusText: "유효하지 않은 사업자등록번호",
+          });
+        }
+
+        if (validBatch.length === 0) {
+          continue;
+        }
         const apiUrl = `https://api.odcloud.kr/api/nts-businessman/v1/status?serviceKey=${encodeURIComponent(
           apiKey
         )}&returnType=JSON`;
@@ -164,7 +197,7 @@ export async function POST(request: NextRequest) {
             Accept: "application/json",
           },
           body: JSON.stringify({
-            b_no: cleanBatch,
+            b_no: validBatch,
           }),
         });
 

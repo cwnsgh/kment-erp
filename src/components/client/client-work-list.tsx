@@ -810,6 +810,8 @@ export function ClientWorkList({
                                   }
                                   alt="서명"
                                   className={styles.signImg}
+                                  width={24}
+                                  height={24}
                                 />
                               )}
                             </div>
@@ -864,6 +866,8 @@ export function ClientWorkList({
                                   }
                                   alt="서명"
                                   className={styles.signImg}
+                                  width={24}
+                                  height={24}
                                 />
                               )}
                             </div>

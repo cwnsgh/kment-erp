@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 import createExcelResponse from "@/lib/excel-export";
+import { formatBusinessNumber } from "@/lib/business-number";
 
 const mapStatus = (status: string | null | undefined) => {
   if (!status) return "확인불가";
@@ -69,7 +70,9 @@ export async function GET(request: NextRequest) {
 
     (data || []).forEach((client) => {
       sheet.addRow({
-        businessNumber: client.business_registration_number || "-",
+        businessNumber: client.business_registration_number
+          ? formatBusinessNumber(client.business_registration_number)
+          : "-",
         name: client.name || "-",
         ceoName: client.ceo_name || "-",
         postalCode: client.postal_code || "-",

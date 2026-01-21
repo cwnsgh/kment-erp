@@ -329,6 +329,8 @@ export default function ManagedClientListPage() {
                         <img
                           src="/images/date_icon.svg"
                           alt="날짜"
+                          width={24}
+                          height={24}
                           style={{
                             width: "24px",
                             height: "24px",
@@ -366,6 +368,8 @@ export default function ManagedClientListPage() {
                         <img
                           src="/images/date_icon.svg"
                           alt="날짜"
+                          width={24}
+                          height={24}
                           style={{
                             width: "24px",
                             height: "24px",

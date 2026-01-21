@@ -15,6 +15,7 @@ import {
   checkUsername,
 } from "@/app/actions/signup-validation";
 import AddressSearch from "@/components/common/address-search";
+import { formatBusinessNumberInput } from "@/lib/business-number";
 
 type AgreementKey = "terms" | "privacy" | "thirdParty";
 
@@ -168,9 +169,11 @@ export default function SignUpPage() {
     event: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = event.target;
+    const nextValue =
+      name === "businessNumber" ? formatBusinessNumberInput(value) : value;
     setForm((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: nextValue,
     }));
 
     // 입력값 변경 시 중복 확인 상태 초기화
@@ -556,6 +559,7 @@ export default function SignUpPage() {
               placeholder="숫자만 입력"
               value={form.businessNumber}
               onChange={handleInputChange}
+            inputMode="numeric"
               suffix={
                 <button
                   type="button"
@@ -902,6 +906,7 @@ type TextFieldProps = {
   suffix?: ReactNode;
   readOnly?: boolean;
   className?: string;
+  inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
 };
 
 function TextField({
@@ -913,6 +918,7 @@ function TextField({
   suffix,
   readOnly,
   className,
+  inputMode,
 }: TextFieldProps) {
   return (
     <div
@@ -928,6 +934,7 @@ function TextField({
           onChange={onChange}
           placeholder={placeholder}
           readOnly={readOnly}
+          inputMode={inputMode}
           className="flex-1 rounded border border-slate-200 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:bg-slate-100 disabled:cursor-not-allowed"
         />
         {suffix}

@@ -1,6 +1,8 @@
 "use server";
 
 import { getSupabaseServerClient } from "@/lib/supabase-server";
+import { requireAuth } from "@/lib/auth";
+import { formatBusinessNumber } from "@/lib/business-number";
 import { revalidatePath } from "next/cache";
 
 /**
@@ -13,6 +15,7 @@ export async function checkAndResetMaintenanceCounts(managedClientId: string): P
   error?: string;
 }> {
   try {
+    await requireAuth();
     const supabase = await getSupabaseServerClient();
 
     // 관리 고객 정보 조회
@@ -104,9 +107,9 @@ export async function getClientsForModal(
   searchType?: "name" | "ceo",
   searchKeyword?: string
 ) {
-  const supabase = await getSupabaseServerClient();
-
   try {
+    await requireAuth();
+    const supabase = await getSupabaseServerClient();
     let query = supabase
       .from("client")
       .select("id, business_registration_number, name, ceo_name, status")
@@ -144,6 +147,9 @@ export async function getClientsForModal(
 
       const clientsWithFlag = clients.map((client) => ({
         ...client,
+        business_registration_number: formatBusinessNumber(
+          client.business_registration_number
+        ),
         hasManagedProduct: managedClientIds.has(client.id),
       }));
 
@@ -172,45 +178,46 @@ export async function getClientsForModal(
  * 거래처 상세 정보 조회 (관리고객 등록용)
  */
 export async function getClientForManagedRegistration(clientId: string) {
-  const supabase = await getSupabaseServerClient();
-
   try {
+    await requireAuth();
+    const supabase = await getSupabaseServerClient();
     // 거래처 메인 정보
     const { data: client, error: clientError } = await supabase
       .from("client")
-      .select("*")
+      .select(
+        "id, business_registration_number, name, ceo_name, postal_code, address, address_detail, business_type, business_item, login_id, status, note"
+      )
       .eq("id", clientId)
       .single();
 
     if (clientError) throw clientError;
     if (!client) throw new Error("거래처를 찾을 수 없습니다.");
 
-    // 담당자 정보
-    const { data: contacts, error: contactsError } = await supabase
-      .from("client_contact")
-      .select("*")
-      .eq("client_id", clientId)
-      .order("created_at", { ascending: true });
+    const [contactsResult, sitesResult, attachmentsResult] = await Promise.all([
+      supabase
+        .from("client_contact")
+        .select("name, phone, email, title, note")
+        .eq("client_id", clientId)
+        .order("created_at", { ascending: true }),
+      supabase
+        .from("client_site")
+        .select("brand_name, domain, solution, login_id, login_password, type")
+        .eq("client_id", clientId)
+        .order("created_at", { ascending: true }),
+      supabase
+        .from("client_attachment")
+        .select("file_url, file_name, file_type")
+        .eq("client_id", clientId)
+        .order("created_at", { ascending: true }),
+    ]);
 
-    if (contactsError) throw contactsError;
+    if (contactsResult.error) throw contactsResult.error;
+    if (sitesResult.error) throw sitesResult.error;
+    if (attachmentsResult.error) throw attachmentsResult.error;
 
-    // 사이트 정보
-    const { data: sites, error: sitesError } = await supabase
-      .from("client_site")
-      .select("*")
-      .eq("client_id", clientId)
-      .order("created_at", { ascending: true });
-
-    if (sitesError) throw sitesError;
-
-    // 첨부파일 정보
-    const { data: attachments, error: attachmentsError } = await supabase
-      .from("client_attachment")
-      .select("*")
-      .eq("client_id", clientId)
-      .order("created_at", { ascending: true });
-
-    if (attachmentsError) throw attachmentsError;
+    const contacts = contactsResult.data;
+    const sites = sitesResult.data;
+    const attachments = attachmentsResult.data;
 
     // status 매핑
     const statusMap: Record<string, "정상" | "휴업" | "폐업"> = {
@@ -223,7 +230,9 @@ export async function getClientForManagedRegistration(clientId: string) {
       success: true,
       client: {
         id: client.id,
-        businessRegistrationNumber: client.business_registration_number,
+        businessRegistrationNumber: formatBusinessNumber(
+          client.business_registration_number
+        ),
         name: client.name,
         ceoName: client.ceo_name || "",
         postalCode: client.postal_code || "",
@@ -292,9 +301,9 @@ type ManagedClientData = {
  * 관리고객 등록
  */
 export async function createManagedClient(data: ManagedClientData) {
-  const supabase = await getSupabaseServerClient();
-
   try {
+    await requireAuth();
+    const supabase = await getSupabaseServerClient();
     // 유지보수형인 경우 초기값도 함께 저장
     const insertData: any = {
       client_id: data.clientId,
@@ -360,31 +369,36 @@ export async function getManagedClients(params: {
   startDateFrom?: string;
   startDateTo?: string;
 }) {
-  const supabase = await getSupabaseServerClient();
-
   try {
+    await requireAuth();
+    const supabase = await getSupabaseServerClient();
     const page = params.page || 1;
     const limit = params.limit || 20;
     const offset = (page - 1) * limit;
 
     // managed_client와 client 조인하여 조회
     let query = supabase
-      .from("managed_client")
+      .from("managed_client_view")
       .select(
         `
-        *,
-        client:client_id (
-          id,
-          name
-        )
+        id,
+        client_id,
+        client_name,
+        product_type1,
+        product_type2,
+        total_amount,
+        payment_status,
+        start_date,
+        computed_end_date,
+        computed_status,
+        created_at
       `,
         { count: "exact" }
       );
 
     // 검색 키워드 필터 (회사명 또는 브랜드명)
     if (params.searchKeyword) {
-      // client 테이블과 조인하여 회사명 검색
-      query = query.ilike("client.name", `%${params.searchKeyword}%`);
+      query = query.ilike("client_name", `%${params.searchKeyword}%`);
     }
 
     // 관리유형 필터
@@ -394,7 +408,7 @@ export async function getManagedClients(params: {
 
     // 진행상황 필터
     if (params.status) {
-      query = query.eq("status", params.status);
+      query = query.eq("computed_status", params.status);
     }
 
     // 시작일 필터
@@ -406,6 +420,7 @@ export async function getManagedClients(params: {
     }
 
     query = query.order("created_at", { ascending: false });
+    query = query.range(offset, offset + limit - 1);
 
     const { data, error, count } = await query;
 
@@ -413,82 +428,29 @@ export async function getManagedClients(params: {
 
     // 데이터 가공
     let processedData = (data || []).map((item: any) => {
-      const client = item.client;
-      
-      // 브랜드명 조회
-      let brandNames: string[] = [];
-      if (client) {
-        // client_site에서 브랜드명 가져오기 (나중에 구현)
-        brandNames = [];
-      }
-
-      // 종료일 계산
-      let endDate = item.end_date;
-      if (!endDate && item.start_date) {
-        if (item.product_type1 === "deduct" && item.product_type2) {
-          const months = parseInt(item.product_type2.replace("m", ""));
-          const start = new Date(item.start_date);
-          start.setMonth(start.getMonth() + months);
-          endDate = start.toISOString();
-        } else if (item.product_type1 === "maintenance") {
-          const start = new Date(item.start_date);
-          start.setFullYear(start.getFullYear() + 1);
-          endDate = start.toISOString();
-        }
-      }
-
-      // 진행상황 계산
-      let status = item.status;
-      if (!status) {
-        if (item.payment_status === "unpaid") {
-          status = "unpaid";
-        } else {
-          const now = new Date();
-          const isEnded =
-            (endDate && new Date(endDate) < now) ||
-            (item.product_type1 === "deduct" &&
-              item.total_amount !== null &&
-              Number(item.total_amount) === 0);
-
-          if (isEnded) {
-            status = "end";
-          } else if (item.start_date) {
-            status = "ongoing";
-          } else {
-            status = "wait";
-          }
-        }
-      }
+      const brandNames: string[] = [];
 
       return {
         id: item.id,
-        clientId: client?.id || item.client_id || "",
-        companyName: client?.name || "",
-        brandNames: brandNames,
+        clientId: item.client_id || "",
+        companyName: item.client_name || "",
+        brandNames,
         productType1: item.product_type1,
         productType2: item.product_type2 || "",
         totalAmount: item.total_amount ? Number(item.total_amount) : null,
         paymentStatus: item.payment_status,
         startDate: item.start_date,
-        endDate: endDate,
-        status: status,
+        endDate: item.computed_end_date,
+        status: item.computed_status,
         createdAt: item.created_at,
       };
     });
 
-    // 진행상황 필터 적용
-    if (params.status) {
-      processedData = processedData.filter((mc) => mc.status === params.status);
-    }
-
-    // 전체 개수 계산
-    const totalCount = processedData.length;
-
-    // 페이지네이션 적용
-    const paginatedData = processedData.slice(offset, offset + limit);
+    // 전체 개수 계산 (DB count 기반)
+    const totalCount = count ?? processedData.length;
     const totalPages = Math.ceil(totalCount / limit);
 
-    const managedClients = paginatedData;
+    const managedClients = processedData;
 
     return {
       success: true,
@@ -515,55 +477,58 @@ export async function getManagedClients(params: {
  * 관리고객 상세 조회
  */
 export async function getManagedClientDetail(managedClientId: string) {
-  const supabase = await getSupabaseServerClient();
-
   try {
+    await requireAuth();
+    const supabase = await getSupabaseServerClient();
     // managed_client 정보 조회
     const { data: managedClient, error: managedClientError } = await supabase
-      .from("managed_client")
-      .select("*")
+      .from("managed_client_view")
+      .select(
+        "id, client_id, product_type1, product_type2, total_amount, payment_status, start_date, end_date, status, detail_text_edit_count, detail_coding_edit_count, detail_image_edit_count, detail_popup_design_count, detail_banner_design_count, note, computed_end_date, computed_status, created_at"
+      )
       .eq("id", managedClientId)
       .single();
 
     if (managedClientError) throw managedClientError;
     if (!managedClient) throw new Error("관리고객을 찾을 수 없습니다.");
 
-    // 거래처 정보 조회
-    const { data: client, error: clientError } = await supabase
-      .from("client")
-      .select("*")
-      .eq("id", managedClient.client_id)
-      .single();
+    const clientId = managedClient.client_id;
+    const [clientResult, contactsResult, sitesResult, attachmentsResult] =
+      await Promise.all([
+        supabase
+          .from("client")
+          .select(
+            "id, business_registration_number, name, ceo_name, postal_code, address, address_detail, business_type, business_item, login_id, status, note"
+          )
+          .eq("id", clientId)
+          .single(),
+        supabase
+          .from("client_contact")
+          .select("name, phone, email, title, note")
+          .eq("client_id", clientId)
+          .order("created_at", { ascending: true }),
+        supabase
+          .from("client_site")
+          .select("brand_name, domain, solution, login_id, login_password, type")
+          .eq("client_id", clientId)
+          .order("created_at", { ascending: true }),
+        supabase
+          .from("client_attachment")
+          .select("file_url, file_name, file_type")
+          .eq("client_id", clientId)
+          .order("created_at", { ascending: true }),
+      ]);
 
-    if (clientError) throw clientError;
-    if (!client) throw new Error("거래처를 찾을 수 없습니다.");
+    if (clientResult.error) throw clientResult.error;
+    if (!clientResult.data) throw new Error("거래처를 찾을 수 없습니다.");
+    if (contactsResult.error) throw contactsResult.error;
+    if (sitesResult.error) throw sitesResult.error;
+    if (attachmentsResult.error) throw attachmentsResult.error;
 
-    // 담당자 정보
-    const { data: contacts, error: contactsError } = await supabase
-      .from("client_contact")
-      .select("*")
-      .eq("client_id", client.id)
-      .order("created_at", { ascending: true });
-
-    if (contactsError) throw contactsError;
-
-    // 사이트 정보
-    const { data: sites, error: sitesError } = await supabase
-      .from("client_site")
-      .select("*")
-      .eq("client_id", client.id)
-      .order("created_at", { ascending: true });
-
-    if (sitesError) throw sitesError;
-
-    // 첨부파일 정보
-    const { data: attachments, error: attachmentsError } = await supabase
-      .from("client_attachment")
-      .select("*")
-      .eq("client_id", client.id)
-      .order("created_at", { ascending: true });
-
-    if (attachmentsError) throw attachmentsError;
+    const client = clientResult.data;
+    const contacts = contactsResult.data;
+    const sites = sitesResult.data;
+    const attachments = attachmentsResult.data;
 
     // status 매핑
     const statusMap: Record<string, "정상" | "휴업" | "폐업"> = {
@@ -572,46 +537,11 @@ export async function getManagedClientDetail(managedClientId: string) {
       closed: "폐업",
     };
 
-    // 종료일 계산
-    let endDate = managedClient.end_date;
-    if (!endDate && managedClient.start_date) {
-      if (managedClient.product_type1 === "deduct" && managedClient.product_type2) {
-        const months = parseInt(managedClient.product_type2.replace("m", ""));
-        const start = new Date(managedClient.start_date);
-        start.setMonth(start.getMonth() + months);
-        endDate = start.toISOString();
-      } else if (managedClient.product_type1 === "maintenance") {
-        const start = new Date(managedClient.start_date);
-        start.setFullYear(start.getFullYear() + 1);
-        endDate = start.toISOString();
-      }
-    }
-
-    // 진행상황 계산
-    let status = managedClient.status;
-    if (!status) {
-      if (managedClient.payment_status === "unpaid") {
-        status = "unpaid";
-      } else {
-        const now = new Date();
-        const isEnded =
-          (endDate && new Date(endDate) < now) ||
-          (managedClient.product_type1 === "deduct" &&
-            managedClient.total_amount !== null &&
-            Number(managedClient.total_amount) === 0);
-
-        if (isEnded) {
-          status = "end";
-        } else if (managedClient.start_date) {
-          status = "ongoing";
-        } else {
-          status = "wait";
-        }
-      }
-    }
-
     // 유지보수형이고 진행상황이 "진행"인 경우 초기화 체크
-    if (managedClient.product_type1 === "maintenance" && status === "ongoing") {
+    if (
+      managedClient.product_type1 === "maintenance" &&
+      managedClient.computed_status === "ongoing"
+    ) {
       await checkAndResetMaintenanceCounts(managedClientId);
       // 초기화 후 다시 조회하여 최신 데이터 가져오기
       const { data: updatedManagedClient } = await supabase
@@ -639,8 +569,8 @@ export async function getManagedClientDetail(managedClientId: string) {
         totalAmount: managedClient.total_amount ? Number(managedClient.total_amount) : null,
         paymentStatus: managedClient.payment_status,
         startDate: managedClient.start_date,
-        endDate: endDate,
-        status: status,
+        endDate: managedClient.computed_end_date,
+        status: managedClient.computed_status,
         detailTextEditCount: managedClient.detail_text_edit_count || 0,
         detailCodingEditCount: managedClient.detail_coding_edit_count || 0,
         detailImageEditCount: managedClient.detail_image_edit_count || 0,
@@ -651,7 +581,9 @@ export async function getManagedClientDetail(managedClientId: string) {
       },
       client: {
         id: client.id,
-        businessRegistrationNumber: client.business_registration_number,
+        businessRegistrationNumber: formatBusinessNumber(
+          client.business_registration_number
+        ),
         name: client.name,
         ceoName: client.ceo_name || "",
         postalCode: client.postal_code || "",
@@ -706,9 +638,9 @@ export async function getManagedClientDetail(managedClientId: string) {
  * 관리고객 삭제
  */
 export async function deleteManagedClients(managedClientIds: string[]) {
-  const supabase = await getSupabaseServerClient();
-
   try {
+    await requireAuth();
+    const supabase = await getSupabaseServerClient();
     const { error } = await supabase
       .from("managed_client")
       .delete()

@@ -674,7 +674,9 @@ export async function getClientNotifications(): Promise<{
 
     const { data: notifications, error } = await supabase
       .from("notification")
-      .select("*")
+      .select(
+        "id, employee_id, client_id, work_request_id, type, title, message, is_read, created_at"
+      )
       .eq("client_id", session.id)
       .order("created_at", { ascending: false });
 
@@ -717,7 +719,9 @@ export async function getEmployeeNotifications(): Promise<{
 
     const { data: notifications, error } = await supabase
       .from("notification")
-      .select("*")
+      .select(
+        "id, employee_id, client_id, work_request_id, type, title, message, is_read, created_at"
+      )
       .eq("employee_id", session.id)
       .order("created_at", { ascending: false });
 

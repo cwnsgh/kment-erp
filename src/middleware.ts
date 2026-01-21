@@ -6,6 +6,7 @@ import { getSession } from './lib/auth';
  * 보호된 경로 목록
  */
 const protectedPaths = ['/dashboard', '/clients', '/contracts', '/operations', '/schedule', '/staff', '/vacations'];
+const clientProtectedPaths = ['/client'];
 
 /**
  * 인증이 필요 없는 경로 목록
@@ -17,6 +18,9 @@ export async function middleware(request: NextRequest) {
   
   // 보호된 경로인지 확인
   const isProtectedPath = protectedPaths.some(path => pathname.startsWith(path));
+  const isClientProtectedPath = clientProtectedPaths.some(path =>
+    pathname.startsWith(path)
+  );
   const isPublicPath = publicPaths.some(path => pathname === path);
 
   // 보호된 경로 접근 시
@@ -41,6 +45,24 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // 클라이언트 포털 보호
+  if (isClientProtectedPath) {
+    try {
+      const clientSessionCookie = request.cookies.get('client_session');
+
+      if (!clientSessionCookie) {
+        const loginUrl = new URL('/login', request.url);
+        loginUrl.searchParams.set('redirect', pathname);
+        return NextResponse.redirect(loginUrl);
+      }
+
+      return NextResponse.next();
+    } catch (error) {
+      const loginUrl = new URL('/login', request.url);
+      return NextResponse.redirect(loginUrl);
+    }
+  }
+
   // 공개 경로이면서 로그인 상태인 경우
   if (isPublicPath && pathname === '/login') {
     const sessionCookie = request.cookies.get('employee_session');
@@ -48,6 +70,10 @@ export async function middleware(request: NextRequest) {
     if (sessionCookie) {
       // 이미 로그인 상태 - 대시보드로 리다이렉트
       return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
+    const clientSessionCookie = request.cookies.get('client_session');
+    if (clientSessionCookie) {
+      return NextResponse.redirect(new URL('/client/dashboard', request.url));
     }
   }
 

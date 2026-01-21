@@ -479,6 +479,8 @@ export default function ManagedClientDetailPage() {
                 <img
                   src="/images/arrow_icon.svg"
                   alt=""
+                  width={16}
+                  height={16}
                   className={`table_toggle ${
                     isContactsOpen ? styles.rotated : ""
                   }`}
@@ -534,6 +536,8 @@ export default function ManagedClientDetailPage() {
                 <img
                   src="/images/arrow_icon.svg"
                   alt=""
+                  width={16}
+                  height={16}
                   className={`table_toggle ${
                     isSitesOpen ? styles.rotated : ""
                   }`}
@@ -588,6 +592,8 @@ export default function ManagedClientDetailPage() {
                 <img
                   src="/images/arrow_icon.svg"
                   alt=""
+                  width={16}
+                  height={16}
                   className={`table_toggle ${isNoteOpen ? styles.rotated : ""}`}
                 />
               </h2>

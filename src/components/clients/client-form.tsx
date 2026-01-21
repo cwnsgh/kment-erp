@@ -8,6 +8,7 @@ import {
   checkBusinessRegistrationNumber,
 } from "@/app/actions/client";
 import AddressSearch from "@/components/common/address-search";
+import { formatBusinessNumberInput } from "@/lib/business-number";
 import styles from "./client-form.module.css";
 
 type Contact = {
@@ -58,6 +59,12 @@ export function ClientForm() {
       note: "",
     },
   ]);
+
+  const handleBusinessNumberInput = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    event.target.value = formatBusinessNumberInput(event.target.value);
+  };
   const [attachments, setAttachments] = useState<
     Array<{
       fileUrl: string;
@@ -418,6 +425,8 @@ export function ClientForm() {
                           type="text"
                           placeholder="123-45-67890"
                           required
+                          inputMode="numeric"
+                          onChange={handleBusinessNumberInput}
                           style={{ flex: 1 }}
                         />
                         <button
@@ -596,7 +605,12 @@ export function ClientForm() {
                               className="file-upload-btn"
                             >
                               첨부파일{" "}
-                              <img src="/images/attach_icon.svg" alt="첨부" />
+                              <img
+                                src="/images/attach_icon.svg"
+                                alt="첨부"
+                                width={16}
+                                height={16}
+                              />
                             </button>
                           )}
                         {attachments
@@ -702,7 +716,12 @@ export function ClientForm() {
                               className="file-upload-btn"
                             >
                               첨부파일{" "}
-                              <img src="/images/attach_icon.svg" alt="첨부" />
+                              <img
+                                src="/images/attach_icon.svg"
+                                alt="첨부"
+                                width={16}
+                                height={16}
+                              />
                             </button>
                           )}
                         {attachments

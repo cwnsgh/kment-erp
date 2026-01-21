@@ -2,6 +2,7 @@
 
 import bcrypt from "bcryptjs";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
+import { normalizeBusinessNumber } from "@/lib/business-number";
 
 type SignupData = {
   username: string;
@@ -71,7 +72,7 @@ export async function signup(data: SignupData) {
     const { data: client, error: clientError } = await supabase
       .from("client")
       .insert({
-        business_registration_number: data.businessNumber,
+        business_registration_number: normalizeBusinessNumber(data.businessNumber),
         name: data.companyName,
         ceo_name: data.ceoName,
         address: data.address,

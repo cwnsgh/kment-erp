@@ -1,12 +1,16 @@
+import { Suspense } from 'react';
 import { ClientTable } from '@/components/clients/client-table';
-import { PageHeader } from '@/components/layout/page-header';
 import { getClients } from '@/app/actions/client';
 import styles from './page.module.css';
 
-export default async function ClientListPage() {
+async function ClientsContent() {
   const result = await getClients();
   const clients = result.success ? result.clients : [];
 
+  return <ClientTable initialClients={clients} />;
+}
+
+export default function ClientListPage() {
   return (
     <div className={`${styles.clientsPage} page_section`}>
       <div className="page_title">
@@ -17,7 +21,9 @@ export default async function ClientListPage() {
           </a>
         </div>
       </div>
-      <ClientTable initialClients={clients} />
+      <Suspense fallback={<div className="text-sm text-gray-500">로딩 중...</div>}>
+        <ClientsContent />
+      </Suspense>
     </div>
   );
 }

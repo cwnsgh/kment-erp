@@ -2,6 +2,7 @@
 
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 import { getSession } from "@/lib/auth";
+import { formatBusinessNumber } from "@/lib/business-number";
 import { revalidatePath } from "next/cache";
 
 export interface SignupRequest {
@@ -52,43 +53,76 @@ export async function getPendingSignupRequests(): Promise<{
     // pending 상태인 client 조회
     const { data: clients, error: clientsError } = await supabase
       .from("client")
-      .select("*")
+      .select(
+        "id, business_registration_number, name, ceo_name, address, address_detail, business_type, business_item, login_id, created_at"
+      )
       .eq("status", "pending")
       .order("created_at", { ascending: false });
 
     if (clientsError) throw clientsError;
 
-    // 각 client의 담당자와 첨부파일 조회
-    const requests: SignupRequest[] = await Promise.all(
-      (clients || []).map(async (client) => {
-        // 담당자 조회
-        const { data: contacts } = await supabase
-          .from("client_contact")
-          .select("name, phone, email, title")
-          .eq("client_id", client.id);
+    if (!clients || clients.length === 0) {
+      return {
+        success: true,
+        data: [],
+      };
+    }
 
-        // 첨부파일 조회
-        const { data: attachments } = await supabase
-          .from("client_attachment")
-          .select("id, file_url, file_name, file_type")
-          .eq("client_id", client.id);
+    const clientIds = clients.map((client) => client.id);
+    const [contactsResult, attachmentsResult] = await Promise.all([
+      supabase
+        .from("client_contact")
+        .select("client_id, name, phone, email, title")
+        .in("client_id", clientIds),
+      supabase
+        .from("client_attachment")
+        .select("id, client_id, file_url, file_name, file_type")
+        .in("client_id", clientIds),
+    ]);
 
-        return {
-          id: client.id,
-          business_registration_number: client.business_registration_number,
-          name: client.name,
-          ceo_name: client.ceo_name,
-          address: client.address,
-          address_detail: client.address_detail,
-          business_type: client.business_type,
-          business_item: client.business_item,
-          login_id: client.login_id,
-          created_at: client.created_at,
-          contacts: contacts || [],
-          attachments: attachments || [],
-        };
-      })
-    );
+    if (contactsResult.error) throw contactsResult.error;
+    if (attachmentsResult.error) throw attachmentsResult.error;
+
+    const contactsByClientId = new Map<string, SignupRequest["contacts"]>();
+    for (const contact of contactsResult.data || []) {
+      const list = contactsByClientId.get(contact.client_id) || [];
+      list.push({
+        name: contact.name,
+        phone: contact.phone,
+        email: contact.email,
+        title: contact.title,
+      });
+      contactsByClientId.set(contact.client_id, list);
+    }
+
+    const attachmentsByClientId = new Map<string, SignupRequest["attachments"]>();
+    for (const attachment of attachmentsResult.data || []) {
+      const list = attachmentsByClientId.get(attachment.client_id) || [];
+      list.push({
+        id: attachment.id,
+        file_url: attachment.file_url,
+        file_name: attachment.file_name,
+        file_type: attachment.file_type,
+      });
+      attachmentsByClientId.set(attachment.client_id, list);
+    }
+
+    const requests: SignupRequest[] = clients.map((client) => ({
+      id: client.id,
+      business_registration_number: formatBusinessNumber(
+        client.business_registration_number
+      ),
+      name: client.name,
+      ceo_name: client.ceo_name,
+      address: client.address,
+      address_detail: client.address_detail,
+      business_type: client.business_type,
+      business_item: client.business_item,
+      login_id: client.login_id,
+      created_at: client.created_at,
+      contacts: contactsByClientId.get(client.id) || [],
+      attachments: attachmentsByClientId.get(client.id) || [],
+    }));
 
     return {
       success: true,

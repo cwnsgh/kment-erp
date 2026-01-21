@@ -140,7 +140,12 @@ export default function LoginPage() {
               <label htmlFor="remember_id">아이디 기억하기</label>
             </div>
             <div className={styles.helpBox}>
-              <p onClick={toggleHelpBox}>
+              <button
+                type="button"
+                className={styles.helpToggle}
+                onClick={toggleHelpBox}
+                aria-expanded={showHelpBox}
+              >
                 <svg
                   width="16"
                   height="16"
@@ -168,7 +173,7 @@ export default function LoginPage() {
                   </text>
                 </svg>
                 비밀번호를 분실했어요
-              </p>
+              </button>
               <div
                 className={`${styles.boxContent} ${
                   showHelpBox ? styles.open : ""
@@ -181,22 +186,27 @@ export default function LoginPage() {
                   <span>2. 보내시는 분의 명함 이미지</span>
                   제출된 내용 확인 후, 임시 비밀번호를 안내해드립니다.
                 </p>
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 12 12"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
+                <button
+                  type="button"
                   className={styles.closeBtn}
                   onClick={toggleHelpBox}
+                  aria-label="도움말 닫기"
                 >
-                  <path
-                    d="M1 1L11 11M11 1L1 11"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                  />
-                </svg>
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 12 12"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M1 1L11 11M11 1L1 11"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </button>
               </div>
             </div>
           </div>

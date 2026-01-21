@@ -120,6 +120,7 @@ input:focus,
 textarea:focus {
   border: 2px solid var(--primary);
   outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 20%, transparent);
 }
 
 /* Radio Button Styles */

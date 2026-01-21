@@ -2,8 +2,19 @@
 
 import bcrypt from "bcryptjs";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
-import { getSession } from "@/lib/auth";
+import { getSession, requireAuth } from "@/lib/auth";
+import { formatBusinessNumber, normalizeBusinessNumber } from "@/lib/business-number";
 import { revalidatePath } from "next/cache";
+
+function resolveBaseUrl() {
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL;
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  return "http://localhost:3000";
+}
 
 type ClientData = {
   businessRegistrationNumber: string;
@@ -40,9 +51,9 @@ type ClientData = {
 };
 
 export async function createClient(data: ClientData) {
-  const supabase = await getSupabaseServerClient();
-
   try {
+    await requireAuth();
+    const supabase = await getSupabaseServerClient();
     // 비밀번호 해싱 (있는 경우)
     let hashedPassword = data.loginPassword;
     if (data.loginPassword) {
@@ -53,7 +64,9 @@ export async function createClient(data: ClientData) {
     const { data: client, error: clientError } = await supabase
       .from("client")
       .insert({
-        business_registration_number: data.businessRegistrationNumber,
+        business_registration_number: normalizeBusinessNumber(
+          data.businessRegistrationNumber
+        ),
         name: data.name,
         ceo_name: data.ceoName,
         address: data.address,
@@ -150,9 +163,9 @@ export async function createClient(data: ClientData) {
  * 거래처 목록 조회
  */
 export async function getClients() {
-  const supabase = await getSupabaseServerClient();
-
   try {
+    await requireAuth();
+    const supabase = await getSupabaseServerClient();
     const { data: clients, error } = await supabase
       .from("client")
       .select(
@@ -163,9 +176,17 @@ export async function getClients() {
 
     if (error) throw error;
 
+    const formattedClients =
+      clients?.map((client) => ({
+        ...client,
+        business_registration_number: formatBusinessNumber(
+          client.business_registration_number
+        ),
+      })) || [];
+
     return {
       success: true,
-      clients: clients || [],
+      clients: formattedClients,
     };
   } catch (error) {
     console.error("거래처 조회 오류:", error);
@@ -182,45 +203,46 @@ export async function getClients() {
  * 거래처 상세 조회 (관련 테이블 포함)
  */
 export async function getClientDetail(clientId: string) {
-  const supabase = await getSupabaseServerClient();
-
   try {
+    await requireAuth();
+    const supabase = await getSupabaseServerClient();
     // 1. 거래처 메인 정보
     const { data: client, error: clientError } = await supabase
       .from("client")
-      .select("*")
+      .select(
+        "id, login_id, business_registration_number, name, address, ceo_name, business_type, business_item, note, status"
+      )
       .eq("id", clientId)
       .single();
 
     if (clientError) throw clientError;
     if (!client) throw new Error("거래처를 찾을 수 없습니다.");
 
-    // 2. 담당자 정보
-    const { data: contacts, error: contactsError } = await supabase
-      .from("client_contact")
-      .select("*")
-      .eq("client_id", clientId)
-      .order("created_at", { ascending: true });
+    const [contactsResult, sitesResult, attachmentsResult] = await Promise.all([
+      supabase
+        .from("client_contact")
+        .select("name, phone, email, note")
+        .eq("client_id", clientId)
+        .order("created_at", { ascending: true }),
+      supabase
+        .from("client_site")
+        .select("brand_name, solution, domain, login_id, login_password")
+        .eq("client_id", clientId)
+        .order("created_at", { ascending: true }),
+      supabase
+        .from("client_attachment")
+        .select("file_url, file_name, file_type")
+        .eq("client_id", clientId)
+        .order("created_at", { ascending: true }),
+    ]);
 
-    if (contactsError) throw contactsError;
+    if (contactsResult.error) throw contactsResult.error;
+    if (sitesResult.error) throw sitesResult.error;
+    if (attachmentsResult.error) throw attachmentsResult.error;
 
-    // 3. 사이트 정보
-    const { data: sites, error: sitesError } = await supabase
-      .from("client_site")
-      .select("*")
-      .eq("client_id", clientId)
-      .order("created_at", { ascending: true });
-
-    if (sitesError) throw sitesError;
-
-    // 4. 첨부파일 정보
-    const { data: attachments, error: attachmentsError } = await supabase
-      .from("client_attachment")
-      .select("*")
-      .eq("client_id", clientId)
-      .order("created_at", { ascending: true });
-
-    if (attachmentsError) throw attachmentsError;
+    const contacts = contactsResult.data;
+    const sites = sitesResult.data;
+    const attachments = attachmentsResult.data;
 
     // 비밀번호는 보안상 반환하지 않음 (필요시 별도 처리)
     const businessRegistrationAttachment = attachments?.find(
@@ -250,7 +272,9 @@ export async function getClientDetail(clientId: string) {
         id: client.id,
         loginId: client.login_id || "",
         loginPassword: "", // 보안상 빈 문자열 반환
-        businessRegistrationNumber: client.business_registration_number,
+        businessRegistrationNumber: formatBusinessNumber(
+          client.business_registration_number
+        ),
         name: client.name,
         address: client.address || "",
         ceoName: client.ceo_name || "",
@@ -297,9 +321,9 @@ export async function getClientDetail(clientId: string) {
  * 거래처 수정
  */
 export async function updateClient(clientId: string, data: ClientData) {
-  const supabase = await getSupabaseServerClient();
-
   try {
+    await requireAuth();
+    const supabase = await getSupabaseServerClient();
     // 비밀번호 해싱 (변경된 경우만)
     let hashedPassword = data.loginPassword;
     if (data.loginPassword && !data.loginPassword.startsWith("$2")) {
@@ -319,7 +343,9 @@ export async function updateClient(clientId: string, data: ClientData) {
     const { data: client, error: clientError } = await supabase
       .from("client")
       .update({
-        business_registration_number: data.businessRegistrationNumber,
+        business_registration_number: normalizeBusinessNumber(
+          data.businessRegistrationNumber
+        ),
         name: data.name,
         ceo_name: data.ceoName,
         address: data.address,
@@ -445,14 +471,21 @@ export async function checkBusinessRegistrationNumber(
   businessRegistrationNumber: string,
   excludeClientId?: string
 ): Promise<CheckBusinessRegistrationNumberResult> {
-  const supabase = await getSupabaseServerClient();
-
   try {
+    await requireAuth();
+    const supabase = await getSupabaseServerClient();
     // 1. 먼저 사업자등록번호가 유효한지 API로 확인
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL 
-      ? `https://${process.env.VERCEL_URL}` 
-      : 'http://localhost:3000';
-    
+    const baseUrl = resolveBaseUrl();
+    const normalized = normalizeBusinessNumber(businessRegistrationNumber);
+    if (normalized.length !== 10) {
+      return {
+        success: false,
+        isDuplicate: false,
+        error: "사업자등록번호 형식이 올바르지 않습니다.",
+      };
+    }
+    const formatted = formatBusinessNumber(normalized);
+
     let businessStatus: { status: string; statusText?: string } | undefined;
     
     try {
@@ -462,7 +495,7 @@ export async function checkBusinessRegistrationNumber(
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          businessNumber: businessRegistrationNumber,
+          businessNumber: normalized,
         }),
       });
 
@@ -500,10 +533,17 @@ export async function checkBusinessRegistrationNumber(
     }
 
     // 2. 유효한 사업자등록번호인 경우, 중복 여부 확인
+    const candidates = Array.from(
+      new Set([businessRegistrationNumber, normalized, formatted])
+    );
+    const orConditions = candidates
+      .map((value) => `business_registration_number.eq.${value}`)
+      .join(",");
+
     let query = supabase
       .from("client")
       .select("id, name")
-      .eq("business_registration_number", businessRegistrationNumber);
+      .or(orConditions);
 
     // 수정 시에는 현재 거래처는 제외
     if (excludeClientId) {
@@ -636,9 +676,9 @@ export async function changeClientPassword(data: {
  * 거래처 사업자 상태 새로고침
  */
 export async function refreshBusinessStatus(clientIds: string[] = []) {
-  const supabase = await getSupabaseServerClient();
-
   try {
+    await requireAuth();
+    const supabase = await getSupabaseServerClient();
     let query = supabase
       .from("client")
       .select("id, business_registration_number");
@@ -660,79 +700,82 @@ export async function refreshBusinessStatus(clientIds: string[] = []) {
       };
     }
 
-    // 사업자등록번호로 실제 상태를 조회하고 업데이트
+    // 사업자등록번호로 실제 상태를 조회하고 업데이트 (배치 호출)
     let updatedCount = 0;
+    const baseUrl = resolveBaseUrl();
 
-    for (const client of clients) {
-      try {
-        // 사업자등록번호 검증 API 호출
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL 
-          ? `https://${process.env.VERCEL_URL}` 
-          : 'http://localhost:3000';
-        
-        const response = await fetch(`${baseUrl}/api/business/verify`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            businessNumber: client.business_registration_number,
-          }),
-        });
+    const cleanedToClientMap = new Map<
+      string,
+      { id: string; businessNo: string }
+    >();
+    const businessNumbers = clients.map((client) => {
+      const clean = normalizeBusinessNumber(client.business_registration_number);
+      cleanedToClientMap.set(clean, {
+        id: client.id,
+        businessNo: client.business_registration_number,
+      });
+      return clean;
+    });
 
-        let dbStatus: string;
+    const response = await fetch(`${baseUrl}/api/business/verify`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        businessNumbers,
+      }),
+    });
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          console.error(
-            `사업자등록번호 ${client.business_registration_number} 검증 실패:`,
-            errorData.error || response.statusText
-          );
-          // API 호출 실패 시 "확인불가" 상태로 업데이트
-          dbStatus = "unavailable";
-        } else {
-          const result = await response.json();
-          
-          // API 응답이 실패한 경우
-          if (!result.success) {
-            console.error(
-              `사업자등록번호 ${client.business_registration_number} 검증 실패:`,
-              result.error
-            );
-            // API 응답 실패 시 "확인불가" 상태로 업데이트
-            dbStatus = "unavailable";
-          } else {
-            // API 응답에서 상태를 매핑
-            // API는 "approved" | "suspended" | "closed" 형식으로 반환
-            dbStatus = result.status;
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error(
+        "사업자등록번호 배치 검증 실패:",
+        errorData.error || response.statusText
+      );
+      return {
+        success: false,
+        message:
+          errorData.error || "사업자등록번호 배치 검증에 실패했습니다.",
+        updated: 0,
+      };
+    }
 
-            // 상태가 없거나 유효하지 않은 경우 "확인불가"로 처리
-            if (!dbStatus || !["approved", "suspended", "closed"].includes(dbStatus)) {
-              console.error(
-                `사업자등록번호 ${client.business_registration_number}의 상태가 유효하지 않습니다:`,
-                dbStatus
-              );
-              dbStatus = "unavailable";
-            }
-          }
-        }
+    const result = await response.json();
+    if (!result.success || !Array.isArray(result.results)) {
+      console.error("사업자등록번호 배치 검증 실패:", result?.error);
+      return {
+        success: false,
+        message:
+          result?.error || "사업자등록번호 배치 검증에 실패했습니다.",
+        updated: 0,
+      };
+    }
 
-        // 상태 업데이트
-        const { error: updateError } = await supabase
-          .from("client")
-          .update({ status: dbStatus })
-          .eq("id", client.id);
+    const statusByBusinessNo = new Map<string, string>();
+    for (const item of result.results) {
+      const clean = String(item.businessNumber).replace(/-/g, "");
+      statusByBusinessNo.set(clean, item.status);
+    }
 
-        if (updateError) {
-          console.error(`거래처 ${client.id} 상태 업데이트 실패:`, updateError);
-          continue;
-        }
+    for (const [cleanBusinessNo, meta] of cleanedToClientMap.entries()) {
+      const dbStatus = statusByBusinessNo.get(cleanBusinessNo) || "unavailable";
 
-        updatedCount++;
-      } catch (error) {
-        console.error(`거래처 ${client.id} 상태 조회 중 오류:`, error);
+      if (!["approved", "suspended", "closed", "unavailable"].includes(dbStatus)) {
         continue;
       }
+
+      const { error: updateError } = await supabase
+        .from("client")
+        .update({ status: dbStatus })
+        .eq("id", meta.id);
+
+      if (updateError) {
+        console.error(`거래처 ${meta.id} 상태 업데이트 실패:`, updateError);
+        continue;
+      }
+
+      updatedCount++;
     }
 
     return {

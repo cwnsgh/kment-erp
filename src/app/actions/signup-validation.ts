@@ -1,6 +1,7 @@
 "use server";
 
 import { getSupabaseServerClient } from "@/lib/supabase-server";
+import { formatBusinessNumber, normalizeBusinessNumber } from "@/lib/business-number";
 
 /**
  * 사업자등록번호 중복 확인
@@ -19,10 +20,25 @@ export async function checkBusinessNumber(businessNumber: string): Promise<{
   try {
     const supabase = await getSupabaseServerClient();
 
+    const normalized = normalizeBusinessNumber(businessNumber);
+    if (normalized.length !== 10) {
+      return {
+        available: false,
+        message: "사업자등록번호 형식이 올바르지 않습니다.",
+      };
+    }
+    const formatted = formatBusinessNumber(normalized);
+    const candidates = Array.from(
+      new Set([businessNumber.trim(), normalized, formatted])
+    );
+    const orConditions = candidates
+      .map((value) => `business_registration_number.eq.${value}`)
+      .join(",");
+
     const { data, error } = await supabase
       .from("client")
       .select("id, business_registration_number, name")
-      .eq("business_registration_number", businessNumber.trim())
+      .or(orConditions)
       .maybeSingle();
 
     if (error) {

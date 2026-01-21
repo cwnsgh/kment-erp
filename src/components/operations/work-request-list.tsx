@@ -807,7 +807,18 @@ export default function WorkRequestList({
 
       {/* 상태 변경 확인 모달 */}
       {confirmModal.isOpen && (
-        <div className={styles.modalOverlay} onClick={handleCancelStatusChange}>
+        <div
+          className={styles.modalOverlay}
+          onClick={handleCancelStatusChange}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              handleCancelStatusChange();
+            }
+          }}
+          role="button"
+          tabIndex={0}
+        >
           <div
             className={styles.modalContent}
             onClick={(e) => e.stopPropagation()}
@@ -859,6 +870,14 @@ export default function WorkRequestList({
         <div
           className={styles.detailModalOverlay}
           onClick={handleCloseDetailModal}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              handleCloseDetailModal();
+            }
+          }}
+          role="button"
+          tabIndex={0}
         >
           <div
             className={styles.detailModalInner}
@@ -1210,6 +1229,8 @@ export default function WorkRequestList({
                                   }
                                   alt="서명"
                                   className={styles.signImg}
+                                  width={24}
+                                  height={24}
                                 />
                               )}
                             </div>
@@ -1264,6 +1285,8 @@ export default function WorkRequestList({
                                   }
                                   alt="서명"
                                   className={styles.signImg}
+                                  width={24}
+                                  height={24}
                                 />
                               )}
                             </div>
