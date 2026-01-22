@@ -467,10 +467,29 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
     }
   };
 
-  const handleDelete = () => {
-    if (confirm("정말 이 거래처를 삭제하시겠습니까?")) {
-      // TODO: 삭제 로직 구현
-      alert("삭제 기능은 구현 예정입니다.");
+  const handleDelete = async () => {
+    if (!confirm("정말 이 거래처를 삭제하시겠습니까?\n\n관련된 모든 데이터(담당자, 사이트, 첨부파일 등)가 함께 삭제됩니다.")) {
+      return;
+    }
+
+    if (!clientId) {
+      alert("거래처 ID가 없습니다.");
+      return;
+    }
+
+    try {
+      const { deleteClient } = await import("@/app/actions/client");
+      const result = await deleteClient(clientId);
+      
+      if (result.success) {
+        alert("거래처가 삭제되었습니다.");
+        router.push("/clients");
+      } else {
+        alert(`삭제 실패: ${result.error}`);
+      }
+    } catch (error) {
+      console.error("삭제 오류:", error);
+      alert("삭제 중 오류가 발생했습니다.");
     }
   };
 

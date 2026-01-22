@@ -171,7 +171,7 @@ export async function getClients() {
       .select(
         "id, business_registration_number, name, ceo_name, status, created_at"
       )
-      // status 필터 제거: 모든 상태의 거래처를 조회 (정상, 휴업, 폐업, 확인불가 등)
+      .eq("status", "approved") // approved 상태인 거래처만 조회 (회원가입 승인된 거래처만)
       .order("created_at", { ascending: false });
 
     if (error) throw error;
@@ -681,7 +681,8 @@ export async function refreshBusinessStatus(clientIds: string[] = []) {
     const supabase = await getSupabaseServerClient();
     let query = supabase
       .from("client")
-      .select("id, business_registration_number");
+      .select("id, business_registration_number, status")
+      .eq("status", "approved"); // approved 상태인 거래처만 조회
 
     // 특정 거래처만 조회하는 경우
     if (clientIds.length > 0) {
@@ -706,13 +707,14 @@ export async function refreshBusinessStatus(clientIds: string[] = []) {
 
     const cleanedToClientMap = new Map<
       string,
-      { id: string; businessNo: string }
+      { id: string; businessNo: string; status: string }
     >();
     const businessNumbers = clients.map((client) => {
       const clean = normalizeBusinessNumber(client.business_registration_number);
       cleanedToClientMap.set(clean, {
         id: client.id,
         businessNo: client.business_registration_number,
+        status: client.status,
       });
       return clean;
     });
@@ -765,10 +767,18 @@ export async function refreshBusinessStatus(clientIds: string[] = []) {
         continue;
       }
 
+      // pending 상태인 거래처는 상태 새로고침으로 변경하지 않음 (승인 대기 중이므로)
+      // 현재 상태가 pending이면 건너뛰기
+      if (meta.status === "pending") {
+        continue;
+      }
+
+      // pending이 아닌 거래처만 상태 업데이트
       const { error: updateError } = await supabase
         .from("client")
         .update({ status: dbStatus })
-        .eq("id", meta.id);
+        .eq("id", meta.id)
+        .neq("status", "pending"); // pending 상태는 제외
 
       if (updateError) {
         console.error(`거래처 ${meta.id} 상태 업데이트 실패:`, updateError);
@@ -792,6 +802,85 @@ export async function refreshBusinessStatus(clientIds: string[] = []) {
           ? error.message
           : "상태 새로고침에 실패했습니다.",
       updated: 0,
+    };
+  }
+}
+
+/**
+ * 거래처 삭제 (관련된 모든 데이터 함께 삭제)
+ */
+export async function deleteClient(clientId: string) {
+  try {
+    await requireAuth();
+    const supabase = await getSupabaseServerClient();
+
+    // 1. 거래처가 존재하는지 확인
+    const { data: client, error: clientError } = await supabase
+      .from("client")
+      .select("id")
+      .eq("id", clientId)
+      .single();
+
+    if (clientError || !client) {
+      return {
+        success: false,
+        error: "거래처를 찾을 수 없습니다.",
+      };
+    }
+
+    // 2. 관련된 managed_client가 있는지 확인
+    const { data: managedClients, error: managedClientsError } = await supabase
+      .from("managed_client")
+      .select("id")
+      .eq("client_id", clientId);
+
+    if (managedClientsError) throw managedClientsError;
+
+    if (managedClients && managedClients.length > 0) {
+      return {
+        success: false,
+        error: `관리 상품이 등록된 거래처는 삭제할 수 없습니다. (${managedClients.length}개의 관리 상품이 등록되어 있습니다.)`,
+      };
+    }
+
+    // 3. 관련 데이터 삭제 (순서 중요: 외래키 제약조건 고려)
+    // 3-1. 알림 삭제 (client_id 참조)
+    await supabase.from("notification").delete().eq("client_id", clientId);
+
+    // 3-2. 가입 승인 삭제
+    await supabase.from("signup_approval").delete().eq("client_id", clientId);
+
+    // 3-3. 담당자 삭제
+    await supabase.from("client_contact").delete().eq("client_id", clientId);
+
+    // 3-4. 사이트 삭제
+    await supabase.from("client_site").delete().eq("client_id", clientId);
+
+    // 3-5. 첨부파일 삭제
+    await supabase.from("client_attachment").delete().eq("client_id", clientId);
+
+    // 4. 거래처 삭제
+    const { error: deleteError } = await supabase
+      .from("client")
+      .delete()
+      .eq("id", clientId);
+
+    if (deleteError) throw deleteError;
+
+    revalidatePath("/clients");
+    revalidatePath("/operations/clients");
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error("거래처 삭제 오류:", error);
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "거래처 삭제에 실패했습니다.",
     };
   }
 }
