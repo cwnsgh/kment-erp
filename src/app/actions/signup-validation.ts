@@ -2,16 +2,7 @@
 
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 import { formatBusinessNumber, normalizeBusinessNumber } from "@/lib/business-number";
-
-function resolveBaseUrl() {
-  if (process.env.NEXT_PUBLIC_APP_URL) {
-    return process.env.NEXT_PUBLIC_APP_URL;
-  }
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
-  }
-  return "http://localhost:3000";
-}
+import { getEnv } from "@/lib/env";
 
 /**
  * 사업자등록번호 중복 확인
@@ -29,7 +20,6 @@ export async function checkBusinessNumber(businessNumber: string): Promise<{
 
   try {
     const supabase = await getSupabaseServerClient();
-    const baseUrl = resolveBaseUrl();
 
     const normalized = normalizeBusinessNumber(businessNumber);
     if (normalized.length !== 10) {
@@ -40,31 +30,60 @@ export async function checkBusinessNumber(businessNumber: string): Promise<{
     }
     const formatted = formatBusinessNumber(normalized);
 
-    // 국세청 API로 유효성 확인
-    const verifyResponse = await fetch(`${baseUrl}/api/business/verify`, {
+    // 국세청 API로 유효성 확인 (직접 호출)
+    const apiKey =
+      process.env.PUBLIC_DATA_API_KEY || getEnv("PUBLIC_DATA_API_KEY");
+    const apiUrl = `https://api.odcloud.kr/api/nts-businessman/v1/status?serviceKey=${encodeURIComponent(
+      apiKey
+    )}&returnType=JSON`;
+
+    const verifyResponse = await fetch(apiUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Accept: "application/json",
       },
       body: JSON.stringify({
-        businessNumber: normalized,
+        b_no: [normalized],
       }),
     });
 
     if (!verifyResponse.ok) {
-      const errorData = await verifyResponse.json().catch(() => ({}));
+      const errorText = await verifyResponse.text();
       return {
         available: false,
-        message:
-          errorData.error || "사업자등록번호 유효성 검증에 실패했습니다.",
+        message: `국세청 API 호출 실패: ${verifyResponse.status} ${errorText}`,
       };
     }
 
-    const verifyResult = await verifyResponse.json();
-    if (!verifyResult.success) {
+    const apiData = await verifyResponse.json();
+    if (
+      apiData.status_code !== "OK" ||
+      !apiData.data ||
+      apiData.data.length === 0
+    ) {
       return {
         available: false,
-        message: verifyResult.error || "유효하지 않은 사업자등록번호입니다.",
+        message: "사업자등록번호를 확인할 수 없습니다.",
+      };
+    }
+
+    const businessInfo = apiData.data[0];
+    if (!businessInfo.b_no || businessInfo.b_no.replace(/-/g, "") !== normalized) {
+      return {
+        available: false,
+        message: "유효하지 않은 사업자등록번호입니다.",
+      };
+    }
+
+    const statusCode = businessInfo.b_stt_cd;
+    if (
+      !statusCode ||
+      (statusCode !== "01" && statusCode !== "02" && statusCode !== "03")
+    ) {
+      return {
+        available: false,
+        message: "사업자등록번호 상태를 확인할 수 없습니다.",
       };
     }
     const candidates = Array.from(
