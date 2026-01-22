@@ -3,6 +3,16 @@
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 import { formatBusinessNumber, normalizeBusinessNumber } from "@/lib/business-number";
 
+function resolveBaseUrl() {
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL;
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  return "http://localhost:3000";
+}
+
 /**
  * 사업자등록번호 중복 확인
  */
@@ -19,6 +29,7 @@ export async function checkBusinessNumber(businessNumber: string): Promise<{
 
   try {
     const supabase = await getSupabaseServerClient();
+    const baseUrl = resolveBaseUrl();
 
     const normalized = normalizeBusinessNumber(businessNumber);
     if (normalized.length !== 10) {
@@ -28,6 +39,34 @@ export async function checkBusinessNumber(businessNumber: string): Promise<{
       };
     }
     const formatted = formatBusinessNumber(normalized);
+
+    // 국세청 API로 유효성 확인
+    const verifyResponse = await fetch(`${baseUrl}/api/business/verify`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        businessNumber: normalized,
+      }),
+    });
+
+    if (!verifyResponse.ok) {
+      const errorData = await verifyResponse.json().catch(() => ({}));
+      return {
+        available: false,
+        message:
+          errorData.error || "사업자등록번호 유효성 검증에 실패했습니다.",
+      };
+    }
+
+    const verifyResult = await verifyResponse.json();
+    if (!verifyResult.success) {
+      return {
+        available: false,
+        message: verifyResult.error || "유효하지 않은 사업자등록번호입니다.",
+      };
+    }
     const candidates = Array.from(
       new Set([businessNumber.trim(), normalized, formatted])
     );
