@@ -81,6 +81,12 @@ export async function checkBusinessNumber(businessNumber: string): Promise<{
       .maybeSingle();
 
     if (error) {
+      if (error.code === "PGRST116") {
+        return {
+          available: false,
+          message: "이미 등록된 사업자등록번호입니다.",
+        };
+      }
       console.error("사업자등록번호 확인 오류:", error);
       return {
         available: false,
