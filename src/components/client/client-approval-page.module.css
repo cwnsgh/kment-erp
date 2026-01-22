@@ -708,12 +708,17 @@
   border: 1px solid #e5e7eb;
   border-radius: 10px;
   background: #f8fafc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .signatureImage {
   max-width: 100%;
   max-height: 220px;
   object-fit: contain;
+  display: block;
+  margin: 0 auto;
 }
 
 .signatureState {

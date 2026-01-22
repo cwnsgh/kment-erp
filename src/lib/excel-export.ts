@@ -12,7 +12,7 @@ export async function createExcelResponse(
   const encodedFilename = encodeURIComponent(filename);
   const asciiFilename = filename.replace(/[^\x20-\x7E]+/g, "_") || "export.xlsx";
 
-  return new NextResponse(Buffer.from(buffer), {
+  return new NextResponse(buffer as any, {
     headers: {
       "Content-Type": EXCEL_CONTENT_TYPE,
       "Content-Disposition": `attachment; filename="${asciiFilename}"; filename*=UTF-8''${encodedFilename}`,

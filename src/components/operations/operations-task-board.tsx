@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   WorkRequest,
   updateWorkRequestStatus,
+  getAllEmployees,
 } from "@/app/actions/work-request";
 
 const requestTone: Record<string, string> = {
@@ -19,14 +20,16 @@ const progressTone: Record<string, string> = {
   완료: "bg-emerald-100 text-emerald-700",
 };
 
-type TaskItem = WorkRequest & { client_name?: string | null };
+type TaskItem = WorkRequest & { client_name?: string | null; employee_name?: string | null };
 
 type OperationsTaskBoardProps = {
   workRequests: TaskItem[];
+  currentEmployeeId?: string;
 };
 
 export function OperationsTaskBoard({
   workRequests,
+  currentEmployeeId,
 }: OperationsTaskBoardProps) {
   const [searchField, setSearchField] = useState<"all" | "client" | "brand">(
     "all"
@@ -36,12 +39,26 @@ export function OperationsTaskBoard({
   const [progressFilter, setProgressFilter] = useState<
     "all" | "waiting" | "in_progress" | "completed" | "rejected"
   >("all");
+  const [employeeFilter, setEmployeeFilter] = useState<string>("all");
+  const [employees, setEmployees] = useState<Array<{ id: string; name: string }>>([]);
   const [selectedTask, setSelectedTask] = useState<TaskItem | null>(null);
   const [confirmAction, setConfirmAction] = useState<{
     task: TaskItem;
     nextStatus: "in_progress" | "completed";
   } | null>(null);
   const [statusUpdating, setStatusUpdating] = useState(false);
+
+  // 직원 목록 로드
+  useEffect(() => {
+    const loadEmployees = async () => {
+      const result = await getAllEmployees();
+      if (result.success && result.data) {
+        setEmployees(result.data);
+        // 기본값은 "전체 담당자"로 유지
+      }
+    };
+    loadEmployees();
+  }, [currentEmployeeId]);
 
   const getRequestStatusLabel = (status: WorkRequest["status"]) => {
     if (status === "approved") return "승인";
@@ -65,6 +82,7 @@ export function OperationsTaskBoard({
       rejected: "승인반려",
       in_progress: "작업중",
       completed: "작업완료",
+      deleted: "삭제됨",
     };
     return statusMap[status] ?? status;
   };
@@ -99,7 +117,7 @@ export function OperationsTaskBoard({
 
   const filteredRequests = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
-    const filteredBySearch = !query
+    let filtered = !query
       ? workRequests
       : workRequests.filter((item) => {
           const clientName = (item.client_name ?? "").toLowerCase();
@@ -114,9 +132,15 @@ export function OperationsTaskBoard({
           return clientName.includes(query) || brandName.includes(query);
         });
 
-    if (progressFilter === "all") return filteredBySearch;
+    // 담당자 필터 적용
+    if (employeeFilter !== "all") {
+      filtered = filtered.filter((item) => item.employee_id === employeeFilter);
+    }
 
-    return filteredBySearch.filter((item) => {
+    // 진행상황 필터 적용
+    if (progressFilter === "all") return filtered;
+
+    return filtered.filter((item) => {
       if (progressFilter === "waiting") {
         return item.status === "pending" || item.status === "approved";
       }
@@ -131,7 +155,7 @@ export function OperationsTaskBoard({
       }
       return true;
     });
-  }, [progressFilter, searchField, searchQuery, workRequests]);
+  }, [progressFilter, searchField, searchQuery, workRequests, employeeFilter]);
 
   const suggestions = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -274,7 +298,21 @@ export function OperationsTaskBoard({
           </div>
         </div>
       </header>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap items-center gap-2">
+        {/* 담당자 필터 */}
+        <select
+          value={employeeFilter}
+          onChange={(e) => setEmployeeFilter(e.target.value)}
+          className="h-9 rounded-md border border-slate-200 px-3 text-sm text-slate-600 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+        >
+          <option value="all">전체 담당자</option>
+          {employees.map((emp) => (
+            <option key={emp.id} value={emp.id}>
+              {emp.name}
+            </option>
+          ))}
+        </select>
+        {/* 진행상황 필터 */}
         <button
           type="button"
           onClick={() => setProgressFilter("all")}

@@ -22,6 +22,7 @@ export async function POST(
     const result = await approveWorkRequest(workRequestId, session.id);
 
     if (!result.success) {
+      console.error("승인 처리 실패:", result.error);
       return NextResponse.json(
         { success: false, error: result.error || "승인 처리에 실패했습니다." },
         { status: 400 }

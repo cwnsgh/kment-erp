@@ -35,13 +35,14 @@ export default async function ClientTasksPage({
   const clientId = managedClientResult.client.id;
   const clientName = managedClientResult.client.name || "거래처";
 
-  // 초기 업무 목록 조회
+  // 초기 업무 목록 조회 (모든 담당자의 업무 조회, 기본값은 자신의 업무이지만 필터로 변경 가능)
   const workRequestsResult = await getWorkRequestsByClientIdForEmployee(
     clientId,
     session.id,
     {
       page: 1,
       limit: 20,
+      employeeFilter: null, // 모든 담당자 조회
     }
   );
 

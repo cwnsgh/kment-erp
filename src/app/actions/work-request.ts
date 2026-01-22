@@ -1,8 +1,42 @@
 "use server";
 
 import { getSupabaseServerClient } from "@/lib/supabase-server";
-import { getSession } from "@/lib/auth";
+import { getSession, requireAuth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+
+/**
+ * 모든 활성 직원 목록 조회
+ */
+export async function getAllEmployees(): Promise<{
+  success: boolean;
+  data?: Array<{ id: string; name: string }>;
+  error?: string;
+}> {
+  try {
+    await requireAuth();
+    const supabase = await getSupabaseServerClient();
+
+    const { data: employees, error } = await supabase
+      .from("employee")
+      .select("id, name")
+      .eq("is_active", true)
+      .order("name", { ascending: true });
+
+    if (error) throw error;
+
+    return {
+      success: true,
+      data: employees || [],
+    };
+  } catch (error) {
+    console.error("직원 목록 조회 오류:", error);
+    return {
+      success: false,
+      error: "직원 목록을 조회하는 중 오류가 발생했습니다.",
+      data: [],
+    };
+  }
+}
 
 export interface WorkRequest {
   id: string;
@@ -13,7 +47,7 @@ export interface WorkRequest {
   work_content: string | null;
   start_date?: string | null;
   end_date?: string | null;
-  status: "pending" | "approved" | "rejected" | "in_progress" | "completed";
+  status: "pending" | "approved" | "rejected" | "in_progress" | "completed" | "deleted";
   created_at: string;
   updated_at: string;
   employee_name?: string | null;
@@ -924,6 +958,7 @@ export async function getWorkRequestsByClientIdForEmployee(
       | "completed";
     searchType?: "brand" | "manager";
     searchKeyword?: string;
+    employeeFilter?: string | null; // 담당자 필터 추가
     page?: number;
     limit?: number;
   }
@@ -961,6 +996,11 @@ export async function getWorkRequestsByClientIdForEmployee(
         { count: "exact" }
       )
       .eq("client_id", clientId);
+
+    // 담당자 필터 적용 (employeeFilter가 제공되면 해당 담당자만, 없으면 모든 담당자)
+    if (options?.employeeFilter && options.employeeFilter !== "all") {
+      query = query.eq("employee_id", options.employeeFilter);
+    }
 
     // 검색 필터 적용
     if (options?.searchKeyword) {
@@ -1293,9 +1333,9 @@ export async function getWorkRequestDetailForEmployee(
 /**
  * 담당자 기준 관리업무 현황 조회
  */
-export async function getWorkRequestsForEmployee(): Promise<{
+export async function getWorkRequestsForEmployee(employeeId?: string | null): Promise<{
   success: boolean;
-  data?: (WorkRequest & { client_name?: string | null })[];
+  data?: (WorkRequest & { client_name?: string | null; employee_name?: string | null })[];
   error?: string;
 }> {
   try {
@@ -1309,7 +1349,8 @@ export async function getWorkRequestsForEmployee(): Promise<{
 
     const supabase = await getSupabaseServerClient();
 
-    const { data: workRequests, error } = await supabase
+    // employeeId가 제공되면 해당 담당자만, 없으면 모든 담당자 조회
+    let query = supabase
       .from("work_request")
       .select(
         `
@@ -1317,10 +1358,20 @@ export async function getWorkRequestsForEmployee(): Promise<{
         client:client_id (
           id,
           name
+        ),
+        employee:employee_id (
+          id,
+          name
         )
       `
-      )
-      .eq("employee_id", session.id)
+      );
+
+    // employeeId가 제공되면 해당 담당자만 필터링, 없으면 모든 담당자
+    if (employeeId) {
+      query = query.eq("employee_id", employeeId);
+    }
+
+    const { data: workRequests, error } = await query
       .order("updated_at", { ascending: false });
 
     if (error) throw error;
@@ -1328,7 +1379,8 @@ export async function getWorkRequestsForEmployee(): Promise<{
     const workRequestsWithClient = (workRequests || []).map((wr: any) => ({
       ...wr,
       client_name: wr.client?.name || null,
-    })) as (WorkRequest & { client_name?: string | null })[];
+      employee_name: wr.employee?.name || null,
+    })) as (WorkRequest & { client_name?: string | null; employee_name?: string | null })[];
 
     return {
       success: true,
@@ -1545,13 +1597,14 @@ export async function approveWorkRequest(
     });
 
     if (error) {
+      console.error("승인 DB 함수 호출 오류:", error);
       return {
         success: false,
         error:
           error.message?.includes("approve_work_request") ||
           error.message?.includes("function")
             ? "DB 함수가 없습니다. db/approve-work-request-transaction.sql을 실행해 주세요."
-            : error.message,
+            : error.message || "승인 처리 중 오류가 발생했습니다.",
       };
     }
 
@@ -1693,6 +1746,67 @@ export async function rejectWorkRequest(
         error instanceof Error
           ? error.message
           : "업무 거절 중 오류가 발생했습니다.",
+    };
+  }
+}
+
+/**
+ * 업무 삭제 (금액 복구 포함) - 직원만 가능
+ */
+export async function deleteWorkRequest(
+  workRequestId: string,
+  employeeId: string
+): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  try {
+    const session = await getSession();
+    if (!session || session.type !== "employee") {
+      return {
+        success: false,
+        error: "직원 로그인이 필요합니다.",
+      };
+    }
+
+    const supabase = await getSupabaseServerClient();
+
+    const { data, error } = await supabase.rpc("delete_work_request", {
+      p_work_request_id: workRequestId,
+      p_employee_id: employeeId,
+    });
+
+    if (error) {
+      console.error("삭제 DB 함수 호출 오류:", error);
+      return {
+        success: false,
+        error:
+          error.message?.includes("delete_work_request") ||
+          error.message?.includes("function")
+            ? "DB 함수가 없습니다. db/delete-work-request-transaction.sql을 실행해 주세요."
+            : error.message || "삭제 처리 중 오류가 발생했습니다.",
+      };
+    }
+
+    const result = Array.isArray(data) ? data[0] : data;
+    if (!result || !result.success) {
+      return {
+        success: false,
+        error: result?.error || "삭제 처리에 실패했습니다.",
+      };
+    }
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error("업무 삭제 오류:", error);
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "업무 삭제 중 오류가 발생했습니다.",
     };
   }
 }

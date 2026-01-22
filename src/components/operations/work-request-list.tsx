@@ -5,6 +5,7 @@ import {
   getWorkRequestsByClientIdForEmployee,
   updateWorkRequestStatus,
   getWorkRequestDetailForEmployee,
+  getAllEmployees,
   type WorkRequest,
 } from "@/app/actions/work-request";
 import { buildExcelFilename, downloadExcel } from "@/lib/excel-download";
@@ -38,7 +39,10 @@ export default function WorkRequestList({
   const [statusFilter, setStatusFilter] = useState<
     "all" | "pending" | "approved" | "rejected" | "in_progress" | "completed"
   >("all");
+  const [employeeFilter, setEmployeeFilter] = useState<string>("all");
+  const [employees, setEmployees] = useState<Array<{ id: string; name: string }>>([]);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  const [deletingRequestId, setDeletingRequestId] = useState<string | null>(null);
   const dropdownRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
@@ -150,6 +154,7 @@ export default function WorkRequestList({
           statusFilter,
           searchType,
           searchKeyword: searchKeyword || undefined,
+          employeeFilter: employeeFilter !== "all" ? employeeFilter : undefined,
           page,
           limit: itemsPerPage,
         }
@@ -170,6 +175,18 @@ export default function WorkRequestList({
     }
   };
 
+  // 직원 목록 로드
+  useEffect(() => {
+    const loadEmployees = async () => {
+      const result = await getAllEmployees();
+      if (result.success && result.data) {
+        setEmployees(result.data);
+        // 기본값은 "전체 담당자"로 유지
+      }
+    };
+    loadEmployees();
+  }, [currentEmployeeId]);
+
   // 초기 로드 (initialWorkRequests가 없을 때만)
   useEffect(() => {
     if (!hasInitialLoad) {
@@ -179,6 +196,15 @@ export default function WorkRequestList({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // 담당자 필터 변경 시 데이터 다시 로드
+  useEffect(() => {
+    if (hasInitialLoad) {
+      loadData(1);
+      setSelectedIds([]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [employeeFilter]);
+
   // 검색 핸들러
   const handleSearch = () => {
     loadData(1);
@@ -187,6 +213,9 @@ export default function WorkRequestList({
 
   // 검색어와 필터에 따른 데이터 필터링 (담당자 검색은 클라이언트 측에서)
   const filteredWorkRequests = workRequests.filter((wr) => {
+    // deleted 상태는 제외
+    if (wr.status === "deleted") return false;
+    
     if (searchKeyword) {
       if (searchType === "brand") {
         // 브랜드 검색은 서버에서 이미 처리됨
@@ -354,6 +383,49 @@ export default function WorkRequestList({
     });
   };
 
+  // 업무 삭제 핸들러 (직원만 가능)
+  const handleDelete = async (workRequestId: string) => {
+    if (deletingRequestId) return; // 이미 삭제 처리 중이면 무시
+    
+    const confirmed = confirm(
+      "이 업무를 삭제하시겠습니까?\n금액차감형인 경우 차감된 금액이 복구됩니다."
+    );
+    
+    if (!confirmed) return;
+
+    setDeletingRequestId(workRequestId);
+    try {
+      const response = await fetch(
+        `/api/work-request/${workRequestId}/delete`,
+        {
+          method: "POST",
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          // 목록 새로고침
+          loadData(1);
+          setSelectedIds([]);
+          // 모달 닫기
+          handleCloseDetailModal();
+          alert("업무가 삭제되었습니다.");
+        } else {
+          alert(data.error || "삭제 처리에 실패했습니다.");
+        }
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        alert(errorData.error || "삭제 처리에 실패했습니다.");
+      }
+    } catch (error) {
+      console.error("삭제 처리 오류:", error);
+      alert("삭제 처리 중 오류가 발생했습니다.");
+    } finally {
+      setDeletingRequestId(null);
+    }
+  };
+
   // 드롭다운 토글
   const toggleDropdown = (id: string) => {
     setOpenDropdownId(openDropdownId === id ? null : id);
@@ -438,6 +510,19 @@ export default function WorkRequestList({
               <span className={styles.workCount}>({totalCount}건)</span>
             </h2>
             <div className={styles.searchFlex}>
+              {/* 담당자 필터 */}
+              <select
+                value={employeeFilter}
+                onChange={(e) => setEmployeeFilter(e.target.value)}
+                style={{ marginRight: "8px" }}
+              >
+                <option value="all">전체 담당자</option>
+                {employees.map((emp) => (
+                  <option key={emp.id} value={emp.id}>
+                    {emp.name}
+                  </option>
+                ))}
+              </select>
               <select
                 value={searchType}
                 onChange={(e) =>
@@ -884,14 +969,37 @@ export default function WorkRequestList({
             onClick={(e) => e.stopPropagation()}
           >
             <div className={styles.detailModalHeader}>
-              <h3>관리 업무 상세조회</h3>
-              <button
-                type="button"
-                className={styles.detailModalClose}
-                onClick={handleCloseDetailModal}
-              >
-                ×
-              </button>
+              <div style={{ display: "flex", gap: "8px", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+                <h3>관리 업무 상세조회</h3>
+                <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                  {detailModal.workRequest && 
+                   detailModal.workRequest.status !== "deleted" &&
+                   detailModal.workRequest.status !== "pending" && (
+                    <button
+                      type="button"
+                      className={`btn danger btn_md`}
+                      onClick={() => {
+                        if (detailModal.workRequest?.id) {
+                          handleDelete(detailModal.workRequest.id);
+                        }
+                      }}
+                      disabled={deletingRequestId === detailModal.workRequest?.id}
+                      style={{ marginRight: "8px" }}
+                    >
+                      {deletingRequestId === detailModal.workRequest?.id
+                        ? "삭제 중..."
+                        : "삭제"}
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    className={styles.detailModalClose}
+                    onClick={handleCloseDetailModal}
+                  >
+                    ×
+                  </button>
+                </div>
+              </div>
             </div>
 
             <div className={`${styles.detailModalBody} ${styles.scroll}`}>

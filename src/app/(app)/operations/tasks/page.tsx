@@ -10,7 +10,8 @@ export default async function OperationsTaskPage() {
     redirect("/login");
   }
 
-  const result = await getWorkRequestsForEmployee();
+  // 모든 담당자의 업무 조회 (기본값은 자신의 업무이지만 필터로 변경 가능)
+  const result = await getWorkRequestsForEmployee(null);
   const workRequests = result.success && result.data ? result.data : [];
 
   return (
@@ -19,7 +20,7 @@ export default async function OperationsTaskPage() {
         title="관리업무 현황"
         description="요청된 관리 업무의 진행도를 확인하고 히스토리를 관리합니다."
       />
-      <OperationsTaskBoard workRequests={workRequests} />
+      <OperationsTaskBoard workRequests={workRequests} currentEmployeeId={session.id} />
     </div>
   );
 }

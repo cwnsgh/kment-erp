@@ -205,6 +205,7 @@ export function ClientWorkList({
     });
   };
 
+
   // 날짜 포맷 (모달용)
   const formatDateForModal = (dateStr: string | null | undefined) => {
     if (!dateStr) return "-";
@@ -226,12 +227,18 @@ export function ClientWorkList({
     return `${start} ~ ${end}`;
   };
 
-  // 필터링된 작업만 표시 (approved, in_progress, completed)
+  // 필터링된 작업만 표시 (approved, in_progress, completed, deleted 제외)
   const filteredRequests = workRequests.filter(
-    (r) =>
-      r.status === "approved" ||
-      r.status === "in_progress" ||
-      r.status === "completed"
+    (r) => {
+      // deleted 상태는 제외
+      if (r.status === "deleted") return false;
+      // approved, in_progress, completed만 표시
+      return (
+        r.status === "approved" ||
+        r.status === "in_progress" ||
+        r.status === "completed"
+      );
+    }
   );
 
   const paginatedRequests = filteredRequests.slice(
@@ -551,14 +558,38 @@ export function ClientWorkList({
                         <>
                           <ul className={styles.tableRow}>
                             <li className={styles.rowGroup}>
-                              <div className={styles.tableHead}>총 금액</div>
+                              <div className={styles.tableHead}>승인 시점 총 금액</div>
                               <div
                                 className={`${styles.tableData} ${styles.fontB}`}
                               >
-                                {detailModal.workRequest.managed_client
-                                  .totalAmount
-                                  ? detailModal.workRequest.managed_client.totalAmount.toLocaleString()
-                                  : "-"}
+                                {(() => {
+                                  // 승인된 경우 (approved, in_progress, completed): 승인 시점의 총 금액 = 잔여 금액 + 차감 금액
+                                  if (detailModal.workRequest.status === "approved" || 
+                                      detailModal.workRequest.status === "in_progress" ||
+                                      detailModal.workRequest.status === "completed") {
+                                    const remaining = detailModal.workRequest.approval_remaining_amount;
+                                    const deducted = detailModal.workRequest.approval_deducted_amount;
+                                    
+                                    // 승인 시점 스냅샷이 모두 있으면 계산
+                                    if (remaining !== null && remaining !== undefined &&
+                                        deducted !== null && deducted !== undefined) {
+                                      const totalAtApproval = remaining + deducted;
+                                      if (totalAtApproval > 0) {
+                                        return totalAtApproval.toLocaleString("ko-KR");
+                                      }
+                                    }
+                                    
+                                    // 승인 시점 스냅샷이 없으면 (기존 데이터) 현재 총 금액 표시
+                                    return detailModal.workRequest.managed_client?.totalAmount
+                                      ? detailModal.workRequest.managed_client.totalAmount.toLocaleString("ko-KR")
+                                      : "-";
+                                  }
+                                  
+                                  // 승인 전이면 현재 총 금액 표시
+                                  return detailModal.workRequest.managed_client?.totalAmount
+                                    ? detailModal.workRequest.managed_client.totalAmount.toLocaleString("ko-KR")
+                                    : "-";
+                                })()}
                               </div>
                             </li>
                             <li className={styles.rowGroup}>

@@ -4,6 +4,8 @@ import { getSession } from "@/lib/auth";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 import createExcelResponse from "@/lib/excel-export";
 
+export const dynamic = "force-dynamic";
+
 const formatDate = (dateStr?: string | null) => {
   if (!dateStr) return "-";
   const date = new Date(dateStr);
@@ -18,6 +20,7 @@ const statusLabelMap: Record<string, string> = {
   rejected: "승인반려",
   in_progress: "작업중",
   completed: "작업완료",
+  deleted: "삭제됨",
 };
 
 export async function GET() {
@@ -43,6 +46,7 @@ export async function GET() {
       `
       )
       .eq("client_id", session.id)
+      .neq("status", "deleted") // 삭제된 항목 제외
       .order("created_at", { ascending: false });
 
     if (error) throw error;

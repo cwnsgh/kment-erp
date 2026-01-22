@@ -30,6 +30,7 @@ export function ClientApprovalPage({
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const itemsPerPageOptions = [10, 50, 100, 200];
   const [approvalTargetId, setApprovalTargetId] = useState<string | null>(null);
+  const [approvingRequestId, setApprovingRequestId] = useState<string | null>(null);
   const [signatureUrl, setSignatureUrl] = useState<string | null>(null);
   const [signatureLoading, setSignatureLoading] = useState(false);
   const [signatureError, setSignatureError] = useState<string | null>(null);
@@ -106,6 +107,9 @@ export function ClientApprovalPage({
   };
 
   const handleApprove = async (workRequestId: string) => {
+    if (approvingRequestId) return; // 이미 승인 처리 중이면 무시
+    
+    setApprovingRequestId(workRequestId);
     try {
       const response = await fetch(
         `/api/work-request/${workRequestId}/approve`,
@@ -118,15 +122,22 @@ export function ClientApprovalPage({
         const data = await response.json();
         if (data.success) {
           loadData(currentPage, itemsPerPage);
+          // 상세 모달이 열려있고 승인한 업무와 같으면 데이터 다시 불러오기
+          if (detailModal.isOpen && detailModal.workRequest?.id === workRequestId) {
+            handleOpenDetailModal(workRequestId);
+          }
         } else {
           alert(data.error || "승인 처리에 실패했습니다.");
         }
       } else {
-        alert("승인 처리에 실패했습니다.");
+        const errorData = await response.json().catch(() => ({}));
+        alert(errorData.error || "승인 처리에 실패했습니다.");
       }
     } catch (error) {
       console.error("승인 처리 오류:", error);
       alert("승인 처리 중 오류가 발생했습니다.");
+    } finally {
+      setApprovingRequestId(null);
     }
   };
 
@@ -419,9 +430,9 @@ export function ClientApprovalPage({
                                   event.stopPropagation();
                                   handleOpenApprovalModal(request.id);
                                 }}
-                                disabled={isPending}
+                                disabled={isPending || approvingRequestId === request.id}
                               >
-                                승인하기
+                                {approvingRequestId === request.id ? "승인 중..." : "승인하기"}
                               </button>
                               <button
                                 type="button"
@@ -430,7 +441,7 @@ export function ClientApprovalPage({
                                   event.stopPropagation();
                                   handleReject(request.id);
                                 }}
-                                disabled={isPending}
+                                disabled={isPending || approvingRequestId === request.id}
                               >
                                 반려하기
                               </button>
@@ -540,7 +551,7 @@ export function ClientApprovalPage({
               </div>
             ) : (
               <div className={styles.signatureState}>
-                {signatureError || "저장된 서명이 없습니다."}
+                {signatureError || "저장된 서명이 없습니다. 서명 없이도 승인할 수 있습니다."}
               </div>
             )}
 
@@ -549,7 +560,7 @@ export function ClientApprovalPage({
                 type="button"
                 className={`btn normal btn_md`}
                 onClick={() => setApprovalTargetId(null)}
-                disabled={isPending}
+                disabled={isPending || !!(approvalTargetId && approvingRequestId === approvalTargetId)}
               >
                 취소
               </button>
@@ -557,9 +568,13 @@ export function ClientApprovalPage({
                 type="button"
                 className={`btn primary btn_md`}
                 onClick={handleConfirmApprove}
-                disabled={isPending || !signatureUrl}
+                disabled={isPending || !!(approvalTargetId && approvingRequestId === approvalTargetId)}
               >
-                확인 후 승인
+                {approvalTargetId && approvingRequestId === approvalTargetId
+                  ? "승인 중..."
+                  : signatureUrl
+                  ? "확인 후 승인"
+                  : "서명 없이 승인"}
               </button>
             </div>
           </div>
@@ -793,15 +808,29 @@ export function ClientApprovalPage({
                       승인 후 잔여 금액
                     </span>
                     <p className={styles.detailValue}>
-                      {detailModal.workRequest.approval_remaining_amount
-                        ? detailModal.workRequest.approval_remaining_amount.toLocaleString(
+                      {(() => {
+                        // 승인 후 스냅샷이 있으면 그것을 표시
+                        if (detailModal.workRequest.approval_remaining_amount) {
+                          console.log("[승인 후] approval_remaining_amount:", detailModal.workRequest.approval_remaining_amount);
+                          return detailModal.workRequest.approval_remaining_amount.toLocaleString(
                             "ko-KR"
-                          )
-                        : detailModal.workRequest.managed_client?.totalAmount
-                        ? detailModal.workRequest.managed_client.totalAmount.toLocaleString(
-                            "ko-KR"
-                          )
-                        : "-"}
+                          );
+                        }
+                        
+                        // 승인 전이면 현재 금액 - 요청 금액 계산
+                        const currentAmount = detailModal.workRequest.managed_client?.totalAmount || 0;
+                        const requestCost = (detailModal.workRequest as any).cost || 0;
+                        const remainingAmount = Math.max(0, currentAmount - requestCost);
+                        
+                        console.log("[승인 전] 계산:", {
+                          currentAmount,
+                          requestCost,
+                          remainingAmount,
+                          status: detailModal.workRequest.status,
+                        });
+                        
+                        return remainingAmount.toLocaleString("ko-KR");
+                      })()}
                     </p>
                   </div>
                 )}

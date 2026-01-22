@@ -1,7 +1,7 @@
 -- 업무 승인 처리 (원자적 차감 + 스냅샷 저장)
 -- 실행 후 Supabase에 함수가 생성됩니다.
 
-create or replace function approve_work_request(
+create or replace function erp.approve_work_request(
   p_work_request_id uuid,
   p_client_id uuid
 )
@@ -22,7 +22,7 @@ declare
 begin
   select *
     into v_wr
-    from work_request
+    from erp.work_request
    where id = p_work_request_id
      and client_id = p_client_id
    for update;
@@ -40,21 +40,34 @@ begin
   if v_wr.managed_client_id is not null then
     select *
       into v_mc
-      from managed_client
+      from erp.managed_client
      where id = v_wr.managed_client_id
      for update;
+    
+    if not found then
+      return query select false, '관리 고객 정보를 찾을 수 없습니다.', v_wr.id, v_wr.employee_id;
+      return;
+    end if;
   end if;
 
-  if v_wr.work_type = 'deduct' and v_wr.cost is not null then
+  if v_wr.work_type = 'deduct' and v_wr.cost is not null and v_wr.managed_client_id is not null then
+    -- 차감 금액 설정
     v_deducted := v_wr.cost;
+    
+    -- 현재 총 금액 가져오기 (null이면 0으로 처리)
     v_total := coalesce(v_mc.total_amount, 0);
+    
+    -- 잔여 금액 계산 (0보다 작으면 0으로 설정)
     v_remaining := greatest(0, v_total - v_deducted);
 
-    update managed_client
-       set total_amount = v_remaining
+    -- managed_client의 total_amount를 잔여 금액으로 업데이트
+    update erp.managed_client
+       set total_amount = v_remaining,
+           updated_at = now()
      where id = v_wr.managed_client_id;
 
-    update work_request
+    -- work_request 업데이트: 승인 상태 및 승인 시점 스냅샷 저장
+    update erp.work_request
        set status = 'approved',
            approved_at = now(),
            approved_by = p_client_id,
@@ -63,7 +76,7 @@ begin
            approval_remaining_amount = v_remaining
      where id = v_wr.id;
   elsif v_wr.work_type = 'maintenance' then
-    update work_request
+    update erp.work_request
        set status = 'approved',
            approved_at = now(),
            approved_by = p_client_id,
@@ -75,7 +88,7 @@ begin
            approval_banner_design_count = coalesce(v_mc.detail_banner_design_count, 0)
      where id = v_wr.id;
   else
-    update work_request
+    update erp.work_request
        set status = 'approved',
            approved_at = now(),
            approved_by = p_client_id,
