@@ -2,7 +2,6 @@
 
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 import { formatBusinessNumber, normalizeBusinessNumber } from "@/lib/business-number";
-import { getEnv } from "@/lib/env";
 
 /**
  * 사업자등록번호 중복 확인
@@ -28,62 +27,72 @@ export async function checkBusinessNumber(businessNumber: string): Promise<{
         message: "사업자등록번호 형식이 올바르지 않습니다.",
       };
     }
-    const formatted = formatBusinessNumber(normalized);
 
-    // 국세청 API로 유효성 확인 (직접 호출)
-    const apiKey =
-      process.env.PUBLIC_DATA_API_KEY || getEnv("PUBLIC_DATA_API_KEY");
-    const apiUrl = `https://api.odcloud.kr/api/nts-businessman/v1/status?serviceKey=${encodeURIComponent(
-      apiKey
-    )}&returnType=JSON`;
+    const isValidBusinessNumber = (value: string) => {
+      if (!/^\d{10}$/.test(value)) return false;
+      const digits = value.split("").map((char) => Number(char));
+      const weights = [1, 3, 7, 1, 3, 7, 1, 3, 5];
+      let sum = 0;
+      for (let i = 0; i < weights.length; i += 1) {
+        sum += digits[i] * weights[i];
+      }
+      sum += Math.floor((digits[8] * 5) / 10);
+      const checkDigit = (10 - (sum % 10)) % 10;
+      return checkDigit === digits[9];
+    };
 
-    const verifyResponse = await fetch(apiUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({
-        b_no: [normalized],
-      }),
-    });
-
-    if (!verifyResponse.ok) {
-      const errorText = await verifyResponse.text();
-      return {
-        available: false,
-        message: `국세청 API 호출 실패: ${verifyResponse.status} ${errorText}`,
-      };
-    }
-
-    const apiData = await verifyResponse.json();
-    if (
-      apiData.status_code !== "OK" ||
-      !apiData.data ||
-      apiData.data.length === 0
-    ) {
-      return {
-        available: false,
-        message: "사업자등록번호를 확인할 수 없습니다.",
-      };
-    }
-
-    const businessInfo = apiData.data[0];
-    if (!businessInfo.b_no || businessInfo.b_no.replace(/-/g, "") !== normalized) {
+    if (!isValidBusinessNumber(normalized)) {
       return {
         available: false,
         message: "유효하지 않은 사업자등록번호입니다.",
       };
     }
+    const formatted = formatBusinessNumber(normalized);
 
-    const statusCode = businessInfo.b_stt_cd;
-    if (
-      !statusCode ||
-      (statusCode !== "01" && statusCode !== "02" && statusCode !== "03")
-    ) {
+    // 국세청 API로 유효성 확인 (내부 API 사용)
+    // 체크섬 검증은 이미 통과했으므로, 실제 존재하는 사업자등록번호인지 API로 확인
+    // API 검증은 필수입니다 - 실패하면 유효하지 않은 것으로 처리
+    const baseUrl =
+      process.env.NEXT_PUBLIC_APP_URL ||
+      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+
+    try {
+      const verifyResponse = await fetch(`${baseUrl}/api/business/verify`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          businessNumber: normalized,
+        }),
+      });
+
+      if (!verifyResponse.ok) {
+        const errorData = await verifyResponse.json().catch(() => ({
+          error: `HTTP ${verifyResponse.status}: ${verifyResponse.statusText}`,
+        }));
+        return {
+          available: false,
+          message: errorData.error || "사업자등록번호 유효성 검증에 실패했습니다.",
+        };
+      }
+
+      const verifyResult = await verifyResponse.json();
+      if (!verifyResult.success) {
+        return {
+          available: false,
+          message: verifyResult.error || "사업자등록번호를 확인할 수 없습니다.",
+        };
+      }
+      
+      // API 검증 성공 - 실제 존재하는 사업자등록번호임을 확인
+    } catch (apiError) {
+      console.error("사업자등록번호 API 호출 오류:", apiError);
+      // API 호출 실패 시 유효하지 않은 것으로 처리
       return {
         available: false,
-        message: "사업자등록번호 상태를 확인할 수 없습니다.",
+        message: "사업자등록번호 유효성 검증 중 오류가 발생했습니다. 올바른 사업자등록번호를 입력해주세요.",
       };
     }
     const candidates = Array.from(

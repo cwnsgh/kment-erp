@@ -16,6 +16,9 @@ export async function POST(request: NextRequest) {
     // API 키 가져오기
     const apiKey =
       process.env.PUBLIC_DATA_API_KEY || getEnv("PUBLIC_DATA_API_KEY");
+    const serviceKey = apiKey.includes("%")
+      ? apiKey
+      : encodeURIComponent(apiKey);
 
     if (!apiKey) {
       return NextResponse.json(
@@ -49,9 +52,7 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      const apiUrl = `https://api.odcloud.kr/api/nts-businessman/v1/status?serviceKey=${encodeURIComponent(
-        apiKey
-      )}&returnType=JSON`;
+      const apiUrl = `https://api.odcloud.kr/api/nts-businessman/v1/status?serviceKey=${serviceKey}&returnType=JSON`;
 
       const response = await fetch(apiUrl, {
         method: "POST",
@@ -186,9 +187,7 @@ export async function POST(request: NextRequest) {
         if (validBatch.length === 0) {
           continue;
         }
-        const apiUrl = `https://api.odcloud.kr/api/nts-businessman/v1/status?serviceKey=${encodeURIComponent(
-          apiKey
-        )}&returnType=JSON`;
+        const apiUrl = `https://api.odcloud.kr/api/nts-businessman/v1/status?serviceKey=${serviceKey}&returnType=JSON`;
 
         const response = await fetch(apiUrl, {
           method: "POST",
