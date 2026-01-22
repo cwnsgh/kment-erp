@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, FormEvent } from "react";
-import Image from "next/image";
+import { useState, FormEvent, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
-  getClientForManagedRegistration,
-  createManagedClient,
+  getManagedClientDetail,
+  updateManagedClient,
 } from "@/app/actions/managed-client";
-import { ClientSelectModal } from "./client-select-modal";
 import styles from "./managed-client-registration-form.module.css";
 
 type ClientData = {
@@ -45,13 +44,20 @@ type ClientData = {
   }>;
 };
 
-export function ManagedClientRegistrationForm() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+type ManagedClientEditFormProps = {
+  managedClientId: string;
+};
+
+export function ManagedClientEditForm({
+  managedClientId,
+}: ManagedClientEditFormProps) {
+  const router = useRouter();
   const [clientData, setClientData] = useState<ClientData | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
 
-  // 토글 상태 (기본값: 닫힘)
+  // 토글 상태
   const [isContactsOpen, setIsContactsOpen] = useState(false);
   const [isSitesOpen, setIsSitesOpen] = useState(false);
   const [isNoteOpen, setIsNoteOpen] = useState(false);
@@ -71,6 +77,159 @@ export function ManagedClientRegistrationForm() {
   const [detailImageEditCount, setDetailImageEditCount] = useState("");
   const [detailPopupDesignCount, setDetailPopupDesignCount] = useState("");
   const [detailBannerDesignCount, setDetailBannerDesignCount] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [status, setStatus] = useState<"ongoing" | "wait" | "end" | "unpaid">(
+    "wait"
+  );
+  const [note, setNote] = useState("");
+
+  // 초기 데이터 로드
+  useEffect(() => {
+    loadData();
+  }, [managedClientId]);
+
+  const loadData = async () => {
+    setIsLoading(true);
+    setError("");
+    try {
+      const result = await getManagedClientDetail(managedClientId);
+      if (result.success && result.managedClient && result.client) {
+        const mc = result.managedClient;
+        setClientData(result.client);
+        setProductType1(mc.productType1);
+        // productType2가 숫자로 끝나면 (예: "24m") 기타로 처리
+        const type2 = mc.productType2 || "";
+        if (type2 && !["3m", "6m", "9m", "12m"].includes(type2)) {
+          // 숫자 추출 (예: "24m" -> "24")
+          const months = type2.replace(/m$/, "");
+          if (/^\d+$/.test(months)) {
+            setProductType2("other");
+            setCustomMonths(months);
+          } else {
+            setProductType2(type2);
+            setCustomMonths("");
+          }
+        } else {
+          setProductType2(type2);
+          setCustomMonths("");
+        }
+        setTotalAmount(mc.totalAmount ? mc.totalAmount.toString() : "");
+        setPaymentStatus(mc.paymentStatus);
+        setDetailTextEditCount(mc.detailTextEditCount.toString());
+        setDetailCodingEditCount(mc.detailCodingEditCount.toString());
+        setDetailImageEditCount(mc.detailImageEditCount.toString());
+        setDetailPopupDesignCount(mc.detailPopupDesignCount.toString());
+        setDetailBannerDesignCount(mc.detailBannerDesignCount.toString());
+        setStartDate(mc.startDate || "");
+        setEndDate(mc.endDate || "");
+        setStatus(mc.status as "ongoing" | "wait" | "end" | "unpaid");
+        setNote(mc.note || "");
+      } else {
+        setError(result.error || "데이터를 불러올 수 없습니다.");
+      }
+    } catch (err) {
+      setError("데이터 로드 중 오류가 발생했습니다.");
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!clientData) {
+      setError("거래처 정보가 없습니다.");
+      return;
+    }
+
+    setIsSaving(true);
+    setError("");
+
+    const data = {
+      productType1,
+      productType2: productType2 === "other" && customMonths 
+        ? `${customMonths}m` 
+        : productType2 || undefined,
+      totalAmount:
+        productType1 === "deduct" && totalAmount
+          ? parseFloat(totalAmount)
+          : undefined,
+      paymentStatus,
+      detailTextEditCount:
+        productType1 === "maintenance" && detailTextEditCount
+          ? parseInt(detailTextEditCount)
+          : undefined,
+      detailCodingEditCount:
+        productType1 === "maintenance" && detailCodingEditCount
+          ? parseInt(detailCodingEditCount)
+          : undefined,
+      detailImageEditCount:
+        productType1 === "maintenance" && detailImageEditCount
+          ? parseInt(detailImageEditCount)
+          : undefined,
+      detailPopupDesignCount:
+        productType1 === "maintenance" && detailPopupDesignCount
+          ? parseInt(detailPopupDesignCount)
+          : undefined,
+      detailBannerDesignCount:
+        productType1 === "maintenance" &&
+        productType2 === "premium" &&
+        detailBannerDesignCount
+          ? parseInt(detailBannerDesignCount)
+          : undefined,
+      startDate: startDate || undefined,
+      endDate: endDate || undefined,
+      status,
+      note: note || undefined,
+    };
+
+    const result = await updateManagedClient(managedClientId, data);
+    if (result.success) {
+      alert("관리고객 정보가 수정되었습니다.");
+      router.push(`/operations/clients/${managedClientId}`);
+    } else {
+      setError(result.error || "관리고객 수정에 실패했습니다.");
+    }
+    setIsSaving(false);
+  };
+
+  const businessRegistrationFile = clientData?.attachments.find(
+    (a) => a.fileType === "business_registration"
+  );
+  const signatureFile = clientData?.attachments.find(
+    (a) => a.fileType === "signature"
+  );
+
+  if (isLoading) {
+    return (
+      <section className={`manageClient_regist page_section ${styles.manageClientRegist}`}>
+        <div className="white_box">
+          <div style={{ textAlign: "center", padding: "40px 20px" }}>
+            로딩 중...
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error && !clientData) {
+    return (
+      <section className={`manageClient_regist page_section ${styles.manageClientRegist}`}>
+        <div className="white_box">
+          <div
+            style={{
+              padding: "20px",
+              color: "var(--negative)",
+              textAlign: "center",
+            }}
+          >
+            {error}
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   // 기본값 정의
   const getDefaultValue = (field: string) => {
@@ -103,124 +262,31 @@ export function ManagedClientRegistrationForm() {
     return value !== "" && value !== defaultValue;
   };
 
-  const handleSelectClient = async (clientId: string) => {
-    setIsLoading(true);
-    setError("");
-    const result = await getClientForManagedRegistration(clientId);
-    if (result.success && result.client) {
-      setClientData(result.client);
-    } else {
-      setError(result.error || "거래처 정보를 불러오는데 실패했습니다.");
-    }
-    setIsLoading(false);
-  };
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!clientData) {
-      setError("거래처를 선택해주세요.");
-      return;
-    }
-
-    setIsLoading(true);
-    setError("");
-
-    const data = {
-      clientId: clientData.id,
-      productType1,
-      productType2: productType2 === "other" && customMonths 
-        ? `${customMonths}m` 
-        : productType2 || undefined,
-      totalAmount:
-        productType1 === "deduct" && totalAmount
-          ? parseFloat(totalAmount)
-          : undefined,
-      paymentStatus,
-      detailTextEditCount:
-        productType1 === "maintenance" && detailTextEditCount
-          ? parseInt(detailTextEditCount)
-          : undefined,
-      detailCodingEditCount:
-        productType1 === "maintenance" && detailCodingEditCount
-          ? parseInt(detailCodingEditCount)
-          : undefined,
-      detailImageEditCount:
-        productType1 === "maintenance" && detailImageEditCount
-          ? parseInt(detailImageEditCount)
-          : undefined,
-      detailPopupDesignCount:
-        productType1 === "maintenance" && detailPopupDesignCount
-          ? parseInt(detailPopupDesignCount)
-          : undefined,
-      detailBannerDesignCount:
-        productType1 === "maintenance" &&
-        productType2 === "premium" &&
-        detailBannerDesignCount
-          ? parseInt(detailBannerDesignCount)
-          : undefined,
-    };
-
-    const result = await createManagedClient(data);
-    if (result.success) {
-      alert("관리고객이 등록되었습니다.");
-      // 폼 초기화
-      setClientData(null);
-      setProductType1("deduct");
-      setProductType2("");
-      setCustomMonths("");
-      setTotalAmount("");
-      setPaymentStatus("unpaid");
-      setDetailTextEditCount("");
-      setDetailCodingEditCount("");
-      setDetailImageEditCount("");
-      setDetailPopupDesignCount("");
-      setDetailBannerDesignCount("");
-    } else {
-      setError(result.error || "관리고객 등록에 실패했습니다.");
-    }
-    setIsLoading(false);
-  };
-
-  const businessRegistrationFile = clientData?.attachments.find(
-    (a) => a.fileType === "business_registration"
-  );
-  const signatureFile = clientData?.attachments.find(
-    (a) => a.fileType === "signature"
-  );
-
   return (
     <section className={`manageClient_regist page_section ${styles.manageClientRegist}`}>
       <div className="page_title">
-        <h1>관리 고객 등록</h1>
+        <h1>관리 고객 수정</h1>
         <div className="btn_wrap">
+          <button
+            type="button"
+            className="btn btn_lg normal"
+            onClick={() => router.push(`/operations/clients/${managedClientId}`)}
+          >
+            취소
+          </button>
           <button
             type="submit"
             form="manageClientForm"
-            disabled={isLoading || !clientData}
+            disabled={isSaving || !clientData}
             className="btn btn_lg primary"
           >
-            {isLoading ? "등록 중..." : "등록"}
+            {isSaving ? "저장 중..." : "저장"}
           </button>
         </div>
       </div>
 
       <form id="manageClientForm" onSubmit={handleSubmit}>
         <div className="white_box">
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              marginBottom: "30px",
-            }}
-          >
-            <div
-              className="import_btn btn btn_md black"
-              onClick={() => setIsModalOpen(true)}
-            >
-              거래처 불러오기
-            </div>
-          </div>
-
           {error && (
             <div
               style={{
@@ -234,19 +300,6 @@ export function ManagedClientRegistrationForm() {
               }}
             >
               {error}
-            </div>
-          )}
-
-          {isLoading && !clientData && (
-            <div
-              style={{
-                textAlign: "center",
-                padding: "40px 20px",
-                color: "var(--text-gray)",
-                fontSize: "14px",
-              }}
-            >
-              거래처 정보를 불러오는 중...
             </div>
           )}
 
@@ -371,8 +424,6 @@ export function ManagedClientRegistrationForm() {
                                   | "maintenance";
                                 setProductType1(newType);
                                 setProductType2("");
-                                setCustomMonths("");
-                                // 유형 변경 시 다른 유형의 입력값 초기화
                                 if (newType === "deduct") {
                                   setDetailTextEditCount("");
                                   setDetailCodingEditCount("");
@@ -398,8 +449,6 @@ export function ManagedClientRegistrationForm() {
                                   | "maintenance";
                                 setProductType1(newType);
                                 setProductType2("");
-                                setCustomMonths("");
-                                // 유형 변경 시 다른 유형의 입력값 초기화
                                 if (newType === "deduct") {
                                   setDetailTextEditCount("");
                                   setDetailCodingEditCount("");
@@ -495,7 +544,7 @@ export function ManagedClientRegistrationForm() {
                             <div className="table_data pd12" style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
                               <input
                                 type="number"
-                                id="custom_months"
+                                id="custom_months_edit"
                                 name="custom_months"
                                 value={customMonths}
                                 onChange={(e) => {
@@ -529,7 +578,6 @@ export function ManagedClientRegistrationForm() {
                               }
                               onChange={(e) => {
                                 const value = e.target.value.replace(/,/g, "");
-                                // 숫자만 허용
                                 if (value === "" || /^\d+$/.test(value)) {
                                   setTotalAmount(value);
                                 }
@@ -591,8 +639,6 @@ export function ManagedClientRegistrationForm() {
                                   | "maintenance";
                                 setProductType1(newType);
                                 setProductType2("");
-                                setCustomMonths("");
-                                // 유형 변경 시 다른 유형의 입력값 초기화
                                 if (newType === "deduct") {
                                   setDetailTextEditCount("");
                                   setDetailCodingEditCount("");
@@ -618,8 +664,6 @@ export function ManagedClientRegistrationForm() {
                                   | "maintenance";
                                 setProductType1(newType);
                                 setProductType2("");
-                                setCustomMonths("");
-                                // 유형 변경 시 다른 유형의 입력값 초기화
                                 if (newType === "deduct") {
                                   setDetailTextEditCount("");
                                   setDetailCodingEditCount("");
@@ -704,7 +748,6 @@ export function ManagedClientRegistrationForm() {
                               checked={productType2 === "standard"}
                               onChange={(e) => {
                                 setProductType2(e.target.value);
-                                // 스탠다드 기본값 설정
                                 setDetailTextEditCount("3");
                                 setDetailCodingEditCount("3");
                                 setDetailImageEditCount("2");
@@ -722,7 +765,6 @@ export function ManagedClientRegistrationForm() {
                               checked={productType2 === "premium"}
                               onChange={(e) => {
                                 setProductType2(e.target.value);
-                                // 프리미엄 기본값 설정
                                 setDetailTextEditCount("5");
                                 setDetailCodingEditCount("5");
                                 setDetailImageEditCount("5");
@@ -749,7 +791,6 @@ export function ManagedClientRegistrationForm() {
                                 value={detailTextEditCount}
                                 onChange={(e) => {
                                   const value = e.target.value;
-                                  // 숫자만 허용
                                   if (value === "" || /^\d+$/.test(value)) {
                                     setDetailTextEditCount(value);
                                   }
@@ -782,7 +823,6 @@ export function ManagedClientRegistrationForm() {
                                 value={detailCodingEditCount}
                                 onChange={(e) => {
                                   const value = e.target.value;
-                                  // 숫자만 허용
                                   if (value === "" || /^\d+$/.test(value)) {
                                     setDetailCodingEditCount(value);
                                   }
@@ -817,7 +857,6 @@ export function ManagedClientRegistrationForm() {
                                 value={detailImageEditCount}
                                 onChange={(e) => {
                                   const value = e.target.value;
-                                  // 숫자만 허용
                                   if (value === "" || /^\d+$/.test(value)) {
                                     setDetailImageEditCount(value);
                                   }
@@ -850,7 +889,6 @@ export function ManagedClientRegistrationForm() {
                                 value={detailPopupDesignCount}
                                 onChange={(e) => {
                                   const value = e.target.value;
-                                  // 숫자만 허용
                                   if (value === "" || /^\d+$/.test(value)) {
                                     setDetailPopupDesignCount(value);
                                   }
@@ -884,7 +922,6 @@ export function ManagedClientRegistrationForm() {
                                   value={detailBannerDesignCount}
                                   onChange={(e) => {
                                     const value = e.target.value;
-                                    // 숫자만 허용
                                     if (value === "" || /^\d+$/.test(value)) {
                                       setDetailBannerDesignCount(value);
                                     }
@@ -915,6 +952,335 @@ export function ManagedClientRegistrationForm() {
                       </ul>
                     </>
                   )}
+
+                  {/* 시작일-종료일 */}
+                  <ul className="table_row">
+                    <li className="row_group">
+                      <div className="table_head">시작일-종료일</div>
+                      <div className="table_data pd12">
+                        <form action="#" method="get" className={styles.dateGroup}>
+                          <input
+                            type="date"
+                            id="start-date-edit"
+                            name="start-date"
+                            value={startDate}
+                            onChange={(e) => setStartDate(e.target.value)}
+                            onClick={(e) => {
+                              // 인풋 클릭 시 달력이 열리지 않도록 방지
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }}
+                            onFocus={(e) => {
+                              // 포커스 시 달력이 열리지 않도록 blur 처리
+                              const target = e.target as HTMLInputElement;
+                              target.blur();
+                              setTimeout(() => {
+                                try {
+                                  if (target.setSelectionRange && target.type !== "date") {
+                                    target.setSelectionRange(0, 0);
+                                  }
+                                } catch (err) {
+                                  // setSelectionRange가 지원되지 않는 경우 무시
+                                }
+                                window.getSelection()?.removeAllRanges();
+                              }, 0);
+                            }}
+                            onMouseDown={(e) => {
+                              // 드래그 방지
+                              const target = e.target as HTMLInputElement;
+                              if (target.type === "date") {
+                                // 즉시 선택 범위 초기화
+                                try {
+                                  if (target.setSelectionRange) {
+                                    target.setSelectionRange(0, 0);
+                                  }
+                                } catch (err) {
+                                  // setSelectionRange가 지원되지 않는 경우 무시
+                                }
+                                window.getSelection()?.removeAllRanges();
+                              }
+                            }}
+                            onMouseMove={(e) => {
+                              // 마우스 이동 중 선택 방지
+                              const target = e.target as HTMLInputElement;
+                              if (target.type === "date" && window.getSelection) {
+                                const selection = window.getSelection();
+                                if (selection && selection.toString().length > 0) {
+                                  selection.removeAllRanges();
+                                  try {
+                                    if (target.setSelectionRange) {
+                                      target.setSelectionRange(0, 0);
+                                    }
+                                  } catch (err) {
+                                    // setSelectionRange가 지원되지 않는 경우 무시
+                                  }
+                                }
+                              }
+                            }}
+                            onSelect={(e) => {
+                              // 텍스트 선택 방지
+                              e.preventDefault();
+                              const target = e.target as HTMLInputElement;
+                              try {
+                                if (target.setSelectionRange && target.type !== "date") {
+                                  target.setSelectionRange(0, 0);
+                                }
+                              } catch (err) {
+                                // setSelectionRange가 지원되지 않는 경우 무시
+                              }
+                              window.getSelection()?.removeAllRanges();
+                            }}
+                            onDragStart={(e) => {
+                              // 드래그 시작 방지
+                              e.preventDefault();
+                              return false;
+                            }}
+                            className={styles.dateInput}
+                          />
+                          <label
+                            htmlFor="start-date-edit"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              const input = document.getElementById(
+                                "start-date-edit"
+                              ) as HTMLInputElement | null;
+                              if (input) {
+                                // showPicker가 지원되면 사용, 아니면 click
+                                if (typeof (input as any).showPicker === 'function') {
+                                  try {
+                                    (input as any).showPicker();
+                                  } catch {
+                                    input.click();
+                                  }
+                                } else {
+                                  input.click();
+                                }
+                              }
+                            }}
+                          >
+                            <img
+                              src="/images/date_icon.svg"
+                              alt="날짜"
+                              width={24}
+                              height={24}
+                              style={{
+                                width: "24px",
+                                height: "24px",
+                                display: "block",
+                              }}
+                            />
+                          </label>
+                          <span>~</span>
+                          <input
+                            type="date"
+                            id="end-date-edit"
+                            name="end-date"
+                            value={endDate}
+                            onChange={(e) => setEndDate(e.target.value)}
+                            onClick={(e) => {
+                              // 인풋 클릭 시 달력이 열리지 않도록 방지
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }}
+                            onFocus={(e) => {
+                              // 포커스 시 달력이 열리지 않도록 blur 처리
+                              const target = e.target as HTMLInputElement;
+                              target.blur();
+                              setTimeout(() => {
+                                try {
+                                  if (target.setSelectionRange && target.type !== "date") {
+                                    target.setSelectionRange(0, 0);
+                                  }
+                                } catch (err) {
+                                  // setSelectionRange가 지원되지 않는 경우 무시
+                                }
+                                window.getSelection()?.removeAllRanges();
+                              }, 0);
+                            }}
+                            onMouseDown={(e) => {
+                              // 드래그 방지
+                              const target = e.target as HTMLInputElement;
+                              if (target.type === "date") {
+                                // 즉시 선택 범위 초기화
+                                try {
+                                  if (target.setSelectionRange) {
+                                    target.setSelectionRange(0, 0);
+                                  }
+                                } catch (err) {
+                                  // setSelectionRange가 지원되지 않는 경우 무시
+                                }
+                                window.getSelection()?.removeAllRanges();
+                              }
+                            }}
+                            onMouseMove={(e) => {
+                              // 마우스 이동 중 선택 방지
+                              const target = e.target as HTMLInputElement;
+                              if (target.type === "date" && window.getSelection) {
+                                const selection = window.getSelection();
+                                if (selection && selection.toString().length > 0) {
+                                  selection.removeAllRanges();
+                                  try {
+                                    if (target.setSelectionRange) {
+                                      target.setSelectionRange(0, 0);
+                                    }
+                                  } catch (err) {
+                                    // setSelectionRange가 지원되지 않는 경우 무시
+                                  }
+                                }
+                              }
+                            }}
+                            onSelect={(e) => {
+                              // 텍스트 선택 방지
+                              e.preventDefault();
+                              const target = e.target as HTMLInputElement;
+                              try {
+                                if (target.setSelectionRange && target.type !== "date") {
+                                  target.setSelectionRange(0, 0);
+                                }
+                              } catch (err) {
+                                // setSelectionRange가 지원되지 않는 경우 무시
+                              }
+                              window.getSelection()?.removeAllRanges();
+                            }}
+                            onDragStart={(e) => {
+                              // 드래그 시작 방지
+                              e.preventDefault();
+                              return false;
+                            }}
+                            className={styles.dateInput}
+                          />
+                          <label
+                            htmlFor="end-date-edit"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              const input = document.getElementById(
+                                "end-date-edit"
+                              ) as HTMLInputElement | null;
+                              if (input) {
+                                // showPicker가 지원되면 사용, 아니면 click
+                                if (typeof (input as any).showPicker === 'function') {
+                                  try {
+                                    (input as any).showPicker();
+                                  } catch {
+                                    input.click();
+                                  }
+                                } else {
+                                  input.click();
+                                }
+                              }
+                            }}
+                          >
+                            <img
+                              src="/images/date_icon.svg"
+                              alt="날짜"
+                              width={24}
+                              height={24}
+                              style={{
+                                width: "24px",
+                                height: "24px",
+                                display: "block",
+                              }}
+                            />
+                          </label>
+                        </form>
+                      </div>
+                    </li>
+                  </ul>
+
+                  {/* 진행상황 */}
+                  <ul className="table_row">
+                    <li className="row_group">
+                      <div className="table_head">진행상황</div>
+                      <div className="table_data">
+                        <input
+                          type="radio"
+                          id="status_ongoing"
+                          name="status"
+                          value="ongoing"
+                          checked={status === "ongoing"}
+                          onChange={(e) =>
+                            setStatus(
+                              e.target.value as
+                                | "ongoing"
+                                | "wait"
+                                | "end"
+                                | "unpaid"
+                            )
+                          }
+                        />
+                        <label htmlFor="status_ongoing">진행</label>
+
+                        <input
+                          type="radio"
+                          id="status_wait"
+                          name="status"
+                          value="wait"
+                          checked={status === "wait"}
+                          onChange={(e) =>
+                            setStatus(
+                              e.target.value as
+                                | "ongoing"
+                                | "wait"
+                                | "end"
+                                | "unpaid"
+                            )
+                          }
+                        />
+                        <label htmlFor="status_wait">대기</label>
+
+                        <input
+                          type="radio"
+                          id="status_end"
+                          name="status"
+                          value="end"
+                          checked={status === "end"}
+                          onChange={(e) =>
+                            setStatus(
+                              e.target.value as
+                                | "ongoing"
+                                | "wait"
+                                | "end"
+                                | "unpaid"
+                            )
+                          }
+                        />
+                        <label htmlFor="status_end">종료</label>
+
+                        <input
+                          type="radio"
+                          id="status_unpaid"
+                          name="status"
+                          value="unpaid"
+                          checked={status === "unpaid"}
+                          onChange={(e) =>
+                            setStatus(
+                              e.target.value as
+                                | "ongoing"
+                                | "wait"
+                                | "end"
+                                | "unpaid"
+                            )
+                          }
+                        />
+                        <label htmlFor="status_unpaid">미납</label>
+                      </div>
+                    </li>
+                  </ul>
+
+                  {/* 비고 */}
+                  <ul className="table_row">
+                    <li className="row_group">
+                      <div className="table_head">비고</div>
+                      <div className="table_data pd12">
+                        <textarea
+                          value={note}
+                          onChange={(e) => setNote(e.target.value)}
+                          rows={4}
+                          style={{ width: "100%" }}
+                        />
+                      </div>
+                    </li>
+                  </ul>
                 </div>
               </div>
 
@@ -934,7 +1300,7 @@ export function ManagedClientRegistrationForm() {
                       alignItems: "center",
                     }}
                   >
-                    <Image
+                    <img
                       src="/images/arrow_icon.svg"
                       alt=""
                       width={16}
@@ -984,7 +1350,7 @@ export function ManagedClientRegistrationForm() {
                         className="table_data"
                         style={{ padding: "18px 20px" }}
                       >
-                        거래처를 선택하면 담당자 정보가 표시됩니다.
+                        담당자 정보가 없습니다.
                       </div>
                     )}
                   </div>
@@ -1007,7 +1373,7 @@ export function ManagedClientRegistrationForm() {
                       alignItems: "center",
                     }}
                   >
-                    <Image
+                    <img
                       src="/images/arrow_icon.svg"
                       alt=""
                       width={16}
@@ -1060,60 +1426,17 @@ export function ManagedClientRegistrationForm() {
                         className="table_data"
                         style={{ padding: "18px 20px" }}
                       >
-                        거래처를 선택하면 사이트 정보가 표시됩니다.
+                        사이트 정보가 없습니다.
                       </div>
                     )}
                   </div>
                 )}
               </div>
-
-              {/* 비고 */}
-              {clientData?.note && (
-                <div className="table_item">
-                  <h2 className="table_title">
-                    비고
-                    <button
-                      type="button"
-                      onClick={() => setIsNoteOpen(!isNoteOpen)}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        padding: 0,
-                        cursor: "pointer",
-                        display: "inline-flex",
-                        alignItems: "center",
-                      }}
-                    >
-                      <Image
-                        src="/images/arrow_icon.svg"
-                        alt=""
-                        width={16}
-                        height={16}
-                        className={`${styles.tableToggle} ${
-                          !isNoteOpen ? styles.rotated : ""
-                        }`}
-                      />
-                    </button>
-                  </h2>
-                  {isNoteOpen && (
-                    <div className="table_wrap">
-                      <div className="text_box scroll">
-                        <p>{clientData.note}</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
           </div>
         </div>
       </form>
-
-      <ClientSelectModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSelect={handleSelectClient}
-      />
     </section>
   );
 }
+

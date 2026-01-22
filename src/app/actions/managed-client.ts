@@ -426,9 +426,33 @@ export async function getManagedClients(params: {
 
     if (error) throw error;
 
+    // 모든 관리고객의 client_id 수집
+    const clientIds = (data || []).map((item: any) => item.client_id).filter(Boolean);
+    
+    // 모든 브랜드명 조회 (한 번에)
+    let brandNamesMap: Record<string, string[]> = {};
+    if (clientIds.length > 0) {
+      const { data: sitesData, error: sitesError } = await supabase
+        .from("client_site")
+        .select("client_id, brand_name")
+        .in("client_id", clientIds);
+      
+      if (!sitesError && sitesData) {
+        // client_id별로 브랜드명 그룹화
+        sitesData.forEach((site: any) => {
+          if (site.client_id && site.brand_name) {
+            if (!brandNamesMap[site.client_id]) {
+              brandNamesMap[site.client_id] = [];
+            }
+            brandNamesMap[site.client_id].push(site.brand_name);
+          }
+        });
+      }
+    }
+
     // 데이터 가공
     let processedData = (data || []).map((item: any) => {
-      const brandNames: string[] = [];
+      const brandNames = brandNamesMap[item.client_id] || [];
 
       return {
         id: item.id,
@@ -509,7 +533,7 @@ export async function getManagedClientDetail(managedClientId: string) {
           .order("created_at", { ascending: true }),
         supabase
           .from("client_site")
-          .select("brand_name, domain, solution, login_id, login_password, type")
+          .select("id, brand_name, domain, solution, login_id, login_password, type")
           .eq("client_id", clientId)
           .order("created_at", { ascending: true }),
         supabase
@@ -630,6 +654,93 @@ export async function getManagedClientDetail(managedClientId: string) {
           : "관리고객 상세 조회에 실패했습니다.",
       managedClient: null,
       client: null,
+    };
+  }
+}
+
+/**
+ * 관리고객 수정
+ */
+export async function updateManagedClient(
+  managedClientId: string,
+  data: Partial<ManagedClientData> & {
+    startDate?: string;
+    endDate?: string;
+    status?: "ongoing" | "wait" | "end" | "unpaid";
+    note?: string;
+  }
+) {
+  try {
+    await requireAuth();
+    const supabase = await getSupabaseServerClient();
+
+    const updateData: any = {};
+
+    if (data.productType1 !== undefined) {
+      updateData.product_type1 = data.productType1;
+    }
+    if (data.productType2 !== undefined) {
+      updateData.product_type2 = data.productType2 || null;
+    }
+    if (data.totalAmount !== undefined) {
+      updateData.total_amount = data.totalAmount || null;
+    }
+    if (data.paymentStatus !== undefined) {
+      updateData.payment_status = data.paymentStatus;
+    }
+    if (data.startDate !== undefined) {
+      updateData.start_date = data.startDate || null;
+    }
+    if (data.endDate !== undefined) {
+      updateData.end_date = data.endDate || null;
+    }
+    if (data.status !== undefined) {
+      updateData.status = data.status;
+    }
+    if (data.note !== undefined) {
+      updateData.note = data.note || null;
+    }
+
+    // 유지보수형인 경우 세부 내용 업데이트
+    if (data.productType1 === "maintenance" || updateData.product_type1 === "maintenance") {
+      if (data.detailTextEditCount !== undefined) {
+        updateData.detail_text_edit_count = data.detailTextEditCount || 0;
+      }
+      if (data.detailCodingEditCount !== undefined) {
+        updateData.detail_coding_edit_count = data.detailCodingEditCount || 0;
+      }
+      if (data.detailImageEditCount !== undefined) {
+        updateData.detail_image_edit_count = data.detailImageEditCount || 0;
+      }
+      if (data.detailPopupDesignCount !== undefined) {
+        updateData.detail_popup_design_count = data.detailPopupDesignCount || 0;
+      }
+      if (data.detailBannerDesignCount !== undefined) {
+        updateData.detail_banner_design_count = data.detailBannerDesignCount || 0;
+      }
+    }
+
+    const { error } = await supabase
+      .from("managed_client")
+      .update(updateData)
+      .eq("id", managedClientId);
+
+    if (error) throw error;
+
+    revalidatePath("/operations/clients");
+    revalidatePath(`/operations/clients/${managedClientId}`);
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error("관리고객 수정 오류:", error);
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "관리고객 수정에 실패했습니다.",
     };
   }
 }

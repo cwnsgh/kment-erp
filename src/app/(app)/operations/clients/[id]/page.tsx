@@ -93,6 +93,10 @@ export default function ManagedClientDetailPage() {
       if (result.success && result.managedClient && result.client) {
         setManagedClient(result.managedClient);
         setClientData(result.client);
+        // 디버깅: 브랜드명 확인
+        console.log("Client sites (raw):", result.client.sites);
+        console.log("Brand names:", result.client.sites?.map(s => ({ brandName: s.brandName, hasValue: !!s.brandName })));
+        console.log("Sites count:", result.client.sites?.length);
       } else {
         setError(result.error || "데이터를 불러올 수 없습니다.");
       }
@@ -344,6 +348,23 @@ export default function ManagedClientDetailPage() {
                 <li className="row_group">
                   <div className="table_head">휴·폐업 상태</div>
                   <div className="table_data">{clientData.status || "-"}</div>
+                </li>
+              </ul>
+
+              <ul className="table_row">
+                <li className="row_group">
+                  <div className="table_head">브랜드명</div>
+                  <div className="table_data pd12" style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                    {clientData.sites && clientData.sites.length > 0 ? (
+                      clientData.sites.map((site, index) => (
+                        <div key={`brand-${index}`}>
+                          {site.brandName || "-"}
+                        </div>
+                      ))
+                    ) : (
+                      <div>-</div>
+                    )}
+                  </div>
                 </li>
               </ul>
             </div>

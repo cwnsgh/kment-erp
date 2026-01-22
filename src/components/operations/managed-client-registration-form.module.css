@@ -224,3 +224,142 @@
 .tableToggle.rotated {
   transform: rotate(180deg) !important;
 }
+
+/* 날짜 입력 필드 스타일 */
+.dateGroup {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 10px !important;
+  flex-wrap: nowrap !important;
+  width: 100% !important;
+}
+
+.dateGroup > span {
+  margin: 0 10px !important;
+  color: var(--text-gray) !important;
+  font-size: 14px !important;
+}
+
+.dateGroup label {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  margin-left: 8px !important;
+  line-height: 1 !important;
+  vertical-align: middle !important;
+}
+
+.dateGroup label img {
+  width: 24px !important;
+  height: 24px !important;
+  min-width: 24px !important;
+  min-height: 24px !important;
+  object-fit: contain !important;
+  display: block !important;
+  vertical-align: middle !important;
+  flex-shrink: 0 !important;
+}
+
+.dateInput {
+  border: 1px solid var(--border-color) !important;
+  border-radius: 4px !important;
+  height: 36px !important;
+  padding: 4px 4px 4px 14px !important;
+  box-sizing: border-box !important;
+  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif !important;
+  font-size: 14px !important;
+  max-width: 150px !important;
+  width: auto !important;
+  min-width: 120px !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  -webkit-touch-callout: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  -moz-user-select: -moz-none !important;
+  -khtml-user-select: none !important;
+  -ms-touch-action: manipulation !important;
+  touch-action: manipulation !important;
+}
+
+.dateInput::selection {
+  background: transparent !important;
+  color: inherit !important;
+}
+
+.dateInput::-moz-selection {
+  background: transparent !important;
+  color: inherit !important;
+}
+
+.dateInput:focus {
+  border: 2px solid var(--primary) !important;
+  outline: none !important;
+}
+
+.dateInput::-webkit-calendar-picker-indicator {
+  display: none !important;
+}
+
+.dateInput::-moz-focus-outer {
+  border: none !important;
+}
+
+.manageClientRegist :global(input[type="date"]) {
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+}
+
+.manageClientRegist :global(input[type="date"]::-webkit-calendar-picker-indicator) {
+  display: none !important;
+}
+
+.manageClientRegist :global(input[type="date"]::-moz-focus-outer) {
+  border: none !important;
+}
+
+/* 유지보수형 세부내용 input_group 스타일 */
+.manageClientRegist :global(.input_group) {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  width: 100% !important;
+  margin-bottom: 16px !important;
+  gap: 8px !important;
+}
+
+.manageClientRegist :global(.input_group:last-child) {
+  margin-bottom: 0 !important;
+}
+
+.manageClientRegist :global(.input_group .prefix) {
+  font-size: 14px !important;
+  color: var(--text-color) !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  min-width: fit-content !important;
+  margin-right: 8px !important;
+}
+
+.manageClientRegist :global(.input_group input[type="number"]) {
+  width: 60px !important;
+  min-width: 60px !important;
+  flex-shrink: 0 !important;
+  text-align: center !important;
+}
+
+.manageClientRegist :global(.input_group .suffix) {
+  font-size: 14px !important;
+  color: var(--text-color) !important;
+  margin-left: 6px !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+}
