@@ -22,6 +22,7 @@ import {
   deleteEmployeeNotification,
   Notification,
 } from "@/app/actions/work-request";
+import { getMenuPermissionByEmployeeId } from "@/app/actions/permission";
 
 import { ComingSoon } from "./coming-soon";
 import { NavigationGroup } from "./navigation-group";
@@ -235,13 +236,63 @@ export function AppShell({
     };
   }, [notificationOpen]);
 
-  // roleId에 따라 메뉴를 필터링하는 함수
-  const filterNavByRole = (
+  // DB에서 현재 직원의 메뉴 권한 정보 가져오기
+  const [menuPermissions, setMenuPermissions] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    // 현재 직원의 권한 정보 로드
+    const loadPermissions = async () => {
+      if (!session.id) return;
+
+      const result = await getMenuPermissionByEmployeeId(session.id);
+      if (result.success && result.data) {
+        // 메뉴별 권한 매핑
+        const permissions: Record<string, boolean> = {};
+        result.data.forEach((p) => {
+          if (p.allowed) {
+            permissions[p.menu_key] = true;
+          }
+        });
+        setMenuPermissions(permissions);
+      }
+    };
+
+    loadPermissions();
+  }, [session.id]);
+
+  // 메뉴 키 추출 (href에서)
+  const getMenuKeyFromHref = (href: string): string | null => {
+    if (href === "/dashboard" || href.startsWith("/dashboard")) return "dashboard";
+    if (href.includes("/clients") && !href.includes("/operations")) return "clients";
+    if (href.includes("/consultation")) return "consultation";
+    if (href.includes("/contracts")) return "contracts";
+    if (href.includes("/schedule")) return "schedule";
+    if (href.includes("/operations")) return "operations";
+    if (href.includes("/staff") && !href.includes("/approvals")) return "staff";
+    if (href.includes("/vacations")) return "vacations";
+    if (href.includes("/admin")) return "admin";
+    return null;
+  };
+
+  // 직원별 메뉴 필터링 함수
+  const filterNavByEmployee = (
     navItems: NavItem[],
-    roleId: number | null
+    roleId: number | null,
+    employeeId: string | null
   ): NavItem[] => {
     return navItems
       .filter((item) => {
+        // 관리자(role_id: 1)는 모든 메뉴 접근 가능
+        if (roleId === 1) {
+          return true;
+        }
+
+        // DB 권한 정보 확인 (직원별)
+        const menuKey = getMenuKeyFromHref(item.href);
+        if (menuKey && menuPermissions[menuKey] !== undefined) {
+          return menuPermissions[menuKey];
+        }
+
         // allowedRoleIds가 없으면 모든 role 접근 가능
         if (!item.allowedRoleIds || item.allowedRoleIds.length === 0) {
           return true;
@@ -252,7 +303,7 @@ export function AppShell({
       .map((item) => {
         // 자식 메뉴가 있으면 재귀적으로 필터링
         if (item.children) {
-          const filteredChildren = filterNavByRole(item.children, roleId);
+          const filteredChildren = filterNavByEmployee(item.children, roleId, employeeId);
           return {
             ...item,
             children:
@@ -267,10 +318,10 @@ export function AppShell({
       });
   };
 
-  // role에 따라 필터링된 메뉴
+  // 직원별로 필터링된 메뉴
   const filteredNav = useMemo(
-    () => filterNavByRole(mainNav, session.roleId),
-    [session.roleId]
+    () => filterNavByEmployee(mainNav, session.roleId, session.id),
+    [session.roleId, session.id, menuPermissions]
   );
 
   return (
