@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 import type { NavItem } from '@/config/navigation';
 import styles from './app-shell.module.css';
@@ -48,6 +48,8 @@ export function NavigationGroup({ item, isMini = false, onNavigate }: Navigation
     ) ?? false;
 
   const [open, setOpen] = useState(hasActiveChild);
+  const submenuRef = useRef<HTMLUListElement>(null);
+  const [maxHeight, setMaxHeight] = useState<string>('');
 
   // pathname이 변경될 때마다 open 상태 업데이트
   // - 현재 경로가 이 메뉴의 서브메뉴 중 하나와 일치하면 열림
@@ -55,6 +57,35 @@ export function NavigationGroup({ item, isMini = false, onNavigate }: Navigation
   useEffect(() => {
     setOpen(hasActiveChild);
   }, [pathname, hasActiveChild]);
+
+  // 서브메뉴 열림/닫힘 시 실제 높이 계산 (패딩 포함)
+  useEffect(() => {
+    if (!submenuRef.current) return;
+
+    if (open) {
+      // 열릴 때: 실제 높이 계산 (패딩 포함)
+      // 약간의 딜레이를 주어 DOM이 먼저 렌더링되도록
+      const timer = setTimeout(() => {
+        if (submenuRef.current) {
+          const height = submenuRef.current.scrollHeight;
+          setMaxHeight(`${height}px`);
+        }
+      }, 10);
+      return () => clearTimeout(timer);
+    } else {
+      // 닫힐 때: 현재 높이를 먼저 설정한 후 0으로
+      if (submenuRef.current) {
+        const currentHeight = submenuRef.current.scrollHeight;
+        setMaxHeight(`${currentHeight}px`);
+        // 다음 프레임에서 0으로 설정
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            setMaxHeight('0px');
+          });
+        });
+      }
+    }
+  }, [open]);
 
   // 메인 메뉴는 정확히 그 페이지일 때만 활성화 (서브메뉴가 열렸다고 활성화되면 안됨)
   const isActive = pathname === item.href;
@@ -159,7 +190,11 @@ export function NavigationGroup({ item, isMini = false, onNavigate }: Navigation
       </button>
 
       {!isMini && (
-        <ul className={styles.submenu}>
+        <ul 
+          ref={submenuRef}
+          className={styles.submenu}
+          style={maxHeight ? { maxHeight } : undefined}
+        >
           {item.children?.map((child) => {
             // 서브메뉴 항목 활성화: 정확히 그 경로일 때만
             const childActive = pathname === child.href;
