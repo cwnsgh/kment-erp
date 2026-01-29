@@ -152,9 +152,15 @@ export async function getAllEmployeesForPermission() {
 
     if (error) throw error;
 
+    // role이 배열로 반환될 수 있으므로 단일 객체로 변환
+    const transformedData = (data || []).map((employee: any) => ({
+      ...employee,
+      role: Array.isArray(employee.role) ? employee.role[0] : employee.role,
+    }));
+
     return {
       success: true,
-      data: data || [],
+      data: transformedData,
     };
   } catch (error) {
     console.error("직원 조회 오류:", error);
