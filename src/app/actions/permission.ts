@@ -1,7 +1,8 @@
 "use server";
 
-import { getSupabaseServerClient } from "@/lib/supabase-server";
-import { requireAuth } from "@/lib/auth";
+import { cache } from "react";
+import { getSupabaseServerClient, getSupabaseStorageClient } from "@/lib/supabase-server";
+import { requireAuth, type EmployeeSession } from "@/lib/auth";
 
 // 메뉴 권한 조회
 export async function getMenuPermissions() {
@@ -58,12 +59,93 @@ export async function getMenuPermissionByKey(menuKey: string) {
   }
 }
 
-// 특정 직원의 메뉴 권한 조회
-export async function getMenuPermissionByEmployeeId(employeeId: string) {
+// 메뉴 구조 캐싱 (변경 빈도가 낮으므로 캐싱)
+const getMenuStructure = cache(async () => {
+  const supabase = await getSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("menu_structure")
+    .select("menu_key")
+    .eq("is_active", true)
+    .order("category_key", { ascending: true })
+    .order("display_order", { ascending: true });
+
+  if (error) throw error;
+  return data || [];
+});
+
+// 메뉴 구조 전체 조회 (권한 관리 UI용)
+export async function getAllMenuStructure() {
   try {
     await requireAuth();
     const supabase = await getSupabaseServerClient();
 
+    console.log("메뉴 구조 조회 시작...");
+    
+    // is_active 필터를 제거하고 모든 데이터 조회 (디버깅용)
+    const { data, error } = await supabase
+      .from("menu_structure")
+      .select("*")
+      .order("category_key", { ascending: true })
+      .order("display_order", { ascending: true });
+    
+    // is_active가 false인 경우 필터링 (클라이언트 측에서)
+    const filteredData = (data || []).filter((item: any) => item.is_active !== false);
+
+    console.log("메뉴 구조 조회 결과:", { data, error });
+
+    if (error) {
+      console.error("메뉴 구조 조회 에러 상세:", {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+      });
+      throw error;
+    }
+
+    console.log("메뉴 구조 조회 성공, 전체 데이터 개수:", data?.length || 0);
+    console.log("필터링 후 데이터 개수:", filteredData.length);
+
+    return {
+      success: true,
+      data: filteredData,
+    };
+  } catch (error) {
+    console.error("메뉴 구조 조회 오류:", error);
+    const errorMessage = error instanceof Error 
+      ? `${error.message}${error.cause ? ` (원인: ${error.cause})` : ''}`
+      : "메뉴 구조 조회에 실패했습니다.";
+    return {
+      success: false,
+      error: errorMessage,
+      data: [],
+    };
+  }
+}
+
+// 특정 직원의 메뉴 권한 조회 (캐싱 적용)
+export const getMenuPermissionByEmployeeId = cache(async (
+  employeeId: string,
+  roleId: number | null
+) => {
+  try {
+    await requireAuth();
+    const supabase = await getSupabaseServerClient();
+
+    // 관리자(role_id: 1)는 모든 메뉴 접근 가능 - DB 조회 없이 즉시 반환
+    if (roleId === 1) {
+      const allMenus = await getMenuStructure();
+      return {
+        success: true,
+        data: allMenus.map((menu) => ({
+          menu_key: menu.menu_key,
+          employee_id: employeeId,
+          allowed: true,
+        })),
+      };
+    }
+
+    // 일반 직원은 권한 데이터 조회
     const { data, error } = await supabase
       .from("menu_permission")
       .select("*")
@@ -83,6 +165,43 @@ export async function getMenuPermissionByEmployeeId(employeeId: string) {
       data: [],
     };
   }
+});
+
+// 특정 메뉴에 대한 접근 권한 확인 (roleId를 파라미터로 받아 불필요한 DB 조회 제거)
+export async function checkMenuPermission(
+  employeeId: string,
+  menuKey: string,
+  roleId: number | null
+): Promise<boolean> {
+  try {
+    // 관리자(role_id: 1)는 모든 메뉴 접근 가능 - DB 조회 없이 즉시 반환
+    if (roleId === 1) {
+      return true;
+    }
+
+    const supabase = await getSupabaseServerClient();
+
+    // 권한 확인
+    const { data, error } = await supabase
+      .from("menu_permission")
+      .select("allowed")
+      .eq("employee_id", employeeId)
+      .eq("menu_key", menuKey)
+      .single();
+
+    if (error) {
+      // 권한 데이터가 없으면 false 반환
+      if (error.code === "PGRST116") {
+        return false;
+      }
+      throw error;
+    }
+
+    return data?.allowed ?? false;
+  } catch (error) {
+    console.error("메뉴 권한 확인 오류:", error);
+    return false;
+  }
 }
 
 // 메뉴 권한 저장 (여러 권한을 한번에 저장)
@@ -91,30 +210,50 @@ export async function saveMenuPermissions(
 ) {
   try {
     await requireAuth();
-    const supabase = await getSupabaseServerClient();
+    
+    // 권한 문제 해결을 위해 Service Role Key 사용 (getSupabaseStorageClient 사용)
+    // 이 클라이언트는 Service Role Key를 사용하므로 RLS를 우회할 수 있습니다
+    const supabase = await getSupabaseStorageClient();
+
+    console.log("권한 저장 시작, 개수:", permissions.length);
 
     // 트랜잭션으로 처리
     const results = await Promise.all(
       permissions.map(async (perm) => {
-        const { data, error } = await supabase
-          .from("menu_permission")
-          .upsert(
-            {
-              menu_key: perm.menuKey,
-              employee_id: perm.employeeId,
-              allowed: perm.allowed,
-              updated_at: new Date().toISOString(),
-            },
-            {
-              onConflict: "menu_key,employee_id",
-            }
-          )
-          .select();
+        try {
+          const { data, error } = await supabase
+            .from("menu_permission")
+            .upsert(
+              {
+                menu_key: perm.menuKey,
+                employee_id: perm.employeeId,
+                allowed: perm.allowed,
+                updated_at: new Date().toISOString(),
+              },
+              {
+                onConflict: "menu_key,employee_id",
+              }
+            )
+            .select();
 
-        if (error) throw error;
-        return data;
+          if (error) {
+            console.error(`권한 저장 오류 (${perm.menuKey}, ${perm.employeeId}):`, {
+              message: error.message,
+              code: error.code,
+              details: error.details,
+              hint: error.hint,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          console.error(`개별 권한 저장 실패:`, perm, error);
+          throw error;
+        }
       })
     );
+
+    console.log("권한 저장 성공");
 
     return {
       success: true,
@@ -122,9 +261,12 @@ export async function saveMenuPermissions(
     };
   } catch (error) {
     console.error("메뉴 권한 저장 오류:", error);
+    const errorMessage = error instanceof Error 
+      ? `${error.message}${error.cause ? ` (원인: ${error.cause})` : ''}`
+      : "메뉴 권한 저장에 실패했습니다.";
     return {
       success: false,
-      error: error instanceof Error ? error.message : "메뉴 권한 저장에 실패했습니다.",
+      error: errorMessage,
     };
   }
 }

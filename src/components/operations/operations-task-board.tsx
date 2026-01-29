@@ -452,34 +452,35 @@ export function OperationsTaskBoard({
           onClick={() => setSelectedTask(null)}
         >
           <div
-            className="w-full max-w-2xl rounded-xl bg-white p-6 shadow-xl"
+            className="w-full max-w-2xl rounded-xl bg-white shadow-xl overflow-y-auto max-h-[90vh]"
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h3 className="text-lg font-semibold text-slate-900">
-                  {selectedTask.work_content || "관리 업무 상세"}
-                </h3>
-                <p className="mt-1 text-sm text-slate-500">
-                  <span className="font-normal text-slate-400">
-                    {selectedTask.client_name || "거래처"}
-                  </span>
-                  <span className="mx-1 text-slate-300">·</span>
-                  <span className="font-semibold text-slate-800">
-                    {selectedTask.brand_name}
-                  </span>
-                </p>
+            <div className="p-6">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-slate-900">
+                    {selectedTask.work_content || "관리 업무 상세"}
+                  </h3>
+                  <p className="mt-1 text-sm text-slate-500">
+                    <span className="font-normal text-slate-400">
+                      {selectedTask.client_name || "거래처"}
+                    </span>
+                    <span className="mx-1 text-slate-300">·</span>
+                    <span className="font-semibold text-slate-800">
+                      {selectedTask.brand_name}
+                    </span>
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="rounded-full border border-slate-200 px-3 py-1 text-sm text-slate-600 transition hover:bg-slate-100"
+                  onClick={() => setSelectedTask(null)}
+                >
+                  닫기
+                </button>
               </div>
-              <button
-                type="button"
-                className="rounded-full border border-slate-200 px-3 py-1 text-sm text-slate-600 transition hover:bg-slate-100"
-                onClick={() => setSelectedTask(null)}
-              >
-                닫기
-              </button>
-            </div>
 
-            <div className="mt-5 grid grid-cols-1 gap-4 text-sm text-slate-700 sm:grid-cols-2">
+              <div className="mt-5 grid grid-cols-1 gap-4 text-sm text-slate-700 sm:grid-cols-2">
               <div>
                 <span className="text-xs text-slate-400">요청 상태</span>
                 <p className="mt-1 font-medium">
@@ -577,6 +578,7 @@ export function OperationsTaskBoard({
                 </button>
               </div>
             )}
+            </div>
           </div>
         </div>
       )}

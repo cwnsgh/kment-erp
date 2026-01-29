@@ -22,7 +22,7 @@ import {
   deleteEmployeeNotification,
   Notification,
 } from "@/app/actions/work-request";
-import { getMenuPermissionByEmployeeId } from "@/app/actions/permission";
+import { getMenuPermissionByEmployeeId, getAllMenuStructure } from "@/app/actions/permission";
 
 import { ComingSoon } from "./coming-soon";
 import { NavigationGroup } from "./navigation-group";
@@ -238,90 +238,208 @@ export function AppShell({
 
   // DB에서 현재 직원의 메뉴 권한 정보 가져오기
   const [menuPermissions, setMenuPermissions] = useState<Record<string, boolean>>({});
+  const [menuStructure, setMenuStructure] = useState<Array<{ menu_key: string; navigation_path: string; category_key: string }>>([]);
+  const [permissionsLoaded, setPermissionsLoaded] = useState(false);
 
   useEffect(() => {
-    // 현재 직원의 권한 정보 로드
+    // 현재 직원의 권한 정보 및 메뉴 구조 로드
     const loadPermissions = async () => {
-      if (!session.id) return;
+      if (!session.id) {
+        setPermissionsLoaded(true);
+        return;
+      }
 
-      const result = await getMenuPermissionByEmployeeId(session.id);
-      if (result.success && result.data) {
-        // 메뉴별 권한 매핑
-        const permissions: Record<string, boolean> = {};
-        result.data.forEach((p) => {
-          if (p.allowed) {
-            permissions[p.menu_key] = true;
-          }
-        });
-        setMenuPermissions(permissions);
+      try {
+        // 메뉴 구조와 권한 정보를 동시에 로드
+        const [structureResult, permissionResult] = await Promise.all([
+          getAllMenuStructure(),
+          getMenuPermissionByEmployeeId(session.id, session.roleId),
+        ]);
+
+        if (structureResult.success && structureResult.data) {
+          setMenuStructure(structureResult.data);
+        }
+
+        if (permissionResult.success && permissionResult.data) {
+          // 메뉴별 권한 매핑 (menu_key 기준)
+          const permissions: Record<string, boolean> = {};
+          permissionResult.data.forEach((p) => {
+            if (p.allowed) {
+              permissions[p.menu_key] = true;
+            }
+          });
+          setMenuPermissions(permissions);
+        }
+      } catch (error) {
+        console.error("권한 로드 오류:", error);
+      } finally {
+        setPermissionsLoaded(true);
       }
     };
 
     loadPermissions();
-  }, [session.id]);
+  }, [session.id, session.roleId]);
 
-  // 메뉴 키 추출 (href에서)
+  // href에서 해당하는 메뉴 키 찾기 (navigation_path 매칭)
   const getMenuKeyFromHref = (href: string): string | null => {
-    if (href === "/dashboard" || href.startsWith("/dashboard")) return "dashboard";
-    if (href.includes("/clients") && !href.includes("/operations")) return "clients";
-    if (href.includes("/consultation")) return "consultation";
-    if (href.includes("/contracts")) return "contracts";
-    if (href.includes("/schedule")) return "schedule";
-    if (href.includes("/operations")) return "operations";
-    if (href.includes("/staff") && !href.includes("/approvals")) return "staff";
-    if (href.includes("/vacations")) return "vacations";
-    if (href.includes("/admin")) return "admin";
+    // 정확한 경로 매칭
+    const exactMatch = menuStructure.find((menu) => menu.navigation_path === href);
+    if (exactMatch) {
+      return exactMatch.menu_key;
+    }
+    
+    // 부분 매칭 (예: /clients/new는 /clients/new와 매칭)
+    const partialMatch = menuStructure.find((menu) => 
+      href.startsWith(menu.navigation_path) || menu.navigation_path.startsWith(href)
+    );
+    if (partialMatch) {
+      return partialMatch.menu_key;
+    }
+    
     return null;
   };
 
-  // 직원별 메뉴 필터링 함수
-  const filterNavByEmployee = (
+  // 특정 카테고리의 세부 메뉴 중 하나라도 권한이 있는지 확인
+  const hasCategoryPermission = (categoryKey: string): boolean => {
+    if (session.roleId === 1) return true; // 관리자는 모든 권한
+    
+    const categoryMenus = menuStructure.filter((menu) => menu.category_key === categoryKey);
+    const hasPermission = categoryMenus.some((menu) => menuPermissions[menu.menu_key] === true);
+    
+    // 디버깅용 로그
+    if (categoryKey === "admin") {
+      console.log("관리자페이지 권한 체크:", {
+        categoryKey,
+        categoryMenus: categoryMenus.map(m => ({ menu_key: m.menu_key, navigation_path: m.navigation_path })),
+        menuPermissions,
+        hasPermission,
+      });
+    }
+    
+    return hasPermission;
+  };
+
+  // href에서 카테고리 키 찾기 (대분류 경로도 처리)
+  const getCategoryKeyFromHref = (href: string): string | null => {
+    // 먼저 정확한 경로 매칭 시도
+    const exactMatch = menuStructure.find((m) => m.navigation_path === href);
+    if (exactMatch) {
+      return exactMatch.category_key;
+    }
+
+    // 대분류 경로 매핑 (navigation.ts의 href -> menu_structure의 category_key)
+    const categoryMapping: Record<string, string> = {
+      "/clients": "client-management",
+      "/consultation": "consultation",
+      "/contracts": "contract",
+      "/schedule": "schedule",
+      "/operations/tasks": "operations",
+      "/staff": "staff",
+      "/vacations": "vacation",
+      "/admin": "admin",
+    };
+
+    // 대분류 경로 직접 매칭
+    if (categoryMapping[href]) {
+      return categoryMapping[href];
+    }
+
+    // 부분 매칭 (예: /admin/deleted-tasks -> admin)
+    for (const [navPath, categoryKey] of Object.entries(categoryMapping)) {
+      if (href.startsWith(navPath)) {
+        return categoryKey;
+      }
+    }
+
+    // menu_structure에서 부분 매칭 시도
+    const partialMatch = menuStructure.find((m) => 
+      href.startsWith(m.navigation_path) || m.navigation_path.startsWith(href)
+    );
+    if (partialMatch) {
+      return partialMatch.category_key;
+    }
+
+    return null;
+  };
+
+  // 직원별 메뉴 필터링 함수 (간단하게 재작성)
+  const filterNavByEmployee = useCallback((
     navItems: NavItem[],
     roleId: number | null,
     employeeId: string | null
   ): NavItem[] => {
+    // 권한이 아직 로드되지 않았으면 빈 배열 반환 (로딩 중)
+    if (!permissionsLoaded || menuStructure.length === 0) {
+      // 관리자는 모든 메뉴 표시
+      if (roleId === 1) {
+        return navItems;
+      }
+      // 일반 직원은 권한 로드 완료까지 대기
+      return [];
+    }
+
+    // 관리자(role_id: 1)는 모든 메뉴 접근 가능
+    if (roleId === 1) {
+      return navItems;
+    }
+
     return navItems
-      .filter((item) => {
-        // 관리자(role_id: 1)는 모든 메뉴 접근 가능
-        if (roleId === 1) {
-          return true;
-        }
-
-        // DB 권한 정보 확인 (직원별)
-        const menuKey = getMenuKeyFromHref(item.href);
-        if (menuKey && menuPermissions[menuKey] !== undefined) {
-          return menuPermissions[menuKey];
-        }
-
-        // allowedRoleIds가 없으면 모든 role 접근 가능
-        if (!item.allowedRoleIds || item.allowedRoleIds.length === 0) {
-          return true;
-        }
-        // allowedRoleIds가 있으면 해당 role ID만 허용
-        return roleId !== null && item.allowedRoleIds.includes(roleId);
-      })
       .map((item) => {
-        // 자식 메뉴가 있으면 재귀적으로 필터링
-        if (item.children) {
-          const filteredChildren = filterNavByEmployee(item.children, roleId, employeeId);
-          return {
-            ...item,
-            children:
-              filteredChildren.length > 0 ? filteredChildren : undefined,
-          };
+        // 대시보드는 항상 표시
+        if (item.href === "/dashboard") {
+          return item;
         }
-        return item;
+
+        // 자식 메뉴가 있는 경우
+        if (item.children && item.children.length > 0) {
+          // 카테고리 키 찾기
+          const categoryKey = getCategoryKeyFromHref(item.href);
+          
+          // 해당 카테고리의 세부 메뉴 중 권한이 있는 것만 필터링
+          const filteredChildren = item.children.filter((child) => {
+            const childMenuKey = getMenuKeyFromHref(child.href);
+            return childMenuKey ? menuPermissions[childMenuKey] === true : false;
+          });
+
+          // 카테고리에 권한이 있는 메뉴가 하나라도 있으면 대분류 표시
+          if (categoryKey && hasCategoryPermission(categoryKey) && filteredChildren.length > 0) {
+            return {
+              ...item,
+              children: filteredChildren,
+            };
+          }
+
+          // 권한이 없으면 null 반환 (필터링됨)
+          return null;
+        }
+
+        // 자식이 없는 경우: 해당 경로의 세부 메뉴 권한 확인
+        const menuKey = getMenuKeyFromHref(item.href);
+        if (menuKey && menuPermissions[menuKey] === true) {
+          return item;
+        }
+
+        // allowedRoleIds 체크 (기존 로직 유지)
+        if (item.allowedRoleIds && item.allowedRoleIds.length > 0) {
+          if (roleId !== null && item.allowedRoleIds.includes(roleId)) {
+            return item;
+          }
+        }
+
+        // 권한이 없으면 null 반환 (필터링됨)
+        return null;
       })
+      .filter((item): item is NavItem => item !== null)
       .filter((item) => {
         // 자식이 있는 메뉴는 자식이 하나라도 남아있어야 표시
         return !item.children || item.children.length > 0;
       });
-  };
+  }, [permissionsLoaded, menuStructure, menuPermissions, session.roleId]);
 
   // 직원별로 필터링된 메뉴
   const filteredNav = useMemo(
     () => filterNavByEmployee(mainNav, session.roleId, session.id),
-    [session.roleId, session.id, menuPermissions]
+    [filterNavByEmployee, session.roleId, session.id]
   );
 
   return (
