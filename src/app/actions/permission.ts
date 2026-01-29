@@ -73,47 +73,32 @@ const getMenuStructure = cache(async () => {
   return data || [];
 });
 
-// 메뉴 구조 전체 조회 (권한 관리 UI용)
-export async function getAllMenuStructure() {
+// 메뉴 구조 전체 조회 (캐싱 적용 - 메뉴 구조는 거의 변하지 않음)
+export const getAllMenuStructure = cache(async () => {
   try {
     await requireAuth();
     const supabase = await getSupabaseServerClient();
-
-    console.log("메뉴 구조 조회 시작...");
     
-    // is_active 필터를 제거하고 모든 데이터 조회 (디버깅용)
     const { data, error } = await supabase
       .from("menu_structure")
       .select("*")
+      .eq("is_active", true)
       .order("category_key", { ascending: true })
       .order("display_order", { ascending: true });
-    
-    // is_active가 false인 경우 필터링 (클라이언트 측에서)
-    const filteredData = (data || []).filter((item: any) => item.is_active !== false);
-
-    console.log("메뉴 구조 조회 결과:", { data, error });
 
     if (error) {
-      console.error("메뉴 구조 조회 에러 상세:", {
-        message: error.message,
-        code: error.code,
-        details: error.details,
-        hint: error.hint,
-      });
+      console.error("메뉴 구조 조회 에러:", error);
       throw error;
     }
 
-    console.log("메뉴 구조 조회 성공, 전체 데이터 개수:", data?.length || 0);
-    console.log("필터링 후 데이터 개수:", filteredData.length);
-
     return {
       success: true,
-      data: filteredData,
+      data: data || [],
     };
   } catch (error) {
     console.error("메뉴 구조 조회 오류:", error);
     const errorMessage = error instanceof Error 
-      ? `${error.message}${error.cause ? ` (원인: ${error.cause})` : ''}`
+      ? error.message
       : "메뉴 구조 조회에 실패했습니다.";
     return {
       success: false,
@@ -121,7 +106,7 @@ export async function getAllMenuStructure() {
       data: [],
     };
   }
-}
+});
 
 // 특정 직원의 메뉴 권한 조회 (캐싱 적용)
 export const getMenuPermissionByEmployeeId = cache(async (

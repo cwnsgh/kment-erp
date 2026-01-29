@@ -33,12 +33,16 @@ type AppShellProps = {
   children: ReactNode;
   session: EmployeeSession;
   pendingApprovalCount?: number;
+  initialMenuStructure?: Array<{ menu_key: string; navigation_path: string; category_key: string }>;
+  initialMenuPermissions?: Array<{ menu_key: string; employee_id: string; allowed: boolean }>;
 };
 
 export function AppShell({
   children,
   session,
   pendingApprovalCount = 0,
+  initialMenuStructure = [],
+  initialMenuPermissions = [],
 }: AppShellProps) {
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -237,12 +241,26 @@ export function AppShell({
   }, [notificationOpen]);
 
   // DB에서 현재 직원의 메뉴 권한 정보 가져오기
-  const [menuPermissions, setMenuPermissions] = useState<Record<string, boolean>>({});
-  const [menuStructure, setMenuStructure] = useState<Array<{ menu_key: string; navigation_path: string; category_key: string }>>([]);
-  const [permissionsLoaded, setPermissionsLoaded] = useState(false);
+  // 서버에서 미리 로드한 데이터로 초기화
+  const [menuPermissions, setMenuPermissions] = useState<Record<string, boolean>>(() => {
+    const permissions: Record<string, boolean> = {};
+    initialMenuPermissions.forEach((p) => {
+      if (p.allowed) {
+        permissions[p.menu_key] = true;
+      }
+    });
+    return permissions;
+  });
+  const [menuStructure, setMenuStructure] = useState<Array<{ menu_key: string; navigation_path: string; category_key: string }>>(initialMenuStructure);
+  const [permissionsLoaded, setPermissionsLoaded] = useState(initialMenuStructure.length > 0 && initialMenuPermissions.length >= 0);
 
   useEffect(() => {
-    // 현재 직원의 권한 정보 및 메뉴 구조 로드
+    // 서버에서 이미 로드된 데이터가 있으면 클라이언트에서 다시 로드하지 않음
+    if (permissionsLoaded && menuStructure.length > 0) {
+      return;
+    }
+
+    // 현재 직원의 권한 정보 및 메뉴 구조 로드 (서버에서 로드 실패한 경우에만)
     const loadPermissions = async () => {
       if (!session.id) {
         setPermissionsLoaded(true);
@@ -278,7 +296,7 @@ export function AppShell({
     };
 
     loadPermissions();
-  }, [session.id, session.roleId]);
+  }, [session.id, session.roleId, permissionsLoaded, menuStructure.length]);
 
   // href에서 해당하는 메뉴 키 찾기 (navigation_path 매칭)
   const getMenuKeyFromHref = (href: string): string | null => {
@@ -304,19 +322,7 @@ export function AppShell({
     if (session.roleId === 1) return true; // 관리자는 모든 권한
     
     const categoryMenus = menuStructure.filter((menu) => menu.category_key === categoryKey);
-    const hasPermission = categoryMenus.some((menu) => menuPermissions[menu.menu_key] === true);
-    
-    // 디버깅용 로그
-    if (categoryKey === "admin") {
-      console.log("관리자페이지 권한 체크:", {
-        categoryKey,
-        categoryMenus: categoryMenus.map(m => ({ menu_key: m.menu_key, navigation_path: m.navigation_path })),
-        menuPermissions,
-        hasPermission,
-      });
-    }
-    
-    return hasPermission;
+    return categoryMenus.some((menu) => menuPermissions[menu.menu_key] === true);
   };
 
   // href에서 카테고리 키 찾기 (대분류 경로도 처리)

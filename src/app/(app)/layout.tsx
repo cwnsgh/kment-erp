@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 
 import { AppShell } from '@/components/layout/app-shell';
 import { getPendingSignupRequests } from '@/app/actions/client-approval';
+import { getAllMenuStructure, getMenuPermissionByEmployeeId } from '@/app/actions/permission';
 
 type AppLayoutProps = {
   children: ReactNode;
@@ -29,14 +30,28 @@ export default async function AppLayout({ children }: AppLayoutProps) {
     redirect('/client/dashboard');
   }
 
-  // 승인 대기 건수 가져오기
-  const approvalResult = await getPendingSignupRequests();
+  // 승인 대기 건수와 메뉴 데이터를 병렬로 로드
+  const [approvalResult, menuStructureResult, menuPermissionResult] = await Promise.all([
+    getPendingSignupRequests(),
+    getAllMenuStructure(),
+    getMenuPermissionByEmployeeId(session.id, session.roleId),
+  ]);
+
   const pendingCount = approvalResult.success && approvalResult.data 
     ? approvalResult.data.length 
     : 0;
 
   // 이 시점에서 session은 EmployeeSession으로 좁혀짐
-  return <AppShell session={session} pendingApprovalCount={pendingCount}>{children}</AppShell>;
+  return (
+    <AppShell 
+      session={session} 
+      pendingApprovalCount={pendingCount}
+      initialMenuStructure={menuStructureResult.success ? menuStructureResult.data : []}
+      initialMenuPermissions={menuPermissionResult.success ? menuPermissionResult.data : []}
+    >
+      {children}
+    </AppShell>
+  );
 }
 
 
