@@ -180,6 +180,57 @@
   width: 100%;
 }
 
+/* site-table 스타일 */
+.manageClientList :global(.site-table) {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.manageClientList :global(.site-table thead) {
+  background-color: var(--background-color);
+}
+
+.manageClientList :global(.site-table th) {
+  padding: 14px 10px;
+  font-weight: var(--font-weight-semibold);
+  border-bottom: 1px solid var(--border-color);
+  text-align: center;
+  background: var(--background-color);
+  color: var(--text-color);
+  font-size: 14px;
+}
+
+.manageClientList :global(.site-table td) {
+  padding: 18px 10px;
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+  text-align: center;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-color);
+  font-size: 14px;
+}
+
+.manageClientList :global(.site-table tbody tr:last-child td) {
+  border-bottom: none;
+}
+
+.manageClientList :global(.site-table tbody tr:hover) {
+  background-color: var(--hover-bg);
+}
+
+/* table_item2 스타일 - 사이트 정보 섹션 */
+.manageClientList :global(.table_item2) {
+  width: 100%;
+}
+
+.manageClientList :global(.table_item2 .table_wrap) {
+  width: 100%;
+  overflow-x: auto;
+}
+
 /* 페이지 타이틀 영역 */
 .pageTitle {
   display: flex !important;
