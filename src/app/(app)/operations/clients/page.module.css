@@ -3,10 +3,23 @@
 
 .manageClientList {
   /* page_section 스타일 */
-  max-width: 1100px !important;
   margin: 80px auto 100px !important;
   padding: 0 24px !important;
   box-sizing: border-box !important;
+}
+
+/* Page Title Styles */
+.manageClientList :global(.page_title) {
+  text-align: left;
+  margin: 0 auto 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.manageClientList :global(.page_title h1) {
+  font-size: 32px;
+  font-weight: var(--font-weight-bold);
 }
 
 /* Button Styles */
