@@ -389,7 +389,13 @@ export function ManageWorkRegistrationForm({
     attachment: File | null;
     cost: string;
     workContent: string;
+    status?: "request" | "wait" | "approved" | "rejected";
   }) => {
+    // 이미 요청 중이거나 승인 대기 중이면 중복 요청 방지
+    if (work.status === "wait" || isLoading) {
+      return;
+    }
+
     if (!managedClientData || !clientData) {
       alert("관리 고객을 선택해주세요.");
       return;
@@ -471,7 +477,13 @@ export function ManageWorkRegistrationForm({
     attachment: File | null;
     workContent: string;
     count: number;
+    status?: "request" | "wait" | "approved" | "rejected";
   }) => {
+    // 이미 요청 중이거나 승인 대기 중이면 중복 요청 방지
+    if (task.status === "wait" || isLoading) {
+      return;
+    }
+
     if (!managedClientData || !clientData) {
       alert("관리 고객을 선택해주세요.");
       return;
@@ -1348,12 +1360,17 @@ export function ManageWorkRegistrationForm({
                                           ? styles.approvalWait
                                           : styles.approvalRequest
                                       }
-                                      style={{ cursor: "pointer" }}
+                                      style={{ 
+                                        cursor: work.status === "wait" || isLoading ? "not-allowed" : "pointer",
+                                        opacity: work.status === "wait" || isLoading ? 0.6 : 1
+                                      }}
                                       onClick={() =>
                                         handleDeductApprovalRequest(work)
                                       }
                                     >
-                                      {work.status === "wait"
+                                      {isLoading
+                                        ? "요청중..."
+                                        : work.status === "wait"
                                         ? "승인대기"
                                         : "승인요청"}
                                     </span>
@@ -1690,12 +1707,17 @@ export function ManageWorkRegistrationForm({
                                             ? styles.approvalWait
                                             : styles.approvalRequest
                                         }
-                                        style={{ cursor: "pointer" }}
+                                        style={{ 
+                                          cursor: task.status === "wait" || isLoading ? "not-allowed" : "pointer",
+                                          opacity: task.status === "wait" || isLoading ? 0.6 : 1
+                                        }}
                                         onClick={() =>
                                           handleMaintenanceApprovalRequest(task)
                                         }
                                       >
-                                        {task.status === "wait"
+                                        {isLoading
+                                          ? "요청중..."
+                                          : task.status === "wait"
                                           ? "승인대기"
                                           : "승인요청"}
                                       </span>

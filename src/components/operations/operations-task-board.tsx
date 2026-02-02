@@ -5,6 +5,7 @@ import {
   WorkRequest,
   updateWorkRequestStatus,
   getAllEmployees,
+  cancelWorkRequest,
 } from "@/app/actions/work-request";
 
 const requestTone: Record<string, string> = {
@@ -47,6 +48,7 @@ export function OperationsTaskBoard({
     nextStatus: "in_progress" | "completed";
   } | null>(null);
   const [statusUpdating, setStatusUpdating] = useState(false);
+  const [cancellingRequestId, setCancellingRequestId] = useState<string | null>(null);
 
   // 직원 목록 로드
   useEffect(() => {
@@ -237,9 +239,34 @@ export function OperationsTaskBoard({
         return;
       }
       setSelectedTask(null);
+      // 페이지 새로고침하여 최신 데이터 반영
+      window.location.reload();
     } finally {
       setStatusUpdating(false);
       setConfirmAction(null);
+    }
+  };
+
+  const handleCancelRequest = async (workRequestId: string, employeeId: string) => {
+    if (!confirm("요청을 취소하시겠습니까?")) {
+      return;
+    }
+
+    try {
+      setCancellingRequestId(workRequestId);
+      const result = await cancelWorkRequest(workRequestId, employeeId);
+      if (!result.success) {
+        alert(result.error || "요청 취소에 실패했습니다.");
+        return;
+      }
+      alert("요청이 취소되었습니다.");
+      // 페이지 새로고침하여 최신 데이터 반영
+      window.location.reload();
+    } catch (error) {
+      console.error("요청 취소 오류:", error);
+      alert("요청 취소 중 오류가 발생했습니다.");
+    } finally {
+      setCancellingRequestId(null);
     }
   };
 
@@ -438,7 +465,23 @@ export function OperationsTaskBoard({
                 </div>
                 <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
                   <span>담당자: {operation.manager || "-"}</span>
-                  <span>최근 업데이트: {formatDate(operation.updated_at)}</span>
+                  <div className="flex items-center gap-2">
+                    <span>최근 업데이트: {formatDate(operation.updated_at)}</span>
+                    {operation.status === "pending" && 
+                     operation.employee_id === currentEmployeeId && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCancelRequest(operation.id, operation.employee_id || "");
+                        }}
+                        disabled={cancellingRequestId === operation.id}
+                        className="rounded border border-red-300 bg-red-50 px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {cancellingRequestId === operation.id ? "취소 중..." : "요청 취소"}
+                      </button>
+                    )}
+                  </div>
                 </div>
               </article>
             );

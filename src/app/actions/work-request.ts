@@ -1810,3 +1810,125 @@ export async function deleteWorkRequest(
     };
   }
 }
+
+/**
+ * 요청 취소 (pending 상태만 가능) - 담당자만 가능
+ */
+export async function cancelWorkRequest(
+  workRequestId: string,
+  employeeId: string
+): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  try {
+    const session = await getSession();
+    if (!session || session.type !== "employee") {
+      return {
+        success: false,
+        error: "직원 로그인이 필요합니다.",
+      };
+    }
+
+    const supabase = await getSupabaseServerClient();
+
+    // 업무 요청 조회하여 담당자 및 상태 확인
+    const { data: workRequest, error: fetchError } = await supabase
+      .from("work_request")
+      .select("employee_id, status, managed_client_id, work_type, work_type_detail, count")
+      .eq("id", workRequestId)
+      .single();
+
+    if (fetchError || !workRequest) {
+      return {
+        success: false,
+        error: "업무 요청을 찾을 수 없습니다.",
+      };
+    }
+
+    // 담당자가 아니면 오류
+    if (workRequest.employee_id !== employeeId) {
+      return {
+        success: false,
+        error: "담당자만 요청을 취소할 수 있습니다.",
+      };
+    }
+
+    // pending 상태가 아니면 오류
+    if (workRequest.status !== "pending") {
+      return {
+        success: false,
+        error: "승인 대기 중인 요청만 취소할 수 있습니다.",
+      };
+    }
+
+    // 유지보수형인 경우 횟수 복구
+    if (workRequest.work_type === "maintenance" && workRequest.work_type_detail && workRequest.count && workRequest.managed_client_id) {
+      const { data: managedClient, error: managedClientError } = await supabase
+        .from("managed_client")
+        .select("detail_text_edit_count, detail_coding_edit_count, detail_image_edit_count, detail_popup_design_count, detail_banner_design_count")
+        .eq("id", workRequest.managed_client_id)
+        .single();
+
+      if (!managedClientError && managedClient) {
+        const updateData: any = {};
+        const count = workRequest.count;
+
+        switch (workRequest.work_type_detail) {
+          case "textEdit":
+            updateData.detail_text_edit_count = (managedClient.detail_text_edit_count || 0) + count;
+            break;
+          case "codingEdit":
+            updateData.detail_coding_edit_count = (managedClient.detail_coding_edit_count || 0) + count;
+            break;
+          case "imageEdit":
+            updateData.detail_image_edit_count = (managedClient.detail_image_edit_count || 0) + count;
+            break;
+          case "popupDesign":
+            updateData.detail_popup_design_count = (managedClient.detail_popup_design_count || 0) + count;
+            break;
+          case "bannerDesign":
+            updateData.detail_banner_design_count = (managedClient.detail_banner_design_count || 0) + count;
+            break;
+        }
+
+        if (Object.keys(updateData).length > 0) {
+          const { error: updateError } = await supabase
+            .from("managed_client")
+            .update(updateData)
+            .eq("id", workRequest.managed_client_id);
+
+          if (updateError) {
+            console.error("횟수 복구 오류:", updateError);
+          }
+        }
+      }
+    }
+
+    // 요청 삭제
+    const { error: deleteError } = await supabase
+      .from("work_request")
+      .delete()
+      .eq("id", workRequestId)
+      .eq("employee_id", employeeId)
+      .eq("status", "pending");
+
+    if (deleteError) throw deleteError;
+
+    revalidatePath("/operations/tasks");
+    revalidatePath("/operations/new");
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error("요청 취소 오류:", error);
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "요청 취소 중 오류가 발생했습니다.",
+    };
+  }
+}
