@@ -902,12 +902,11 @@ export function ClientForm() {
                 <div className="table_wrap">
                   <table className={styles.siteTable}>
                     <colgroup>
-                      <col style={{ width: "15%" }} />
-                      <col style={{ width: "auto" }} />
-                      <col style={{ width: "15%" }} />
-                      <col style={{ width: "15%" }} />
-                      <col style={{ width: "15%" }} />
-                      <col style={{ width: "15%" }} />
+                      <col style={{ width: "19%" }} />
+                      <col style={{ width: "19%" }} />
+                      <col style={{ width: "19%" }} />
+                      <col style={{ width: "19%" }} />
+                      <col style={{ width: "19%" }} />
                       <col style={{ width: "5%" }} />
                     </colgroup>
                     <thead>
@@ -917,7 +916,6 @@ export function ClientForm() {
                         <th>솔루션</th>
                         <th>아이디</th>
                         <th>패스워드</th>
-                        <th>유형</th>
                         <th></th>
                       </tr>
                     </thead>
@@ -960,17 +958,6 @@ export function ClientForm() {
                               type="password"
                               placeholder="패스워드"
                             />
-                          </td>
-                          <td data-th="유형">
-                            <select name={`site_${site.id}_type`}>
-                              <option value="">선택</option>
-                              <option value="신규">신규</option>
-                              <option value="리뉴얼">리뉴얼</option>
-                              <option value="이전">이전</option>
-                              <option value="개발">개발</option>
-                              <option value="유지보수">유지보수</option>
-                              <option value="기타">기타</option>
-                            </select>
                           </td>
                           <td className="right">
                             {sites.length > 1 && (

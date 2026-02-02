@@ -568,12 +568,11 @@ export default function ManagedClientDetailPage() {
                 <div className="table_wrap">
                   <table className="site-table">
                     <colgroup>
-                      <col style={{ width: "15%" }} />
-                      <col style={{ width: "auto" }} />
-                      <col style={{ width: "15%" }} />
-                      <col style={{ width: "15%" }} />
-                      <col style={{ width: "15%" }} />
-                      <col style={{ width: "15%" }} />
+                      <col style={{ width: "20%" }} />
+                      <col style={{ width: "20%" }} />
+                      <col style={{ width: "20%" }} />
+                      <col style={{ width: "20%" }} />
+                      <col style={{ width: "20%" }} />
                     </colgroup>
                     <thead>
                       <tr>
@@ -582,7 +581,6 @@ export default function ManagedClientDetailPage() {
                         <th>솔루션</th>
                         <th>아이디</th>
                         <th>패스워드</th>
-                        <th>유형</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -593,7 +591,6 @@ export default function ManagedClientDetailPage() {
                           <td>{site.solution || "-"}</td>
                           <td>{site.loginId || "-"}</td>
                           <td>{site.loginPassword || "-"}</td>
-                          <td>{site.type || "-"}</td>
                         </tr>
                       ))}
                     </tbody>

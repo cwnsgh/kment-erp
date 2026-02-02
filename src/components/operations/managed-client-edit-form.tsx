@@ -1403,12 +1403,11 @@ export function ManagedClientEditForm({
                     {clientData && clientData.sites.length > 0 ? (
                       <table className="site-table">
                         <colgroup>
-                          <col style={{ width: "15%" }} />
-                          <col style={{ width: "auto" }} />
-                          <col style={{ width: "15%" }} />
-                          <col style={{ width: "15%" }} />
-                          <col style={{ width: "15%" }} />
-                          <col style={{ width: "15%" }} />
+                          <col style={{ width: "20%" }} />
+                          <col style={{ width: "20%" }} />
+                          <col style={{ width: "20%" }} />
+                          <col style={{ width: "20%" }} />
+                          <col style={{ width: "20%" }} />
                         </colgroup>
                         <thead>
                           <tr>
@@ -1417,7 +1416,6 @@ export function ManagedClientEditForm({
                             <th>솔루션</th>
                             <th>아이디</th>
                             <th>패스워드</th>
-                            <th>유형</th>
                           </tr>
                         </thead>
                         <tbody id="siteBody">
@@ -1428,9 +1426,8 @@ export function ManagedClientEditForm({
                               <td data-th="솔루션">{site.solution || "-"}</td>
                               <td data-th="아이디">{site.loginId || "-"}</td>
                               <td data-th="패스워드">
-                                {site.loginPassword ? "••••••••" : "-"}
+                                {site.loginPassword || "-"}
                               </td>
-                              <td data-th="유형">{site.type || "-"}</td>
                             </tr>
                           ))}
                         </tbody>
