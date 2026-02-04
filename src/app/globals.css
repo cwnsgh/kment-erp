@@ -153,7 +153,7 @@ input[type="radio"]:checked::before {
   z-index: 10;
 }
 
-input[type="radio"]:checked + label {
+input[type="radio"]:checked+label {
   color: var(--text-color);
 }
 
@@ -163,4 +163,8 @@ label {
   vertical-align: text-bottom;
   margin-right: 20px;
   line-height: 1.6;
+}
+
+main.bg-white {
+  background: var(--background-color);
 }

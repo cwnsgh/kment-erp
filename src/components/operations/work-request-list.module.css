@@ -2,7 +2,7 @@
 /* Button Styles */
 .manageWorkList :global(.btn) {
   border: none;
-  border-radius: 6px;
+  border-radius: 4px;
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
   font-size: 15px;
@@ -72,19 +72,20 @@
 }
 
 .boxInner {
-  padding: 24px;
+  padding: 50px 0px 100px;
 }
 
 /* 검색 박스 */
 .searchBox {
+  padding: 0 30px;
   margin-bottom: 24px;
 }
 
 .pageSubTitle {
   font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 24px;
-  color: #1e293b;
+  font-weight: var(--font-weight-bold);
+  margin-bottom: 40px;
+  color: var(--text-color);
 }
 
 .companyName {
@@ -93,32 +94,41 @@
 }
 
 .workCount {
-  color: #64748b;
-  font-weight: 400;
+  color: var(--text-color);
 }
 
 .searchFlex {
   display: flex;
-  gap: 12px;
+  gap: 4px;
   align-items: center;
+  width: 50%;
 }
 
 .searchFlex select {
-  padding: 10px 14px;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  font-size: 14px;
+  height: 42px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  padding: 0 12px;
+  font-size: 13px;
+  color: #475569;
   background: #fff;
   cursor: pointer;
-  min-width: 120px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background: url(/images/select_arrow.svg) no-repeat center right 10px;
+  padding-right: 32px;
+  background-size: 12px 10px;
 }
 
 .searchFlex input[type="text"] {
   flex: 1;
   padding: 10px 14px;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
   font-size: 14px;
+  height: 42px;
+  margin-right: 6px;
 }
 
 .searchFlex input[type="text"]:focus {
@@ -153,12 +163,10 @@
 }
 
 .primary {
-  background: #3b82f6;
+  background: var(--primary);
   color: #fff;
-}
-
-.primary:hover {
-  background: #2563eb;
+  height: 42px;
+  padding: 0 16px;
 }
 
 .normal {
@@ -171,33 +179,58 @@
   background: #e2e8f0;
 }
 
+.listTable .excelBtn {
+  /* excel_btn 스타일 */
+  background: url('/images/excel_icon.png') no-repeat !important;
+  background-size: 16px !important;
+  background-position: center left 10px !important;
+  padding-left: 30px !important;
+  background-color: var(--background-color) !important;
+}
+
+.listTable .viewSelect {
+  /* view_select 스타일 */
+  appearance: none !important;
+  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif !important;
+  background: url('/images/select_arrow.svg') no-repeat center right 10px !important;
+  background-size: 12px 8px !important;
+  height: 30px !important;
+  padding: 0 26px 0 14px !important;
+  border-color: var(--border-color) !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  border: 1px solid var(--border-color) !important;
+  font-size: 13px !important;
+  font-weight: var(--font-weight-medium) !important;
+}
+
 /* 테이블 영역 */
 .listTable {
-  margin-top: 24px;
+  margin-top: 80px;
 }
 
 .tableTop {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
-  padding: 16px 0;
-  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 20px;
+  padding: 0 30px;
 }
 
 .topTotal {
-  font-size: 14px;
-  color: #64748b;
+  font-size: 13px;
+  color: var(--text-gray);
+  font-weight: var(--font-weight-semibold);
 }
 
 .topTotal span {
-  font-weight: 600;
-  color: #1e293b;
+  font-weight: var(--font-weight-bold);
+  color: var(--primary);
 }
 
 .topBtnGroup {
   display: flex;
-  gap: 12px;
+  gap: 6px;
   align-items: center;
 }
 
@@ -210,23 +243,7 @@
   z-index: 2;
 }
 
-.deleteGroup {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  margin-top: 4px;
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  list-style: none;
-  padding: 4px;
-  min-width: 120px;
-  z-index: 10;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.2s, visibility 0.2s;
-}
+
 
 .deleteBtn.show .deleteGroup,
 .deleteBtn:hover .deleteGroup {
@@ -263,7 +280,7 @@
 
 .viewSelect {
   padding: 8px 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   font-size: 13px;
   background: #fff;
@@ -280,17 +297,17 @@
   width: 100%;
   border-collapse: collapse;
   background: #fff;
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .tableWrap thead th {
-  background: #f8fafc;
-  padding: 14px 12px;
+  padding: 24px 0;
   text-align: center;
-  font-weight: 600;
-  font-size: 13px;
-  color: #1e293b;
-  border-bottom: 1px solid #e5e7eb;
-  border-right: 1px solid #e5e7eb;
+  font-weight: var(--font-weight-semibold);
+  font-size: 15px;
+  color: var(--text-gray);
+  border-bottom: 1px solid var(--border-color);
   white-space: nowrap;
 }
 
@@ -299,7 +316,7 @@
 }
 
 .tableWrap tbody tr {
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color);
   transition: background-color 0.2s;
 }
 
@@ -308,7 +325,7 @@
 }
 
 .tableWrap tbody tr:hover {
-  background: #f8fafc;
+  background-color: var(--hover-bg) !important;
 }
 
 .clickableRow {
@@ -320,11 +337,13 @@
 }
 
 .tableWrap tbody td {
-  padding: 14px 12px;
+  padding: 30px 10px;
   text-align: center;
-  font-size: 13px;
-  color: #475569;
-  border-right: 1px solid #e5e7eb;
+  font-size: 14px;
+  color: var(--text-color);
+  font-weight: var(--font-weight-medium);
+  word-break: keep-all;
+  box-sizing: border-box;
 }
 
 .tableWrap tbody td:last-child {
@@ -341,6 +360,8 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   margin: 0;
+  text-align: center;
+  max-width: 200px;
 }
 
 /* 상태 셀 */
@@ -472,7 +493,7 @@
   position: fixed;
   z-index: 1000;
   background: #fff;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   min-width: 120px;
@@ -508,7 +529,7 @@
 .pagination {
   margin-top: 24px;
   padding: 16px 0;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border-color);
 }
 
 .pagination ul {
@@ -612,6 +633,7 @@
     opacity: 0;
     transform: translateY(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -634,14 +656,14 @@
   padding: 24px;
 }
 
-.modalBody > p {
+.modalBody>p {
   margin: 0 0 16px 0;
   font-size: 15px;
   color: #475569;
   line-height: 1.6;
 }
 
-.modalBody > p strong {
+.modalBody>p strong {
   color: #3b82f6;
   font-weight: 600;
 }
@@ -721,6 +743,7 @@
     opacity: 0;
     transform: scale(0.95);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -915,7 +938,7 @@
 
 .detailModalFooter .btn {
   padding: 10px 20px;
-  border-radius: 6px;
+  border-radius: 4px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -980,4 +1003,63 @@
   height: 24px;
   margin-left: 8px;
   object-fit: contain;
+}
+
+
+.listTable .tableWrap table input[type="checkbox"] {
+  appearance: none !important;
+  width: 16px !important;
+  height: 16px !important;
+  border: 1px solid #ddd !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  position: relative !important;
+  vertical-align: middle !important;
+  margin: 0 !important;
+}
+
+.listTable .tableWrap table input[type="checkbox"]:checked {
+  border-color: var(--positive) !important;
+  background: var(--positive) !important;
+}
+
+.listTable .tableWrap table input[type="checkbox"]:checked::before {
+  content: "" !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: 10px !important;
+  height: 10px !important;
+  background: url('/images/check_icon.svg') center center no-repeat !important;
+  background-size: contain !important;
+  z-index: 10 !important;
+}
+
+.listTable .deleteBtn.show .deleteGroup {
+  display: flex !important;
+}
+
+.listTable .deleteBtn.show button#deleteClick {
+  display: none !important;
+}
+
+.listTable .deleteBtn .deleteGroup {
+  display: none !important;
+  position: absolute !important;
+  top: -8px !important;
+  left: -249% !important;
+  margin-top: 4px !important;
+  padding: 4px !important;
+  z-index: 10 !important;
+  list-style: none !important;
+  min-width: 100px !important;
+  gap: 6px;
+}
+
+.listTable .deleteBtn .deleteGroup li {
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: max-content;
 }

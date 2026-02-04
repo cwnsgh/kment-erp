@@ -6,6 +6,7 @@ import { getManagedClientDetail } from "@/app/actions/managed-client";
 import { createWorkRequest } from "@/app/actions/work-request";
 import { ManagedClientSelectModal } from "./managed-client-select-modal";
 import styles from "./manage-work-registration-form.module.css";
+import { Weight } from "lucide-react";
 
 type ManagedClientData = {
   id: string;
@@ -65,9 +66,7 @@ type ManageWorkRegistrationFormProps = {
   employeeName: string;
 };
 
-export function ManageWorkRegistrationForm({
-  employeeName,
-}: ManageWorkRegistrationFormProps) {
+export function ManageWorkRegistrationForm({ employeeName }: ManageWorkRegistrationFormProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isContactsOpen, setIsContactsOpen] = useState(false);
   const [isSitesOpen, setIsSitesOpen] = useState(false);
@@ -75,8 +74,7 @@ export function ManageWorkRegistrationForm({
   const [isProductInfoOpen, setIsProductInfoOpen] = useState(true); // 기본적으로 열림
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [managedClientData, setManagedClientData] =
-    useState<ManagedClientData | null>(null);
+  const [managedClientData, setManagedClientData] = useState<ManagedClientData | null>(null);
   const [clientData, setClientData] = useState<ClientData | null>(null);
 
   // 금액차감형 업무 등록용 상태 - 배열로 변경
@@ -174,10 +172,7 @@ export function ManageWorkRegistrationForm({
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return "-";
     const date = new Date(dateStr);
-    return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(
-      2,
-      "0"
-    )}.${String(date.getDate()).padStart(2, "0")}`;
+    return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, "0")}.${String(date.getDate()).padStart(2, "0")}`;
   };
 
   // 금액 포맷팅
@@ -201,10 +196,7 @@ export function ManageWorkRegistrationForm({
   };
 
   // 관리 상품 유형 표시
-  const formatProductType2 = (
-    type1: "deduct" | "maintenance",
-    type2: string
-  ) => {
+  const formatProductType2 = (type1: "deduct" | "maintenance", type2: string) => {
     if (type1 === "deduct") {
       return type2.toUpperCase();
     } else {
@@ -214,15 +206,11 @@ export function ManageWorkRegistrationForm({
 
   // 작업 유형 옵션 (유지보수형)
   const getWorkTypeOptions = () => {
-    if (
-      !managedClientData ||
-      managedClientData.productType1 !== "maintenance"
-    ) {
+    if (!managedClientData || managedClientData.productType1 !== "maintenance") {
       return [];
     }
 
-    const options: Array<{ value: string; label: string; remaining: number }> =
-      [];
+    const options: Array<{ value: string; label: string; remaining: number }> = [];
 
     if (managedClientData.detailTextEditCount > 0) {
       options.push({
@@ -252,10 +240,7 @@ export function ManageWorkRegistrationForm({
         remaining: managedClientData.detailPopupDesignCount,
       });
     }
-    if (
-      managedClientData.productType2 === "premium" &&
-      managedClientData.detailBannerDesignCount > 0
-    ) {
+    if (managedClientData.productType2 === "premium" && managedClientData.detailBannerDesignCount > 0) {
       options.push({
         value: "bannerDesign",
         label: "신규 배너 디자인",
@@ -342,17 +327,11 @@ export function ManageWorkRegistrationForm({
 
   // 작업 유형 변경 핸들러
   const handleWorkTypeChange = (taskId: string, workType: string) => {
-    setWorkTasks(
-      workTasks.map((task) =>
-        task.id === taskId ? { ...task, workType } : task
-      )
-    );
+    setWorkTasks(workTasks.map((task) => (task.id === taskId ? { ...task, workType } : task)));
   };
 
   // 파일 업로드 함수
-  const uploadFile = async (
-    file: File
-  ): Promise<{ url: string; fileName: string } | null> => {
+  const uploadFile = async (file: File): Promise<{ url: string; fileName: string } | null> => {
     try {
       const formData = new FormData();
       formData.append("file", file);
@@ -381,16 +360,7 @@ export function ManageWorkRegistrationForm({
   };
 
   // 금액차감형 승인 요청 핸들러
-  const handleDeductApprovalRequest = async (work: {
-    id: string;
-    brandName: string;
-    manager: string;
-    workPeriod: string;
-    attachment: File | null;
-    cost: string;
-    workContent: string;
-    status?: "request" | "wait" | "approved" | "rejected";
-  }) => {
+  const handleDeductApprovalRequest = async (work: { id: string; brandName: string; manager: string; workPeriod: string; attachment: File | null; cost: string; workContent: string; status?: "request" | "wait" | "approved" | "rejected" }) => {
     // 이미 요청 중이거나 승인 대기 중이면 중복 요청 방지
     if (work.status === "wait" || isLoading) {
       return;
@@ -451,11 +421,7 @@ export function ManageWorkRegistrationForm({
       if (result.success) {
         alert("승인 요청이 완료되었습니다.");
         // 상태를 "wait"로 변경 (UI 업데이트)
-        setDeductWorks(
-          deductWorks.map((w) =>
-            w.id === work.id ? { ...w, status: "wait" } : w
-          )
-        );
+        setDeductWorks(deductWorks.map((w) => (w.id === work.id ? { ...w, status: "wait" } : w)));
       } else {
         alert(`승인 요청 실패: ${result.error}`);
       }
@@ -468,17 +434,7 @@ export function ManageWorkRegistrationForm({
   };
 
   // 유지보수형 승인 요청 핸들러
-  const handleMaintenanceApprovalRequest = async (task: {
-    id: string;
-    workType?: string;
-    brandName: string;
-    manager: string;
-    workPeriod: string;
-    attachment: File | null;
-    workContent: string;
-    count: number;
-    status?: "request" | "wait" | "approved" | "rejected";
-  }) => {
+  const handleMaintenanceApprovalRequest = async (task: { id: string; workType?: string; brandName: string; manager: string; workPeriod: string; attachment: File | null; workContent: string; count: number; status?: "request" | "wait" | "approved" | "rejected" }) => {
     // 이미 요청 중이거나 승인 대기 중이면 중복 요청 방지
     if (task.status === "wait" || isLoading) {
       return;
@@ -505,9 +461,7 @@ export function ManageWorkRegistrationForm({
     }
 
     const workTypeOptions = getWorkTypeOptions();
-    const selectedOption = workTypeOptions.find(
-      (opt) => opt.value === task.workType
-    );
+    const selectedOption = workTypeOptions.find((opt) => opt.value === task.workType);
 
     if (!selectedOption || selectedOption.remaining < task.count) {
       alert("남은 횟수가 부족합니다.");
@@ -549,11 +503,7 @@ export function ManageWorkRegistrationForm({
 
       if (result.success) {
         // 상태 변경
-        setWorkTasks(
-          workTasks.map((t) =>
-            t.id === task.id ? { ...t, status: "wait" } : t
-          )
-        );
+        setWorkTasks(workTasks.map((t) => (t.id === task.id ? { ...t, status: "wait" } : t)));
 
         // 남은 횟수 차감 (관리 상품 정보 업데이트)
         const updatedData = {
@@ -562,34 +512,19 @@ export function ManageWorkRegistrationForm({
 
         switch (task.workType) {
           case "textEdit":
-            updatedData.detailTextEditCount = Math.max(
-              0,
-              updatedData.detailTextEditCount - task.count
-            );
+            updatedData.detailTextEditCount = Math.max(0, updatedData.detailTextEditCount - task.count);
             break;
           case "codingEdit":
-            updatedData.detailCodingEditCount = Math.max(
-              0,
-              updatedData.detailCodingEditCount - task.count
-            );
+            updatedData.detailCodingEditCount = Math.max(0, updatedData.detailCodingEditCount - task.count);
             break;
           case "imageEdit":
-            updatedData.detailImageEditCount = Math.max(
-              0,
-              updatedData.detailImageEditCount - task.count
-            );
+            updatedData.detailImageEditCount = Math.max(0, updatedData.detailImageEditCount - task.count);
             break;
           case "popupDesign":
-            updatedData.detailPopupDesignCount = Math.max(
-              0,
-              updatedData.detailPopupDesignCount - task.count
-            );
+            updatedData.detailPopupDesignCount = Math.max(0, updatedData.detailPopupDesignCount - task.count);
             break;
           case "bannerDesign":
-            updatedData.detailBannerDesignCount = Math.max(
-              0,
-              updatedData.detailBannerDesignCount - task.count
-            );
+            updatedData.detailBannerDesignCount = Math.max(0, updatedData.detailBannerDesignCount - task.count);
             break;
         }
 
@@ -608,20 +543,14 @@ export function ManageWorkRegistrationForm({
   };
 
   return (
-    <section
-      className={`manageWork_regist page_section ${styles.manageWorkRegist}`}
-    >
+    <section className={`manageWork_regist page_section ${styles.manageWorkRegist}`}>
       <div className="page_title">
         <h1>관리 업무 등록</h1>
         <div className="btn_wrap">
           <button type="button" className="btn btn_lg normal">
             삭제
           </button>
-          <button
-            type="submit"
-            form="manageWorkForm"
-            className="btn btn_lg primary"
-          >
+          <button type="submit" form="manageWorkForm" className="btn btn_lg primary">
             등록
           </button>
         </div>
@@ -629,11 +558,7 @@ export function ManageWorkRegistrationForm({
       <form id="manageWorkForm">
         <div className="white_box">
           <div className={styles.importBtnWrapper}>
-            <button
-              type="button"
-              className="import_btn btn btn_md black"
-              onClick={() => setIsModalOpen(true)}
-            >
+            <button type="button" className="import_btn btn btn_md black" onClick={() => setIsModalOpen(true)}>
               거래처 불러오기
             </button>
           </div>
@@ -648,8 +573,7 @@ export function ManageWorkRegistrationForm({
                 borderRadius: "6px",
                 color: "var(--negative)",
                 fontSize: "13px",
-              }}
-            >
+              }}>
               {error}
             </div>
           )}
@@ -661,8 +585,7 @@ export function ManageWorkRegistrationForm({
                 padding: "40px 20px",
                 color: "var(--text-gray)",
                 fontSize: "14px",
-              }}
-            >
+              }}>
               관리고객 정보를 불러오는 중...
             </div>
           )}
@@ -674,15 +597,11 @@ export function ManageWorkRegistrationForm({
                 <ul className="table_row">
                   <li className="row_group">
                     <div className="table_head">아이디</div>
-                    <div className="table_data">
-                      {clientData?.loginId || "-"}
-                    </div>
+                    <div className="table_data">{clientData?.loginId || "-"}</div>
                   </li>
                   <li className="row_group">
                     <div className="table_head">패스워드</div>
-                    <div className="table_data">
-                      {clientData?.loginPassword ? "••••••••" : "-"}
-                    </div>
+                    <div className="table_data">{clientData?.loginPassword ? "••••••••" : "-"}</div>
                   </li>
                 </ul>
               </div>
@@ -694,9 +613,7 @@ export function ManageWorkRegistrationForm({
                   <ul className="table_row">
                     <li className="row_group">
                       <div className="table_head">거래처 사업자등록번호</div>
-                      <div className="table_data">
-                        {clientData.businessRegistrationNumber || "-"}
-                      </div>
+                      <div className="table_data">{clientData.businessRegistrationNumber || "-"}</div>
                     </li>
                   </ul>
 
@@ -707,63 +624,43 @@ export function ManageWorkRegistrationForm({
                     </li>
                     <li className="row_group">
                       <div className="table_head">대표자</div>
-                      <div className="table_data">
-                        {clientData.ceoName || "-"}
-                      </div>
+                      <div className="table_data">{clientData.ceoName || "-"}</div>
                     </li>
                   </ul>
 
                   <ul className="table_row">
                     <li className="row_group">
                       <div className="table_head">사업자 주소</div>
-                      <div className="table_data">
-                        {clientData.address && clientData.addressDetail
-                          ? `${clientData.address} ${clientData.addressDetail}`.trim()
-                          : clientData.address || "-"}
-                      </div>
+                      <div className="table_data">{clientData.address && clientData.addressDetail ? `${clientData.address} ${clientData.addressDetail}`.trim() : clientData.address || "-"}</div>
                     </li>
                   </ul>
 
                   <ul className="table_row">
                     <li className="row_group">
                       <div className="table_head">업태</div>
-                      <div className="table_data">
-                        {clientData.businessType || "-"}
-                      </div>
+                      <div className="table_data">{clientData.businessType || "-"}</div>
                     </li>
                     <li className="row_group">
                       <div className="table_head">종목</div>
-                      <div className="table_data">
-                        {clientData.businessItem || "-"}
-                      </div>
+                      <div className="table_data">{clientData.businessItem || "-"}</div>
                     </li>
                   </ul>
 
                   <ul className="table_row">
                     <li className="row_group">
                       <div className="table_head">사업자 등록증 첨부</div>
-                      <div className="table_data attach">
-                        {clientData.attachments.find(
-                          (a) => a.fileType === "business_registration"
-                        )?.fileName || "-"}
-                      </div>
+                      <div className="table_data attach">{clientData.attachments.find((a) => a.fileType === "business_registration")?.fileName || "-"}</div>
                     </li>
                     <li className="row_group">
                       <div className="table_head">서명 등록</div>
-                      <div className="table_data attach">
-                        {clientData.attachments.find(
-                          (a) => a.fileType === "signature"
-                        )?.fileName || "-"}
-                      </div>
+                      <div className="table_data attach">{clientData.attachments.find((a) => a.fileType === "signature")?.fileName || "-"}</div>
                     </li>
                   </ul>
 
                   <ul className="table_row">
                     <li className="row_group">
                       <div className="table_head">휴·폐업 상태</div>
-                      <div className="table_data">
-                        {clientData.status || "-"}
-                      </div>
+                      <div className="table_data">{clientData.status || "-"}</div>
                     </li>
                   </ul>
                 </div>
@@ -772,43 +669,22 @@ export function ManageWorkRegistrationForm({
               {/* 관리 상품 정보 */}
               {managedClientData && (
                 <div className="table_item">
-                  <h2
-                    className={`table_title ${isProductInfoOpen ? "on" : ""}`}
-                    onClick={() => setIsProductInfoOpen(!isProductInfoOpen)}
-                    style={{ cursor: "pointer" }}
-                  >
+                  <h2 className={`table_title ${isProductInfoOpen ? "on" : ""}`} onClick={() => setIsProductInfoOpen(!isProductInfoOpen)} style={{ cursor: "pointer" }}>
                     관리 상품 정보
-                    <Image
-                      src="/images/arrow_icon.svg"
-                      alt=""
-                      width={16}
-                      height={16}
-                      className={`${styles.tableToggle} ${
-                        isProductInfoOpen ? styles.rotated : ""
-                      }`}
-                    />
+                    <Image src="/images/arrow_icon.svg" alt="" width={16} height={16} className={`${styles.tableToggle} ${isProductInfoOpen ? styles.rotated : ""}`} />
                   </h2>
                   {isProductInfoOpen && (
                     <div className="table_wrap on">
                       <ul className="table_row">
                         <li className="row_group">
                           <div className="table_head">관리 상품 유형1</div>
-                          <div className="table_data">
-                            {managedClientData.productType1 === "deduct"
-                              ? "금액차감형"
-                              : "유지보수형"}
-                          </div>
+                          <div className="table_data">{managedClientData.productType1 === "deduct" ? "금액차감형" : "유지보수형"}</div>
                         </li>
                       </ul>
                       <ul className="table_row">
                         <li className="row_group">
                           <div className="table_head">관리 상품 유형2</div>
-                          <div className="table_data">
-                            {formatProductType2(
-                              managedClientData.productType1,
-                              managedClientData.productType2
-                            )}
-                          </div>
+                          <div className="table_data">{formatProductType2(managedClientData.productType1, managedClientData.productType2)}</div>
                         </li>
                       </ul>
                       {managedClientData.productType1 === "deduct" ? (
@@ -816,20 +692,20 @@ export function ManageWorkRegistrationForm({
                           <ul className="table_row">
                             <li className="row_group">
                               <div className="table_head">총 금액</div>
-                              <div className="table_data">
+                              <div className="table_data" style={{ color: "#3b82f6", fontWeight: "bold" }}>
                                 {formatAmount(managedClientData.totalAmount)}
                               </div>
                             </li>
                             <li className="row_group">
                               <div className="table_head">차감 금액</div>
-                              <div className="table_data">-</div>
+                              <div className="table_data" style={{ color: "#3b82f6", fontWeight: "bold" }}>
+                                -
+                              </div>
                             </li>
                             <li className="row_group">
                               <div className="table_head">잔여 금액</div>
-                              <div className="table_data">
-                                <span className="font_b">
-                                  {formatAmount(managedClientData.totalAmount)}
-                                </span>
+                              <div className="table_data" style={{ color: "#3b82f6", fontWeight: "bold" }}>
+                                <span className="font_b">{formatAmount(managedClientData.totalAmount)}</span>
                               </div>
                             </li>
                           </ul>
@@ -838,58 +714,37 @@ export function ManageWorkRegistrationForm({
                         <ul className="table_row">
                           <li className="row_group">
                             <div className="table_head">세부 내용(잔여)</div>
-                            <div
-                              className="table_data pd12"
-                              style={{ width: "50%" }}
-                            >
+                            <div className="table_data pd12" style={{ width: "50%" }}>
                               <ul className="detail_list">
                                 <li>
-                                  영역 텍스트 수정
+                                  <span>영역 텍스트 수정</span>
                                   <span>
-                                    <b className="font_b">
-                                      {managedClientData.detailTextEditCount}
-                                    </b>
-                                    회
+                                    <b className="font_b">{managedClientData.detailTextEditCount}</b>회
                                   </span>
                                 </li>
                                 <li>
-                                  코딩 수정
+                                  <span>코딩 수정</span>
                                   <span>
-                                    <b className="font_b">
-                                      {managedClientData.detailCodingEditCount}
-                                    </b>
-                                    회
+                                    <b className="font_b">{managedClientData.detailCodingEditCount}</b>회
                                   </span>
                                 </li>
                                 <li>
-                                  기존 결과물 이미지 수정
+                                  <span>기존 결과물 이미지 수정</span>
                                   <span>
-                                    <b className="font_b">
-                                      {managedClientData.detailImageEditCount}
-                                    </b>
-                                    회
+                                    <b className="font_b">{managedClientData.detailImageEditCount}</b>회
                                   </span>
                                 </li>
                                 <li>
-                                  팝업 디자인
+                                  <span>팝업 디자인</span>
                                   <span>
-                                    <b className="font_b">
-                                      {managedClientData.detailPopupDesignCount}
-                                    </b>
-                                    회
+                                    <b className="font_b">{managedClientData.detailPopupDesignCount}</b>회
                                   </span>
                                 </li>
-                                {managedClientData.productType2 ===
-                                  "premium" && (
+                                {managedClientData.productType2 === "premium" && (
                                   <li>
-                                    신규 배너 디자인
+                                    <span>신규 배너 디자인</span>
                                     <span>
-                                      <b className="font_b">
-                                        {
-                                          managedClientData.detailBannerDesignCount
-                                        }
-                                      </b>
-                                      회
+                                      <b className="font_b">{managedClientData.detailBannerDesignCount}</b>회
                                     </span>
                                   </li>
                                 )}
@@ -901,14 +756,7 @@ export function ManageWorkRegistrationForm({
                       <ul className="table_row">
                         <li className="row_group">
                           <div className="table_head">시작일 ~ 종료일</div>
-                          <div className="table_data">
-                            {managedClientData.startDate &&
-                            managedClientData.endDate
-                              ? `${formatDate(
-                                  managedClientData.startDate
-                                )} ~ ${formatDate(managedClientData.endDate)}`
-                              : "-"}
-                          </div>
+                          <div className="table_data">{managedClientData.startDate && managedClientData.endDate ? `${formatDate(managedClientData.startDate)} ~ ${formatDate(managedClientData.endDate)}` : "-"}</div>
                         </li>
                         <li className="row_group">
                           <div className="table_head">진행상황</div>
@@ -927,20 +775,8 @@ export function ManageWorkRegistrationForm({
                 <div className="table_item">
                   <h2 className="table_title">
                     담당자 정보
-                    <button
-                      type="button"
-                      onClick={() => setIsContactsOpen(!isContactsOpen)}
-                      className={styles.toggleBtn}
-                    >
-                      <Image
-                        src="/images/arrow_icon.svg"
-                        alt=""
-                        width={16}
-                        height={16}
-                        className={`${styles.tableToggle} ${
-                          isContactsOpen ? styles.rotated : ""
-                        }`}
-                      />
+                    <button type="button" onClick={() => setIsContactsOpen(!isContactsOpen)} className={styles.toggleBtn}>
+                      <Image src="/images/arrow_icon.svg" alt="" width={16} height={16} className={`${styles.tableToggle} ${isContactsOpen ? styles.rotated : ""}`} />
                     </button>
                   </h2>
                   {isContactsOpen && (
@@ -948,44 +784,31 @@ export function ManageWorkRegistrationForm({
                       {clientData.contacts && clientData.contacts.length > 0 ? (
                         clientData.contacts.map((contact, index) => (
                           <div key={index}>
-                            <h3 className="table_title_sub">
-                              담당자{index + 1}
-                            </h3>
+                            <h3 className="table_title_sub">담당자{index + 1}</h3>
                             <ul className="table_row">
                               <li className="row_group">
                                 <div className="table_head">이름</div>
-                                <div className="table_data">
-                                  {contact.name || "-"}
-                                </div>
+                                <div className="table_data">{contact.name || "-"}</div>
                               </li>
                               <li className="row_group">
                                 <div className="table_head">연락처</div>
-                                <div className="table_data">
-                                  {contact.phone || "-"}
-                                </div>
+                                <div className="table_data">{contact.phone || "-"}</div>
                               </li>
                             </ul>
                             <ul className="table_row">
                               <li className="row_group">
                                 <div className="table_head">이메일</div>
-                                <div className="table_data">
-                                  {contact.email || "-"}
-                                </div>
+                                <div className="table_data">{contact.email || "-"}</div>
                               </li>
                               <li className="row_group">
                                 <div className="table_head">비고</div>
-                                <div className="table_data">
-                                  {contact.note || "-"}
-                                </div>
+                                <div className="table_data">{contact.note || "-"}</div>
                               </li>
                             </ul>
                           </div>
                         ))
                       ) : (
-                        <div
-                          className="table_data"
-                          style={{ padding: "18px 20px" }}
-                        >
+                        <div className="table_data" style={{ padding: "18px 20px" }}>
                           담당자 정보가 없습니다.
                         </div>
                       )}
@@ -999,20 +822,8 @@ export function ManageWorkRegistrationForm({
                 <div className="table_item table_item2">
                   <h2 className="table_title">
                     사이트 정보
-                    <button
-                      type="button"
-                      onClick={() => setIsSitesOpen(!isSitesOpen)}
-                      className={styles.toggleBtn}
-                    >
-                      <Image
-                        src="/images/arrow_icon.svg"
-                        alt=""
-                        width={16}
-                        height={16}
-                        className={`${styles.tableToggle} ${
-                          isSitesOpen ? styles.rotated : ""
-                        }`}
-                      />
+                    <button type="button" onClick={() => setIsSitesOpen(!isSitesOpen)} className={styles.toggleBtn}>
+                      <Image src="/images/arrow_icon.svg" alt="" width={16} height={16} className={`${styles.tableToggle} ${isSitesOpen ? styles.rotated : ""}`} />
                     </button>
                   </h2>
                   {isSitesOpen && (
@@ -1038,24 +849,17 @@ export function ManageWorkRegistrationForm({
                           <tbody id="siteBody">
                             {clientData.sites.map((site, index) => (
                               <tr key={index} className="site-row">
-                                <td data-th="브랜드">
-                                  {site.brandName || "-"}
-                                </td>
+                                <td data-th="브랜드">{site.brandName || "-"}</td>
                                 <td data-th="도메인">{site.domain || "-"}</td>
                                 <td data-th="솔루션">{site.solution || "-"}</td>
                                 <td data-th="아이디">{site.loginId || "-"}</td>
-                                <td data-th="패스워드">
-                                  {site.loginPassword || "-"}
-                                </td>
+                                <td data-th="패스워드">{site.loginPassword || "-"}</td>
                               </tr>
                             ))}
                           </tbody>
                         </table>
                       ) : (
-                        <div
-                          className="table_data"
-                          style={{ padding: "18px 20px" }}
-                        >
+                        <div className="table_data" style={{ padding: "18px 20px" }}>
                           사이트 정보가 없습니다.
                         </div>
                       )}
@@ -1069,20 +873,8 @@ export function ManageWorkRegistrationForm({
                 <div className="table_item">
                   <h2 className="table_title">
                     비고
-                    <button
-                      type="button"
-                      onClick={() => setIsNoteOpen(!isNoteOpen)}
-                      className={styles.toggleBtn}
-                    >
-                      <Image
-                        src="/images/arrow_icon.svg"
-                        alt=""
-                        width={16}
-                        height={16}
-                        className={`${styles.tableToggle} ${
-                          isNoteOpen ? styles.rotated : ""
-                        }`}
-                      />
+                    <button type="button" onClick={() => setIsNoteOpen(!isNoteOpen)} className={styles.toggleBtn}>
+                      <Image src="/images/arrow_icon.svg" alt="" width={16} height={16} className={`${styles.tableToggle} ${isNoteOpen ? styles.rotated : ""}`} />
                     </button>
                   </h2>
                   {isNoteOpen && (
@@ -1097,25 +889,26 @@ export function ManageWorkRegistrationForm({
 
               {/* 업무 등록 */}
               {managedClientData && clientData && (
-                <div
-                  className={`table_item table_item2 ${styles.workRegistration}`}
-                >
+                <div className={`table_item table_item2 ${styles.workRegistration}`}>
                   <h2 className="table_title">업무등록</h2>
                   <div className="table_wrap">
                     {/* 금액차감형 테이블 */}
                     {managedClientData.productType1 === "deduct" ? (
                       <>
-                        <table
-                          className={`${styles.workTable} ${styles.deductTable}`}
-                        >
+                        <div style={{ textAlign: "right", position: "absolute", right: "0", top: "0" }}>
+                          <button type="button" onClick={handleAddDeductWork} className="btn">
+                            + 업무 추가
+                          </button>
+                        </div>
+                        <table className={`${styles.workTable} ${styles.deductTable}`}>
                           <colgroup>
-                            <col style={{ width: "14%" }} />
+                            <col style={{ width: "12%" }} />
                             <col style={{ width: "8%" }} />
-                            <col style={{ width: "14%" }} />
+                            <col style={{ width: "15%" }} />
                             <col style={{ width: "12%" }} />
                             <col style={{ width: "14%" }} />
                             <col style={{ width: "27%" }} />
-                            <col style={{ width: "10%" }} />
+                            <col style={{ width: "8%" }} />
                           </colgroup>
                           <thead>
                             <tr>
@@ -1131,10 +924,7 @@ export function ManageWorkRegistrationForm({
                           <tbody id="workBody">
                             {deductWorks.map((work) => (
                               <tr key={work.id} className={styles.workRow}>
-                                <td
-                                  data-th="브랜드"
-                                  className={styles.selectCell}
-                                >
+                                <td data-th="브랜드" className={styles.selectCell}>
                                   <select
                                     value={work.brandName}
                                     onChange={(e) =>
@@ -1145,37 +935,22 @@ export function ManageWorkRegistrationForm({
                                                 ...w,
                                                 brandName: e.target.value,
                                               }
-                                            : w
-                                        )
+                                            : w,
+                                        ),
                                       )
-                                    }
-                                  >
-                                    <option value="">브랜드 선택</option>
+                                    }>
+                                    <option value="">브랜드</option>
                                     {clientData.sites.map((site, index) => (
-                                      <option
-                                        key={index}
-                                        value={site.brandName}
-                                      >
+                                      <option key={index} value={site.brandName}>
                                         {site.brandName}
                                       </option>
                                     ))}
                                   </select>
                                 </td>
-                                <td
-                                  data-th="담당자"
-                                  className={styles.inputCell}
-                                >
-                                  <input
-                                    type="text"
-                                    placeholder="담당자"
-                                    value={work.manager}
-                                    readOnly
-                                  />
+                                <td data-th="담당자" className={styles.inputCell}>
+                                  <input type="text" placeholder="담당자" value={work.manager} readOnly />
                                 </td>
-                                <td
-                                  data-th="작업기간"
-                                  className={styles.dateCell}
-                                >
+                                <td data-th="작업기간" className={styles.dateCell}>
                                   <input
                                     type="date"
                                     className={styles.dateRange}
@@ -1189,16 +964,13 @@ export function ManageWorkRegistrationForm({
                                                 ...w,
                                                 workPeriod: e.target.value,
                                               }
-                                            : w
-                                        )
+                                            : w,
+                                        ),
                                       )
                                     }
                                   />
                                 </td>
-                                <td
-                                  data-th="첨부파일"
-                                  className={styles.inputCell}
-                                >
+                                <td data-th="첨부파일" className={styles.inputCell}>
                                   <div className="file-upload-box">
                                     <input
                                       type="file"
@@ -1206,27 +978,17 @@ export function ManageWorkRegistrationForm({
                                       data-work-id={work.id}
                                       hidden
                                       onChange={(e) => {
-                                        const file =
-                                          e.target.files?.[0] || null;
-                                        setDeductWorks(
-                                          deductWorks.map((w) =>
-                                            w.id === work.id
-                                              ? { ...w, attachment: file }
-                                              : w
-                                          )
-                                        );
+                                        const file = e.target.files?.[0] || null;
+                                        setDeductWorks(deductWorks.map((w) => (w.id === work.id ? { ...w, attachment: file } : w)));
                                       }}
                                     />
                                     {!work.attachment ? (
                                       <div
                                         className="file-upload-btn"
                                         onClick={() => {
-                                          const input = document.querySelector(
-                                            `.fileInput[data-work-id="${work.id}"]`
-                                          ) as HTMLInputElement;
+                                          const input = document.querySelector(`.fileInput[data-work-id="${work.id}"]`) as HTMLInputElement;
                                           input?.click();
-                                        }}
-                                      >
+                                        }}>
                                         <span>첨부파일</span>
                                         <Image
                                           src="/images/attach_icon.svg"
@@ -1241,35 +1003,18 @@ export function ManageWorkRegistrationForm({
                                       </div>
                                     ) : (
                                       <div className={styles.fileNameContainer}>
-                                        <span className="fileName">
-                                          {work.attachment.name}
-                                        </span>
+                                        <span className="fileName">{work.attachment.name}</span>
                                         <button
                                           type="button"
                                           className={styles.fileRemoveBtn}
                                           onClick={(e) => {
                                             e.stopPropagation();
-                                            setDeductWorks(
-                                              deductWorks.map((w) =>
-                                                w.id === work.id
-                                                  ? { ...w, attachment: null }
-                                                  : w
-                                              )
-                                            );
+                                            setDeductWorks(deductWorks.map((w) => (w.id === work.id ? { ...w, attachment: null } : w)));
                                             // input 값도 초기화
-                                            const input =
-                                              document.querySelector(
-                                                `.fileInput[data-work-id="${work.id}"]`
-                                              ) as HTMLInputElement;
+                                            const input = document.querySelector(`.fileInput[data-work-id="${work.id}"]`) as HTMLInputElement;
                                             if (input) input.value = "";
-                                          }}
-                                        >
-                                          <Image
-                                            src="/images/close_icon.svg"
-                                            alt="제거"
-                                            width={14}
-                                            height={14}
-                                          />
+                                          }}>
+                                          <Image src="/images/close_icon.svg" alt="제거" width={14} height={14} />
                                         </button>
                                       </div>
                                     )}
@@ -1281,36 +1026,17 @@ export function ManageWorkRegistrationForm({
                                     placeholder=""
                                     value={work.cost}
                                     onChange={(e) => {
-                                      const formatted = formatNumberWithComma(
-                                        e.target.value
-                                      );
-                                      setDeductWorks(
-                                        deductWorks.map((w) =>
-                                          w.id === work.id
-                                            ? { ...w, cost: formatted }
-                                            : w
-                                        )
-                                      );
+                                      const formatted = formatNumberWithComma(e.target.value);
+                                      setDeductWorks(deductWorks.map((w) => (w.id === work.id ? { ...w, cost: formatted } : w)));
                                     }}
                                     onBlur={(e) => {
                                       // 포커스가 벗어날 때도 포맷팅 유지
-                                      const formatted = formatNumberWithComma(
-                                        e.target.value
-                                      );
-                                      setDeductWorks(
-                                        deductWorks.map((w) =>
-                                          w.id === work.id
-                                            ? { ...w, cost: formatted }
-                                            : w
-                                        )
-                                      );
+                                      const formatted = formatNumberWithComma(e.target.value);
+                                      setDeductWorks(deductWorks.map((w) => (w.id === work.id ? { ...w, cost: formatted } : w)));
                                     }}
                                   />
                                 </td>
-                                <td
-                                  data-th="작업내용"
-                                  className={styles.textareaCell}
-                                >
+                                <td data-th="작업내용" className={styles.textareaCell}>
                                   <textarea
                                     placeholder=""
                                     className={styles.textArea}
@@ -1323,11 +1049,10 @@ export function ManageWorkRegistrationForm({
                                                 ...w,
                                                 workContent: e.target.value,
                                               }
-                                            : w
-                                        )
+                                            : w,
+                                        ),
                                       )
-                                    }
-                                  ></textarea>
+                                    }></textarea>
                                 </td>
                                 <td data-th="" className={styles.buttonCell}>
                                   <div
@@ -1335,44 +1060,29 @@ export function ManageWorkRegistrationForm({
                                       display: "flex",
                                       gap: "4px",
                                       flexDirection: "column",
-                                    }}
-                                  >
+                                    }}>
                                     <button
                                       type="button"
-                                      onClick={() =>
-                                        handleRemoveDeductWork(work.id)
-                                      }
+                                      onClick={() => handleRemoveDeductWork(work.id)}
                                       style={{
-                                        padding: "4px 8px",
+                                        padding: "6px 8px",
                                         fontSize: "12px",
                                         background: "var(--negative)",
                                         color: "#fff",
                                         border: "none",
                                         borderRadius: "4px",
                                         cursor: "pointer",
-                                      }}
-                                    >
+                                      }}>
                                       삭제
                                     </button>
                                     <span
-                                      className={
-                                        work.status === "wait"
-                                          ? styles.approvalWait
-                                          : styles.approvalRequest
-                                      }
-                                      style={{ 
+                                      className={work.status === "wait" ? styles.approvalWait : styles.approvalRequest}
+                                      style={{
                                         cursor: work.status === "wait" || isLoading ? "not-allowed" : "pointer",
-                                        opacity: work.status === "wait" || isLoading ? 0.6 : 1
+                                        opacity: work.status === "wait" || isLoading ? 0.6 : 1,
                                       }}
-                                      onClick={() =>
-                                        handleDeductApprovalRequest(work)
-                                      }
-                                    >
-                                      {isLoading
-                                        ? "요청중..."
-                                        : work.status === "wait"
-                                        ? "승인대기"
-                                        : "승인요청"}
+                                      onClick={() => handleDeductApprovalRequest(work)}>
+                                      {isLoading ? "요청중..." : work.status === "wait" ? "승인대기" : "승인요청"}
                                     </span>
                                   </div>
                                 </td>
@@ -1380,31 +1090,25 @@ export function ManageWorkRegistrationForm({
                             ))}
                           </tbody>
                         </table>
-                        <div style={{ marginTop: "10px", textAlign: "right" }}>
-                          <button
-                            type="button"
-                            onClick={handleAddDeductWork}
-                            className="btn btn_md normal"
-                          >
-                            + 업무 추가
-                          </button>
-                        </div>
                       </>
                     ) : (
                       /* 유지보수형 테이블 */
                       <>
-                        <table
-                          className={`${styles.workTable} ${styles.maintenanceTable}`}
-                        >
+                        <div style={{ textAlign: "right", position: "absolute", right: "0", top: "0" }}>
+                          <button type="button" onClick={handleAddWork} className="btn">
+                            + 업무 추가
+                          </button>
+                        </div>
+                        <table className={`${styles.workTable} ${styles.maintenanceTable}`}>
                           <colgroup>
                             <col style={{ width: "10%" }} />
-                            <col style={{ width: "7%" }} />
-                            <col style={{ width: "10%" }} />
-                            <col style={{ width: "13%" }} />
                             <col style={{ width: "8%" }} />
+                            <col style={{ width: "13%" }} />
+                            <col style={{ width: "13%" }} />
                             <col style={{ width: "10%" }} />
-                            <col style={{ width: "5%" }} />
-                            <col style={{ width: "7%" }} />
+                            <col style={{ width: "20%" }} />
+                            <col style={{ width: "6%" }} />
+                            <col style={{ width: "8%" }} />
                           </colgroup>
                           <thead>
                             <tr>
@@ -1421,20 +1125,11 @@ export function ManageWorkRegistrationForm({
                           <tbody id="workBodyMaintenance">
                             {workTasks.map((task) => {
                               const workTypeOptions = getWorkTypeOptions();
-                              const selectedOption = workTypeOptions.find(
-                                (opt: {
-                                  value: string;
-                                  label: string;
-                                  remaining: number;
-                                }) => opt.value === task.workType
-                              );
+                              const selectedOption = workTypeOptions.find((opt: { value: string; label: string; remaining: number }) => opt.value === task.workType);
 
                               return (
                                 <tr key={task.id} className={styles.workRow}>
-                                  <td
-                                    data-th="브랜드"
-                                    className={styles.selectCell}
-                                  >
+                                  <td data-th="브랜드" className={styles.selectCell}>
                                     <select
                                       value={task.brandName}
                                       onChange={(e) =>
@@ -1445,37 +1140,22 @@ export function ManageWorkRegistrationForm({
                                                   ...t,
                                                   brandName: e.target.value,
                                                 }
-                                              : t
-                                          )
+                                              : t,
+                                          ),
                                         )
-                                      }
-                                    >
-                                      <option value="">브랜드 선택</option>
+                                      }>
+                                      <option value="">브랜드</option>
                                       {clientData?.sites.map((site, index) => (
-                                        <option
-                                          key={index}
-                                          value={site.brandName}
-                                        >
+                                        <option key={index} value={site.brandName}>
                                           {site.brandName}
                                         </option>
                                       ))}
                                     </select>
                                   </td>
-                                  <td
-                                    data-th="담당자"
-                                    className={styles.inputCell}
-                                  >
-                                    <input
-                                      type="text"
-                                      placeholder="담당자"
-                                      value={task.manager || employeeName}
-                                      readOnly
-                                    />
+                                  <td data-th="담당자" className={styles.inputCell}>
+                                    <input type="text" placeholder="담당자" value={task.manager || employeeName} readOnly />
                                   </td>
-                                  <td
-                                    data-th="작업기간"
-                                    className={styles.dateCell}
-                                  >
+                                  <td data-th="작업기간" className={styles.dateCell}>
                                     <input
                                       type="date"
                                       className={styles.dateRange}
@@ -1488,43 +1168,21 @@ export function ManageWorkRegistrationForm({
                                                   ...t,
                                                   workPeriod: e.target.value,
                                                 }
-                                              : t
-                                          )
+                                              : t,
+                                          ),
                                         )
                                       }
                                       style={{ width: "100%" }}
                                     />
                                   </td>
-                                  <td
-                                    data-th="작업유형"
-                                    className={styles.selectCell}
-                                  >
-                                    <select
-                                      value={task.workType || ""}
-                                      onChange={(e) =>
-                                        handleWorkTypeChange(
-                                          task.id,
-                                          e.target.value
-                                        )
-                                      }
-                                    >
+                                  <td data-th="작업유형" className={styles.selectCell}>
+                                    <select value={task.workType || ""} onChange={(e) => handleWorkTypeChange(task.id, e.target.value)}>
                                       <option value="">작업 유형 선택</option>
-                                      {workTypeOptions.map(
-                                        (option: {
-                                          value: string;
-                                          label: string;
-                                          remaining: number;
-                                        }) => (
-                                          <option
-                                            key={option.value}
-                                            value={option.value}
-                                            disabled={option.remaining <= 0}
-                                          >
-                                            {option.label} (잔여:{" "}
-                                            {option.remaining}회)
-                                          </option>
-                                        )
-                                      )}
+                                      {workTypeOptions.map((option: { value: string; label: string; remaining: number }) => (
+                                        <option key={option.value} value={option.value} disabled={option.remaining <= 0}>
+                                          {option.label} (잔여: {option.remaining}회)
+                                        </option>
+                                      ))}
                                     </select>
                                     {selectedOption && (
                                       <div
@@ -1532,20 +1190,12 @@ export function ManageWorkRegistrationForm({
                                           fontSize: "11px",
                                           color: "var(--text-gray)",
                                           marginTop: "4px",
-                                        }}
-                                      >
-                                        잔여:{" "}
-                                        <span className="font_b">
-                                          {selectedOption.remaining}
-                                        </span>
-                                        회
+                                        }}>
+                                        잔여: <span className="font_b">{selectedOption.remaining}</span>회
                                       </div>
                                     )}
                                   </td>
-                                  <td
-                                    data-th="첨부파일"
-                                    className={styles.inputCell}
-                                  >
+                                  <td data-th="첨부파일" className={styles.inputCell}>
                                     <div className="file-upload-box">
                                       <input
                                         type="file"
@@ -1553,28 +1203,17 @@ export function ManageWorkRegistrationForm({
                                         data-task-id={task.id}
                                         hidden
                                         onChange={(e) => {
-                                          const file =
-                                            e.target.files?.[0] || null;
-                                          setWorkTasks(
-                                            workTasks.map((t) =>
-                                              t.id === task.id
-                                                ? { ...t, attachment: file }
-                                                : t
-                                            )
-                                          );
+                                          const file = e.target.files?.[0] || null;
+                                          setWorkTasks(workTasks.map((t) => (t.id === task.id ? { ...t, attachment: file } : t)));
                                         }}
                                       />
                                       {!task.attachment ? (
                                         <div
                                           className="file-upload-btn"
                                           onClick={() => {
-                                            const input =
-                                              document.querySelector(
-                                                `.fileInput[data-task-id="${task.id}"]`
-                                              ) as HTMLInputElement;
+                                            const input = document.querySelector(`.fileInput[data-task-id="${task.id}"]`) as HTMLInputElement;
                                             input?.click();
-                                          }}
-                                        >
+                                          }}>
                                           <span>첨부파일</span>
                                           <Image
                                             src="/images/attach_icon.svg"
@@ -1588,12 +1227,8 @@ export function ManageWorkRegistrationForm({
                                           />
                                         </div>
                                       ) : (
-                                        <div
-                                          className={styles.fileNameContainer}
-                                        >
-                                          <span className="fileName">
-                                            {task.attachment.name}
-                                          </span>
+                                        <div className={styles.fileNameContainer}>
+                                          <span className="fileName">{task.attachment.name}</span>
                                           <button
                                             type="button"
                                             className={styles.fileRemoveBtn}
@@ -1606,32 +1241,20 @@ export function ManageWorkRegistrationForm({
                                                         ...t,
                                                         attachment: null,
                                                       }
-                                                    : t
-                                                )
+                                                    : t,
+                                                ),
                                               );
                                               // input 값도 초기화
-                                              const input =
-                                                document.querySelector(
-                                                  `.fileInput[data-task-id="${task.id}"]`
-                                                ) as HTMLInputElement;
+                                              const input = document.querySelector(`.fileInput[data-task-id="${task.id}"]`) as HTMLInputElement;
                                               if (input) input.value = "";
-                                            }}
-                                          >
-                                            <Image
-                                              src="/images/close_icon.svg"
-                                              alt="제거"
-                                              width={14}
-                                              height={14}
-                                            />
+                                            }}>
+                                            <Image src="/images/close_icon.svg" alt="제거" width={12} height={12} />
                                           </button>
                                         </div>
                                       )}
                                     </div>
                                   </td>
-                                  <td
-                                    data-th="작업내용"
-                                    className={styles.textareaCell}
-                                  >
+                                  <td data-th="작업내용" className={styles.textareaCell}>
                                     <textarea
                                       placeholder=""
                                       className={styles.textArea}
@@ -1644,16 +1267,13 @@ export function ManageWorkRegistrationForm({
                                                   ...t,
                                                   workContent: e.target.value,
                                                 }
-                                              : t
-                                          )
+                                              : t,
+                                          ),
                                         )
                                       }
                                     />
                                   </td>
-                                  <td
-                                    data-th="횟수"
-                                    className={styles.numberCell}
-                                  >
+                                  <td data-th="횟수" className={styles.numberCell}>
                                     <input
                                       type="number"
                                       placeholder="1"
@@ -1666,12 +1286,10 @@ export function ManageWorkRegistrationForm({
                                             t.id === task.id
                                               ? {
                                                   ...t,
-                                                  count:
-                                                    parseInt(e.target.value) ||
-                                                    1,
+                                                  count: parseInt(e.target.value) || 1,
                                                 }
-                                              : t
-                                          )
+                                              : t,
+                                          ),
                                         )
                                       }
                                     />
@@ -1682,44 +1300,29 @@ export function ManageWorkRegistrationForm({
                                         display: "flex",
                                         gap: "4px",
                                         flexDirection: "column",
-                                      }}
-                                    >
+                                      }}>
                                       <button
                                         type="button"
-                                        onClick={() =>
-                                          handleRemoveWork(task.id)
-                                        }
+                                        onClick={() => handleRemoveWork(task.id)}
                                         style={{
-                                          padding: "4px 8px",
+                                          padding: "6px 8px",
                                           fontSize: "12px",
                                           background: "var(--negative)",
                                           color: "#fff",
                                           border: "none",
                                           borderRadius: "4px",
                                           cursor: "pointer",
-                                        }}
-                                      >
+                                        }}>
                                         삭제
                                       </button>
                                       <span
-                                        className={
-                                          task.status === "wait"
-                                            ? styles.approvalWait
-                                            : styles.approvalRequest
-                                        }
-                                        style={{ 
+                                        className={task.status === "wait" ? styles.approvalWait : styles.approvalRequest}
+                                        style={{
                                           cursor: task.status === "wait" || isLoading ? "not-allowed" : "pointer",
-                                          opacity: task.status === "wait" || isLoading ? 0.6 : 1
+                                          opacity: task.status === "wait" || isLoading ? 0.6 : 1,
                                         }}
-                                        onClick={() =>
-                                          handleMaintenanceApprovalRequest(task)
-                                        }
-                                      >
-                                        {isLoading
-                                          ? "요청중..."
-                                          : task.status === "wait"
-                                          ? "승인대기"
-                                          : "승인요청"}
+                                        onClick={() => handleMaintenanceApprovalRequest(task)}>
+                                        {isLoading ? "요청중..." : task.status === "wait" ? "승인대기" : "승인요청"}
                                       </span>
                                     </div>
                                   </td>
@@ -1728,15 +1331,6 @@ export function ManageWorkRegistrationForm({
                             })}
                           </tbody>
                         </table>
-                        <div style={{ marginTop: "10px", textAlign: "right" }}>
-                          <button
-                            type="button"
-                            onClick={handleAddWork}
-                            className="btn btn_md normal"
-                          >
-                            + 업무 추가
-                          </button>
-                        </div>
                       </>
                     )}
                   </div>
@@ -1747,11 +1341,7 @@ export function ManageWorkRegistrationForm({
         </div>
       </form>
 
-      <ManagedClientSelectModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSelect={handleSelectManagedClient}
-      />
+      <ManagedClientSelectModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSelect={handleSelectManagedClient} />
     </section>
   );
 }

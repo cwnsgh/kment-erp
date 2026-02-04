@@ -2,10 +2,7 @@
 
 import { useState, FormEvent } from "react";
 import Image from "next/image";
-import {
-  getClientForManagedRegistration,
-  createManagedClient,
-} from "@/app/actions/managed-client";
+import { getClientForManagedRegistration, createManagedClient } from "@/app/actions/managed-client";
 import { ClientSelectModal } from "./client-select-modal";
 import styles from "./managed-client-registration-form.module.css";
 
@@ -57,15 +54,11 @@ export function ManagedClientRegistrationForm() {
   const [isNoteOpen, setIsNoteOpen] = useState(false);
 
   // 관리 상품 정보 상태
-  const [productType1, setProductType1] = useState<"deduct" | "maintenance">(
-    "deduct"
-  );
+  const [productType1, setProductType1] = useState<"deduct" | "maintenance">("deduct");
   const [productType2, setProductType2] = useState("");
   const [customMonths, setCustomMonths] = useState(""); // 기타 개월수
   const [totalAmount, setTotalAmount] = useState("");
-  const [paymentStatus, setPaymentStatus] = useState<
-    "paid" | "prepaid" | "unpaid"
-  >("unpaid");
+  const [paymentStatus, setPaymentStatus] = useState<"paid" | "prepaid" | "unpaid">("unpaid");
   const [detailTextEditCount, setDetailTextEditCount] = useState("");
   const [detailCodingEditCount, setDetailCodingEditCount] = useState("");
   const [detailImageEditCount, setDetailImageEditCount] = useState("");
@@ -128,36 +121,14 @@ export function ManagedClientRegistrationForm() {
     const data = {
       clientId: clientData.id,
       productType1,
-      productType2: productType2 === "other" && customMonths 
-        ? `${customMonths}m` 
-        : productType2 || undefined,
-      totalAmount:
-        productType1 === "deduct" && totalAmount
-          ? parseFloat(totalAmount)
-          : undefined,
+      productType2: productType2 === "other" && customMonths ? `${customMonths}m` : productType2 || undefined,
+      totalAmount: productType1 === "deduct" && totalAmount ? parseFloat(totalAmount) : undefined,
       paymentStatus,
-      detailTextEditCount:
-        productType1 === "maintenance" && detailTextEditCount
-          ? parseInt(detailTextEditCount)
-          : undefined,
-      detailCodingEditCount:
-        productType1 === "maintenance" && detailCodingEditCount
-          ? parseInt(detailCodingEditCount)
-          : undefined,
-      detailImageEditCount:
-        productType1 === "maintenance" && detailImageEditCount
-          ? parseInt(detailImageEditCount)
-          : undefined,
-      detailPopupDesignCount:
-        productType1 === "maintenance" && detailPopupDesignCount
-          ? parseInt(detailPopupDesignCount)
-          : undefined,
-      detailBannerDesignCount:
-        productType1 === "maintenance" &&
-        productType2 === "premium" &&
-        detailBannerDesignCount
-          ? parseInt(detailBannerDesignCount)
-          : undefined,
+      detailTextEditCount: productType1 === "maintenance" && detailTextEditCount ? parseInt(detailTextEditCount) : undefined,
+      detailCodingEditCount: productType1 === "maintenance" && detailCodingEditCount ? parseInt(detailCodingEditCount) : undefined,
+      detailImageEditCount: productType1 === "maintenance" && detailImageEditCount ? parseInt(detailImageEditCount) : undefined,
+      detailPopupDesignCount: productType1 === "maintenance" && detailPopupDesignCount ? parseInt(detailPopupDesignCount) : undefined,
+      detailBannerDesignCount: productType1 === "maintenance" && productType2 === "premium" && detailBannerDesignCount ? parseInt(detailBannerDesignCount) : undefined,
     };
 
     const result = await createManagedClient(data);
@@ -181,24 +152,15 @@ export function ManagedClientRegistrationForm() {
     setIsLoading(false);
   };
 
-  const businessRegistrationFile = clientData?.attachments.find(
-    (a) => a.fileType === "business_registration"
-  );
-  const signatureFile = clientData?.attachments.find(
-    (a) => a.fileType === "signature"
-  );
+  const businessRegistrationFile = clientData?.attachments.find((a) => a.fileType === "business_registration");
+  const signatureFile = clientData?.attachments.find((a) => a.fileType === "signature");
 
   return (
     <section className={`manageClient_regist page_section ${styles.manageClientRegist}`}>
       <div className="page_title">
         <h1>관리 고객 등록</h1>
         <div className="btn_wrap">
-          <button
-            type="submit"
-            form="manageClientForm"
-            disabled={isLoading || !clientData}
-            className="btn btn_lg primary"
-          >
+          <button type="submit" form="manageClientForm" disabled={isLoading || !clientData} className="btn btn_lg primary">
             {isLoading ? "등록 중..." : "등록"}
           </button>
         </div>
@@ -210,13 +172,8 @@ export function ManagedClientRegistrationForm() {
             style={{
               display: "flex",
               justifyContent: "flex-end",
-              marginBottom: "30px",
-            }}
-          >
-            <div
-              className="import_btn btn btn_md black"
-              onClick={() => setIsModalOpen(true)}
-            >
+            }}>
+            <div className="import_btn btn btn_md black" onClick={() => setIsModalOpen(true)}>
               거래처 불러오기
             </div>
           </div>
@@ -231,8 +188,7 @@ export function ManagedClientRegistrationForm() {
                 borderRadius: "6px",
                 color: "var(--negative)",
                 fontSize: "13px",
-              }}
-            >
+              }}>
               {error}
             </div>
           )}
@@ -244,8 +200,7 @@ export function ManagedClientRegistrationForm() {
                 padding: "40px 20px",
                 color: "var(--text-gray)",
                 fontSize: "14px",
-              }}
-            >
+              }}>
               거래처 정보를 불러오는 중...
             </div>
           )}
@@ -258,15 +213,11 @@ export function ManagedClientRegistrationForm() {
                 <ul className="table_row">
                   <li className="row_group">
                     <div className="table_head">아이디</div>
-                    <div className="table_data">
-                      {clientData?.loginId || "-"}
-                    </div>
+                    <div className="table_data">{clientData?.loginId || "-"}</div>
                   </li>
                   <li className="row_group">
                     <div className="table_head">패스워드</div>
-                    <div className="table_data">
-                      {clientData?.loginPassword ? "••••••••" : "-"}
-                    </div>
+                    <div className="table_data">{clientData?.loginPassword ? "••••••••" : "-"}</div>
                   </li>
                 </ul>
               </div>
@@ -277,9 +228,7 @@ export function ManagedClientRegistrationForm() {
                 <ul className="table_row">
                   <li className="row_group">
                     <div className="table_head">거래처 사업자등록번호</div>
-                    <div className="table_data">
-                      {clientData?.businessRegistrationNumber || "-"}
-                    </div>
+                    <div className="table_data">{clientData?.businessRegistrationNumber || "-"}</div>
                   </li>
                 </ul>
 
@@ -290,61 +239,43 @@ export function ManagedClientRegistrationForm() {
                   </li>
                   <li className="row_group">
                     <div className="table_head">대표자</div>
-                    <div className="table_data">
-                      {clientData?.ceoName || "-"}
-                    </div>
+                    <div className="table_data">{clientData?.ceoName || "-"}</div>
                   </li>
                 </ul>
 
                 <ul className="table_row">
                   <li className="row_group">
                     <div className="table_head">사업자 주소</div>
-                    <div className="table_data">
-                      {clientData
-                        ? `${clientData.address || ""} ${
-                            clientData.addressDetail || ""
-                          }`.trim() || "-"
-                        : "-"}
-                    </div>
+                    <div className="table_data">{clientData ? `${clientData.address || ""} ${clientData.addressDetail || ""}`.trim() || "-" : "-"}</div>
                   </li>
                 </ul>
 
                 <ul className="table_row">
                   <li className="row_group">
                     <div className="table_head">업태</div>
-                    <div className="table_data">
-                      {clientData?.businessType || "-"}
-                    </div>
+                    <div className="table_data">{clientData?.businessType || "-"}</div>
                   </li>
                   <li className="row_group">
                     <div className="table_head">종목</div>
-                    <div className="table_data">
-                      {clientData?.businessItem || "-"}
-                    </div>
+                    <div className="table_data">{clientData?.businessItem || "-"}</div>
                   </li>
                 </ul>
 
                 <ul className="table_row">
                   <li className="row_group">
                     <div className="table_head">사업자 등록증 첨부</div>
-                    <div className="table_data attach">
-                      {businessRegistrationFile?.fileName || "-"}
-                    </div>
+                    <div className="table_data attach">{businessRegistrationFile?.fileName || "-"}</div>
                   </li>
                   <li className="row_group">
                     <div className="table_head">서명 등록</div>
-                    <div className="table_data attach">
-                      {signatureFile?.fileName || "-"}
-                    </div>
+                    <div className="table_data attach">{signatureFile?.fileName || "-"}</div>
                   </li>
                 </ul>
 
                 <ul className="table_row">
                   <li className="row_group">
                     <div className="table_head">휴·폐업 상태</div>
-                    <div className="table_data">
-                      {clientData?.status || "-"}
-                    </div>
+                    <div className="table_data">{clientData?.status || "-"}</div>
                   </li>
                 </ul>
               </div>
@@ -366,9 +297,7 @@ export function ManagedClientRegistrationForm() {
                               value="deduct"
                               checked={true}
                               onChange={(e) => {
-                                const newType = e.target.value as
-                                  | "deduct"
-                                  | "maintenance";
+                                const newType = e.target.value as "deduct" | "maintenance";
                                 setProductType1(newType);
                                 setProductType2("");
                                 setCustomMonths("");
@@ -393,9 +322,7 @@ export function ManagedClientRegistrationForm() {
                               value="maintenance"
                               checked={false}
                               onChange={(e) => {
-                                const newType = e.target.value as
-                                  | "deduct"
-                                  | "maintenance";
+                                const newType = e.target.value as "deduct" | "maintenance";
                                 setProductType1(newType);
                                 setProductType2("");
                                 setCustomMonths("");
@@ -411,9 +338,7 @@ export function ManagedClientRegistrationForm() {
                                 }
                               }}
                             />
-                            <label htmlFor="ptype1_maintenance">
-                              유지보수형
-                            </label>
+                            <label htmlFor="ptype1_maintenance">유지보수형</label>
                           </div>
                         </li>
                       </ul>
@@ -522,11 +447,7 @@ export function ManagedClientRegistrationForm() {
                               type="text"
                               id="price_d"
                               name="price_d"
-                              value={
-                                totalAmount
-                                  ? parseInt(totalAmount).toLocaleString()
-                                  : ""
-                              }
+                              value={totalAmount ? parseInt(totalAmount).toLocaleString() : ""}
                               onChange={(e) => {
                                 const value = e.target.value.replace(/,/g, "");
                                 // 숫자만 허용
@@ -542,32 +463,10 @@ export function ManagedClientRegistrationForm() {
                         <li className="row_group">
                           <div className="table_head">납부 진행</div>
                           <div className="table_data">
-                            <input
-                              type="radio"
-                              id="payment_paid_d"
-                              name="payment_status_d"
-                              value="paid"
-                              checked={paymentStatus === "paid"}
-                              onChange={(e) =>
-                                setPaymentStatus(
-                                  e.target.value as "paid" | "unpaid"
-                                )
-                              }
-                            />
+                            <input type="radio" id="payment_paid_d" name="payment_status_d" value="paid" checked={paymentStatus === "paid"} onChange={(e) => setPaymentStatus(e.target.value as "paid" | "unpaid")} />
                             <label htmlFor="payment_paid_d">완납</label>
 
-                            <input
-                              type="radio"
-                              id="payment_unpaid_d"
-                              name="payment_status_d"
-                              value="unpaid"
-                              checked={paymentStatus === "unpaid"}
-                              onChange={(e) =>
-                                setPaymentStatus(
-                                  e.target.value as "paid" | "unpaid"
-                                )
-                              }
-                            />
+                            <input type="radio" id="payment_unpaid_d" name="payment_status_d" value="unpaid" checked={paymentStatus === "unpaid"} onChange={(e) => setPaymentStatus(e.target.value as "paid" | "unpaid")} />
                             <label htmlFor="payment_unpaid_d">미납</label>
                           </div>
                         </li>
@@ -586,9 +485,7 @@ export function ManagedClientRegistrationForm() {
                               value="deduct"
                               checked={false}
                               onChange={(e) => {
-                                const newType = e.target.value as
-                                  | "deduct"
-                                  | "maintenance";
+                                const newType = e.target.value as "deduct" | "maintenance";
                                 setProductType1(newType);
                                 setProductType2("");
                                 setCustomMonths("");
@@ -613,9 +510,7 @@ export function ManagedClientRegistrationForm() {
                               value="maintenance"
                               checked={true}
                               onChange={(e) => {
-                                const newType = e.target.value as
-                                  | "deduct"
-                                  | "maintenance";
+                                const newType = e.target.value as "deduct" | "maintenance";
                                 setProductType1(newType);
                                 setProductType2("");
                                 setCustomMonths("");
@@ -631,63 +526,19 @@ export function ManagedClientRegistrationForm() {
                                 }
                               }}
                             />
-                            <label htmlFor="ptype1_maintenance_m">
-                              유지보수형
-                            </label>
+                            <label htmlFor="ptype1_maintenance_m">유지보수형</label>
                           </div>
                         </li>
                         <li className="row_group">
                           <div className="table_head">납부 진행</div>
                           <div className="table_data">
-                            <input
-                              type="radio"
-                              id="payment_paid_m"
-                              name="payment_status_m"
-                              value="paid"
-                              checked={paymentStatus === "paid"}
-                              onChange={(e) =>
-                                setPaymentStatus(
-                                  e.target.value as
-                                    | "paid"
-                                    | "prepaid"
-                                    | "unpaid"
-                                )
-                              }
-                            />
+                            <input type="radio" id="payment_paid_m" name="payment_status_m" value="paid" checked={paymentStatus === "paid"} onChange={(e) => setPaymentStatus(e.target.value as "paid" | "prepaid" | "unpaid")} />
                             <label htmlFor="payment_paid_m">완납</label>
 
-                            <input
-                              type="radio"
-                              id="payment_prepaid_m"
-                              name="payment_status_m"
-                              value="prepaid"
-                              checked={paymentStatus === "prepaid"}
-                              onChange={(e) =>
-                                setPaymentStatus(
-                                  e.target.value as
-                                    | "paid"
-                                    | "prepaid"
-                                    | "unpaid"
-                                )
-                              }
-                            />
+                            <input type="radio" id="payment_prepaid_m" name="payment_status_m" value="prepaid" checked={paymentStatus === "prepaid"} onChange={(e) => setPaymentStatus(e.target.value as "paid" | "prepaid" | "unpaid")} />
                             <label htmlFor="payment_prepaid_m">선납</label>
 
-                            <input
-                              type="radio"
-                              id="payment_unpaid_m"
-                              name="payment_status_m"
-                              value="unpaid"
-                              checked={paymentStatus === "unpaid"}
-                              onChange={(e) =>
-                                setPaymentStatus(
-                                  e.target.value as
-                                    | "paid"
-                                    | "prepaid"
-                                    | "unpaid"
-                                )
-                              }
-                            />
+                            <input type="radio" id="payment_unpaid_m" name="payment_status_m" value="unpaid" checked={paymentStatus === "unpaid"} onChange={(e) => setPaymentStatus(e.target.value as "paid" | "prepaid" | "unpaid")} />
                             <label htmlFor="payment_unpaid_m">미납</label>
                           </div>
                         </li>
@@ -737,10 +588,7 @@ export function ManagedClientRegistrationForm() {
                       <ul className="table_row">
                         <li className="row_group">
                           <div className="table_head">세부 내용</div>
-                          <div
-                            className="table_data pd12"
-                            style={{ width: "50%" }}
-                          >
+                          <div className="table_data pd12" style={{ width: "50%" }}>
                             <div className="input_group">
                               <span className="prefix">영역 텍스트 수정</span>
                               <input
@@ -758,18 +606,8 @@ export function ManagedClientRegistrationForm() {
                                 min="0"
                                 step="1"
                                 style={{
-                                  color: isChanged(
-                                    "textEdit",
-                                    detailTextEditCount
-                                  )
-                                    ? "#dc2626"
-                                    : "inherit",
-                                  fontWeight: isChanged(
-                                    "textEdit",
-                                    detailTextEditCount
-                                  )
-                                    ? "600"
-                                    : "inherit",
+                                  color: isChanged("textEdit", detailTextEditCount) ? "#dc2626" : "inherit",
+                                  fontWeight: isChanged("textEdit", detailTextEditCount) ? "600" : "inherit",
                                 }}
                               />
                               <span className="suffix">회</span>
@@ -791,26 +629,14 @@ export function ManagedClientRegistrationForm() {
                                 min="0"
                                 step="1"
                                 style={{
-                                  color: isChanged(
-                                    "codingEdit",
-                                    detailCodingEditCount
-                                  )
-                                    ? "#dc2626"
-                                    : "inherit",
-                                  fontWeight: isChanged(
-                                    "codingEdit",
-                                    detailCodingEditCount
-                                  )
-                                    ? "600"
-                                    : "inherit",
+                                  color: isChanged("codingEdit", detailCodingEditCount) ? "#dc2626" : "inherit",
+                                  fontWeight: isChanged("codingEdit", detailCodingEditCount) ? "600" : "inherit",
                                 }}
                               />
                               <span className="suffix">회</span>
                             </div>
                             <div className="input_group">
-                              <span className="prefix">
-                                기존 결과물 이미지 수정
-                              </span>
+                              <span className="prefix">기존 결과물 이미지 수정</span>
                               <input
                                 type="number"
                                 name="detail3_m"
@@ -826,18 +652,8 @@ export function ManagedClientRegistrationForm() {
                                 min="0"
                                 step="1"
                                 style={{
-                                  color: isChanged(
-                                    "imageEdit",
-                                    detailImageEditCount
-                                  )
-                                    ? "#dc2626"
-                                    : "inherit",
-                                  fontWeight: isChanged(
-                                    "imageEdit",
-                                    detailImageEditCount
-                                  )
-                                    ? "600"
-                                    : "inherit",
+                                  color: isChanged("imageEdit", detailImageEditCount) ? "#dc2626" : "inherit",
+                                  fontWeight: isChanged("imageEdit", detailImageEditCount) ? "600" : "inherit",
                                 }}
                               />
                               <span className="suffix">회</span>
@@ -859,18 +675,8 @@ export function ManagedClientRegistrationForm() {
                                 min="0"
                                 step="1"
                                 style={{
-                                  color: isChanged(
-                                    "popupDesign",
-                                    detailPopupDesignCount
-                                  )
-                                    ? "#dc2626"
-                                    : "inherit",
-                                  fontWeight: isChanged(
-                                    "popupDesign",
-                                    detailPopupDesignCount
-                                  )
-                                    ? "600"
-                                    : "inherit",
+                                  color: isChanged("popupDesign", detailPopupDesignCount) ? "#dc2626" : "inherit",
+                                  fontWeight: isChanged("popupDesign", detailPopupDesignCount) ? "600" : "inherit",
                                 }}
                               />
                               <span className="suffix">회</span>
@@ -893,18 +699,8 @@ export function ManagedClientRegistrationForm() {
                                   min="0"
                                   step="1"
                                   style={{
-                                    color: isChanged(
-                                      "bannerDesign",
-                                      detailBannerDesignCount
-                                    )
-                                      ? "#dc2626"
-                                      : "inherit",
-                                    fontWeight: isChanged(
-                                      "bannerDesign",
-                                      detailBannerDesignCount
-                                    )
-                                      ? "600"
-                                      : "inherit",
+                                    color: isChanged("bannerDesign", detailBannerDesignCount) ? "#dc2626" : "inherit",
+                                    fontWeight: isChanged("bannerDesign", detailBannerDesignCount) ? "600" : "inherit",
                                   }}
                                 />
                                 <span className="suffix">회</span>
@@ -932,17 +728,9 @@ export function ManagedClientRegistrationForm() {
                       cursor: "pointer",
                       display: "inline-flex",
                       alignItems: "center",
-                    }}
-                  >
-                    <Image
-                      src="/images/arrow_icon.svg"
-                      alt=""
-                      width={16}
-                      height={16}
-                      className={`${styles.tableToggle} ${
-                        !isContactsOpen ? styles.rotated : ""
-                      }`}
-                    />
+                      transform: "Rotate(-90deg)",
+                    }}>
+                    <Image src="/images/arrow_icon.svg" alt="" width={16} height={16} className={`${styles.tableToggle} ${!isContactsOpen ? styles.rotated : ""}`} />
                   </button>
                 </h2>
                 {isContactsOpen && (
@@ -958,32 +746,23 @@ export function ManagedClientRegistrationForm() {
                             </li>
                             <li className="row_group">
                               <div className="table_head">연락처</div>
-                              <div className="table_data">
-                                {contact.phone || "-"}
-                              </div>
+                              <div className="table_data">{contact.phone || "-"}</div>
                             </li>
                           </ul>
                           <ul className="table_row">
                             <li className="row_group">
                               <div className="table_head">이메일</div>
-                              <div className="table_data">
-                                {contact.email || "-"}
-                              </div>
+                              <div className="table_data">{contact.email || "-"}</div>
                             </li>
                             <li className="row_group">
                               <div className="table_head">비고</div>
-                              <div className="table_data">
-                                {contact.note || "-"}
-                              </div>
+                              <div className="table_data">{contact.note || "-"}</div>
                             </li>
                           </ul>
                         </div>
                       ))
                     ) : (
-                      <div
-                        className="table_data"
-                        style={{ padding: "18px 20px" }}
-                      >
+                      <div className="table_data" style={{ padding: "18px 20px" }}>
                         거래처를 선택하면 담당자 정보가 표시됩니다.
                       </div>
                     )}
@@ -1005,17 +784,9 @@ export function ManagedClientRegistrationForm() {
                       cursor: "pointer",
                       display: "inline-flex",
                       alignItems: "center",
-                    }}
-                  >
-                    <Image
-                      src="/images/arrow_icon.svg"
-                      alt=""
-                      width={16}
-                      height={16}
-                      className={`${styles.tableToggle} ${
-                        !isSitesOpen ? styles.rotated : ""
-                      }`}
-                    />
+                      transform: "Rotate(-90deg)",
+                    }}>
+                    <Image src="/images/arrow_icon.svg" alt="" width={16} height={16} className={`${styles.tableToggle} ${!isSitesOpen ? styles.rotated : ""}`} />
                   </button>
                 </h2>
                 {isSitesOpen && (
@@ -1045,18 +816,13 @@ export function ManagedClientRegistrationForm() {
                               <td data-th="도메인">{site.domain || "-"}</td>
                               <td data-th="솔루션">{site.solution || "-"}</td>
                               <td data-th="아이디">{site.loginId || "-"}</td>
-                              <td data-th="패스워드">
-                                {site.loginPassword || "-"}
-                              </td>
+                              <td data-th="패스워드">{site.loginPassword || "-"}</td>
                             </tr>
                           ))}
                         </tbody>
                       </table>
                     ) : (
-                      <div
-                        className="table_data"
-                        style={{ padding: "18px 20px" }}
-                      >
+                      <div className="table_data" style={{ padding: "18px 20px" }}>
                         거래처를 선택하면 사이트 정보가 표시됩니다.
                       </div>
                     )}
@@ -1079,17 +845,8 @@ export function ManagedClientRegistrationForm() {
                         cursor: "pointer",
                         display: "inline-flex",
                         alignItems: "center",
-                      }}
-                    >
-                      <Image
-                        src="/images/arrow_icon.svg"
-                        alt=""
-                        width={16}
-                        height={16}
-                        className={`${styles.tableToggle} ${
-                          !isNoteOpen ? styles.rotated : ""
-                        }`}
-                      />
+                      }}>
+                      <Image src="/images/arrow_icon.svg" alt="" width={16} height={16} className={`${styles.tableToggle} ${!isNoteOpen ? styles.rotated : ""}`} />
                     </button>
                   </h2>
                   {isNoteOpen && (
@@ -1106,11 +863,7 @@ export function ManagedClientRegistrationForm() {
         </div>
       </form>
 
-      <ClientSelectModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSelect={handleSelectClient}
-      />
+      <ClientSelectModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSelect={handleSelectClient} />
     </section>
   );
 }

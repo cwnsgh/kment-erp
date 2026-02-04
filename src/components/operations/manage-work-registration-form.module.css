@@ -15,6 +15,10 @@
   display: inline-block;
   transition: background-color 0.2s, color 0.2s, border-color 0.2s,
     box-shadow 0.2s;
+  font-size: 13px;
+  color: var(--text-gray);
+  font-weight: var(--font-weight-semibold);
+  line-height: 27px;
 }
 
 .manageWorkRegist :global(.btn.primary) {
@@ -23,9 +27,12 @@
 }
 
 .manageWorkRegist :global(.btn.normal) {
-  background-color: #fff;
   color: var(--text-color);
   border: 1px solid var(--border-color);
+  background-color: #fff;
+  font-size: 15px;
+  font-weight: var(--font-weight-semibold);
+  line-height: 27px;
 }
 
 .manageWorkRegist :global(.btn.normal:hover) {
@@ -36,6 +43,9 @@
   background-color: var(--text-color);
   color: #fff;
   border: 1px solid var(--text-color);
+  position: absolute;
+  top: 60px;
+  right: 50px;
 }
 
 .manageWorkRegist :global(.btn.black:hover) {
@@ -69,6 +79,7 @@
   margin: 80px auto 100px;
 }
 
+
 .manageWorkRegist :global(.page_title) {
   text-align: left;
   margin: 0 auto 30px;
@@ -92,6 +103,7 @@
   position: relative;
 }
 
+
 /* Table Group Styles */
 .manageWorkRegist :global(.table_group) {
   display: flex;
@@ -101,6 +113,7 @@
   font-size: 14px;
   font-weight: var(--font-weight-semibold);
 }
+
 
 .manageWorkRegist :global(.table_group h2.table_title) {
   font-size: 18px;
@@ -207,6 +220,26 @@
   align-items: flex-start;
 }
 
+.manageWorkRegist :global(.table_group .table_item .table_row .row_group .table_data.pd12 .detail_list li) {
+  margin-bottom: 20px;
+  display: flex;
+
+}
+
+.manageWorkRegist :global(.table_group .table_item .table_row .row_group .table_data.pd12 .detail_list li span:first-child) {
+  display: inline-block;
+  width: 200px;
+}
+
+.manageWorkRegist :global(.table_group .table_item .table_row .row_group .table_data.pd12 .detail_list li span > b) {
+  color: var(--primary);
+  margin-right: 14px;
+}
+
+.manageWorkRegist :global(.table_group .table_item .table_row .row_group .table_data.pd12 .detail_list li:last-child) {
+  margin-bottom: 0;
+}
+
 .manageWorkRegist :global(.table_group .table_item .text_box) {
   width: 100%;
   border: 1px solid var(--border-color);
@@ -217,11 +250,21 @@
   box-sizing: border-box;
 }
 
+.manageWorkRegist :global(.status_ongoing) {
+  display: inline-block !important;
+  font-size: 13px !important;
+  color: var(--primary) !important;
+  font-weight: var(--font-weight-bold) !important;
+  background-color: var(--status-blue) !important;
+  padding: 5px 10px !important;
+  border-radius: 4px !important;
+  line-height: 1 !important;
+}
+
 /* 거래처 불러오기 버튼 래퍼 */
 .importBtnWrapper {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 30px;
 }
 
 /* 토글 버튼 스타일 */
@@ -260,6 +303,7 @@
   min-width: 0 !important;
   width: 100% !important;
   max-width: 100% !important;
+  position: relative;
 }
 
 .workRegistration .table_wrap {
@@ -366,13 +410,13 @@
   text-align: center;
   background: #f8fafc;
   font-weight: var(--font-weight-semibold);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .workTable td {
   padding: 14px 8px !important;
   border-bottom: 1px solid var(--border-color);
-  vertical-align: middle;
+  vertical-align: top;
   font-weight: var(--font-weight-semibold) !important;
   text-align: center;
 }
@@ -452,6 +496,11 @@
 
 .workTable td select {
   cursor: pointer;
+  appearance: none;
+  background: url(/images/select_arrow.svg) no-repeat center right 10px;
+  background-size: 12px 10px;
+  padding-right: 32px;
+  color: #475569;
 }
 
 /* 날짜 그룹 */
@@ -629,20 +678,25 @@
   justify-content: center;
   gap: 8px;
   width: 100%;
-  padding: 8px 4px;
+  padding: 0 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  height: 36px;
 }
 
-.workTable td .fileName {
+.workTable td :global(.fileName) {
   font-size: 12px;
-  color: var(--text-color);
-  word-break: break-all;
+  color: var(--text-gray);
   flex: 1;
   line-height: 1.4;
-  text-align: center;
+  text-align: left;
   min-height: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.workTable td .fileRemoveBtn {
+.workTable td :global(.fileRemoveBtn) {
   background: none;
   border: none;
   padding: 4px;
@@ -662,8 +716,8 @@
 }
 
 .workTable td .fileRemoveBtn img {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   opacity: 0.6;
   transition: opacity 0.2s;
 }
@@ -678,7 +732,7 @@
   vertical-align: middle;
 }
 
-.workTable td.buttonCell > div {
+.workTable td.buttonCell>div {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -695,8 +749,8 @@
 }
 
 /* 금액차감형: buttonCell에 직접 span이 있는 경우 */
-.deductTable td.buttonCell > span.approvalRequest,
-.deductTable td.buttonCell > span.approvalWait {
+.deductTable td.buttonCell>span.approvalRequest,
+.deductTable td.buttonCell>span.approvalWait {
   display: inline-block !important;
   width: auto !important;
   min-width: 80px;
@@ -705,7 +759,7 @@
 }
 
 /* 유지보수형: buttonCell 내부의 div와 버튼들 */
-.maintenanceTable td.buttonCell > div {
+.maintenanceTable td.buttonCell>div {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -719,6 +773,44 @@
   width: 100%;
   text-align: center;
   white-space: nowrap;
+}
+
+/* site-table 스타일 */
+.manageWorkRegist :global(.site-table) {
+  width: 100%;
+  border-collapse: collapse;
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  border-radius: 4px;
+
+}
+
+.manageWorkRegist :global(.site-table thead) {
+  background-color: var(--background-color);
+}
+
+.manageWorkRegist :global(.site-table th) {
+  padding: 14px 10px;
+  font-weight: var(--font-weight-semibold);
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  text-align: center;
+  background: var(--background-color);
+  color: var(--text-color);
+  font-size: 14px;
+}
+
+.manageWorkRegist :global(.site-table td) {
+  padding: 18px 10px;
+  vertical-align: middle;
+  text-align: center;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-color);
+  font-size: 14px;
+}
+
+.manageWorkRegist :global(.site-table tbody tr:hover) {
+  background-color: var(--hover-bg);
 }
 
 /* 반응형 */
