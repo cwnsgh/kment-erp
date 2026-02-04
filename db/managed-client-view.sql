@@ -11,6 +11,7 @@ SELECT
   mc.product_type1,
   mc.product_type2,
   mc.total_amount,
+  mc.initial_total_amount,
   mc.payment_status,
   mc.start_date,
   mc.end_date,

@@ -314,6 +314,11 @@ export async function createManagedClient(data: ManagedClientData) {
       note: data.note || null,
     };
 
+    // 금액차감형인 경우 initial_total_amount 저장 (등록 시점의 total_amount가 초기값)
+    if (data.productType1 === "deduct" && data.totalAmount) {
+      insertData.initial_total_amount = data.totalAmount;
+    }
+
     // 유지보수형인 경우 현재 횟수와 초기값 모두 저장
     if (data.productType1 === "maintenance") {
       insertData.detail_text_edit_count = data.detailTextEditCount || 0;
@@ -508,7 +513,7 @@ export async function getManagedClientDetail(managedClientId: string) {
     const { data: managedClient, error: managedClientError } = await supabase
       .from("managed_client_view")
       .select(
-        "id, client_id, product_type1, product_type2, total_amount, payment_status, start_date, end_date, status, detail_text_edit_count, detail_coding_edit_count, detail_image_edit_count, detail_popup_design_count, detail_banner_design_count, note, computed_end_date, computed_status, created_at"
+        "id, client_id, product_type1, product_type2, total_amount, initial_total_amount, payment_status, start_date, end_date, status, detail_text_edit_count, detail_coding_edit_count, detail_image_edit_count, detail_popup_design_count, detail_banner_design_count, note, computed_end_date, computed_status, created_at"
       )
       .eq("id", managedClientId)
       .single();
@@ -517,6 +522,38 @@ export async function getManagedClientDetail(managedClientId: string) {
     if (!managedClient) throw new Error("관리고객을 찾을 수 없습니다.");
 
     const clientId = managedClient.client_id;
+    
+    // 사용금액 계산 (금액차감형인 경우)
+    let usedAmount = 0;
+    if (managedClient.product_type1 === "deduct") {
+      const { data: workRequests, error: workRequestError } = await supabase
+        .from("work_request")
+        .select("approval_deducted_amount")
+        .eq("managed_client_id", managedClientId)
+        .eq("work_type", "deduct")
+        .in("status", ["approved", "in_progress", "completed"])
+        .neq("status", "deleted");
+      
+      if (workRequestError) {
+        console.error("사용금액 계산 오류:", workRequestError);
+      }
+      
+      if (workRequests && workRequests.length > 0) {
+        usedAmount = workRequests.reduce((sum, wr) => {
+          const amount = wr.approval_deducted_amount ? Number(wr.approval_deducted_amount) : 0;
+          return sum + amount;
+        }, 0);
+      }
+      
+      // 디버깅용 로그
+      console.log("금액 정보:", {
+        total_amount: managedClient.total_amount,
+        initial_total_amount: managedClient.initial_total_amount,
+        usedAmount,
+        workRequestsCount: workRequests?.length || 0,
+      });
+    }
+    
     const [clientResult, contactsResult, sitesResult, attachmentsResult] =
       await Promise.all([
         supabase
@@ -591,6 +628,13 @@ export async function getManagedClientDetail(managedClientId: string) {
         productType1: managedClient.product_type1,
         productType2: managedClient.product_type2 || "",
         totalAmount: managedClient.total_amount ? Number(managedClient.total_amount) : null,
+        initialTotalAmount: managedClient.initial_total_amount 
+          ? Number(managedClient.initial_total_amount) 
+          : (managedClient.product_type1 === "deduct" && managedClient.total_amount 
+              ? Number(managedClient.total_amount) + usedAmount 
+              : null),
+        usedAmount: usedAmount,
+        remainingAmount: managedClient.total_amount ? Number(managedClient.total_amount) : null,
         paymentStatus: managedClient.payment_status,
         startDate: managedClient.start_date,
         endDate: managedClient.computed_end_date,

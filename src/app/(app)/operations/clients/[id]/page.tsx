@@ -14,6 +14,9 @@ type ManagedClientDetail = {
   productType1: "deduct" | "maintenance";
   productType2: string;
   totalAmount: number | null;
+  initialTotalAmount: number | null;
+  usedAmount: number;
+  remainingAmount: number | null;
   paymentStatus: string;
   startDate: string | null;
   endDate: string | null;
@@ -455,16 +458,38 @@ export default function ManagedClientDetailPage() {
                   </ul>
                 )}
                 {managedClient.productType1 === "deduct" && (
-                  <ul className="table_row">
-                    <li className="row_group">
-                      <div className="table_head">총 금액</div>
-                      <div className="table_data">
-                        {managedClient.totalAmount
-                          ? managedClient.totalAmount.toLocaleString()
-                          : "-"}
-                      </div>
-                    </li>
-                  </ul>
+                  <>
+                    <ul className="table_row">
+                      <li className="row_group">
+                        <div className="table_head">초기세팅금액(관리금액)</div>
+                        <div className="table_data">
+                          {managedClient.initialTotalAmount
+                            ? managedClient.initialTotalAmount.toLocaleString()
+                            : "-"}
+                        </div>
+                      </li>
+                    </ul>
+                    <ul className="table_row">
+                      <li className="row_group">
+                        <div className="table_head">사용금액</div>
+                        <div className="table_data">
+                          {managedClient.usedAmount !== undefined && managedClient.usedAmount !== null
+                            ? managedClient.usedAmount.toLocaleString()
+                            : "0"}
+                        </div>
+                      </li>
+                    </ul>
+                    <ul className="table_row">
+                      <li className="row_group">
+                        <div className="table_head">남은금액</div>
+                        <div className="table_data">
+                          {managedClient.remainingAmount !== null
+                            ? managedClient.remainingAmount.toLocaleString()
+                            : "-"}
+                        </div>
+                      </li>
+                    </ul>
+                  </>
                 )}
                 <ul className="table_row">
                   <li className="row_group">
