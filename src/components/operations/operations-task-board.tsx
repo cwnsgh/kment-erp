@@ -7,18 +7,19 @@ import {
   getAllEmployees,
   cancelWorkRequest,
 } from "@/app/actions/work-request";
+import styles from "./operations-task-board.module.css";
 
 const requestTone: Record<string, string> = {
-  승인: "bg-emerald-50 text-emerald-600 border-emerald-100",
-  중: "bg-blue-50 text-blue-600 border-blue-100",
-  반려: "bg-rose-50 text-rose-600 border-rose-100",
+  승인: styles.statusBadgeApproved,
+  중: styles.statusBadgePending,
+  반려: styles.statusBadgeRejected,
 };
 
 const progressTone: Record<string, string> = {
-  "진행 중": "bg-primary text-primary-foreground",
-  대기: "bg-slate-100 text-slate-600",
-  중단: "bg-slate-200 text-slate-500",
-  완료: "bg-emerald-100 text-emerald-700",
+  "진행 중": styles.progressBadgeInProgress,
+  대기: styles.progressBadgeWaiting,
+  중단: styles.progressBadgeStopped,
+  완료: styles.progressBadgeCompleted,
 };
 
 type TaskItem = WorkRequest & { client_name?: string | null; employee_name?: string | null };
@@ -271,29 +272,29 @@ export function OperationsTaskBoard({
   };
 
   return (
-    <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-semibold text-slate-900">
+    <div className={styles.container}>
+      <header className={styles.header}>
+        <div className={styles.headerContent}>
+          <h2 className={styles.headerTitle}>
             관리업무 승인 현황
           </h2>
-          <p className="text-sm text-slate-500">
+          <p className={styles.headerDescription}>
             고객 요청 및 승인 결과를 기반으로 업무를 진행합니다.
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className={styles.headerActions}>
           <select
             value={searchField}
             onChange={(event) =>
               setSearchField(event.target.value as "all" | "client" | "brand")
             }
-            className="h-9 rounded-md border border-slate-200 px-3 text-sm text-slate-600 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className={styles.searchSelect}
           >
             <option value="all">전체</option>
             <option value="client">거래처</option>
             <option value="brand">브랜드</option>
           </select>
-          <div className="relative">
+          <div className={styles.searchWrapper}>
             <input
               value={searchQuery}
               onChange={(event) => {
@@ -305,17 +306,17 @@ export function OperationsTaskBoard({
                 setTimeout(() => setShowSuggestions(false), 150);
               }}
               placeholder="거래처 또는 브랜드명 검색"
-              className="h-9 w-64 rounded-md border border-slate-200 px-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              className={styles.searchInput}
             />
             {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute left-0 top-full z-30 mt-2 w-full overflow-hidden rounded-md border border-slate-200 bg-white text-sm shadow-lg">
+              <div className={styles.suggestions}>
                 {suggestions.map((value) => (
                   <button
                     key={value}
                     type="button"
                     onMouseDown={(event) => event.preventDefault()}
                     onClick={() => handleSuggestionSelect(value)}
-                    className="block w-full px-3 py-2 text-left text-slate-700 hover:bg-slate-100"
+                    className={styles.suggestionItem}
                   >
                     {value}
                   </button>
@@ -325,12 +326,12 @@ export function OperationsTaskBoard({
           </div>
         </div>
       </header>
-      <div className="flex flex-wrap items-center gap-2">
+      <div className={styles.filterGroup}>
         {/* 담당자 필터 */}
         <select
           value={employeeFilter}
           onChange={(e) => setEmployeeFilter(e.target.value)}
-          className="h-9 rounded-md border border-slate-200 px-3 text-sm text-slate-600 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          className={styles.employeeSelect}
         >
           <option value="all">전체 담당자</option>
           {employees.map((emp) => (
@@ -343,77 +344,52 @@ export function OperationsTaskBoard({
         <button
           type="button"
           onClick={() => setProgressFilter("all")}
-          className={[
-            "rounded-full border px-3 py-1 text-xs font-semibold",
-            progressFilter === "all"
-              ? "border-primary bg-primary text-primary-foreground"
-              : "border-slate-200 text-slate-600 hover:bg-slate-50",
-          ].join(" ")}
+          className={`${styles.filterButton} ${progressFilter === "all" ? styles.filterButtonActive : ""}`}
         >
           전체 ({progressCounts.all})
         </button>
         <button
           type="button"
           onClick={() => setProgressFilter("waiting")}
-          className={[
-            "rounded-full border px-3 py-1 text-xs font-semibold",
-            progressFilter === "waiting"
-              ? "border-primary bg-primary text-primary-foreground"
-              : "border-slate-200 text-slate-600 hover:bg-slate-50",
-          ].join(" ")}
+          className={`${styles.filterButton} ${progressFilter === "waiting" ? styles.filterButtonActive : ""}`}
         >
           대기 ({progressCounts.waiting})
         </button>
         <button
           type="button"
           onClick={() => setProgressFilter("in_progress")}
-          className={[
-            "rounded-full border px-3 py-1 text-xs font-semibold",
-            progressFilter === "in_progress"
-              ? "border-primary bg-primary text-primary-foreground"
-              : "border-slate-200 text-slate-600 hover:bg-slate-50",
-          ].join(" ")}
+          className={`${styles.filterButton} ${progressFilter === "in_progress" ? styles.filterButtonActive : ""}`}
         >
           진행중 ({progressCounts.in_progress})
         </button>
         <button
           type="button"
           onClick={() => setProgressFilter("completed")}
-          className={[
-            "rounded-full border px-3 py-1 text-xs font-semibold",
-            progressFilter === "completed"
-              ? "border-primary bg-primary text-primary-foreground"
-              : "border-slate-200 text-slate-600 hover:bg-slate-50",
-          ].join(" ")}
+          className={`${styles.filterButton} ${progressFilter === "completed" ? styles.filterButtonActive : ""}`}
         >
           작업완료 ({progressCounts.completed})
         </button>
         <button
           type="button"
           onClick={() => setProgressFilter("rejected")}
-          className={[
-            "rounded-full border px-3 py-1 text-xs font-semibold",
-            progressFilter === "rejected"
-              ? "border-primary bg-primary text-primary-foreground"
-              : "border-slate-200 text-slate-600 hover:bg-slate-50",
-          ].join(" ")}
+          className={`${styles.filterButton} ${progressFilter === "rejected" ? styles.filterButtonActive : ""}`}
         >
           반려 ({progressCounts.rejected})
         </button>
       </div>
       {filteredRequests.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-4 py-12 text-center text-sm text-slate-500">
+        <div className={styles.emptyState}>
           표시할 관리업무가 없습니다.
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className={styles.taskList}>
           {filteredRequests.map((operation) => {
             const requestStatus = getRequestStatusLabel(operation.status);
             const progressStatus = getProgressLabel(operation.status);
             return (
               <article
                 key={operation.id}
-                className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-4"
+                className={styles.taskItem}
                 role="button"
                 tabIndex={0}
                 onClick={() => setSelectedTask(operation)}
@@ -423,49 +399,41 @@ export function OperationsTaskBoard({
                   }
                 }}
               >
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900">
+                <div className={styles.taskItemContent}>
+                  <div className={styles.taskItemLeft}>
+                    <p className={styles.taskTitle}>
                       {operation.work_content || "관리 업무"}
                     </p>
-                    <p className="mt-1 text-xs text-slate-500">
-                      <span className="font-normal text-slate-400">
+                    <p className={styles.taskMeta}>
+                      <span className={styles.taskMetaNormal}>
                         {operation.client_name || "거래처"}
                       </span>
-                      <span className="mx-1 text-slate-300">·</span>
-                      <span className="font-semibold text-slate-800">
+                      <span className={styles.taskMetaSeparator}>·</span>
+                      <span className={styles.taskMetaBold}>
                         {operation.brand_name}
                       </span>
                     </p>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className={styles.taskItemRight}>
                     {operation.status === "pending" ||
                     operation.status === "approved" ||
                     operation.status === "rejected" ? (
                       <span
-                        className={[
-                          "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium",
-                          requestTone[requestStatus] ??
-                            "bg-slate-100 text-slate-600 border-slate-200",
-                        ].join(" ")}
+                        className={`${styles.statusBadge} ${requestTone[requestStatus] || styles.statusBadgeDefault}`}
                       >
                         요청 {requestStatus}
                       </span>
                     ) : null}
                     <span
-                      className={[
-                        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
-                        progressTone[progressStatus] ??
-                          "bg-slate-100 text-slate-600",
-                      ].join(" ")}
+                      className={`${styles.progressBadge} ${progressTone[progressStatus] || styles.progressBadgeDefault}`}
                     >
                       {progressStatus}
                     </span>
                   </div>
                 </div>
-                <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
+                <div className={styles.taskFooter}>
                   <span>담당자: {operation.manager || "-"}</span>
-                  <div className="flex items-center gap-2">
+                  <div className={styles.taskFooterActions}>
                     <span>최근 업데이트: {formatDate(operation.updated_at)}</span>
                     {operation.status === "pending" && 
                      operation.employee_id === currentEmployeeId && (
@@ -476,7 +444,7 @@ export function OperationsTaskBoard({
                           handleCancelRequest(operation.id, operation.employee_id || "");
                         }}
                         disabled={cancellingRequestId === operation.id}
-                        className="rounded border border-red-300 bg-red-50 px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className={styles.cancelButton}
                       >
                         {cancellingRequestId === operation.id ? "취소 중..." : "요청 취소"}
                       </button>
@@ -491,124 +459,124 @@ export function OperationsTaskBoard({
 
       {selectedTask && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          className={styles.modalOverlay}
           onClick={() => setSelectedTask(null)}
         >
           <div
-            className="w-full max-w-2xl rounded-xl bg-white shadow-xl overflow-y-auto max-h-[90vh]"
+            className={styles.modalContainer}
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="p-6">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h3 className="text-lg font-semibold text-slate-900">
+            <div className={styles.modalContent}>
+              <div className={styles.modalHeader}>
+                <div className={styles.modalHeaderLeft}>
+                  <h3 className={styles.modalTitle}>
                     {selectedTask.work_content || "관리 업무 상세"}
                   </h3>
-                  <p className="mt-1 text-sm text-slate-500">
-                    <span className="font-normal text-slate-400">
+                  <p className={styles.modalSubtitle}>
+                    <span className={styles.modalSubtitleNormal}>
                       {selectedTask.client_name || "거래처"}
                     </span>
-                    <span className="mx-1 text-slate-300">·</span>
-                    <span className="font-semibold text-slate-800">
+                    <span className={styles.modalSubtitleSeparator}>·</span>
+                    <span className={styles.modalSubtitleBold}>
                       {selectedTask.brand_name}
                     </span>
                   </p>
                 </div>
                 <button
                   type="button"
-                  className="rounded-full border border-slate-200 px-3 py-1 text-sm text-slate-600 transition hover:bg-slate-100"
+                  className={styles.modalCloseButton}
                   onClick={() => setSelectedTask(null)}
                 >
                   닫기
                 </button>
               </div>
 
-              <div className="mt-5 grid grid-cols-1 gap-4 text-sm text-slate-700 sm:grid-cols-2">
-              <div>
-                <span className="text-xs text-slate-400">요청 상태</span>
-                <p className="mt-1 font-medium">
+              <div className={styles.modalGrid}>
+              <div className={styles.modalGridItem}>
+                <span className={styles.modalGridLabel}>요청 상태</span>
+                <p className={styles.modalGridValue}>
                   {getStatusLabel(selectedTask.status)}
                 </p>
               </div>
-              <div>
-                <span className="text-xs text-slate-400">진행 상태</span>
-                <p className="mt-1 font-medium">
+              <div className={styles.modalGridItem}>
+                <span className={styles.modalGridLabel}>진행 상태</span>
+                <p className={styles.modalGridValue}>
                   {getProgressLabel(selectedTask.status)}
                 </p>
               </div>
-              <div>
-                <span className="text-xs text-slate-400">담당자</span>
-                <p className="mt-1 font-medium">
+              <div className={styles.modalGridItem}>
+                <span className={styles.modalGridLabel}>담당자</span>
+                <p className={styles.modalGridValue}>
                   {selectedTask.manager || "-"}
                 </p>
               </div>
-              <div>
-                <span className="text-xs text-slate-400">작업기간</span>
-                <p className="mt-1 font-medium">
+              <div className={styles.modalGridItem}>
+                <span className={styles.modalGridLabel}>작업기간</span>
+                <p className={styles.modalGridValue}>
                   {(selectedTask as any).work_period || "-"}
                 </p>
               </div>
-              <div>
-                <span className="text-xs text-slate-400">관리 유형</span>
-                <p className="mt-1 font-medium">
+              <div className={styles.modalGridItem}>
+                <span className={styles.modalGridLabel}>관리 유형</span>
+                <p className={styles.modalGridValue}>
                   {getWorkTypeLabel((selectedTask as any).work_type)}
                 </p>
               </div>
-              <div>
-                <span className="text-xs text-slate-400">세부 유형</span>
-                <p className="mt-1 font-medium">
+              <div className={styles.modalGridItem}>
+                <span className={styles.modalGridLabel}>세부 유형</span>
+                <p className={styles.modalGridValue}>
                   {getWorkTypeDetailLabel(
                     (selectedTask as any).work_type_detail
                   )}
                 </p>
               </div>
-              <div>
-                <span className="text-xs text-slate-400">금액</span>
-                <p className="mt-1 font-medium">
+              <div className={styles.modalGridItem}>
+                <span className={styles.modalGridLabel}>금액</span>
+                <p className={styles.modalGridValue}>
                   {(selectedTask as any).cost
                     ? Number((selectedTask as any).cost).toLocaleString("ko-KR")
                     : "-"}
                 </p>
               </div>
-              <div>
-                <span className="text-xs text-slate-400">횟수</span>
-                <p className="mt-1 font-medium">
+              <div className={styles.modalGridItem}>
+                <span className={styles.modalGridLabel}>횟수</span>
+                <p className={styles.modalGridValue}>
                   {(selectedTask as any).count ?? "-"}
                 </p>
               </div>
-              <div>
-                <span className="text-xs text-slate-400">등록일</span>
-                <p className="mt-1 font-medium">
+              <div className={styles.modalGridItem}>
+                <span className={styles.modalGridLabel}>등록일</span>
+                <p className={styles.modalGridValue}>
                   {formatDate(selectedTask.created_at)}
                 </p>
               </div>
-              <div>
-                <span className="text-xs text-slate-400">최근 업데이트</span>
-                <p className="mt-1 font-medium">
+              <div className={styles.modalGridItem}>
+                <span className={styles.modalGridLabel}>최근 업데이트</span>
+                <p className={styles.modalGridValue}>
                   {formatDate(selectedTask.updated_at)}
                 </p>
               </div>
             </div>
 
-            <div className="mt-6 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
-              <span className="text-xs text-slate-400">요청 내용</span>
-              <p className="mt-2 whitespace-pre-wrap">
+            <div className={styles.modalContentBox}>
+              <span className={styles.modalContentBoxLabel}>요청 내용</span>
+              <p className={styles.modalContentBoxText}>
                 {selectedTask.work_content || "-"}
               </p>
             </div>
 
             {getNextStatusAction(selectedTask.status) && (
-              <div className="mt-6 flex justify-end gap-2">
+              <div className={styles.modalActions}>
                 <button
                   type="button"
-                  className="rounded-md border border-slate-200 px-4 py-2 text-sm text-slate-600 transition hover:bg-slate-100"
+                  className={styles.modalButton}
                   onClick={() => setSelectedTask(null)}
                 >
                   닫기
                 </button>
                 <button
                   type="button"
-                  className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
+                  className={`${styles.modalButton} ${styles.modalButtonPrimary}`}
                   onClick={() =>
                     setConfirmAction({
                       task: selectedTask,
@@ -628,25 +596,25 @@ export function OperationsTaskBoard({
 
       {confirmAction && (
         <div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4"
+          className={`${styles.modalOverlay} ${styles.modalOverlayConfirm}`}
           onClick={() => (statusUpdating ? null : setConfirmAction(null))}
         >
           <div
-            className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl"
+            className={`${styles.modalContainer} ${styles.modalContainerConfirm}`}
             onClick={(event) => event.stopPropagation()}
           >
-            <h3 className="text-lg font-semibold text-slate-900">
+            <h3 className={styles.confirmModalTitle}>
               상태를 변경할까요?
             </h3>
-            <p className="mt-2 text-sm text-slate-600">
+            <p className={styles.confirmModalText}>
               {confirmAction.nextStatus === "in_progress"
                 ? "승인된 업무를 작업중으로 변경합니다."
                 : "작업중인 업무를 작업완료로 변경합니다."}
             </p>
-            <div className="mt-6 flex justify-end gap-2">
+            <div className={styles.confirmModalActions}>
               <button
                 type="button"
-                className="rounded-md border border-slate-200 px-4 py-2 text-sm text-slate-600 transition hover:bg-slate-100"
+                className={styles.modalButton}
                 onClick={() => setConfirmAction(null)}
                 disabled={statusUpdating}
               >
@@ -654,7 +622,7 @@ export function OperationsTaskBoard({
               </button>
               <button
                 type="button"
-                className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-60"
+                className={`${styles.modalButton} ${styles.modalButtonPrimary}`}
                 onClick={handleConfirmStatusChange}
                 disabled={statusUpdating}
               >

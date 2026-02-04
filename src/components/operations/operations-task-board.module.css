@@ -1,0 +1,544 @@
+/* CSS 변수 참조 (globals.css에서 정의됨) */
+/* --primary, --text-color, --border-color, --background-color, --font-weight-* */
+
+/* 컨테이너 */
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  background: #fff;
+  padding: 24px;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* 헤더 */
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.headerContent {
+  display: flex;
+  flex-direction: column;
+}
+
+.headerTitle {
+  font-size: 18px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-color);
+  margin: 0;
+}
+
+.headerDescription {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+}
+
+.headerActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 검색 및 필터 */
+.searchSelect,
+.employeeSelect {
+  height: 36px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  padding: 0 12px;
+  font-size: 14px;
+  color: #475569;
+  background: #fff;
+  cursor: pointer;
+}
+
+.searchSelect:focus,
+.employeeSelect:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px var(--primary);
+}
+
+.searchWrapper {
+  position: relative;
+}
+
+.searchInput {
+  height: 36px;
+  width: 256px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  padding: 0 12px;
+  font-size: 14px;
+  color: #1e293b;
+  background: #fff;
+}
+
+.searchInput::placeholder {
+  color: #94a3b8;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px var(--primary);
+}
+
+.suggestions {
+  position: absolute;
+  left: 0;
+  top: 100%;
+  z-index: 30;
+  margin-top: 8px;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: #fff;
+  font-size: 14px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.suggestionItem {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  text-align: left;
+  color: #1e293b;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.suggestionItem:hover {
+  background: #f1f5f9;
+}
+
+/* 필터 버튼 그룹 */
+.filterGroup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.filterButton {
+  border-radius: 9999px;
+  border: 1px solid var(--border-color);
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: var(--font-weight-semibold);
+  background: #fff;
+  color: #475569;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.filterButton:hover {
+  background: #f8fafc;
+}
+
+.filterButtonActive {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #fff;
+}
+
+/* 빈 상태 */
+.emptyState {
+  border-radius: 8px;
+  border: 1px dashed var(--border-color);
+  background: #f8fafc;
+  padding: 48px 16px;
+  text-align: center;
+  font-size: 14px;
+  color: #64748b;
+}
+
+/* 작업 목록 */
+.taskList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.taskItem {
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: #f8fafc;
+  padding: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.taskItem:hover {
+  background: #f1f5f9;
+}
+
+.taskItemContent {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.taskItemLeft {
+  display: flex;
+  flex-direction: column;
+}
+
+.taskTitle {
+  font-size: 14px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-color);
+  margin: 0;
+}
+
+.taskMeta {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.taskMetaNormal {
+  font-weight: var(--font-weight-normal);
+  color: #cbd5e1;
+}
+
+.taskMetaSeparator {
+  margin: 0 4px;
+  color: #cbd5e1;
+}
+
+.taskMetaBold {
+  font-weight: var(--font-weight-semibold);
+  color: #1e293b;
+}
+
+.taskItemRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 상태 배지 */
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  border: 1px solid;
+  padding: 2px 10px;
+  font-size: 12px;
+  font-weight: var(--font-weight-medium);
+}
+
+.statusBadgeApproved {
+  background: #d1fae5;
+  color: #059669;
+  border-color: #a7f3d0;
+}
+
+.statusBadgePending {
+  background: #dbeafe;
+  color: #2563eb;
+  border-color: #bfdbfe;
+}
+
+.statusBadgeRejected {
+  background: #fee2e2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+.statusBadgeDefault {
+  background: #f1f5f9;
+  color: #475569;
+  border-color: #e2e8f0;
+}
+
+.progressBadge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  padding: 2px 10px;
+  font-size: 12px;
+  font-weight: var(--font-weight-medium);
+}
+
+.progressBadgeInProgress {
+  background: var(--primary);
+  color: #fff;
+}
+
+.progressBadgeWaiting {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.progressBadgeStopped {
+  background: #e2e8f0;
+  color: #64748b;
+}
+
+.progressBadgeCompleted {
+  background: #d1fae5;
+  color: #047857;
+}
+
+.progressBadgeDefault {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+/* 작업 하단 정보 */
+.taskFooter {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.taskFooterActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cancelButton {
+  border-radius: 4px;
+  border: 1px solid #fca5a5;
+  background: #fef2f2;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: var(--font-weight-medium);
+  color: #dc2626;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.cancelButton:hover {
+  background: #fee2e2;
+}
+
+.cancelButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 모달 오버레이 */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 16px;
+}
+
+.modalOverlayConfirm {
+  z-index: 60;
+}
+
+/* 모달 컨테이너 */
+.modalContainer {
+  width: 100%;
+  max-width: 672px;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  overflow-y: auto;
+  max-height: 90vh;
+}
+
+.modalContainerConfirm {
+  max-width: 448px;
+  padding: 24px;
+}
+
+.modalContent {
+  padding: 24px;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.modalHeaderLeft {
+  display: flex;
+  flex-direction: column;
+}
+
+.modalTitle {
+  font-size: 18px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-color);
+  margin: 0;
+}
+
+.modalSubtitle {
+  margin-top: 4px;
+  font-size: 14px;
+  color: #64748b;
+}
+
+.modalSubtitleNormal {
+  font-weight: var(--font-weight-normal);
+  color: #cbd5e1;
+}
+
+.modalSubtitleSeparator {
+  margin: 0 4px;
+  color: #cbd5e1;
+}
+
+.modalSubtitleBold {
+  font-weight: var(--font-weight-semibold);
+  color: #1e293b;
+}
+
+.modalCloseButton {
+  border-radius: 9999px;
+  border: 1px solid var(--border-color);
+  padding: 4px 12px;
+  font-size: 14px;
+  color: #475569;
+  background: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.modalCloseButton:hover {
+  background: #f1f5f9;
+}
+
+/* 모달 그리드 */
+.modalGrid {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  font-size: 14px;
+  color: #334155;
+}
+
+@media (min-width: 640px) {
+  .modalGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.modalGridItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.modalGridLabel {
+  font-size: 12px;
+  color: #cbd5e1;
+}
+
+.modalGridValue {
+  margin-top: 4px;
+  font-weight: var(--font-weight-medium);
+}
+
+/* 모달 내용 박스 */
+.modalContentBox {
+  margin-top: 24px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: #f8fafc;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #334155;
+}
+
+.modalContentBoxLabel {
+  font-size: 12px;
+  color: #cbd5e1;
+}
+
+.modalContentBoxText {
+  margin-top: 8px;
+  white-space: pre-wrap;
+}
+
+/* 모달 액션 버튼 */
+.modalActions {
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.modalButton {
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  padding: 8px 16px;
+  font-size: 14px;
+  color: #475569;
+  background: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.modalButton:hover {
+  background: #f1f5f9;
+}
+
+.modalButtonPrimary {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.modalButtonPrimary:hover {
+  opacity: 0.9;
+}
+
+.modalButtonPrimary:disabled {
+  opacity: 0.6;
+}
+
+.modalButton:disabled {
+  cursor: not-allowed;
+}
+
+/* 확인 모달 */
+.confirmModalTitle {
+  font-size: 18px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-color);
+  margin: 0;
+}
+
+.confirmModalText {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #475569;
+}
+
+.confirmModalActions {
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
