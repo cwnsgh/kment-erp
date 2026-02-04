@@ -1,6 +1,6 @@
 # 데이터베이스 스키마
 
-## 스키마 구조
+## 스키마 구조sdsds
 
 이 프로젝트는 `erp` 스키마를 사용하여 기존 `public` 스키마와 분리합니다.
 
@@ -17,13 +17,13 @@
 
 ```sql
 -- 생성된 스키마 확인
-SELECT schema_name 
-FROM information_schema.schemata 
+SELECT schema_name
+FROM information_schema.schemata
 WHERE schema_name = 'erp';
 
 -- 테이블 목록 확인
-SELECT table_name 
-FROM information_schema.tables 
+SELECT table_name
+FROM information_schema.tables
 WHERE table_schema = 'erp';
 ```
 
@@ -35,17 +35,15 @@ WHERE table_schema = 'erp';
 // Supabase 클라이언트 생성 시 스키마 지정
 const supabase = createClient(url, key, {
   db: {
-    schema: 'erp'
-  }
+    schema: "erp",
+  },
 });
 ```
 
 또는 쿼리 시 직접 지정:
 
 ```typescript
-const { data } = await supabase
-  .from('erp.client')
-  .select('*');
+const { data } = await supabase.from("erp.client").select("*");
 ```
 
 ## 장점
@@ -60,11 +58,3 @@ const { data } = await supabase
 - Supabase는 기본적으로 `public` 스키마를 사용합니다
 - `erp` 스키마를 사용하려면 쿼리 시 스키마를 명시하거나 클라이언트 설정에서 지정해야 합니다
 - RLS (Row Level Security) 정책은 각 테이블별로 설정해야 합니다
-
-
-
-
-
-
-
-
