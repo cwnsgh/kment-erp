@@ -721,6 +721,47 @@
   white-space: nowrap;
 }
 
+/* site-table 스타일 */
+.manageWorkRegist :global(.site-table) {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.manageWorkRegist :global(.site-table thead) {
+  background-color: var(--background-color);
+}
+
+.manageWorkRegist :global(.site-table th) {
+  padding: 14px 10px;
+  font-weight: var(--font-weight-semibold);
+  border-bottom: 1px solid var(--border-color);
+  text-align: center;
+  background: var(--background-color);
+  color: var(--text-color);
+  font-size: 14px;
+}
+
+.manageWorkRegist :global(.site-table td) {
+  padding: 18px 10px;
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+  text-align: center;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-color);
+  font-size: 14px;
+}
+
+.manageWorkRegist :global(.site-table tbody tr:last-child td) {
+  border-bottom: none;
+}
+
+.manageWorkRegist :global(.site-table tbody tr:hover) {
+  background-color: var(--hover-bg);
+}
+
 /* 반응형 */
 @media (max-width: 768px) {
   .workTable {
