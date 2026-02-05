@@ -239,7 +239,7 @@ export function OperationsTaskBoard({ workRequests, currentEmployeeId }: Operati
   };
 
   return (
-    <div className={styles.container}>
+    <div className="white_box">
       <header className={styles.header}>
         <div className={styles.headerActions}>
           <select value={searchField} onChange={(event) => setSearchField(event.target.value as "all" | "client" | "brand")} className={styles.searchSelect}>

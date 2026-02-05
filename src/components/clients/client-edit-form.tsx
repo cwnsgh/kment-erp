@@ -1,12 +1,9 @@
 "use client";
 
-import { Plus, X, Upload } from "lucide-react";
+import { Plus, X, Upload, Eye } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import {
-  updateClient,
-  checkBusinessRegistrationNumber,
-} from "@/app/actions/client";
+import { updateClient, checkBusinessRegistrationNumber } from "@/app/actions/client";
 import AddressSearch from "@/components/common/address-search";
 import { formatBusinessNumberInput } from "@/lib/business-number";
 import styles from "./client-form.module.css";
@@ -70,10 +67,7 @@ type Site = {
   note: string;
 };
 
-const createId = () =>
-  typeof crypto !== "undefined" && "randomUUID" in crypto
-    ? crypto.randomUUID()
-    : Math.random().toString(36).slice(2);
+const createId = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : Math.random().toString(36).slice(2));
 
 export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
   const router = useRouter();
@@ -94,17 +88,11 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
     }>
   >([]);
   // 선택한 파일을 임시로 저장 (아직 업로드 안 함)
-  const [pendingFiles, setPendingFiles] = useState<
-    Array<{ file: File; fileType: "business_registration" | "signature" }>
-  >([]);
+  const [pendingFiles, setPendingFiles] = useState<Array<{ file: File; fileType: "business_registration" | "signature" }>>([]);
   // 사업자 상태 (API에서 가져온 정보)
-  const [businessStatus, setBusinessStatus] = useState<
-    "정상" | "휴업" | "폐업" | null
-  >(null);
+  const [businessStatus, setBusinessStatus] = useState<"정상" | "휴업" | "폐업" | null>(null);
 
-  const handleBusinessNumberInput = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleBusinessNumberInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     event.target.value = formatBusinessNumberInput(event.target.value);
   };
 
@@ -185,13 +173,8 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
     }
   }, [client]);
 
-  const addContact = () =>
-    setContacts((prev) => [
-      ...prev,
-      { id: createId(), name: "", phone: "", email: "", title: "", note: "" },
-    ]);
-  const removeContact = (id: string) =>
-    setContacts((prev) => prev.filter((contact) => contact.id !== id));
+  const addContact = () => setContacts((prev) => [...prev, { id: createId(), name: "", phone: "", email: "", title: "", note: "" }]);
+  const removeContact = (id: string) => setContacts((prev) => prev.filter((contact) => contact.id !== id));
 
   const addSite = () =>
     setSites((prev) => [
@@ -207,8 +190,7 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
         note: "",
       },
     ]);
-  const removeSite = (id: string) =>
-    setSites((prev) => prev.filter((site) => site.id !== id));
+  const removeSite = (id: string) => setSites((prev) => prev.filter((site) => site.id !== id));
 
   const removeAttachment = (index: number) => {
     setAttachments((prev) => prev.filter((_, i) => i !== index));
@@ -216,9 +198,7 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
 
   // 중복확인
   const handleCheckDuplicate = async () => {
-    const input = document.querySelector(
-      'input[name="businessRegistrationNumber"]'
-    ) as HTMLInputElement;
+    const input = document.querySelector('input[name="businessRegistrationNumber"]') as HTMLInputElement;
     const businessNumber = input?.value.trim();
 
     if (!businessNumber) {
@@ -229,10 +209,7 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
     setCheckingDuplicate(true);
     setDuplicateCheckResult("");
 
-    const result = await checkBusinessRegistrationNumber(
-      businessNumber,
-      clientId
-    );
+    const result = await checkBusinessRegistrationNumber(businessNumber, clientId);
 
     setCheckingDuplicate(false);
 
@@ -249,9 +226,7 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
         setBusinessStatus(newStatus);
 
         // 라디오 버튼 자동 선택
-        const statusRadio = document.querySelector(
-          `input[name="status"][value="${newStatus}"]`
-        ) as HTMLInputElement;
+        const statusRadio = document.querySelector(`input[name="status"][value="${newStatus}"]`) as HTMLInputElement;
         if (statusRadio) {
           statusRadio.checked = true;
         }
@@ -263,36 +238,21 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
       setBusinessStatus(null);
 
       // 라디오 버튼을 원래 값으로 복원
-      const originalStatus =
-        client.status === "정상"
-          ? "정상"
-          : client.status === "휴업"
-          ? "휴업"
-          : client.status === "폐업"
-          ? "폐업"
-          : "정상";
-      const statusRadio = document.querySelector(
-        `input[name="status"][value="${originalStatus}"]`
-      ) as HTMLInputElement;
+      const originalStatus = client.status === "정상" ? "정상" : client.status === "휴업" ? "휴업" : client.status === "폐업" ? "폐업" : "정상";
+      const statusRadio = document.querySelector(`input[name="status"][value="${originalStatus}"]`) as HTMLInputElement;
       if (statusRadio) {
         statusRadio.checked = true;
       }
 
       // 에러 메시지 우선 표시 (error 필드가 있으면 사용)
-      const errorMessage =
-        ("error" in result ? result.error : undefined) ||
-        ("message" in result ? result.message : undefined) ||
-        "이미 등록된 사업자등록번호이거나 확인할 수 없습니다.";
+      const errorMessage = ("error" in result ? result.error : undefined) || ("message" in result ? result.message : undefined) || "이미 등록된 사업자등록번호이거나 확인할 수 없습니다.";
       setDuplicateCheckResult(errorMessage);
       alert(errorMessage);
     }
   };
 
   // 파일 선택 시 state에 저장 (아직 업로드 안 함)
-  const handleFileSelect = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    fileType: "business_registration" | "signature"
-  ) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, fileType: "business_registration" | "signature") => {
     const file = e.target.files?.[0];
     if (file) {
       // 파일 크기 검증 (30MB)
@@ -302,10 +262,7 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
       }
 
       // 같은 타입의 기존 파일 제거하고 새 파일 추가
-      setPendingFiles((prev) => [
-        ...prev.filter((f) => f.fileType !== fileType),
-        { file, fileType },
-      ]);
+      setPendingFiles((prev) => [...prev.filter((f) => f.fileType !== fileType), { file, fileType }]);
 
       // input 초기화 (같은 파일을 다시 선택할 수 있도록)
       e.target.value = "";
@@ -333,12 +290,7 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
       for (const { file, fileType } of pendingFiles) {
         const formData = new FormData();
         formData.append("file", file);
-        formData.append(
-          "folder",
-          fileType === "business_registration"
-            ? "business-registration"
-            : "signature"
-        );
+        formData.append("folder", fileType === "business_registration" ? "business-registration" : "signature");
 
         const response = await fetch("/api/files/upload", {
           method: "POST",
@@ -368,10 +320,7 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
       return uploadedFiles;
     } catch (error) {
       console.error("파일 업로드 오류:", error);
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "알 수 없는 오류가 발생했습니다.";
+      const errorMessage = error instanceof Error ? error.message : "알 수 없는 오류가 발생했습니다.";
       throw new Error(`파일 업로드 실패: ${errorMessage}`);
     } finally {
       setUploading(false);
@@ -388,16 +337,12 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
 
       // 2. 업로드된 파일들을 attachments에 추가 (기존 파일과 병합)
       const allAttachments = [
-        ...attachments.filter(
-          (a) => !pendingFiles.some((pf) => pf.fileType === a.fileType)
-        ), // 기존 파일 중 pendingFiles와 타입이 다른 것만 유지
+        ...attachments.filter((a) => !pendingFiles.some((pf) => pf.fileType === a.fileType)), // 기존 파일 중 pendingFiles와 타입이 다른 것만 유지
         ...uploadedFiles,
       ];
 
       // form element 직접 가져오기
-      const formElement = document.getElementById(
-        "clientEditForm"
-      ) as HTMLFormElement;
+      const formElement = document.getElementById("clientEditForm") as HTMLFormElement;
       if (!formElement) {
         throw new Error("Form element not found");
       }
@@ -405,9 +350,7 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
 
       // 기본 정보 수집
       const clientData = {
-        businessRegistrationNumber: formData.get(
-          "businessRegistrationNumber"
-        ) as string,
+        businessRegistrationNumber: formData.get("businessRegistrationNumber") as string,
         name: formData.get("name") as string,
         ceoName: formData.get("ceoName") as string,
         postalCode: formData.get("postalCode") as string,
@@ -416,9 +359,7 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
         businessType: formData.get("businessType") as string,
         businessItem: formData.get("businessItem") as string,
         loginId: formData.get("loginId") as string,
-        loginPassword: passwordChangeMode
-          ? (formData.get("loginPassword") as string)
-          : "", // 비밀번호 변경 모드일 때만
+        loginPassword: passwordChangeMode ? (formData.get("loginPassword") as string) : "", // 비밀번호 변경 모드일 때만
         note: formData.get("note") as string,
         status: formData.get("status") as string, // 휴·폐업 상태
       };
@@ -459,9 +400,7 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
       }
     } catch (error) {
       console.error("수정 오류:", error);
-      alert(
-        error instanceof Error ? error.message : "수정 중 오류가 발생했습니다."
-      );
+      alert(error instanceof Error ? error.message : "수정 중 오류가 발생했습니다.");
     } finally {
       setLoading(false);
     }
@@ -480,7 +419,7 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
     try {
       const { deleteClient } = await import("@/app/actions/client");
       const result = await deleteClient(clientId);
-      
+
       if (result.success) {
         alert("거래처가 삭제되었습니다.");
         router.push("/clients");
@@ -498,24 +437,11 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
       <div className="page_title">
         <h1>거래처 수정</h1>
         <div className="btn_wrap">
-          <button
-            type="button"
-            onClick={handleDelete}
-            className="btn btn_lg normal"
-          >
+          <button type="button" onClick={handleDelete} className="btn btn_lg normal">
             삭제
           </button>
-          <button
-            type="submit"
-            form="clientEditForm"
-            disabled={loading || uploading}
-            className="btn btn_lg primary disabled:opacity-50"
-          >
-            {loading || uploading
-              ? uploading
-                ? "파일 업로드 중..."
-                : "수정 중..."
-              : "수정"}
+          <button type="submit" form="clientEditForm" disabled={loading || uploading} className="btn btn_lg primary disabled:opacity-50">
+            {loading || uploading ? (uploading ? "파일 업로드 중..." : "수정 중...") : "수정"}
           </button>
         </div>
       </div>
@@ -530,34 +456,15 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
                   <li className="row_group">
                     <div className="table_head">아이디</div>
                     <div className="table_data pd12">
-                      <input
-                        name="loginId"
-                        type="text"
-                        defaultValue={client.loginId || ""}
-                        readOnly
-                      />
+                      <input name="loginId" type="text" defaultValue={client.loginId || ""} readOnly />
                     </div>
                   </li>
                   <li className="row_group">
                     <div className="table_head">패스워드</div>
                     <div className="table_data pd12">
                       <div className="flex gap-2 items-center">
-                        <input
-                          name="loginPassword"
-                          type="password"
-                          placeholder={
-                            passwordChangeMode ? "새 비밀번호 입력" : "••••••••"
-                          }
-                          readOnly={!passwordChangeMode}
-                          className="flex-1"
-                        />
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setPasswordChangeMode(!passwordChangeMode)
-                          }
-                          className="btn btn_md normal"
-                        >
+                        <input name="loginPassword" type="password" placeholder={passwordChangeMode ? "새 비밀번호 입력" : "••••••••"} readOnly={!passwordChangeMode} className="flex-1" />
+                        <button type="button" onClick={() => setPasswordChangeMode(!passwordChangeMode)} className="btn btn_md primary">
                           {passwordChangeMode ? "취소" : "변경"}
                         </button>
                       </div>
@@ -578,24 +485,9 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
                           display: "flex",
                           gap: "8px",
                           alignItems: "center",
-                        }}
-                      >
-                        <input
-                          name="businessRegistrationNumber"
-                          type="text"
-                          defaultValue={client.businessRegistrationNumber}
-                          required
-                          style={{ flex: 1 }}
-                          placeholder="123-45-67890"
-                          inputMode="numeric"
-                          onChange={handleBusinessNumberInput}
-                        />
-                        <button
-                          type="button"
-                          onClick={handleCheckDuplicate}
-                          disabled={checkingDuplicate}
-                          className="btn btn_md normal"
-                        >
+                        }}>
+                        <input name="businessRegistrationNumber" type="text" defaultValue={client.businessRegistrationNumber} required style={{ flex: 1 }} placeholder="123-45-67890" inputMode="numeric" onChange={handleBusinessNumberInput} />
+                        <button type="button" onClick={handleCheckDuplicate} disabled={checkingDuplicate} className="btn btn_md primary">
                           {checkingDuplicate ? "확인 중..." : "중복확인"}
                         </button>
                         {duplicateCheckResult && (
@@ -603,11 +495,8 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
                             style={{
                               fontSize: "12px",
                               whiteSpace: "nowrap",
-                              color: duplicateCheckResult.includes("사용 가능")
-                                ? "#10b981"
-                                : "#ef4444",
-                            }}
-                          >
+                              color: duplicateCheckResult.includes("사용 가능") ? "#10b981" : "#ef4444",
+                            }}>
                             {duplicateCheckResult}
                           </span>
                         )}
@@ -619,24 +508,13 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
                   <li className="row_group">
                     <div className="table_head">상호(법인명)</div>
                     <div className="table_data pd12">
-                      <input
-                        name="name"
-                        type="text"
-                        defaultValue={client.name}
-                        required
-                        placeholder="상호(법인명)"
-                      />
+                      <input name="name" type="text" defaultValue={client.name} required placeholder="상호(법인명)" />
                     </div>
                   </li>
                   <li className="row_group">
                     <div className="table_head">대표자</div>
                     <div className="table_data pd12">
-                      <input
-                        name="ceoName"
-                        type="text"
-                        defaultValue={client.ceoName || ""}
-                        placeholder="대표자명"
-                      />
+                      <input name="ceoName" type="text" defaultValue={client.ceoName || ""} placeholder="대표자명" />
                     </div>
                   </li>
                 </ul>
@@ -649,43 +527,22 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
                           display: "flex",
                           gap: "8px",
                           alignItems: "center",
-                        }}
-                      >
-                        <input
-                          name="address"
-                          type="text"
-                          defaultValue={client.address || ""}
-                          readOnly
-                          style={{ flex: 1, opacity: 0.75 }}
-                          placeholder="사업자 주소"
-                        />
+                        }}>
+                        <input name="address" type="text" defaultValue={client.address || ""} readOnly style={{ flex: 1, opacity: 0.75 }} placeholder="사업자 주소" />
                         <AddressSearch
                           onComplete={(data) => {
-                            const addressInput = document.querySelector(
-                              'input[name="address"]'
-                            ) as HTMLInputElement;
-                            const postalCodeInput = document.querySelector(
-                              'input[name="postalCode"]'
-                            ) as HTMLInputElement;
+                            const addressInput = document.querySelector('input[name="address"]') as HTMLInputElement;
+                            const postalCodeInput = document.querySelector('input[name="postalCode"]') as HTMLInputElement;
                             if (addressInput) {
-                              addressInput.value =
-                                data.address +
-                                (data.buildingName
-                                  ? ` ${data.buildingName}`
-                                  : "");
-                              addressInput.dispatchEvent(
-                                new Event("input", { bubbles: true })
-                              );
+                              addressInput.value = data.address + (data.buildingName ? ` ${data.buildingName}` : "");
+                              addressInput.dispatchEvent(new Event("input", { bubbles: true }));
                             }
                             if (postalCodeInput) {
                               postalCodeInput.value = data.zonecode;
-                              postalCodeInput.dispatchEvent(
-                                new Event("input", { bubbles: true })
-                              );
+                              postalCodeInput.dispatchEvent(new Event("input", { bubbles: true }));
                             }
-                          }}
-                        >
-                          <button type="button" className="btn btn_md normal">
+                          }}>
+                          <button type="button" className="btn btn_md primary">
                             주소검색
                           </button>
                         </AddressSearch>
@@ -697,25 +554,13 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
                   <li className="row_group">
                     <div className="table_head">우편번호</div>
                     <div className="table_data pd12">
-                      <input
-                        name="postalCode"
-                        type="text"
-                        readOnly
-                        defaultValue={client.postalCode || ""}
-                        style={{ opacity: 0.75 }}
-                        placeholder="우편번호"
-                      />
+                      <input name="postalCode" type="text" readOnly defaultValue={client.postalCode || ""} style={{ opacity: 0.75 }} placeholder="우편번호" />
                     </div>
                   </li>
                   <li className="row_group">
                     <div className="table_head">상세 주소</div>
                     <div className="table_data pd12">
-                      <input
-                        name="addressDetail"
-                        type="text"
-                        defaultValue={client.addressDetail || ""}
-                        placeholder="상세 주소"
-                      />
+                      <input name="addressDetail" type="text" defaultValue={client.addressDetail || ""} placeholder="상세 주소" />
                     </div>
                   </li>
                 </ul>
@@ -723,23 +568,13 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
                   <li className="row_group">
                     <div className="table_head">업태</div>
                     <div className="table_data pd12">
-                      <input
-                        name="businessType"
-                        type="text"
-                        defaultValue={client.businessType || ""}
-                        placeholder="업태명"
-                      />
+                      <input name="businessType" type="text" defaultValue={client.businessType || ""} placeholder="업태명" />
                     </div>
                   </li>
                   <li className="row_group">
                     <div className="table_head">종목</div>
                     <div className="table_data pd12">
-                      <input
-                        name="businessItem"
-                        type="text"
-                        defaultValue={client.businessItem || ""}
-                        placeholder="종목명"
-                      />
+                      <input name="businessItem" type="text" defaultValue={client.businessItem || ""} placeholder="종목명" />
                     </div>
                   </li>
                 </ul>
@@ -751,32 +586,14 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
                         {attachments
                           .filter((a) => a.fileType === "business_registration")
                           .map((attachment, index) => (
-                            <div
-                              key={index}
-                              className="flex items-center gap-2 text-sm"
-                            >
-                              <span>{attachment.fileName}</span>
+                            <div key={index} className="flex items-center gap-2 text-sm">
+                              <span style={{ color: "var(--text-gray)" }}>{attachment.fileName}</span>
                               {attachment.fileUrl && (
-                                <a
-                                  href={attachment.fileUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-primary hover:underline"
-                                >
-                                  보기
+                                <a href={attachment.fileUrl} target="_blank" rel="noopener noreferrer" className="text-primary text-slate-600 hover:text-slate-800">
+                                  <Eye size={14} />
                                 </a>
                               )}
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  removeAttachment(
-                                    attachments.findIndex(
-                                      (a) => a === attachment
-                                    )
-                                  )
-                                }
-                                className="text-red-500 hover:text-red-600"
-                              >
+                              <button type="button" onClick={() => removeAttachment(attachments.findIndex((a) => a === attachment))} className="text-slate-600 hover:text-slate-800">
                                 <X size={14} />
                               </button>
                             </div>
@@ -784,54 +601,23 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
                         {pendingFiles
                           .filter((f) => f.fileType === "business_registration")
                           .map((pendingFile, index) => (
-                            <div
-                              key={index}
-                              className="flex items-center gap-2 text-sm text-blue-600"
-                            >
-                              <span>
-                                {pendingFile.file.name} (업로드 대기 중)
-                              </span>
+                            <div key={index} className="flex items-center gap-2 text-sm text-blue-600">
+                              <span>{pendingFile.file.name} (업로드 대기 중)</span>
                               <button
                                 type="button"
                                 onClick={() => {
-                                  setPendingFiles((prev) =>
-                                    prev.filter(
-                                      (f, i) =>
-                                        !(
-                                          f.fileType ===
-                                            "business_registration" &&
-                                          i === index
-                                        )
-                                    )
-                                  );
+                                  setPendingFiles((prev) => prev.filter((f, i) => !(f.fileType === "business_registration" && i === index)));
                                 }}
-                                className="text-red-500 hover:text-red-600"
-                              >
+                                className="text-red-500 hover:text-red-600">
                                 <X size={14} />
                               </button>
                             </div>
                           ))}
-                        <button
-                          type="button"
-                          onClick={() =>
-                            businessRegistrationFileInputRef.current?.click()
-                          }
-                          disabled={uploading || loading}
-                          className="btn btn_md normal"
-                        >
-                          <Upload size={14} className="inline mr-1" />
+                        <button type="button" onClick={() => businessRegistrationFileInputRef.current?.click()} disabled={uploading || loading} className=" file-upload-btn">
                           파일 선택
+                          <img src="/images/attach_icon.svg" alt="첨부" width={16} height={16} />
                         </button>
-                        <input
-                          ref={businessRegistrationFileInputRef}
-                          type="file"
-                          accept="image/*,.pdf"
-                          className="hidden"
-                          onChange={(e) =>
-                            handleFileSelect(e, "business_registration")
-                          }
-                          disabled={uploading || loading}
-                        />
+                        <input ref={businessRegistrationFileInputRef} type="file" accept="image/*,.pdf" className="hidden" onChange={(e) => handleFileSelect(e, "business_registration")} disabled={uploading || loading} />
                       </div>
                     </div>
                   </li>
@@ -842,32 +628,14 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
                         {attachments
                           .filter((a) => a.fileType === "signature")
                           .map((attachment, index) => (
-                            <div
-                              key={index}
-                              className="flex items-center gap-2 text-sm"
-                            >
-                              <span>{attachment.fileName}</span>
+                            <div key={index} className="flex items-center gap-2 text-sm">
+                              <span style={{ color: "var(--text-gray)" }}>{attachment.fileName}</span>
                               {attachment.fileUrl && (
-                                <a
-                                  href={attachment.fileUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-primary hover:underline"
-                                >
-                                  보기
+                                <a href={attachment.fileUrl} target="_blank" rel="noopener noreferrer" className="text-primary text-slate-600 hover:text-slate-800">
+                                  <Eye size={14} />
                                 </a>
                               )}
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  removeAttachment(
-                                    attachments.findIndex(
-                                      (a) => a === attachment
-                                    )
-                                  )
-                                }
-                                className="text-red-500 hover:text-red-600"
-                              >
+                              <button type="button" onClick={() => removeAttachment(attachments.findIndex((a) => a === attachment))} className="text-slate-600 hover:text-slate-800">
                                 <X size={14} />
                               </button>
                             </div>
@@ -875,49 +643,23 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
                         {pendingFiles
                           .filter((f) => f.fileType === "signature")
                           .map((pendingFile, index) => (
-                            <div
-                              key={index}
-                              className="flex items-center gap-2 text-sm text-blue-600"
-                            >
-                              <span>
-                                {pendingFile.file.name} (업로드 대기 중)
-                              </span>
+                            <div key={index} className="flex items-center gap-2 text-sm text-blue-600">
+                              <span>{pendingFile.file.name} (업로드 대기 중)</span>
                               <button
                                 type="button"
                                 onClick={() => {
-                                  setPendingFiles((prev) =>
-                                    prev.filter(
-                                      (f, i) =>
-                                        !(
-                                          f.fileType === "signature" &&
-                                          i === index
-                                        )
-                                    )
-                                  );
+                                  setPendingFiles((prev) => prev.filter((f, i) => !(f.fileType === "signature" && i === index)));
                                 }}
-                                className="text-red-500 hover:text-red-600"
-                              >
+                                className="text-red-500 hover:text-red-600">
                                 <X size={14} />
                               </button>
                             </div>
                           ))}
-                        <button
-                          type="button"
-                          onClick={() => signatureFileInputRef.current?.click()}
-                          disabled={uploading || loading}
-                          className="btn btn_md normal"
-                        >
-                          <Upload size={14} className="inline mr-1" />
+                        <button type="button" onClick={() => signatureFileInputRef.current?.click()} disabled={uploading || loading} className="file-upload-btn">
                           파일 선택
+                          <img src="/images/attach_icon.svg" alt="첨부" width={16} height={16} />
                         </button>
-                        <input
-                          ref={signatureFileInputRef}
-                          type="file"
-                          accept="image/*,.pdf"
-                          className="hidden"
-                          onChange={(e) => handleFileSelect(e, "signature")}
-                          disabled={uploading || loading}
-                        />
+                        <input ref={signatureFileInputRef} type="file" accept="image/*,.pdf" className="hidden" onChange={(e) => handleFileSelect(e, "signature")} disabled={uploading || loading} />
                       </div>
                     </div>
                   </li>
@@ -927,38 +669,27 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
               {/* 담당자 정보 */}
               <div className="table_item">
                 <div className="flex items-center justify-between mb-8">
-                  <h2 className={`table_title ${styles.contactTitle}`}>
-                    담당자 정보
-                  </h2>
-                  <button
-                    type="button"
-                    onClick={addContact}
-                    className="btn btn_md normal"
-                  >
-                    <Plus size={16} className="inline mr-1" />
-                    담당자 추가
+                  <h2 className={`table_title ${styles.contactTitle}`}>담당자 정보</h2>
+                  <button type="button" onClick={addContact} className="plus_btn">
+                    + 담당자 추가
                   </button>
                 </div>
                 {contacts.map((contact, index) => (
-                  <div
-                    key={contact.id}
-                    style={{ marginTop: index > 0 ? "30px" : "0" }}
-                  >
+                  <div key={contact.id} style={{ marginTop: index > 0 ? "30px" : "0" }}>
                     <div
                       className={styles.contactHeader}
                       style={{
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "space-between",
-                      }}
-                    >
+                      }}>
                       <h3 className="table_title_sub">담당자{index + 1}</h3>
                       {contacts.length > 1 && (
                         <button
                           type="button"
                           onClick={() => removeContact(contact.id)}
                           style={{
-                            color: "#ef4444",
+                            color: "var(--text-color)",
                             cursor: "pointer",
                             background: "none",
                             border: "none",
@@ -968,8 +699,7 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
                             justifyContent: "center",
                             padding: "0",
                           }}
-                          title="삭제"
-                        >
+                          title="삭제">
                           <X size={18} />
                         </button>
                       )}
@@ -978,24 +708,13 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
                       <li className="row_group">
                         <div className="table_head">이름</div>
                         <div className="table_data pd12">
-                          <input
-                            name={`contact_${contact.id}_name`}
-                            type="text"
-                            defaultValue={contact.name}
-                            required
-                            placeholder="이름"
-                          />
+                          <input name={`contact_${contact.id}_name`} type="text" defaultValue={contact.name} required placeholder="이름" />
                         </div>
                       </li>
                       <li className="row_group">
                         <div className="table_head">연락처</div>
                         <div className="table_data pd12">
-                          <input
-                            name={`contact_${contact.id}_phone`}
-                            type="text"
-                            defaultValue={contact.phone}
-                            placeholder="010-1234-5678"
-                          />
+                          <input name={`contact_${contact.id}_phone`} type="text" defaultValue={contact.phone} placeholder="010-1234-5678" />
                         </div>
                       </li>
                     </ul>
@@ -1003,23 +722,13 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
                       <li className="row_group">
                         <div className="table_head">이메일</div>
                         <div className="table_data pd12">
-                          <input
-                            name={`contact_${contact.id}_email`}
-                            type="email"
-                            defaultValue={contact.email}
-                            placeholder="이메일"
-                          />
+                          <input name={`contact_${contact.id}_email`} type="email" defaultValue={contact.email} placeholder="이메일" />
                         </div>
                       </li>
                       <li className="row_group">
                         <div className="table_head">비고</div>
                         <div className="table_data pd12">
-                          <input
-                            name={`contact_${contact.id}_note`}
-                            type="text"
-                            defaultValue={contact.note}
-                            placeholder="특이사항"
-                          />
+                          <input name={`contact_${contact.id}_note`} type="text" defaultValue={contact.note} placeholder="특이사항" />
                         </div>
                       </li>
                     </ul>
@@ -1031,11 +740,7 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
               <div className="table_item table_item2">
                 <h2 className="table_title">
                   사이트 정보
-                  <span
-                    className="plus_btn"
-                    onClick={addSite}
-                    style={{ marginLeft: "10px", cursor: "pointer" }}
-                  >
+                  <span className="plus_btn" onClick={addSite} style={{ marginLeft: "10px", cursor: "pointer" }}>
                     + 사이트 추가
                   </span>
                 </h2>
@@ -1063,26 +768,13 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
                       {sites.map((site, index) => (
                         <tr key={site.id} className="site-row">
                           <td data-th="브랜드">
-                            <input
-                              name={`site_${site.id}_brandName`}
-                              type="text"
-                              defaultValue={site.brandName}
-                              placeholder="브랜드명"
-                            />
+                            <input name={`site_${site.id}_brandName`} type="text" defaultValue={site.brandName} placeholder="브랜드명" />
                           </td>
                           <td data-th="도메인">
-                            <input
-                              name={`site_${site.id}_domain`}
-                              type="text"
-                              defaultValue={site.domain}
-                              placeholder="https://example.com"
-                            />
+                            <input name={`site_${site.id}_domain`} type="text" defaultValue={site.domain} placeholder="https://example.com" />
                           </td>
                           <td data-th="솔루션">
-                            <select
-                              name={`site_${site.id}_solution`}
-                              defaultValue={site.solution || ""}
-                            >
+                            <select name={`site_${site.id}_solution`} defaultValue={site.solution || ""}>
                               <option value="">선택</option>
                               <option value="카페24">카페24</option>
                               <option value="고도몰">고도몰</option>
@@ -1091,20 +783,10 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
                             </select>
                           </td>
                           <td data-th="아이디">
-                            <input
-                              name={`site_${site.id}_loginId`}
-                              type="text"
-                              defaultValue={site.loginId}
-                              placeholder="아이디"
-                            />
+                            <input name={`site_${site.id}_loginId`} type="text" defaultValue={site.loginId} placeholder="아이디" />
                           </td>
                           <td data-th="패스워드">
-                            <input
-                              name={`site_${site.id}_loginPassword`}
-                              type="text"
-                              defaultValue={site.loginPassword}
-                              placeholder="패스워드"
-                            />
+                            <input name={`site_${site.id}_loginPassword`} type="text" defaultValue={site.loginPassword} placeholder="패스워드" />
                           </td>
                           <td className="right">
                             {sites.length > 1 && (
@@ -1114,12 +796,11 @@ export function ClientEditForm({ client, clientId }: ClientEditFormProps) {
                                 style={{
                                   background: "none",
                                   border: "none",
-                                  color: "#ef4444",
+                                  color: "var(--text-color)",
                                   cursor: "pointer",
                                   padding: "0",
                                 }}
-                                title="삭제"
-                              >
+                                title="삭제">
                                 <X size={18} />
                               </button>
                             )}
@@ -1167,31 +848,14 @@ type FieldProps = {
   defaultValue?: string;
 };
 
-function Field({
-  name,
-  label,
-  required,
-  type = "text",
-  placeholder,
-  className,
-  readOnly,
-  defaultValue,
-}: FieldProps) {
+function Field({ name, label, required, type = "text", placeholder, className, readOnly, defaultValue }: FieldProps) {
   return (
     <label className={`block text-sm ${className || ""}`}>
       <span className="font-semibold text-slate-700">
         {label}
         {required ? <span className="ml-1 text-red-500">*</span> : null}
       </span>
-      <input
-        name={name}
-        type={type}
-        placeholder={placeholder}
-        required={required}
-        readOnly={readOnly}
-        defaultValue={defaultValue}
-        className="mt-1 w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:bg-slate-100 disabled:cursor-not-allowed"
-      />
+      <input name={name} type={type} placeholder={placeholder} required={required} readOnly={readOnly} defaultValue={defaultValue} className="mt-1 w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:bg-slate-100 disabled:cursor-not-allowed" />
     </label>
   );
 }

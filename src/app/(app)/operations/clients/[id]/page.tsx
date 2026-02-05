@@ -170,7 +170,7 @@ export default function ManagedClientDetailPage() {
 
   const getStatusLabel = (status: string) => {
     const statusMap: Record<string, string> = {
-      ongoing: "진행중",
+      ongoing: "진행",
       wait: "대기",
       end: "종료",
       unpaid: "미납",
@@ -220,22 +220,22 @@ export default function ManagedClientDetailPage() {
 
   return (
     <div className={styles.manageClientList}>
-      <div className={styles.pageTitle}>
+      <div className={"page_title"}>
         <h1>관리 고객 상세조회</h1>
-        <div className={styles.btnWrap}>
+        <div className="btn_wrap">
           <button type="button" className="btn btn_lg normal" onClick={() => router.push("/operations/clients")}>
             목록
           </button>
           <button type="button" className="btn btn_lg primary" onClick={() => router.push(`/operations/clients/${managedClientId}/edit`)}>
             수정
           </button>
-          <button type="button" className="btn btn_lg normal" onClick={handleDelete} style={{ marginLeft: "10px" }}>
+          <button type="button" className="btn btn_lg normal" onClick={handleDelete}>
             삭제
           </button>
         </div>
       </div>
 
-      <div className={styles.whiteBox} style={{ padding: "50px 50px 100px" }}>
+      <div className="white_box">
         <div className={styles.boxInner}>
           <div className="table_group">
             {/* ERP 정보 */}
@@ -313,7 +313,7 @@ export default function ManagedClientDetailPage() {
               <ul className="table_row">
                 <li className="row_group">
                   <div className="table_head">브랜드명</div>
-                  <div className="table_data pd12" style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  <div className="table_data" style={{ display: "flex", flexDirection: "column", gap: "8px", alignItems: "flex-start" }}>
                     {clientData.sites && clientData.sites.length > 0 ? clientData.sites.map((site, index) => <div key={`brand-${index}`}>{site.brandName || "-"}</div>) : <div>-</div>}
                   </div>
                 </li>
@@ -327,10 +327,19 @@ export default function ManagedClientDetailPage() {
                 <ul className="table_row">
                   <li className="row_group">
                     <div className="table_head">관리 상품 유형1</div>
-                    <div className="table_data">
-                      <span style={{ color: "var(--primary)" }}>{formatProductType1(managedClient.productType1)}</span>
+                    <div className="table_data" style={{ color: "var(--primary)", fontWeight: "bold" }}>
+                      <span>{formatProductType1(managedClient.productType1)}</span>
                     </div>
                   </li>
+                  <li className="row_group">
+                    <div className="table_head">관리 상품 유형2</div>
+                    <div className="table_data" style={{ color: "var(--primary)", fontWeight: "bold" }}>
+                      <span>{formatProductType2(managedClient.productType1, managedClient.productType2)}</span>
+                    </div>
+                  </li>
+                </ul>
+                <ul className="table_row">
+                  {" "}
                   <li className="row_group">
                     <div className="table_head">납부 진행</div>
                     <div className="table_data">
@@ -338,43 +347,35 @@ export default function ManagedClientDetailPage() {
                     </div>
                   </li>
                 </ul>
-                <ul className="table_row">
-                  <li className="row_group">
-                    <div className="table_head">관리 상품 유형2</div>
-                    <div className="table_data">
-                      <span style={{ color: "var(--primary)" }}>{formatProductType2(managedClient.productType1, managedClient.productType2)}</span>
-                    </div>
-                  </li>
-                </ul>
                 {managedClient.productType1 === "maintenance" && (
                   <ul className="table_row">
                     <li className="row_group">
                       <div className="table_head">세부 내용</div>
-                      <div className="table_data pd12" style={{ width: "50%" }}>
+                      <div className="table_data pd12" style={{ gap: "20px" }}>
                         <div className="input_group">
                           <span className="prefix">영역 텍스트 수정</span>
-                          <span style={{ color: "var(--primary)" }}>{managedClient.detailTextEditCount}</span>
+                          <span style={{ color: "var(--primary)", fontWeight: "bold", marginRight: "20px" }}>{managedClient.detailTextEditCount}</span>
                           <span className="suffix">회</span>
                         </div>
                         <div className="input_group">
                           <span className="prefix">코딩 수정</span>
-                          <span style={{ color: "var(--primary)" }}>{managedClient.detailCodingEditCount}</span>
+                          <span style={{ color: "var(--primary)", fontWeight: "bold", marginRight: "20px" }}>{managedClient.detailCodingEditCount}</span>
                           <span className="suffix">회</span>
                         </div>
                         <div className="input_group">
                           <span className="prefix">기존 결과물 이미지 수정</span>
-                          <span style={{ color: "var(--primary)" }}>{managedClient.detailImageEditCount}</span>
+                          <span style={{ color: "var(--primary)", fontWeight: "bold", marginRight: "20px" }}>{managedClient.detailImageEditCount}</span>
                           <span className="suffix">회</span>
                         </div>
                         <div className="input_group">
                           <span className="prefix">팝업 디자인</span>
-                          <span style={{ color: "var(--primary)" }}>{managedClient.detailPopupDesignCount}</span>
+                          <span style={{ color: "var(--primary)", fontWeight: "bold", marginRight: "20px" }}>{managedClient.detailPopupDesignCount}</span>
                           <span className="suffix">회</span>
                         </div>
                         {managedClient.productType2 === "premium" && (
                           <div className="input_group">
                             <span className="prefix">배너 디자인</span>
-                            <span style={{ color: "var(--primary)" }}>{managedClient.detailBannerDesignCount}</span>
+                            <span style={{ color: "var(--primary)", fontWeight: "bold", marginRight: "20px" }}>{managedClient.detailBannerDesignCount}</span>
                             <span className="suffix">회</span>
                           </div>
                         )}
@@ -387,19 +388,23 @@ export default function ManagedClientDetailPage() {
                     <ul className="table_row">
                       <li className="row_group">
                         <div className="table_head">초기세팅금액(관리금액)</div>
-                        <div className="table_data">{managedClient.initialTotalAmount ? managedClient.initialTotalAmount.toLocaleString() : "-"}</div>
+                        <div className="table_data" style={{ color: "var(--primary)", fontWeight: "bold" }}>
+                          {managedClient.initialTotalAmount ? managedClient.initialTotalAmount.toLocaleString() : "-"}
+                        </div>
                       </li>
-                    </ul>
-                    <ul className="table_row">
                       <li className="row_group">
                         <div className="table_head">사용금액</div>
-                        <div className="table_data">{managedClient.usedAmount !== undefined && managedClient.usedAmount !== null ? managedClient.usedAmount.toLocaleString() : "0"}</div>
+                        <div className="table_data" style={{ color: "var(--primary)", fontWeight: "bold" }}>
+                          {managedClient.usedAmount !== undefined && managedClient.usedAmount !== null ? managedClient.usedAmount.toLocaleString() : "0"}
+                        </div>
                       </li>
                     </ul>
                     <ul className="table_row">
                       <li className="row_group">
                         <div className="table_head">남은금액</div>
-                        <div className="table_data">{managedClient.remainingAmount !== null ? managedClient.remainingAmount.toLocaleString() : "-"}</div>
+                        <div className="table_data" style={{ color: "var(--primary)", fontWeight: "bold" }}>
+                          {managedClient.remainingAmount !== null ? managedClient.remainingAmount.toLocaleString() : "-"}
+                        </div>
                       </li>
                     </ul>
                   </>

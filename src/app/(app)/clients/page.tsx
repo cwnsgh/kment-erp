@@ -1,7 +1,7 @@
-import { Suspense } from 'react';
-import { ClientTable } from '@/components/clients/client-table';
-import { getClients } from '@/app/actions/client';
-import styles from './page.module.css';
+import { Suspense } from "react";
+import { ClientTable } from "@/components/clients/client-table";
+import { getClients } from "@/app/actions/client";
+import styles from "./page.module.css";
 
 async function ClientsContent() {
   const result = await getClients();
@@ -27,11 +27,3 @@ export default function ClientListPage() {
     </div>
   );
 }
-
-
-
-
-
-
-
-

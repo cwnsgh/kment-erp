@@ -728,7 +728,6 @@ export function ManagedClientRegistrationForm() {
                       cursor: "pointer",
                       display: "inline-flex",
                       alignItems: "center",
-                      transform: "Rotate(-90deg)",
                     }}>
                     <Image src="/images/arrow_icon.svg" alt="" width={16} height={16} className={`${styles.tableToggle} ${!isContactsOpen ? styles.rotated : ""}`} />
                   </button>
@@ -784,7 +783,6 @@ export function ManagedClientRegistrationForm() {
                       cursor: "pointer",
                       display: "inline-flex",
                       alignItems: "center",
-                      transform: "Rotate(-90deg)",
                     }}>
                     <Image src="/images/arrow_icon.svg" alt="" width={16} height={16} className={`${styles.tableToggle} ${!isSitesOpen ? styles.rotated : ""}`} />
                   </button>

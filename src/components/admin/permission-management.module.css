@@ -1,17 +1,11 @@
-.container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 24px;
-}
-
 .header {
-  margin-bottom: 32px;
+  margin-bottom: 30px;
 }
 
 .title {
-  font-size: 28px;
-  font-weight: 700;
-  color: #1f2937;
+  font-size: 32px;
+  font-weight: var(--font-weight-bold);
+  color: var(--text-color);
   margin: 0 0 8px 0;
 }
 
@@ -67,16 +61,6 @@
   margin-bottom: 24px;
 }
 
-.categorySelect {
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 14px;
-  background-color: white;
-  color: #1f2937;
-  cursor: pointer;
-  min-width: 200px;
-}
 
 .categorySelect:focus {
   outline: none;
@@ -87,11 +71,10 @@
 /* 테이블 */
 .tableWrapper {
   background: white;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
   overflow: hidden;
   margin-bottom: 24px;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
 }
 
 .table {
@@ -100,8 +83,8 @@
 }
 
 .table thead {
-  background-color: #f9fafb;
-  border-bottom: 1px solid #e5e7eb;
+  background-color: var(--background-color);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .table th {
@@ -138,6 +121,7 @@
   vertical-align: top;
   padding-top: 16px;
   color: #1f2937;
+  padding: 33px 16px !important;
 }
 
 .permissionCell {
@@ -175,7 +159,7 @@
 .permissionTags {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 10px;
   flex: 1;
   align-items: center;
   min-width: 0;
@@ -185,11 +169,11 @@
   display: inline-flex;
   align-items: center;
   padding: 4px 10px;
-  background-color: #f3f4f6;
-  color: #374151;
+  background-color: #e5e7eb;
+  color: var(--text-gray);
   border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: var(--font-weight-semibold);
   white-space: nowrap;
   border: none;
 }
@@ -301,11 +285,13 @@
 }
 
 .modalHeader {
+  padding: 30px 0px 20px 0px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 24px;
-  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--text-color);
+  margin: 0 30px 20px;
 }
 
 .modalTitle {
@@ -316,18 +302,22 @@
 }
 
 .closeButton {
-  width: 32px;
-  height: 32px;
+  width: 20px;
+  height: 20px;
   border: none;
-  background-color: transparent;
-  color: #6b7280;
+  background: transparent;
+  font-size: 24px;
+  color: #64748b;
   cursor: pointer;
-  border-radius: 6px;
-  font-size: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
+  border-radius: 4px;
+  transition: background-color 0.2s, color 0.2s, opacity 0.2s;
+  padding: 0;
+  line-height: 1;
+  font-size: 0;
+  background: url(/images/close_icon.svg);
 }
 
 .closeButton:hover {
@@ -347,7 +337,7 @@
   color: #1f2937;
   margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color)
 }
 
 .modalSection {
@@ -368,8 +358,7 @@
 }
 
 .permissionList {
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  border: 1px solid var(--border-color);
   overflow: hidden;
 }
 
@@ -425,23 +414,12 @@
 
 .modalActions {
   display: flex;
-  gap: 12px;
-  justify-content: flex-end;
+  gap: 10px;
+  justify-content: center;
   padding: 20px 24px;
   border-top: 1px solid #e5e7eb;
 }
 
-.modalSaveButton {
-  padding: 10px 24px;
-  background-color: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
 
 .modalSaveButton:hover:not(:disabled) {
   background-color: #2563eb;

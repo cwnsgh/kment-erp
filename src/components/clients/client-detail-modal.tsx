@@ -41,32 +41,22 @@ type ClientDetailModalProps = {
   onClose: () => void;
 };
 
-export function ClientDetailModal({
-  client,
-  isOpen,
-  onClose,
-}: ClientDetailModalProps) {
+export function ClientDetailModal({ client, isOpen, onClose }: ClientDetailModalProps) {
   if (!isOpen || !client) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-lg bg-white shadow-xl">
+      <div className={`${styles.clientDetailModal}`}>
         {/* 헤더 */}
-        <div className="sticky top-0 flex items-center justify-between border-b border-slate-200 bg-white px-6 py-4 z-10">
-          <h2 className="text-xl font-semibold text-slate-900">
-            거래처 상세조회
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
-          >
-            <X size={20} />
-          </button>
+        <div className={styles.detailModalHeader}>
+          <div style={{ display: "flex", gap: "8px", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+            <h3>거래처 상세조회</h3>
+            <button type="button" onClick={onClose} className={styles.detailModalClose}></button>
+          </div>
         </div>
 
         {/* 내용 */}
-        <div className={`${styles.clientDetailModalWrapper} white_box`} style={{ paddingBottom: "80px" }}>
+        <div className={`${styles.clientDetailModalWrapper}`}>
           <div className="table_group">
             {/* ERP 정보 */}
             <div className="table_item">
@@ -89,9 +79,7 @@ export function ClientDetailModal({
               <ul className="table_row">
                 <li className="row_group">
                   <div className="table_head">거래처 사업자등록번호</div>
-                  <div className="table_data">
-                    {client.businessRegistrationNumber}
-                  </div>
+                  <div className="table_data">{client.businessRegistrationNumber}</div>
                 </li>
               </ul>
               <ul className="table_row">
@@ -128,42 +116,22 @@ export function ClientDetailModal({
                       <div className="flex items-center gap-2">
                         {client.businessRegistrationFileUrl ? (
                           <>
-                            <a
-                              href={client.businessRegistrationFileUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-sm text-slate-700 hover:text-primary hover:underline"
-                            >
+                            <a href={client.businessRegistrationFileUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-slate-700" style={{ color: "var(--text-gray)" }}>
                               {client.businessRegistrationFile}
                             </a>
-                            <a
-                              href={client.businessRegistrationFileUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-slate-600 hover:text-slate-800"
-                              title="새 탭에서 열기"
-                            >
+                            <a href={client.businessRegistrationFileUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-slate-600 hover:text-slate-800" title="새 탭에서 열기">
                               <Eye size={14} />
                             </a>
-                            <a
-                              href={client.businessRegistrationFileUrl}
-                              download={client.businessRegistrationFile}
-                              className="inline-flex items-center gap-1 text-slate-600 hover:text-slate-800"
-                              title="다운로드"
-                            >
+                            <a href={client.businessRegistrationFileUrl} download={client.businessRegistrationFile} className="inline-flex items-center gap-1 text-slate-600 hover:text-slate-800" title="다운로드">
                               <Download size={14} />
                             </a>
                           </>
                         ) : (
-                          <span className="text-sm text-slate-600">
-                            {client.businessRegistrationFile}
-                          </span>
+                          <span className="text-sm text-slate-600">{client.businessRegistrationFile}</span>
                         )}
                       </div>
                     ) : (
-                      <span className="text-sm text-slate-400">
-                        등록된 파일이 없습니다
-                      </span>
+                      <span className="text-sm text-slate-400">등록된 파일이 없습니다</span>
                     )}
                   </div>
                 </li>
@@ -174,61 +142,31 @@ export function ClientDetailModal({
                       <div className="flex items-center gap-2">
                         {client.signatureFileUrl ? (
                           <>
-                            <a
-                              href={client.signatureFileUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-sm text-slate-700 hover:text-primary hover:underline"
-                            >
+                            <a href={client.signatureFileUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-slate-700" style={{ color: "var(--text-gray)" }}>
                               {client.signatureFile}
                             </a>
-                            <a
-                              href={client.signatureFileUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-slate-600 hover:text-slate-800"
-                              title="새 탭에서 열기"
-                            >
+                            <a href={client.signatureFileUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-slate-600 hover:text-slate-800" title="새 탭에서 열기">
                               <Eye size={14} />
                             </a>
-                            <a
-                              href={client.signatureFileUrl}
-                              download={client.signatureFile}
-                              className="inline-flex items-center gap-1 text-slate-600 hover:text-slate-800"
-                              title="다운로드"
-                            >
+                            <a href={client.signatureFileUrl} download={client.signatureFile} className="inline-flex items-center gap-1 text-slate-600 hover:text-slate-800" title="다운로드">
                               <Download size={14} />
                             </a>
                           </>
                         ) : (
-                          <span className="text-sm text-slate-600">
-                            {client.signatureFile}
-                          </span>
+                          <span className="text-sm text-slate-600">{client.signatureFile}</span>
                         )}
                       </div>
                     ) : (
-                      <span className="text-sm text-slate-400">
-                        등록된 파일이 없습니다
-                      </span>
+                      <span className="text-sm text-slate-400">등록된 파일이 없습니다</span>
                     )}
                   </div>
                 </li>
               </ul>
               <ul className="table_row">
                 <li className="row_group">
-                  <div className="table_head">상태</div>
+                  <div className="table_head">휴·폐업 상태</div>
                   <div className="table_data">
-                    <span
-                      className={`text-sm font-medium ${
-                        client.status === "정상"
-                          ? "text-blue-600"
-                          : client.status === "폐업"
-                          ? "text-red-600"
-                          : "text-slate-600"
-                      }`}
-                    >
-                      {client.status}
-                    </span>
+                    <span className={`text-sm font-medium ${client.status === "정상" ? "status_badge ongoing" : client.status === "폐업" ? "status_badge unpaid" : "status_badge end"}`}>{client.status}</span>
                   </div>
                 </li>
               </ul>
@@ -237,6 +175,7 @@ export function ClientDetailModal({
             {/* 담당자 정보 */}
             {client.contacts.map((contact, index) => (
               <div key={index} className="table_item">
+                <h2 className="table_title">담당자 정보</h2>
                 <h3 className="table_title_sub">담당자{index + 1}</h3>
                 <ul className="table_row">
                   <li className="row_group">
@@ -278,24 +217,12 @@ export function ClientDetailModal({
                 client.sites.map((site, index) => (
                   <ul key={index} className="table_row">
                     <li className="row_group_modal">
-                      <div className="table_data width20">
-                        {site.brandName || ""}
-                      </div>
-                      <div className="table_data width20">
-                        {site.domain || ""}
-                      </div>
-                      <div className="table_data width15">
-                        {site.solution || ""}
-                      </div>
-                      <div className="table_data width15">
-                        {site.loginId || ""}
-                      </div>
-                      <div className="table_data width15">
-                        {site.loginPassword || ""}
-                      </div>
-                      <div className="table_data width15">
-                        {site.type || ""}
-                      </div>
+                      <div className="table_data width20">{site.brandName || ""}</div>
+                      <div className="table_data width20">{site.domain || ""}</div>
+                      <div className="table_data width15">{site.solution || ""}</div>
+                      <div className="table_data width15">{site.loginId || ""}</div>
+                      <div className="table_data width15">{site.loginPassword || ""}</div>
+                      <div className="table_data width15">{site.type || ""}</div>
                     </li>
                   </ul>
                 ))
@@ -308,8 +235,7 @@ export function ClientDetailModal({
                         width: "100%",
                         textAlign: "center",
                         padding: "20px",
-                      }}
-                    >
+                      }}>
                       등록된 사이트가 없습니다
                     </div>
                   </li>
@@ -330,21 +256,18 @@ export function ClientDetailModal({
         {/* 푸터 */}
         <div className="sticky bottom-0 flex items-center justify-center border-t border-slate-200 bg-white px-6 py-4 z-20">
           <div className="btn_wrap">
-            <button
-              type="button"
-              onClick={onClose}
-              className="btn btn_lg normal"
-            >
+            {/* 
+            <button type="button" onClick={onClose} className="btn btn_lg normal">
               닫기
             </button>
+            */}
             <button
               type="button"
               onClick={() => {
                 onClose();
                 window.location.href = `/clients/${client.id}/edit`;
               }}
-              className="btn btn_lg primary"
-            >
+              className="btn btn_lg primary">
               수정
             </button>
           </div>

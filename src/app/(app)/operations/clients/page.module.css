@@ -21,46 +21,6 @@
   font-weight: var(--font-weight-bold);
 }
 
-/* Button Styles */
-.manageClientList :global(.btn) {
-  border: none;
-  border-radius: 4px;
-  font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-  font-size: 15px;
-  display: inline-block;
-  transition: all 0.2s;
-}
-
-.manageClientList :global(.btn.primary) {
-  background-color: var(--primary);
-  color: #fff;
-}
-
-.manageClientList :global(.btn.normal) {
-  background-color: #fff;
-  color: var(--text-color);
-  border: 1px solid var(--border-color);
-}
-
-.manageClientList :global(.btn.normal:hover) {
-  background-color: var(--background-color);
-}
-
-.manageClientList :global(.btn_lg) {
-  height: 42px;
-  padding: 0 20px;
-  line-height: 42px;
-  font-size: 15px;
-}
-
-.manageClientList :global(.btn_md) {
-  height: 30px;
-  line-height: 30px;
-  padding: 0 10px;
-  font-size: 13px;
-  border-radius: 4px;
-}
 
 /* Table Group Styles */
 .manageClientList :global(.table_group) {
@@ -167,6 +127,11 @@
   align-items: flex-start;
 }
 
+.manageClientList :global(.table_group .table_item .table_row .row_group .table_data.pd12 .prefix) {
+  display: inline-block;
+  width: 200px;
+}
+
 .manageClientList :global(.table_group .table_item .text_box) {
   width: 100%;
   border: 1px solid var(--border-color);
@@ -192,13 +157,25 @@
   width: 100%;
 }
 
+.manageClientList :global(.table_wrap .table_title_sub) {
+  font-size: 15px;
+  color: var(--text-gray);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: 20px;
+}
+
+.manageClientList :global(.site-table .site-row:hover) {
+  background-color: transparent;
+}
+
 /* site-table 스타일 */
 .manageClientList :global(.site-table) {
   width: 100%;
   border-collapse: collapse;
-  border: 1px solid var(--border-color);
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
   border-radius: 4px;
-  overflow: hidden;
+
 }
 
 .manageClientList :global(.site-table thead) {
@@ -347,6 +324,10 @@
   justify-content: flex-start !important;
   width: calc(100% - 180px) !important;
   line-height: 25px !important;
+}
+
+.tableData input[type="radio"] {
+  margin-top: 3px;
 }
 
 .tableData.attach {
@@ -549,40 +530,6 @@
   margin-top: 20px !important;
 }
 
-/* 라디오 버튼 스타일 */
-.searchBox input[type="radio"] {
-  appearance: none !important;
-  width: 16px !important;
-  height: 16px !important;
-  border: 1px solid #ddd !important;
-  border-radius: 4px !important;
-  cursor: pointer !important;
-  position: relative !important;
-  margin-right: 10px !important;
-  margin-top: 3px;
-}
-
-.searchBox input[type="radio"]:checked {
-  border-color: var(--positive) !important;
-  background: var(--positive) !important;
-}
-
-.searchBox input[type="radio"]:checked::before {
-  content: "" !important;
-  position: absolute !important;
-  top: 50% !important;
-  left: 50% !important;
-  transform: translate(-50%, -50%) !important;
-  width: 10px !important;
-  height: 10px !important;
-  background: url('/images/check_icon.svg') center center no-repeat !important;
-  background-size: contain !important;
-  z-index: 10 !important;
-}
-
-.searchBox input[type="radio"]:checked+label {
-  color: var(--text-color) !important;
-}
 
 .searchBox label {
   font-size: 14px !important;
@@ -594,23 +541,12 @@
 }
 
 /* 검색 영역 input 스타일 */
-.searchBox input[type="text"],
-.searchBox .searchInput {
-  border: 1px solid var(--border-color) !important;
-  border-radius: 4px !important;
-  height: 36px !important;
-  padding: 4px 4px 4px 14px !important;
-  box-sizing: border-box !important;
-  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif !important;
-  font-size: 14px !important;
-  max-width: 300px !important;
-  width: 100% !important;
-}
+
 
 .searchBox .dateInput {
   border: 1px solid var(--border-color) !important;
   border-radius: 4px !important;
-  height: 36px !important;
+  height: 40px !important;
   padding: 4px 4px 4px 14px !important;
   box-sizing: border-box !important;
   font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif !important;
@@ -639,8 +575,8 @@
   -moz-appearance: none !important;
   appearance: none !important;
   padding: 14px !important;
-  border: 1px solid #ddd !important;
-  height: 36px !important;
+  border: 1px solid var(--border-color) !important;
+  height: 40px !important;
   border-radius: 4px !important;
   box-sizing: border-box !important;
 }
@@ -866,82 +802,6 @@
   align-items: center !important;
   justify-content: center !important;
   font-weight: var(--font-weight-semibold) !important;
-}
-
-/* 체크박스 스타일 */
-.listTable .tableWrap table input[type="checkbox"] {
-  appearance: none !important;
-  width: 16px !important;
-  height: 16px !important;
-  border: 1px solid #ddd !important;
-  border-radius: 4px !important;
-  cursor: pointer !important;
-  position: relative !important;
-  vertical-align: middle !important;
-  margin: 0 !important;
-}
-
-.listTable .tableWrap table input[type="checkbox"]:checked {
-  border-color: var(--positive) !important;
-  background: var(--positive) !important;
-}
-
-.listTable .tableWrap table input[type="checkbox"]:checked::before {
-  content: "" !important;
-  position: absolute !important;
-  top: 50% !important;
-  left: 50% !important;
-  transform: translate(-50%, -50%) !important;
-  width: 10px !important;
-  height: 10px !important;
-  background: url('/images/check_icon.svg') center center no-repeat !important;
-  background-size: contain !important;
-  z-index: 10 !important;
-}
-
-/* 상태 뱃지 스타일 */
-.statusOngoing {
-  display: inline-block !important;
-  font-size: 13px !important;
-  color: var(--primary) !important;
-  font-weight: var(--font-weight-bold) !important;
-  background-color: var(--status-blue) !important;
-  padding: 5px 10px !important;
-  border-radius: 4px !important;
-  line-height: 1 !important;
-}
-
-.statusEnd {
-  display: inline-block !important;
-  font-size: 13px !important;
-  color: var(--text-gray) !important;
-  font-weight: var(--font-weight-bold) !important;
-  background-color: var(--status-gray) !important;
-  padding: 5px 10px !important;
-  border-radius: 4px !important;
-  line-height: 1 !important;
-}
-
-.statusUnpaid {
-  display: inline-block !important;
-  font-size: 13px !important;
-  color: var(--negative) !important;
-  font-weight: var(--font-weight-bold) !important;
-  background-color: var(--status-red) !important;
-  padding: 5px 10px !important;
-  border-radius: 4px !important;
-  line-height: 1 !important;
-}
-
-.statusWait {
-  display: inline-block !important;
-  font-size: 13px !important;
-  color: var(--neutral) !important;
-  font-weight: var(--font-weight-bold) !important;
-  background-color: var(--status-yellow) !important;
-  padding: 5px 10px !important;
-  border-radius: 4px !important;
-  line-height: 1 !important;
 }
 
 /* 페이지네이션 스타일 */

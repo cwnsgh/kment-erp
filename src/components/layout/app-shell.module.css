@@ -15,8 +15,7 @@
   padding: 40px 10px;
 }
 
-.sidebarNav {
-}
+.sidebarNav {}
 
 .menuList {
   list-style: none;
@@ -39,7 +38,7 @@
   padding-top: 0;
 }
 
-.menuItem:not(.hasSub):hover > a {
+.menuItem:not(.hasSub):hover>a {
   border-radius: 10px;
   background-color: var(--hover-bg);
   color: var(--primary);
@@ -58,13 +57,13 @@
   margin-bottom: 0;
 }
 
-.menuItem.active > a {
+.menuItem.active>a {
   border-radius: 10px;
   background-color: var(--hover-bg);
   color: var(--primary);
 }
 
-.menuItem.active > a > .menuText {
+.menuItem.active>a>.menuText {
   font-weight: var(--font-weight-bold);
   line-height: 1;
 }
@@ -77,7 +76,7 @@
   display: block !important;
 }
 
-.menuItem > a {
+.menuItem>a {
   padding: 12px 14px;
   transition: all 0.3s;
 }
@@ -91,7 +90,7 @@
   text-decoration: none;
 }
 
-.menuItem a > .menuText {
+.menuItem a>.menuText {
   font-size: 16px;
   font-weight: var(--font-weight-semibold);
   line-height: 1;
@@ -157,7 +156,7 @@
   text-align: left;
 }
 
-.menuBtn > div {
+.menuBtn>div {
   display: flex;
   gap: 16px;
 }
@@ -188,26 +187,27 @@
   padding-top: 24px;
   padding-bottom: 0;
   opacity: 0;
-  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
-              opacity 0.3s ease-out,
-              padding-bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.3s ease-out,
+    padding-bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   list-style: none;
   padding-left: 0;
   margin: 0;
 }
 
 .menuItem.open .submenu {
-  max-height: 500px; /* JavaScript가 실제 높이로 오버라이드 */
+  max-height: 500px;
+  /* JavaScript가 실제 높이로 오버라이드 */
   opacity: 1;
   padding-top: 24px;
   padding-bottom: 24px;
 }
 
-.submenu > li {
+.submenu>li {
   position: relative;
 }
 
-.submenu > li > a {
+.submenu>li>a {
   padding: 10px;
   transition: all 0.3s;
   margin-bottom: 4px;
@@ -215,22 +215,22 @@
   position: relative;
 }
 
-.submenu > li:last-child {
+.submenu>li:last-child {
   margin-bottom: 4px;
 }
 
-.submenu > li:hover > a {
+.submenu>li:hover>a {
   background: var(--hover-bg);
   border-radius: 10px;
   color: var(--primary);
 }
 
-.submenu > li.active {
+.submenu>li.active {
   background: var(--hover-bg);
   border-radius: 10px;
 }
 
-.submenu > li.active > a {
+.submenu>li.active>a {
   color: var(--primary);
   font-weight: var(--font-weight-bold);
 }
@@ -260,17 +260,17 @@
 
 .notificationBadge {
   position: absolute;
-  top: 6px;
-  right: 6px;
-  background: #ef4444;
+  top: 4px;
+  right: 3px;
+  background: #dc2626;
   color: #fff;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
-  padding: 2px 6px;
+  padding: 1px 4px;
   border-radius: 10px;
   min-width: 18px;
   text-align: center;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 .notifyContainer {
@@ -323,7 +323,7 @@
   flex-direction: column;
 }
 
-.notifySection + .notifySection {
+.notifySection+.notifySection {
   border-top: 1px solid #f1f5f9;
 }
 
@@ -486,7 +486,7 @@
   color: #6b7280;
 }
 
-.submenu > li > a {
+.submenu>li>a {
   color: var(--text-gray);
   font-size: 16px;
   font-weight: var(--font-weight-semibold);
@@ -628,4 +628,3 @@
     transform: translateX(-100%);
   }
 }
-

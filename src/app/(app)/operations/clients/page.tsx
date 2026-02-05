@@ -2,10 +2,7 @@
 
 import { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import {
-  getManagedClients,
-  deleteManagedClients,
-} from "@/app/actions/managed-client";
+import { getManagedClients, deleteManagedClients } from "@/app/actions/managed-client";
 import { buildExcelFilename, downloadExcel } from "@/lib/excel-download";
 import styles from "./page.module.css";
 
@@ -35,12 +32,8 @@ export default function ManagedClientListPage() {
 
   // 검색 필터 상태
   const [searchKeyword, setSearchKeyword] = useState("");
-  const [productType1, setProductType1] = useState<
-    "deduct" | "maintenance" | ""
-  >("");
-  const [status, setStatus] = useState<
-    "ongoing" | "wait" | "end" | "unpaid" | ""
-  >("");
+  const [productType1, setProductType1] = useState<"deduct" | "maintenance" | "">("");
+  const [status, setStatus] = useState<"ongoing" | "wait" | "end" | "unpaid" | "">("");
   const [startDateFrom, setStartDateFrom] = useState("");
   const [startDateTo, setStartDateTo] = useState("");
   const [showDeleteMenu, setShowDeleteMenu] = useState(false);
@@ -53,10 +46,7 @@ export default function ManagedClientListPage() {
     if (startDateFrom) params.set("startDateFrom", startDateFrom);
     if (startDateTo) params.set("startDateTo", startDateTo);
 
-    downloadExcel(
-      `/api/operations/clients/export?${params.toString()}`,
-      buildExcelFilename("관리고객-목록")
-    );
+    downloadExcel(`/api/operations/clients/export?${params.toString()}`, buildExcelFilename("관리고객-목록"));
   };
 
   // 데이터 로드
@@ -109,9 +99,7 @@ export default function ManagedClientListPage() {
 
   // 체크박스 토글
   const handleToggleSelect = (id: string) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
-    );
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
   };
 
   // 전체 선택/해제
@@ -164,10 +152,7 @@ export default function ManagedClientListPage() {
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return "-";
     const date = new Date(dateStr);
-    return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(
-      2,
-      "0"
-    )}.${String(date.getDate()).padStart(2, "0")}`;
+    return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, "0")}.${String(date.getDate()).padStart(2, "0")}`;
   };
 
   // 진행상황 표시
@@ -184,18 +169,16 @@ export default function ManagedClientListPage() {
   // 진행상황 스타일
   const getStatusClass = (status: string) => {
     const classMap: Record<string, string> = {
-      ongoing: styles.statusOngoing,
-      wait: styles.statusWait,
-      end: styles.statusEnd,
-      unpaid: styles.statusUnpaid,
+      ongoing: "status_badge ongoing",
+      wait: "status_badge wait",
+      end: "status_badge end",
+      unpaid: "status_badge unpaid",
     };
     return classMap[status] || "";
   };
 
   return (
-    <section
-      className={`${styles.manageClientList} manageClient_list page_section`}
-    >
+    <section className={`${styles.manageClientList} manageClient_list page_section`}>
       <div className="page_title">
         <h1>관리 고객 조회</h1>
       </div>
@@ -208,91 +191,35 @@ export default function ManagedClientListPage() {
                 <li className={styles.rowGroup}>
                   <div className={styles.tableHead}>회사명(브랜드명)</div>
                   <div className={`${styles.tableData} ${styles.pd12}`}>
-                    <input
-                      type="text"
-                      name="search_name"
-                      value={searchKeyword}
-                      onChange={(e) => setSearchKeyword(e.target.value)}
-                      placeholder=""
-                      className={styles.searchInput}
-                    />
+                    <input type="text" name="search_name" value={searchKeyword} onChange={(e) => setSearchKeyword(e.target.value)} placeholder="" className={styles.searchInput} />
                   </div>
                 </li>
                 <li className={styles.rowGroup}>
                   <div className={styles.tableHead}>관리유형</div>
                   <div className={styles.tableData}>
-                    <input
-                      type="radio"
-                      id="search_type_deduct"
-                      name="search_type1"
-                      value="deduct"
-                      checked={productType1 === "deduct"}
-                      onChange={(e) => setProductType1("deduct")}
-                    />
+                    <input type="radio" id="search_type_deduct" name="search_type1" value="deduct" checked={productType1 === "deduct"} onChange={(e) => setProductType1("deduct")} />
                     <label htmlFor="search_type_deduct">금액차감형</label>
 
-                    <input
-                      type="radio"
-                      id="search_type_maintenance"
-                      name="search_type1"
-                      value="maintenance"
-                      checked={productType1 === "maintenance"}
-                      onChange={(e) => setProductType1("maintenance")}
-                    />
+                    <input type="radio" id="search_type_maintenance" name="search_type1" value="maintenance" checked={productType1 === "maintenance"} onChange={(e) => setProductType1("maintenance")} />
                     <label htmlFor="search_type_maintenance">유지보수형</label>
                   </div>
                 </li>
                 <li className={styles.rowGroup}>
                   <div className={styles.tableHead}>진행 상황</div>
                   <div className={styles.tableData}>
-                    <input
-                      type="radio"
-                      id="search_type_all"
-                      name="search_type2"
-                      value="all"
-                      checked={status === ""}
-                      onChange={(e) => setStatus("")}
-                    />
+                    <input type="radio" id="search_type_all" name="search_type2" value="all" checked={status === ""} onChange={(e) => setStatus("")} />
                     <label htmlFor="search_type_all">전체</label>
 
-                    <input
-                      type="radio"
-                      id="search_type_ongoing"
-                      name="search_type2"
-                      value="ongoing"
-                      checked={status === "ongoing"}
-                      onChange={(e) => setStatus("ongoing")}
-                    />
+                    <input type="radio" id="search_type_ongoing" name="search_type2" value="ongoing" checked={status === "ongoing"} onChange={(e) => setStatus("ongoing")} />
                     <label htmlFor="search_type_ongoing">진행</label>
 
-                    <input
-                      type="radio"
-                      id="search_type_wait"
-                      name="search_type2"
-                      value="wait"
-                      checked={status === "wait"}
-                      onChange={(e) => setStatus("wait")}
-                    />
+                    <input type="radio" id="search_type_wait" name="search_type2" value="wait" checked={status === "wait"} onChange={(e) => setStatus("wait")} />
                     <label htmlFor="search_type_wait">대기</label>
 
-                    <input
-                      type="radio"
-                      id="search_type_unpaid"
-                      name="search_type2"
-                      value="unpaid"
-                      checked={status === "unpaid"}
-                      onChange={(e) => setStatus("unpaid")}
-                    />
+                    <input type="radio" id="search_type_unpaid" name="search_type2" value="unpaid" checked={status === "unpaid"} onChange={(e) => setStatus("unpaid")} />
                     <label htmlFor="search_type_unpaid">미납</label>
 
-                    <input
-                      type="radio"
-                      id="search_type_end"
-                      name="search_type2"
-                      value="end"
-                      checked={status === "end"}
-                      onChange={(e) => setStatus("end")}
-                    />
+                    <input type="radio" id="search_type_end" name="search_type2" value="end" checked={status === "end"} onChange={(e) => setStatus("end")} />
                     <label htmlFor="search_type_end">종료</label>
                   </div>
                 </li>
@@ -300,21 +227,12 @@ export default function ManagedClientListPage() {
                   <div className={styles.tableHead}>시작일</div>
                   <div className={`${styles.tableData} ${styles.pd12}`}>
                     <form action="#" method="get" className={styles.dateGroup}>
-                      <input
-                        type="date"
-                        id="start-date"
-                        name="start-date"
-                        value={startDateFrom}
-                        onChange={(e) => setStartDateFrom(e.target.value)}
-                        className={styles.dateInput}
-                      />
+                      <input type="date" id="start-date" name="start-date" value={startDateFrom} onChange={(e) => setStartDateFrom(e.target.value)} className={styles.dateInput} />
                       <label
                         htmlFor="start-date"
                         onClick={(e) => {
                           e.preventDefault();
-                          const input = document.getElementById(
-                            "start-date"
-                          ) as HTMLInputElement | null;
+                          const input = document.getElementById("start-date") as HTMLInputElement | null;
                           if (input && input.type === "date") {
                             try {
                               // showPicker는 최신 브라우저에서 지원
@@ -324,8 +242,7 @@ export default function ManagedClientListPage() {
                               input.click();
                             }
                           }
-                        }}
-                      >
+                        }}>
                         <img
                           src="/images/date_icon.svg"
                           alt="날짜"
@@ -339,21 +256,12 @@ export default function ManagedClientListPage() {
                         />
                       </label>
                       <span>~</span>
-                      <input
-                        type="date"
-                        id="end-date"
-                        name="end-date"
-                        value={startDateTo}
-                        onChange={(e) => setStartDateTo(e.target.value)}
-                        className={styles.dateInput}
-                      />
+                      <input type="date" id="end-date" name="end-date" value={startDateTo} onChange={(e) => setStartDateTo(e.target.value)} className={styles.dateInput} />
                       <label
                         htmlFor="end-date"
                         onClick={(e) => {
                           e.preventDefault();
-                          const input = document.getElementById(
-                            "end-date"
-                          ) as HTMLInputElement | null;
+                          const input = document.getElementById("end-date") as HTMLInputElement | null;
                           if (input && input.type === "date") {
                             try {
                               // showPicker는 최신 브라우저에서 지원
@@ -363,8 +271,7 @@ export default function ManagedClientListPage() {
                               input.click();
                             }
                           }
-                        }}
-                      >
+                        }}>
                         <img
                           src="/images/date_icon.svg"
                           alt="날짜"
@@ -383,11 +290,7 @@ export default function ManagedClientListPage() {
               </ul>
             </div>
             <div className={styles.btnWrap}>
-              <button
-                type="button"
-                className="btn btn_lg primary"
-                onClick={handleSearch}
-              >
+              <button type="button" className="btn btn_lg primary" onClick={handleSearch}>
                 검색
               </button>
               <button
@@ -399,8 +302,7 @@ export default function ManagedClientListPage() {
                   setStatus("");
                   setStartDateFrom("");
                   setStartDateTo("");
-                }}
-              >
+                }}>
                 초기화
               </button>
             </div>
@@ -415,19 +317,8 @@ export default function ManagedClientListPage() {
                 </p>
               </div>
               <div className={styles.topBtnGroup}>
-                <div
-                  className={`${styles.deleteBtn} ${
-                    showDeleteMenu ? styles.show : ""
-                  }`}
-                  onMouseEnter={() => setShowDeleteMenu(true)}
-                  onMouseLeave={() => setShowDeleteMenu(false)}
-                >
-                  <button
-                    type="button"
-                    className="btn primary btn_md"
-                    id="deleteClick"
-                    onClick={() => setShowDeleteMenu(!showDeleteMenu)}
-                  >
+                <div className={`${styles.deleteBtn} ${showDeleteMenu ? styles.show : ""}`} onMouseEnter={() => setShowDeleteMenu(true)} onMouseLeave={() => setShowDeleteMenu(false)}>
+                  <button type="button" className="btn primary btn_md" id="deleteClick" onClick={() => setShowDeleteMenu(!showDeleteMenu)}>
                     삭제
                   </button>
                   <ul className={styles.deleteGroup}>
@@ -438,8 +329,7 @@ export default function ManagedClientListPage() {
                         onClick={() => {
                           handleSelectAll(true);
                           setShowDeleteMenu(false);
-                        }}
-                      >
+                        }}>
                         전체 선택
                       </button>
                     </li>
@@ -451,18 +341,13 @@ export default function ManagedClientListPage() {
                           handleDelete();
                           setShowDeleteMenu(false);
                         }}
-                        disabled={selectedIds.length === 0}
-                      >
+                        disabled={selectedIds.length === 0}>
                         선택 삭제
                       </button>
                     </li>
                   </ul>
                 </div>
-                <button
-                  type="button"
-                  className={`${styles.excelBtn} btn btn_md normal`}
-                  onClick={handleExcelDownload}
-                >
+                <button type="button" className={`${styles.excelBtn} btn btn_md normal`} onClick={handleExcelDownload}>
                   엑셀다운로드
                 </button>
                 <select className={styles.viewSelect}>
@@ -488,15 +373,7 @@ export default function ManagedClientListPage() {
                 <thead>
                   <tr>
                     <th>
-                      <input
-                        type="checkbox"
-                        id="checkAll"
-                        checked={
-                          managedClients.length > 0 &&
-                          selectedIds.length === managedClients.length
-                        }
-                        onChange={(e) => handleSelectAll(e.target.checked)}
-                      />
+                      <input type="checkbox" id="checkAll" checked={managedClients.length > 0 && selectedIds.length === managedClients.length} onChange={(e) => handleSelectAll(e.target.checked)} />
                     </th>
                     <th>번호</th>
                     <th>회사명</th>
@@ -510,19 +387,13 @@ export default function ManagedClientListPage() {
                 <tbody>
                   {isLoading ? (
                     <tr>
-                      <td
-                        colSpan={8}
-                        style={{ textAlign: "center", padding: "30px 0" }}
-                      >
+                      <td colSpan={8} style={{ textAlign: "center", padding: "30px 0" }}>
                         로딩 중...
                       </td>
                     </tr>
                   ) : managedClients.length === 0 ? (
                     <tr>
-                      <td
-                        colSpan={8}
-                        style={{ textAlign: "center", padding: "30px 0" }}
-                      >
+                      <td colSpan={8} style={{ textAlign: "center", padding: "30px 0" }}>
                         데이터가 없습니다.
                       </td>
                     </tr>
@@ -530,30 +401,15 @@ export default function ManagedClientListPage() {
                     managedClients.map((mc, index) => (
                       <tr key={mc.id}>
                         <td>
-                          <input
-                            type="checkbox"
-                            className="rowCheck"
-                            checked={selectedIds.includes(mc.id)}
-                            onChange={() => handleToggleSelect(mc.id)}
-                          />
+                          <input type="checkbox" className="rowCheck" checked={selectedIds.includes(mc.id)} onChange={() => handleToggleSelect(mc.id)} />
                         </td>
                         <td>{totalCount - (currentPage - 1) * 20 - index}</td>
                         <td>{mc.companyName}</td>
                         <td>{mc.brandNames.join(", ") || "-"}</td>
+                        <td>{formatProductType(mc.productType1, mc.productType2)}</td>
+                        <td>{!mc.startDate && !mc.endDate ? "-" : `${formatDate(mc.startDate)}(${formatDate(mc.endDate)})`}</td>
                         <td>
-                          {formatProductType(mc.productType1, mc.productType2)}
-                        </td>
-                        <td>
-                          {!mc.startDate && !mc.endDate
-                            ? "-"
-                            : `${formatDate(mc.startDate)}(${formatDate(
-                                mc.endDate
-                              )})`}
-                        </td>
-                        <td>
-                          <span className={getStatusClass(mc.status)}>
-                            {getStatusLabel(mc.status)}
-                          </span>
+                          <span className={getStatusClass(mc.status)}>{getStatusLabel(mc.status)}</span>
                         </td>
                         <td>
                           <ul className="manageBtn">
@@ -563,8 +419,7 @@ export default function ManagedClientListPage() {
                                 className="btn normal"
                                 onClick={() => {
                                   router.push(`/operations/clients/${mc.id}`);
-                                }}
-                              >
+                                }}>
                                 고객조회
                               </button>
                             </li>
@@ -574,8 +429,7 @@ export default function ManagedClientListPage() {
                                 className="btn normal"
                                 onClick={() => {
                                   router.push(`/operations/clients/${mc.id}/tasks`);
-                                }}
-                              >
+                                }}>
                                 업무조회
                               </button>
                             </li>
@@ -592,12 +446,10 @@ export default function ManagedClientListPage() {
 
         {/* 페이지네이션 */}
         {totalPages > 1 && (
-          <div className={styles.pagination}>
+          <div className={`${styles.pagination}} pagination`}>
             <ul>
               <li
-                className={`${styles.page} ${styles.first} ${
-                  currentPage === 1 ? styles.disabled : ""
-                }`}
+                className={`${styles.page} ${styles.first} ${currentPage === 1 ? styles.disabled : ""} page first`}
                 style={{
                   cursor: currentPage === 1 ? "not-allowed" : "pointer",
                 }}
@@ -605,12 +457,9 @@ export default function ManagedClientListPage() {
                   if (currentPage !== 1) {
                     loadData(1);
                   }
-                }}
-              ></li>
+                }}></li>
               <li
-                className={`${styles.page} ${styles.prev} ${
-                  currentPage === 1 ? styles.disabled : ""
-                }`}
+                className={`${styles.page} ${styles.prev} ${currentPage === 1 ? styles.disabled : ""} page prev`}
                 style={{
                   cursor: currentPage === 1 ? "not-allowed" : "pointer",
                 }}
@@ -618,52 +467,34 @@ export default function ManagedClientListPage() {
                   if (currentPage !== 1) {
                     loadData(currentPage - 1);
                   }
-                }}
-              ></li>
+                }}></li>
 
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                (page) => (
-                  <li
-                    key={page}
-                    className={`${styles.page} ${
-                      currentPage === page ? styles.active : ""
-                    }`}
-                    style={{ cursor: "pointer" }}
-                    onClick={() => loadData(page)}
-                  >
-                    {page}
-                  </li>
-                )
-              )}
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <li key={page} className={`${styles.page} ${currentPage === page ? styles.active : ""} page active`} style={{ cursor: "pointer" }} onClick={() => loadData(page)}>
+                  {page}
+                </li>
+              ))}
 
               <li
-                className={`${styles.page} ${styles.next} ${
-                  currentPage === totalPages ? styles.disabled : ""
-                }`}
+                className={`${styles.page} ${styles.next} ${currentPage === totalPages ? styles.disabled : ""} page next`}
                 style={{
-                  cursor:
-                    currentPage === totalPages ? "not-allowed" : "pointer",
+                  cursor: currentPage === totalPages ? "not-allowed" : "pointer",
                 }}
                 onClick={() => {
                   if (currentPage !== totalPages) {
                     loadData(currentPage + 1);
                   }
-                }}
-              ></li>
+                }}></li>
               <li
-                className={`${styles.page} ${styles.last} ${
-                  currentPage === totalPages ? styles.disabled : ""
-                }`}
+                className={`${styles.page} ${styles.last} ${currentPage === totalPages ? styles.disabled : ""} page last`}
                 style={{
-                  cursor:
-                    currentPage === totalPages ? "not-allowed" : "pointer",
+                  cursor: currentPage === totalPages ? "not-allowed" : "pointer",
                 }}
                 onClick={() => {
                   if (currentPage !== totalPages) {
                     loadData(totalPages);
                   }
-                }}
-              ></li>
+                }}></li>
             </ul>
           </div>
         )}

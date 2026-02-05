@@ -83,11 +83,7 @@ export function ClientTable({ initialClients }: ClientTableProps) {
         case "ceo":
           return client.ceo_name?.toLowerCase().includes(query) || false;
         case "business_number":
-          return (
-            normalizeBusinessNumber(client.business_registration_number).includes(
-              normalizeBusinessNumber(query)
-            )
-          );
+          return normalizeBusinessNumber(client.business_registration_number).includes(normalizeBusinessNumber(query));
         default:
           return true;
       }
@@ -136,20 +132,14 @@ export function ClientTable({ initialClients }: ClientTableProps) {
     setLoading(false);
   };
 
-  const handleRowKeyDown = (
-    event: React.KeyboardEvent<HTMLTableRowElement>,
-    clientId: string
-  ) => {
+  const handleRowKeyDown = (event: React.KeyboardEvent<HTMLTableRowElement>, clientId: string) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       void handleRowClick(clientId);
     }
   };
 
-  const handlePageKeyDown = (
-    event: React.KeyboardEvent<HTMLLIElement>,
-    action: () => void
-  ) => {
+  const handlePageKeyDown = (event: React.KeyboardEvent<HTMLLIElement>, action: () => void) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       action();
@@ -163,10 +153,7 @@ export function ClientTable({ initialClients }: ClientTableProps) {
       params.set("searchQuery", searchQuery.trim());
     }
 
-    downloadExcel(
-      `/api/clients/export?${params.toString()}`,
-      buildExcelFilename("거래처-목록")
-    );
+    downloadExcel(`/api/clients/export?${params.toString()}`, buildExcelFilename("거래처-목록"));
   };
 
   const handleDeleteSelected = () => {
@@ -187,10 +174,7 @@ export function ClientTable({ initialClients }: ClientTableProps) {
       const result = await refreshBusinessStatus([]);
 
       if (result.success) {
-        alert(
-          result.message ||
-            `총 ${result.updated}건의 상태가 업데이트되었습니다.`
-        );
+        alert(result.message || `총 ${result.updated}건의 상태가 업데이트되었습니다.`);
         // 클라이언트 목록 다시 로드
         const clientsResult = await getClients();
         if (clientsResult.success && clientsResult.clients) {
@@ -216,21 +200,12 @@ export function ClientTable({ initialClients }: ClientTableProps) {
           {/* 검색 필터 */}
           <div className={styles.searchBox}>
             <div className={styles.searchFlex}>
-              <select
-                value={searchType}
-                onChange={(e) => setSearchType(e.target.value as SearchType)}
-              >
+              <select value={searchType} onChange={(e) => setSearchType(e.target.value as SearchType)}>
                 <option value="company">회사명</option>
                 <option value="business_number">사업자 등록 번호</option>
                 <option value="ceo">대표자명</option>
               </select>
-              <input
-                type="text"
-                name="search_name"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder=""
-              />
+              <input type="text" name="search_name" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="" />
               <button type="button" className="btn btn_lg primary">
                 검색
               </button>
@@ -246,51 +221,26 @@ export function ClientTable({ initialClients }: ClientTableProps) {
                 </p>
               </div>
               <div className={styles.topBtnGroup}>
-                <button
-                  type="button"
-                  onClick={handleSelectAll}
-                  className="btn btn_md normal"
-                >
+                <button type="button" onClick={handleSelectAll} className="btn btn_md normal">
                   전체 선택
                 </button>
-                <button
-                  type="button"
-                  onClick={handleRefreshStatus}
-                  disabled={refreshing}
-                  className="btn btn_md normal disabled:opacity-50"
-                >
-                  <RefreshCw
-                    size={16}
-                    className={`inline mr-1 ${
-                      refreshing ? "animate-spin" : ""
-                    }`}
-                  />
+                <button type="button" onClick={handleRefreshStatus} disabled={refreshing} className="btn btn_md normal disabled:opacity-50" style={{ display: "flex", alignItems: "center" }}>
+                  <RefreshCw size={14} className={`inline mr-1 ${refreshing ? "animate-spin" : ""}`} />
                   전체 상태 새로고침
                 </button>
-                <button
-                  type="button"
-                  onClick={handleDeleteSelected}
-                  disabled={selectedRows.size === 0}
-                  className="btn btn_md primary disabled:opacity-50"
-                >
+                <button type="button" onClick={handleDeleteSelected} disabled={selectedRows.size === 0} className="btn btn_md primary disabled:opacity-50">
                   선택 삭제
                 </button>
-                <button
-                  type="button"
-                  className="btn btn_md normal excel_btn"
-                  onClick={handleExcelDownload}
-                >
-                  <Download size={16} className="inline mr-1" />
+                <button type="button" className="btn btn_md normal excel_btn" onClick={handleExcelDownload}>
                   엑셀다운로드
                 </button>
                 <select
-                  className="view_select"
+                  className="viewSelect"
                   value={itemsPerPage}
                   onChange={(e) => {
                     setItemsPerPage(Number(e.target.value));
                     setCurrentPage(1);
-                  }}
-                >
+                  }}>
                   <option value={10}>10개씩 보기</option>
                   <option value={30}>50개씩 보기</option>
                   <option value={50}>100개씩 보기</option>
@@ -314,15 +264,7 @@ export function ClientTable({ initialClients }: ClientTableProps) {
               <thead>
                 <tr>
                   <th>
-                    <input
-                      type="checkbox"
-                      id="checkAll"
-                      checked={
-                        selectedRows.size === currentClients.length &&
-                        currentClients.length > 0
-                      }
-                      onChange={handleSelectAll}
-                    />
+                    <input type="checkbox" id="checkAll" checked={selectedRows.size === currentClients.length && currentClients.length > 0} onChange={handleSelectAll} />
                   </th>
                   <th>번호</th>
                   <th>사업자 등록 번호</th>
@@ -337,34 +279,16 @@ export function ClientTable({ initialClients }: ClientTableProps) {
                   const status = mapStatus(client.status);
 
                   return (
-                    <tr
-                      key={client.id}
-                      onClick={() => handleRowClick(client.id)}
-                      onKeyDown={(event) => handleRowKeyDown(event, client.id)}
-                      role="button"
-                      tabIndex={0}
-                      className={
-                        loading && selectedClientId === client.id
-                          ? "opacity-50"
-                          : ""
-                      }
-                    >
+                    <tr key={client.id} onClick={() => handleRowClick(client.id)} onKeyDown={(event) => handleRowKeyDown(event, client.id)} role="button" tabIndex={0} className={loading && selectedClientId === client.id ? "opacity-50" : ""}>
                       <td onClick={(e) => e.stopPropagation()}>
-                        <input
-                          type="checkbox"
-                          className="rowCheck"
-                          checked={isSelected}
-                          onChange={() => handleRowSelect(client.id)}
-                        />
+                        <input type="checkbox" className="rowCheck" checked={isSelected} onChange={() => handleRowSelect(client.id)} />
                       </td>
                       <td>{startIndex + idx + 1}</td>
                       <td>{client.business_registration_number}</td>
                       <td>{client.name}</td>
                       <td>{client.ceo_name || ""}</td>
                       <td>
-                        <span className={getStatusClassName(status)}>
-                          {status}
-                        </span>
+                        <span className={getStatusClassName(status)}>{status}</span>
                       </td>
                     </tr>
                   );
@@ -375,34 +299,10 @@ export function ClientTable({ initialClients }: ClientTableProps) {
         </div>
 
         {/* 페이지네이션 */}
-        <div className={styles.pagination}>
+        <div className={`${styles.pagination} pagination`}>
           <ul>
-            <li
-              className={`${styles.page} ${styles.first} ${
-                currentPage === 1 ? styles.disabled : ""
-              }`}
-              onClick={() => currentPage !== 1 && setCurrentPage(1)}
-              onKeyDown={(event) =>
-                handlePageKeyDown(event, () => currentPage !== 1 && setCurrentPage(1))
-              }
-              role="button"
-              tabIndex={0}
-            ></li>
-            <li
-              className={`${styles.page} ${styles.prev} ${
-                currentPage === 1 ? styles.disabled : ""
-              }`}
-              onClick={() =>
-                currentPage !== 1 && setCurrentPage((p) => Math.max(1, p - 1))
-              }
-              onKeyDown={(event) =>
-                handlePageKeyDown(event, () =>
-                  currentPage !== 1 && setCurrentPage((p) => Math.max(1, p - 1))
-                )
-              }
-              role="button"
-              tabIndex={0}
-            ></li>
+            <li className={`${styles.page} ${styles.first} ${currentPage === 1 ? styles.disabled : ""} page first`} onClick={() => currentPage !== 1 && setCurrentPage(1)} onKeyDown={(event) => handlePageKeyDown(event, () => currentPage !== 1 && setCurrentPage(1))} role="button" tabIndex={0}></li>
+            <li className={`${styles.page} ${styles.prev} ${currentPage === 1 ? styles.disabled : ""} page prev`} onClick={() => currentPage !== 1 && setCurrentPage((p) => Math.max(1, p - 1))} onKeyDown={(event) => handlePageKeyDown(event, () => currentPage !== 1 && setCurrentPage((p) => Math.max(1, p - 1)))} role="button" tabIndex={0}></li>
 
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
               let pageNum;
@@ -417,55 +317,14 @@ export function ClientTable({ initialClients }: ClientTableProps) {
               }
 
               return (
-                <li
-                  key={pageNum}
-                  className={`${styles.page} ${
-                    currentPage === pageNum ? styles.active : ""
-                  }`}
-                  onClick={() => setCurrentPage(pageNum)}
-                  onKeyDown={(event) =>
-                    handlePageKeyDown(event, () => setCurrentPage(pageNum))
-                  }
-                  role="button"
-                  tabIndex={0}
-                >
+                <li key={pageNum} className={`${styles.page} ${currentPage === pageNum ? styles.active : ""} page active`} onClick={() => setCurrentPage(pageNum)} onKeyDown={(event) => handlePageKeyDown(event, () => setCurrentPage(pageNum))} role="button" tabIndex={0}>
                   {pageNum}
                 </li>
               );
             })}
 
-            <li
-              className={`${styles.page} ${styles.next} ${
-                currentPage === totalPages ? styles.disabled : ""
-              }`}
-              onClick={() =>
-                currentPage !== totalPages &&
-                setCurrentPage((p) => Math.min(totalPages, p + 1))
-              }
-              onKeyDown={(event) =>
-                handlePageKeyDown(event, () =>
-                  currentPage !== totalPages &&
-                  setCurrentPage((p) => Math.min(totalPages, p + 1))
-                )
-              }
-              role="button"
-              tabIndex={0}
-            ></li>
-            <li
-              className={`${styles.page} ${styles.last} ${
-                currentPage === totalPages ? styles.disabled : ""
-              }`}
-              onClick={() =>
-                currentPage !== totalPages && setCurrentPage(totalPages)
-              }
-              onKeyDown={(event) =>
-                handlePageKeyDown(event, () =>
-                  currentPage !== totalPages && setCurrentPage(totalPages)
-                )
-              }
-              role="button"
-              tabIndex={0}
-            ></li>
+            <li className={`${styles.page} ${styles.next} ${currentPage === totalPages ? styles.disabled : ""} page next`} onClick={() => currentPage !== totalPages && setCurrentPage((p) => Math.min(totalPages, p + 1))} onKeyDown={(event) => handlePageKeyDown(event, () => currentPage !== totalPages && setCurrentPage((p) => Math.min(totalPages, p + 1)))} role="button" tabIndex={0}></li>
+            <li className={`${styles.page} ${styles.last} ${currentPage === totalPages ? styles.disabled : ""} page last`} onClick={() => currentPage !== totalPages && setCurrentPage(totalPages)} onKeyDown={(event) => handlePageKeyDown(event, () => currentPage !== totalPages && setCurrentPage(totalPages))} role="button" tabIndex={0}></li>
           </ul>
         </div>
       </div>

@@ -1,94 +1,3 @@
-/* Button Styles */
-.manageClientRegist :global(.btn) {
-  border: none;
-  border-radius: 6px;
-  font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-  font-size: 15px;
-  display: inline-block;
-  transition: background-color 0.2s, color 0.2s, border-color 0.2s,
-    box-shadow 0.2s;
-}
-
-.manageClientRegist :global(.btn.primary) {
-  background-color: var(--primary);
-  color: #fff;
-}
-
-.manageClientRegist :global(.btn.normal) {
-  background-color: #fff;
-  color: var(--text-color);
-  border: 1px solid var(--border-color);
-}
-
-.manageClientRegist :global(.btn.normal:hover) {
-  background-color: var(--background-color);
-}
-
-.manageClientRegist :global(.btn.black) {
-  background-color: var(--text-color);
-  color: #fff;
-  border: 1px solid var(--text-color);
-  position: absolute;
-  right: 50px;
-  top: 60px;
-}
-
-.manageClientRegist :global(.btn.black:hover) {
-  background-color: #0f172a;
-}
-
-.manageClientRegist :global(.btn_lg) {
-  height: 42px;
-  padding: 0 20px;
-  line-height: 42px;
-  font-size: 15px;
-}
-
-.manageClientRegist :global(.btn_md) {
-  height: 30px;
-  line-height: 30px;
-  padding: 0 10px;
-  font-size: 13px;
-  border-radius: 4px;
-}
-
-.manageClientRegist :global(.btn_wrap) {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-
-/* Page Section Styles */
-.manageClientRegist :global(.page_section) {
-  max-width: 1100px;
-  margin: 80px auto 100px;
-}
-
-.manageClientRegist :global(.page_title) {
-  text-align: left;
-  margin: 0 auto 30px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.manageClientRegist :global(.page_title h1) {
-  font-size: 32px;
-  font-weight: var(--font-weight-bold);
-}
-
-.manageClientRegist :global(.white_box) {
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
-  width: 100%;
-  padding: 60px 50px 100px;
-  box-sizing: border-box;
-  position: relative;
-}
-
 /* Table Group Styles */
 .manageClientRegist :global(.table_group) {
   display: flex;
@@ -224,10 +133,11 @@
   flex-shrink: 0 !important;
   transition: transform 0.3s ease !important;
   opacity: 0.5;
+  transform: rotate(-90deg);
 }
 
 .tableToggle.rotated {
-  transform: rotate(180deg) !important;
+  transform: rotate(90deg) !important;
 }
 
 /* 날짜 입력 필드 스타일 */
@@ -235,7 +145,6 @@
   display: flex !important;
   flex-direction: row !important;
   align-items: center !important;
-  gap: 10px !important;
   flex-wrap: nowrap !important;
   width: 100% !important;
 }
@@ -257,10 +166,10 @@
 }
 
 .dateGroup label img {
-  width: 24px !important;
-  height: 24px !important;
-  min-width: 24px !important;
-  min-height: 24px !important;
+  width: 16px !important;
+  height: 16px !important;
+  min-width: 16px !important;
+  min-height: 16px !important;
   object-fit: contain !important;
   display: block !important;
   vertical-align: middle !important;
@@ -374,9 +283,9 @@
 .manageClientRegist :global(.site-table) {
   width: 100%;
   border-collapse: collapse;
-  border: 1px solid var(--border-color);
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
   border-radius: 4px;
-  overflow: hidden;
 }
 
 .manageClientRegist :global(.site-table thead) {
@@ -391,6 +300,10 @@
   background: var(--background-color);
   color: var(--text-color);
   font-size: 14px;
+}
+
+.manageClientRegist :global(.site-table .site-row:hover) {
+  background-color: transparent;
 }
 
 .manageClientRegist :global(.site-table td) {

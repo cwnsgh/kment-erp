@@ -1,122 +1,36 @@
-/* Client List Styles */
-
-/* Button Styles */
-.clientTableWrapper :global(.btn) {
-  border: none;
-  border-radius: 6px;
-  font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-  font-size: 15px;
-  display: inline-block;
-  transition: all 0.2s;
-}
-
-.clientTableWrapper :global(.btn.primary) {
-  background-color: var(--primary);
-  color: #fff;
-}
-
-.clientTableWrapper :global(.btn.normal) {
-  background-color: #fff;
-  color: var(--text-color);
-  border: 1px solid var(--border-color);
-}
-
-.clientTableWrapper :global(.btn.normal:hover) {
-  background-color: var(--background-color);
-}
-
-.clientTableWrapper :global(.btn_lg) {
-  height: 42px;
-  padding: 0 20px;
-  line-height: 42px;
-  font-size: 15px;
-}
-
-.clientTableWrapper :global(.btn_md) {
-  height: 30px;
-  line-height: 30px;
-  padding: 0 10px;
-  font-size: 13px;
-  border-radius: 4px;
-}
-
-.clientTableWrapper :global(.white_box) {
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
-  width: 100%;
-  padding: 60px 50px 100px;
-  box-sizing: border-box;
-  position: relative;
-}
-
-.clientTableWrapper :global(.box_inner) {
-  width: 100%;
-}
-
-.searchBox {
-  box-sizing: border-box;
-  padding: 0 40px;
-}
-
 /* 검색 영역 내에서 버튼 스타일 적용 */
-.searchBox :global(.btn) {
-  border: none;
-  border-radius: 6px;
-  font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-  font-size: 15px;
-  display: inline-block;
-  transition: all 0.2s;
-}
-
-.searchBox :global(.btn.primary) {
-  background-color: var(--primary);
-  color: #fff;
-}
-
-.searchBox :global(.btn.normal) {
-  background-color: #fff;
-  color: var(--text-color);
-  border: 1px solid var(--border-color);
-}
-
-.searchBox :global(.btn.normal:hover) {
-  background-color: var(--background-color);
-}
-
-.searchBox :global(.btn_lg) {
-  height: 42px;
-  padding: 0 20px;
-  line-height: 42px;
-  font-size: 15px;
-}
-
-.searchBox :global(.btn_md) {
-  height: 30px;
-  line-height: 30px;
-  padding: 0 10px;
-  font-size: 13px;
-  border-radius: 4px;
+.clientTableWrapper :global(.white_box) {
+  padding: 50px 0 100px;
 }
 
 .searchBox .searchFlex {
   display: flex;
   align-items: center;
   gap: 4px;
+  padding: 0 30px;
+  width: 50%;
 }
 
 .searchBox .searchFlex input[type="text"] {
-  height: 40px;
-  line-height: 40px;
+  flex: 1;
   margin-right: 6px;
-  width: 300px;
 }
 
 .searchBox .searchFlex select {
-  height: 40px;
-  width: 120px;
+  height: 42px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  padding: 0 12px;
+  font-size: 13px;
+  color: #475569;
+  background: #fff;
+  cursor: pointer;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background: url(/images/select_arrow.svg) no-repeat center right 10px;
+  padding-right: 32px;
+  background-size: 12px 10px;
 }
 
 /* 페이지 목록 테이블 공통 css */
@@ -129,7 +43,7 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 20px;
-  padding: 0 40px;
+  padding: 0 30px;
 }
 
 .listTable .tableWrap table tr:last-child {
@@ -142,7 +56,7 @@
   color: var(--text-gray);
 }
 
-.listTable .tableTop .topTotal p > span {
+.listTable .tableTop .topTotal p>span {
   color: var(--primary);
   font-weight: var(--font-weight-bold);
 }
@@ -162,13 +76,11 @@
   background-color: #fff;
 }
 
-.tableWrap {
-  padding: 0 40px;
-}
 
 .tableWrap table {
   text-align: center;
   width: 100%;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .tableWrap table th {
@@ -187,7 +99,7 @@
 }
 
 .tableWrap table td {
-  padding: 16px 10px;
+  padding: 30px 10px;
   font-size: 14px;
   font-weight: var(--font-weight-medium);
   vertical-align: middle;
@@ -195,65 +107,6 @@
   box-sizing: border-box;
 }
 
-.pagination {
-  margin-top: 60px;
-  text-align: center;
-}
-
-.pagination ul {
-  display: inline-flex;
-  gap: 6px;
-}
-
-.pagination .page {
-  min-width: 26px;
-  height: 26px;
-  font-size: 15px;
-  font-weight: var(--font-weight-bold);
-  opacity: 0.4;
-  line-height: 26px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  background: transparent;
-}
-
-.pagination .page.active {
-  opacity: 1;
-}
-
-.pagination .page.disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.pagination .page.first {
-  background: url(/images/page_last_icon.svg) no-repeat center center;
-  transform: rotate(180deg);
-  background-size: 12px;
-  opacity: 1;
-}
-
-.pagination .page.prev {
-  background: url(/images/arrow_icon.svg) no-repeat center center;
-  transform: rotate(180deg);
-  background-size: 12px;
-  opacity: 1;
-}
-
-.pagination .page.next {
-  background: url(/images/arrow_icon.svg) no-repeat center center;
-  background-size: 12px;
-  opacity: 1;
-}
-
-.pagination .page.last {
-  background: url(/images/page_last_icon.svg) no-repeat center center;
-  background-size: 12px;
-  opacity: 1;
-}
 
 /* Status styles (global에서 가져옴) */
 .statusOngoing {

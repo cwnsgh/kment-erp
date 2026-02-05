@@ -75,8 +75,20 @@ a img {
   pointer-events: auto;
 }
 
-a {
+/*a {
   @apply text-primary hover:underline;
+}*/
+
+.positive {
+  color: var(--positive)
+}
+
+.negative {
+  color: var(--negative)
+}
+
+.neutral {
+  color: var(--background-color)
 }
 
 .glass-card {
@@ -99,7 +111,7 @@ input[type="number"],
 textarea {
   border: 1px solid var(--line-color);
   border-radius: 4px;
-  height: 36px;
+  height: 40px;
   padding: 4px 4px 4px 14px;
   box-sizing: border-box;
   font-family: "Pretendard Variable", Pretendard, -apple-system,
@@ -109,6 +121,7 @@ textarea {
   font-size: 14px;
   width: 100%;
   background: #fff;
+  font-weight: var(--font-weight-regular);
 }
 
 textarea {
@@ -157,6 +170,37 @@ input[type="radio"]:checked+label {
   color: var(--text-color);
 }
 
+input[type="checkbox"] {
+  appearance: none !important;
+  width: 16px !important;
+  height: 16px !important;
+  border: 1px solid #ddd !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  position: relative !important;
+  vertical-align: middle !important;
+  margin: 0 !important;
+  background-color: #fff;
+}
+
+input[type="checkbox"]:checked {
+  border-color: var(--positive) !important;
+  background: var(--positive) !important;
+}
+
+input[type="checkbox"]:checked::before {
+  content: "" !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: 10px !important;
+  height: 10px !important;
+  background: url('/images/check_icon.svg') center center no-repeat !important;
+  background-size: contain !important;
+  z-index: 10 !important;
+}
+
 label {
   font-size: 14px;
   color: var(--text-gray);
@@ -167,4 +211,250 @@ label {
 
 main.bg-white {
   background: var(--background-color);
+}
+
+/* 상태 뱃지 스타일 */
+.status_badge.ongoing {
+  display: inline-block !important;
+  font-size: 13px !important;
+  color: var(--primary) !important;
+  font-weight: var(--font-weight-bold) !important;
+  background-color: var(--status-blue) !important;
+  padding: 5px 10px !important;
+  border-radius: 4px !important;
+  line-height: 1 !important;
+}
+
+.status_badge.end {
+  display: inline-block !important;
+  font-size: 13px !important;
+  color: var(--text-gray) !important;
+  font-weight: var(--font-weight-bold) !important;
+  background-color: var(--status-gray) !important;
+  padding: 5px 10px !important;
+  border-radius: 4px !important;
+  line-height: 1 !important;
+}
+
+.status_badge.unpaid {
+  display: inline-block !important;
+  font-size: 13px !important;
+  color: var(--negative) !important;
+  font-weight: var(--font-weight-bold) !important;
+  background-color: var(--status-red) !important;
+  padding: 5px 10px !important;
+  border-radius: 4px !important;
+  line-height: 1 !important;
+}
+
+.status_badge.wait {
+  display: inline-block !important;
+  font-size: 13px !important;
+  color: var(--neutral) !important;
+  font-weight: var(--font-weight-bold) !important;
+  background-color: var(--status-yellow) !important;
+  padding: 5px 10px !important;
+  border-radius: 4px !important;
+  line-height: 1 !important;
+}
+
+/*버튼 공통 스타일*/
+.btn {
+  border: none;
+  border-radius: 4px;
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  font-size: 15px;
+  display: inline-block;
+  transition: all 0.2s;
+}
+
+.btn.primary {
+  background-color: var(--primary);
+  color: #fff;
+}
+
+.btn.primary:hover {
+  background-color: #2563eb;
+}
+
+.btn.normal {
+  background-color: #fff;
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+}
+
+.btn.normal:hover {
+  background-color: var(--background-color);
+}
+
+.btn.black {
+  background-color: var(--text-color);
+  color: #fff;
+  border: 1px solid var(--text-color);
+}
+
+.btn_lg {
+  height: 40px;
+  padding: 0 20px;
+  line-height: 40px;
+  font-size: 15px;
+}
+
+.btn_md {
+  height: 30px;
+  line-height: 30px;
+  padding: 0 10px;
+  font-size: 13px;
+  border-radius: 4px;
+}
+
+.btn_sm {
+  height: 24px;
+  line-height: 24px;
+  padding: 0 14px;
+  font-size: 12px;
+}
+
+.btn_wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.import_btn {
+  position: absolute;
+  right: 50px;
+  top: 60px;
+}
+
+.plus_btn {
+  font-size: 13px;
+  color: var(--text-gray);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
+
+.excel_btn {
+  background: url(/images/excel_icon.png) no-repeat !important;
+  background-size: 16px !important;
+  background-position: center left 10px !important;
+  padding-left: 30px !important;
+  background-color: var(--background-color) !important;
+}
+
+.viewSelect {
+  /* view_select 스타일 */
+  appearance: none !important;
+  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif !important;
+  background: url('/images/select_arrow.svg') no-repeat center right 10px !important;
+  background-size: 12px 8px !important;
+  height: 30px !important;
+  padding: 0 26px 0 14px !important;
+  border-color: var(--border-color) !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  border: 1px solid var(--border-color) !important;
+  font-size: 13px !important;
+  font-weight: var(--font-weight-medium) !important;
+}
+
+Select {
+  /* view_select 스타일 */
+  appearance: none !important;
+  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif !important;
+  background: url('/images/select_arrow.svg') no-repeat center right 10px !important;
+  background-size: 12px 8px !important;
+  height: 40px !important;
+  padding: 0 26px 0 14px !important;
+  border-color: var(--border-color) !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  border: 1px solid var(--border-color) !important;
+  font-size: 13px !important;
+  font-weight: var(--font-weight-medium) !important;
+}
+
+.page_title {
+  text-align: left;
+  margin: 0 auto 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.page_title h1 {
+  font-size: 32px;
+  font-weight: var(--font-weight-bold);
+}
+
+.white_box {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  padding: 50px 30px 100px;
+  box-sizing: border-box;
+  position: relative;
+}
+
+/*페이지네이션*/
+.pagination {
+  margin-top: 60px;
+  text-align: center;
+}
+
+.pagination ul {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.pagination .page {
+  min-width: 26px;
+  height: 26px;
+  font-size: 15px;
+  font-weight: var(--font-weight-bold);
+  opacity: 0.4;
+  line-height: 26px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+}
+
+.pagination .page.active {
+  opacity: 1;
+}
+
+.pagination .page.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pagination .page.first {
+  background: url(/images/page_last_icon.svg) no-repeat center center;
+  transform: rotate(180deg);
+  background-size: 12px;
+  opacity: 1;
+}
+
+.pagination .page.prev {
+  background: url(/images/arrow_icon.svg) no-repeat center center;
+  transform: rotate(180deg);
+  background-size: 12px;
+  opacity: 1;
+}
+
+.pagination .page.next {
+  background: url(/images/arrow_icon.svg) no-repeat center center;
+  background-size: 12px;
+  opacity: 1;
+}
+
+.pagination .page.last {
+  background: url(/images/page_last_icon.svg) no-repeat center center;
+  background-size: 12px;
+  opacity: 1;
 }

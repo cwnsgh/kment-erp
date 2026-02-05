@@ -515,11 +515,11 @@ export default function WorkRequestList({ clientId, clientName, currentEmployeeI
                     </li>
                   </ul>
                 </div>
-                <button type="button" className={`${styles.excelBtn} btn btn_md normal`} onClick={handleExcelDownload}>
+                <button type="button" className={`${styles.excelBtn} btn btn_md normal excel_btn`} onClick={handleExcelDownload}>
                   엑셀다운로드
                 </button>
                 <select
-                  className={styles.viewSelect}
+                  className={`${styles.viewSelect} viewSelect`}
                   value={itemsPerPage}
                   onChange={(e) => {
                     setItemsPerPage(Number(e.target.value));
@@ -570,7 +570,7 @@ export default function WorkRequestList({ clientId, clientName, currentEmployeeI
                     </tr>
                   ) : workRequests.length === 0 ? (
                     <tr>
-                      <td colSpan={7} style={{ textAlign: "center", padding: "30px 0" }}>
+                      <td colSpan={10} style={{ textAlign: "center", padding: "30px 0" }}>
                         데이터가 없습니다.
                       </td>
                     </tr>
@@ -649,17 +649,17 @@ export default function WorkRequestList({ clientId, clientName, currentEmployeeI
 
         {/* 페이지네이션 */}
         {totalPages > 1 && (
-          <div className={styles.pagination}>
+          <div className={`${styles.pagination} pagination`}>
             <ul>
               <li
-                className={`${styles.page} ${styles.first} ${currentPage === 1 ? styles.disabled : ""}`}
+                className={`${styles.page} ${styles.first} ${currentPage === 1 ? styles.disabled : ""} page first`}
                 onClick={() => {
                   if (currentPage !== 1) {
                     loadData(1);
                   }
                 }}></li>
               <li
-                className={`${styles.page} ${styles.prev} ${currentPage === 1 ? styles.disabled : ""}`}
+                className={`${styles.page} ${styles.prev} ${currentPage === 1 ? styles.disabled : ""} page prev`}
                 onClick={() => {
                   if (currentPage !== 1) {
                     loadData(currentPage - 1);
@@ -678,21 +678,21 @@ export default function WorkRequestList({ clientId, clientName, currentEmployeeI
                   pageNum = currentPage - 2 + i;
                 }
                 return (
-                  <li key={pageNum} className={`${styles.page} ${currentPage === pageNum ? styles.active : ""}`} onClick={() => loadData(pageNum)}>
+                  <li key={pageNum} className={`${styles.page} ${currentPage === pageNum ? styles.active : ""} page active`} onClick={() => loadData(pageNum)}>
                     {pageNum}
                   </li>
                 );
               })}
 
               <li
-                className={`${styles.page} ${styles.next} ${currentPage === totalPages ? styles.disabled : ""}`}
+                className={`${styles.page} ${styles.next} ${currentPage === totalPages ? styles.disabled : ""} page next`}
                 onClick={() => {
                   if (currentPage !== totalPages) {
                     loadData(currentPage + 1);
                   }
                 }}></li>
               <li
-                className={`${styles.page} ${styles.last} ${currentPage === totalPages ? styles.disabled : ""}`}
+                className={`${styles.page} ${styles.last} ${currentPage === totalPages ? styles.disabled : ""} page last`}
                 onClick={() => {
                   if (currentPage !== totalPages) {
                     loadData(totalPages);
@@ -795,11 +795,13 @@ export default function WorkRequestList({ clientId, clientName, currentEmployeeI
                       <ul className={styles.tableRow}>
                         <li className={styles.rowGroup}>
                           <div className={styles.tableHead}>관리 상품 유형1</div>
-                          <div className={styles.tableData}>{detailModal.workRequest.managed_client.productType1 === "deduct" ? "금액차감형" : "유지보수형"}</div>
+                          <div className={styles.tableData} style={{ color: "var(--primary)", fontWeight: "bold" }}>
+                            {detailModal.workRequest.managed_client.productType1 === "deduct" ? "금액차감형" : "유지보수형"}
+                          </div>
                         </li>
                         <li className={styles.rowGroup}>
                           <div className={styles.tableHead}>관리 상품 유형2</div>
-                          <div className={styles.tableData}>
+                          <div className={styles.tableData} style={{ color: "var(--primary)", fontWeight: "bold" }}>
                             {detailModal.workRequest.managed_client.productType1 === "deduct"
                               ? detailModal.workRequest.managed_client.productType2 === "3m"
                                 ? "3개월"
@@ -970,7 +972,7 @@ export default function WorkRequestList({ clientId, clientName, currentEmployeeI
                           </li>
                           <li className={styles.rowGroup}>
                             <div className={styles.tableHead}>승인날짜</div>
-                            <div className={`${styles.tableData} ${styles.column}`}>
+                            <div className={`${styles.tableData} ${styles.column}`} style={{ flexDirection: "row" }}>
                               {(detailModal.workRequest as any).approved_at ? formatDate((detailModal.workRequest as any).approved_at) : "-"}
                               {detailModal.workRequest.approved_by_signature_url && <img src={detailModal.workRequest.approved_by_signature_url} alt="서명" className={styles.signImg} width={24} height={24} />}
                             </div>
@@ -999,7 +1001,7 @@ export default function WorkRequestList({ clientId, clientName, currentEmployeeI
                         <ul className={styles.tableRow}>
                           <li className={styles.rowGroup}>
                             <div className={styles.tableHead}>승인날짜</div>
-                            <div className={`${styles.tableData} ${styles.center}`}>
+                            <div className={`${styles.tableData}`} style={{ flexDirection: "row" }}>
                               {(detailModal.workRequest as any).approved_at ? formatDate((detailModal.workRequest as any).approved_at) : "-"}
                               {detailModal.workRequest.approved_by_signature_url && <img src={detailModal.workRequest.approved_by_signature_url} alt="서명" className={styles.signImg} width={24} height={24} />}
                             </div>
@@ -1035,7 +1037,7 @@ export default function WorkRequestList({ clientId, clientName, currentEmployeeI
             <div className={styles.detailModalFooter}>
               <button
                 type="button"
-                className={`${styles.btn} ${styles.btnLg} ${styles.normal}`}
+                className="btn btn_lg normal"
                 onClick={() => {
                   alert("삭제 기능은 추후 구현 예정입니다.");
                 }}>
@@ -1043,7 +1045,7 @@ export default function WorkRequestList({ clientId, clientName, currentEmployeeI
               </button>
               <button
                 type="button"
-                className={`${styles.btn} ${styles.btnLg} ${styles.primary}`}
+                className="btn btn_lg primary"
                 onClick={() => {
                   alert("수정 기능은 추후 구현 예정입니다.");
                 }}>

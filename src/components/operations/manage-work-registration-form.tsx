@@ -678,13 +678,17 @@ export function ManageWorkRegistrationForm({ employeeName }: ManageWorkRegistrat
                       <ul className="table_row">
                         <li className="row_group">
                           <div className="table_head">관리 상품 유형1</div>
-                          <div className="table_data">{managedClientData.productType1 === "deduct" ? "금액차감형" : "유지보수형"}</div>
+                          <div className="table_data" style={{ color: "var(--primary)", fontWeight: "bold" }}>
+                            {managedClientData.productType1 === "deduct" ? "금액차감형" : "유지보수형"}
+                          </div>
                         </li>
                       </ul>
                       <ul className="table_row">
                         <li className="row_group">
                           <div className="table_head">관리 상품 유형2</div>
-                          <div className="table_data">{formatProductType2(managedClientData.productType1, managedClientData.productType2)}</div>
+                          <div className="table_data" style={{ color: "var(--primary)", fontWeight: "bold" }}>
+                            {formatProductType2(managedClientData.productType1, managedClientData.productType2)}
+                          </div>
                         </li>
                       </ul>
                       {managedClientData.productType1 === "deduct" ? (
@@ -1095,7 +1099,7 @@ export function ManageWorkRegistrationForm({ employeeName }: ManageWorkRegistrat
                       /* 유지보수형 테이블 */
                       <>
                         <div style={{ textAlign: "right", position: "absolute", right: "0", top: "0" }}>
-                          <button type="button" onClick={handleAddWork} className="btn">
+                          <button type="button" onClick={handleAddWork} className="plus_btn">
                             + 업무 추가
                           </button>
                         </div>

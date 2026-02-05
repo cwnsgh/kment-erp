@@ -3,10 +3,7 @@
 import { Plus, X, Upload, Trash2 } from "lucide-react";
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import {
-  createClient,
-  checkBusinessRegistrationNumber,
-} from "@/app/actions/client";
+import { createClient, checkBusinessRegistrationNumber } from "@/app/actions/client";
 import AddressSearch from "@/components/common/address-search";
 import { formatBusinessNumberInput } from "@/lib/business-number";
 import styles from "./client-form.module.css";
@@ -31,10 +28,7 @@ type Site = {
   note: string;
 };
 
-const createId = () =>
-  typeof crypto !== "undefined" && "randomUUID" in crypto
-    ? crypto.randomUUID()
-    : Math.random().toString(36).slice(2);
+const createId = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : Math.random().toString(36).slice(2));
 
 export function ClientForm() {
   const router = useRouter();
@@ -44,9 +38,7 @@ export function ClientForm() {
   const [uploading, setUploading] = useState(false);
   const businessRegistrationFileInputRef = useRef<HTMLInputElement>(null);
   const signatureFileInputRef = useRef<HTMLInputElement>(null);
-  const [contacts, setContacts] = useState<Contact[]>([
-    { id: createId(), name: "", phone: "", email: "", title: "", note: "" },
-  ]);
+  const [contacts, setContacts] = useState<Contact[]>([{ id: createId(), name: "", phone: "", email: "", title: "", note: "" }]);
   const [sites, setSites] = useState<Site[]>([
     {
       id: createId(),
@@ -60,9 +52,7 @@ export function ClientForm() {
     },
   ]);
 
-  const handleBusinessNumberInput = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleBusinessNumberInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     event.target.value = formatBusinessNumberInput(event.target.value);
   };
   const [attachments, setAttachments] = useState<
@@ -73,21 +63,12 @@ export function ClientForm() {
     }>
   >([]);
   // 선택한 파일을 임시로 저장 (아직 업로드 안 함)
-  const [pendingFiles, setPendingFiles] = useState<
-    Array<{ file: File; fileType: "business_registration" | "signature" }>
-  >([]);
+  const [pendingFiles, setPendingFiles] = useState<Array<{ file: File; fileType: "business_registration" | "signature" }>>([]);
   // 사업자 상태 (API에서 가져온 정보)
-  const [businessStatus, setBusinessStatus] = useState<
-    "정상" | "휴업" | "폐업" | null
-  >(null);
+  const [businessStatus, setBusinessStatus] = useState<"정상" | "휴업" | "폐업" | null>(null);
 
-  const addContact = () =>
-    setContacts((prev) => [
-      ...prev,
-      { id: createId(), name: "", phone: "", email: "", title: "", note: "" },
-    ]);
-  const removeContact = (id: string) =>
-    setContacts((prev) => prev.filter((contact) => contact.id !== id));
+  const addContact = () => setContacts((prev) => [...prev, { id: createId(), name: "", phone: "", email: "", title: "", note: "" }]);
+  const removeContact = (id: string) => setContacts((prev) => prev.filter((contact) => contact.id !== id));
 
   const addSite = () =>
     setSites((prev) => [
@@ -103,14 +84,11 @@ export function ClientForm() {
         note: "",
       },
     ]);
-  const removeSite = (id: string) =>
-    setSites((prev) => prev.filter((site) => site.id !== id));
+  const removeSite = (id: string) => setSites((prev) => prev.filter((site) => site.id !== id));
 
   // 중복확인
   const handleCheckDuplicate = async () => {
-    const input = document.querySelector(
-      'input[name="businessRegistrationNumber"]'
-    ) as HTMLInputElement;
+    const input = document.querySelector('input[name="businessRegistrationNumber"]') as HTMLInputElement;
     const businessNumber = input?.value.trim();
 
     if (!businessNumber) {
@@ -138,9 +116,7 @@ export function ClientForm() {
         setBusinessStatus(newStatus);
 
         // 숨겨진 input에 상태 저장 (제출 시 사용)
-        const statusInput = document.querySelector(
-          'input[name="status"]'
-        ) as HTMLInputElement;
+        const statusInput = document.querySelector('input[name="status"]') as HTMLInputElement;
         if (statusInput) {
           statusInput.value = newStatus;
         }
@@ -152,28 +128,20 @@ export function ClientForm() {
       setBusinessStatus(null);
 
       // 숨겨진 input의 value도 초기화
-      const statusInput = document.querySelector(
-        'input[name="status"]'
-      ) as HTMLInputElement;
+      const statusInput = document.querySelector('input[name="status"]') as HTMLInputElement;
       if (statusInput) {
         statusInput.value = "정상"; // 기본값으로 초기화
       }
 
       // 에러 메시지 우선 표시 (error 필드가 있으면 사용)
-      const errorMessage =
-        ("error" in result ? result.error : undefined) ||
-        ("message" in result ? result.message : undefined) ||
-        "이미 등록된 사업자등록번호이거나 확인할 수 없습니다.";
+      const errorMessage = ("error" in result ? result.error : undefined) || ("message" in result ? result.message : undefined) || "이미 등록된 사업자등록번호이거나 확인할 수 없습니다.";
       setDuplicateCheckResult(errorMessage);
       alert(errorMessage);
     }
   };
 
   // 파일 선택 시 state에 저장 (아직 업로드 안 함)
-  const handleFileSelect = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    fileType: "business_registration" | "signature"
-  ) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, fileType: "business_registration" | "signature") => {
     const file = e.target.files?.[0];
     if (file) {
       // 파일 크기 검증 (30MB)
@@ -183,10 +151,7 @@ export function ClientForm() {
       }
 
       // 같은 타입의 기존 파일 제거하고 새 파일 추가
-      setPendingFiles((prev) => [
-        ...prev.filter((f) => f.fileType !== fileType),
-        { file, fileType },
-      ]);
+      setPendingFiles((prev) => [...prev.filter((f) => f.fileType !== fileType), { file, fileType }]);
 
       // input 초기화 (같은 파일을 다시 선택할 수 있도록)
       e.target.value = "";
@@ -214,12 +179,7 @@ export function ClientForm() {
       for (const { file, fileType } of pendingFiles) {
         const formData = new FormData();
         formData.append("file", file);
-        formData.append(
-          "folder",
-          fileType === "business_registration"
-            ? "business-registration"
-            : "signature"
-        );
+        formData.append("folder", fileType === "business_registration" ? "business-registration" : "signature");
 
         const response = await fetch("/api/files/upload", {
           method: "POST",
@@ -249,10 +209,7 @@ export function ClientForm() {
       return uploadedFiles;
     } catch (error) {
       console.error("파일 업로드 오류:", error);
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "알 수 없는 오류가 발생했습니다.";
+      const errorMessage = error instanceof Error ? error.message : "알 수 없는 오류가 발생했습니다.";
       throw new Error(`파일 업로드 실패: ${errorMessage}`);
     } finally {
       setUploading(false);
@@ -269,16 +226,12 @@ export function ClientForm() {
 
       // 2. 업로드된 파일들을 attachments에 추가 (기존 파일과 병합)
       const allAttachments = [
-        ...attachments.filter(
-          (a) => !pendingFiles.some((pf) => pf.fileType === a.fileType)
-        ), // 기존 파일 중 pendingFiles와 타입이 다른 것만 유지
+        ...attachments.filter((a) => !pendingFiles.some((pf) => pf.fileType === a.fileType)), // 기존 파일 중 pendingFiles와 타입이 다른 것만 유지
         ...uploadedFiles,
       ];
 
       // form element 직접 가져오기
-      const formElement = document.getElementById(
-        "clientForm"
-      ) as HTMLFormElement;
+      const formElement = document.getElementById("clientForm") as HTMLFormElement;
       if (!formElement) {
         throw new Error("Form element not found");
       }
@@ -286,9 +239,7 @@ export function ClientForm() {
 
       // 기본 정보 수집
       const clientData = {
-        businessRegistrationNumber: formData.get(
-          "businessRegistrationNumber"
-        ) as string,
+        businessRegistrationNumber: formData.get("businessRegistrationNumber") as string,
         name: formData.get("name") as string,
         ceoName: formData.get("ceoName") as string,
         postalCode: formData.get("postalCode") as string,
@@ -338,9 +289,7 @@ export function ClientForm() {
       }
     } catch (error) {
       console.error("등록 오류:", error);
-      alert(
-        error instanceof Error ? error.message : "등록 중 오류가 발생했습니다."
-      );
+      alert(error instanceof Error ? error.message : "등록 중 오류가 발생했습니다.");
     } finally {
       setLoading(false);
     }
@@ -357,21 +306,11 @@ export function ClientForm() {
               setPendingFiles([]);
               router.back();
             }}
-            className="btn btn_lg normal"
-          >
+            className="btn btn_lg normal">
             취소
           </button>
-          <button
-            type="submit"
-            form="clientForm"
-            disabled={loading || uploading}
-            className="btn btn_lg primary disabled:opacity-50"
-          >
-            {loading || uploading
-              ? uploading
-                ? "파일 업로드 중..."
-                : "등록 중..."
-              : "등록"}
+          <button type="submit" form="clientForm" disabled={loading || uploading} className="btn btn_lg primary disabled:opacity-50">
+            {loading || uploading ? (uploading ? "파일 업로드 중..." : "등록 중...") : "등록"}
           </button>
         </div>
       </div>
@@ -386,21 +325,13 @@ export function ClientForm() {
                   <li className="row_group">
                     <div className="table_head">아이디</div>
                     <div className="table_data pd12">
-                      <input
-                        name="loginId"
-                        type="text"
-                        placeholder="거래처 아이디"
-                      />
+                      <input name="loginId" type="text" placeholder="거래처 아이디" />
                     </div>
                   </li>
                   <li className="row_group">
                     <div className="table_head">패스워드</div>
                     <div className="table_data pd12">
-                      <input
-                        name="loginPassword"
-                        type="password"
-                        placeholder="거래처 비밀번호"
-                      />
+                      <input name="loginPassword" type="password" placeholder="거래처 비밀번호" />
                     </div>
                   </li>
                 </ul>
@@ -418,23 +349,9 @@ export function ClientForm() {
                           display: "flex",
                           gap: "8px",
                           alignItems: "center",
-                        }}
-                      >
-                        <input
-                          name="businessRegistrationNumber"
-                          type="text"
-                          placeholder="123-45-67890"
-                          required
-                          inputMode="numeric"
-                          onChange={handleBusinessNumberInput}
-                          style={{ flex: 1 }}
-                        />
-                        <button
-                          type="button"
-                          onClick={handleCheckDuplicate}
-                          disabled={checkingDuplicate}
-                          className="btn btn_md normal"
-                        >
+                        }}>
+                        <input name="businessRegistrationNumber" type="text" placeholder="123-45-67890" required inputMode="numeric" onChange={handleBusinessNumberInput} style={{ flex: 1 }} />
+                        <button type="button" onClick={handleCheckDuplicate} disabled={checkingDuplicate} className="btn btn_md primary">
                           {checkingDuplicate ? "확인 중..." : "중복확인"}
                         </button>
                         {duplicateCheckResult && (
@@ -442,11 +359,8 @@ export function ClientForm() {
                             style={{
                               fontSize: "12px",
                               whiteSpace: "nowrap",
-                              color: duplicateCheckResult.includes("사용 가능")
-                                ? "#10b981"
-                                : "#ef4444",
-                            }}
-                          >
+                              color: duplicateCheckResult.includes("사용 가능") ? "#10b981" : "#ef4444",
+                            }}>
                             {duplicateCheckResult}
                           </span>
                         )}
@@ -458,22 +372,13 @@ export function ClientForm() {
                   <li className="row_group">
                     <div className="table_head">상호(법인명)</div>
                     <div className="table_data pd12">
-                      <input
-                        name="name"
-                        type="text"
-                        required
-                        placeholder="상호(법인명)"
-                      />
+                      <input name="name" type="text" required placeholder="상호(법인명)" />
                     </div>
                   </li>
                   <li className="row_group">
                     <div className="table_head">대표자</div>
                     <div className="table_data pd12">
-                      <input
-                        name="ceoName"
-                        type="text"
-                        placeholder="대표자명"
-                      />
+                      <input name="ceoName" type="text" placeholder="대표자명" />
                     </div>
                   </li>
                 </ul>
@@ -486,41 +391,22 @@ export function ClientForm() {
                           display: "flex",
                           gap: "8px",
                           alignItems: "center",
-                        }}
-                      >
-                        <input
-                          name="address"
-                          type="text"
-                          style={{ flex: 1 }}
-                          placeholder="사업자 주소"
-                        />
+                        }}>
+                        <input name="address" type="text" style={{ flex: 1 }} placeholder="사업자 주소" />
                         <AddressSearch
                           onComplete={(data) => {
-                            const addressInput = document.querySelector(
-                              'input[name="address"]'
-                            ) as HTMLInputElement;
-                            const postalCodeInput = document.querySelector(
-                              'input[name="postalCode"]'
-                            ) as HTMLInputElement;
+                            const addressInput = document.querySelector('input[name="address"]') as HTMLInputElement;
+                            const postalCodeInput = document.querySelector('input[name="postalCode"]') as HTMLInputElement;
                             if (addressInput) {
-                              addressInput.value =
-                                data.address +
-                                (data.buildingName
-                                  ? ` ${data.buildingName}`
-                                  : "");
-                              addressInput.dispatchEvent(
-                                new Event("input", { bubbles: true })
-                              );
+                              addressInput.value = data.address + (data.buildingName ? ` ${data.buildingName}` : "");
+                              addressInput.dispatchEvent(new Event("input", { bubbles: true }));
                             }
                             if (postalCodeInput) {
                               postalCodeInput.value = data.zonecode;
-                              postalCodeInput.dispatchEvent(
-                                new Event("input", { bubbles: true })
-                              );
+                              postalCodeInput.dispatchEvent(new Event("input", { bubbles: true }));
                             }
-                          }}
-                        >
-                          <button type="button" className="btn btn_md normal">
+                          }}>
+                          <button type="button" className="btn btn_md primary">
                             주소검색
                           </button>
                         </AddressSearch>
@@ -532,23 +418,13 @@ export function ClientForm() {
                   <li className="row_group">
                     <div className="table_head">우편번호</div>
                     <div className="table_data pd12">
-                      <input
-                        name="postalCode"
-                        type="text"
-                        readOnly
-                        style={{ opacity: 0.75 }}
-                        placeholder="우편번호"
-                      />
+                      <input name="postalCode" type="text" readOnly style={{ opacity: 0.75 }} placeholder="우편번호" />
                     </div>
                   </li>
                   <li className="row_group">
                     <div className="table_head">상세 주소</div>
                     <div className="table_data pd12">
-                      <input
-                        name="addressDetail"
-                        type="text"
-                        placeholder="상세 주소"
-                      />
+                      <input name="addressDetail" type="text" placeholder="상세 주소" />
                     </div>
                   </li>
                 </ul>
@@ -556,21 +432,13 @@ export function ClientForm() {
                   <li className="row_group">
                     <div className="table_head">업태</div>
                     <div className="table_data pd12">
-                      <input
-                        name="businessType"
-                        type="text"
-                        placeholder="업태명"
-                      />
+                      <input name="businessType" type="text" placeholder="업태명" />
                     </div>
                   </li>
                   <li className="row_group">
                     <div className="table_head">종목</div>
                     <div className="table_data pd12">
-                      <input
-                        name="businessItem"
-                        type="text"
-                        placeholder="종목명"
-                      />
+                      <input name="businessItem" type="text" placeholder="종목명" />
                     </div>
                   </li>
                 </ul>
@@ -579,40 +447,12 @@ export function ClientForm() {
                     <div className="table_head">사업자 등록증 첨부</div>
                     <div className="table_data pd12">
                       <div className="file-upload-box">
-                        <input
-                          ref={businessRegistrationFileInputRef}
-                          type="file"
-                          accept="image/*,.pdf"
-                          className="fileInput"
-                          style={{ display: "none" }}
-                          onChange={(e) =>
-                            handleFileSelect(e, "business_registration")
-                          }
-                          disabled={uploading || loading}
-                        />
-                        {attachments.filter(
-                          (a) => a.fileType === "business_registration"
-                        ).length === 0 &&
-                          pendingFiles.filter(
-                            (f) => f.fileType === "business_registration"
-                          ).length === 0 && (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                businessRegistrationFileInputRef.current?.click()
-                              }
-                              disabled={uploading || loading}
-                              className="file-upload-btn"
-                            >
-                              첨부파일{" "}
-                              <img
-                                src="/images/attach_icon.svg"
-                                alt="첨부"
-                                width={16}
-                                height={16}
-                              />
-                            </button>
-                          )}
+                        <input ref={businessRegistrationFileInputRef} type="file" accept="image/*,.pdf" className="fileInput" style={{ display: "none" }} onChange={(e) => handleFileSelect(e, "business_registration")} disabled={uploading || loading} />
+                        {attachments.filter((a) => a.fileType === "business_registration").length === 0 && pendingFiles.filter((f) => f.fileType === "business_registration").length === 0 && (
+                          <button type="button" onClick={() => businessRegistrationFileInputRef.current?.click()} disabled={uploading || loading} className="file-upload-btn">
+                            첨부파일 <img src="/images/attach_icon.svg" alt="첨부" width={16} height={16} />
+                          </button>
+                        )}
                         {attachments
                           .filter((a) => a.fileType === "business_registration")
                           .map((attachment, index) => (
@@ -628,32 +468,19 @@ export function ClientForm() {
                                     style={{
                                       marginLeft: "8px",
                                       color: "var(--primary)",
-                                    }}
-                                  >
+                                    }}>
                                     보기
                                   </a>
                                 </>
                               )}
                               <button
                                 type="button"
-                                onClick={() =>
-                                  setAttachments((prev) =>
-                                    prev.filter(
-                                      (a, i) =>
-                                        !(
-                                          a.fileType ===
-                                            "business_registration" &&
-                                          i === index
-                                        )
-                                    )
-                                  )
-                                }
+                                onClick={() => setAttachments((prev) => prev.filter((a, i) => !(a.fileType === "business_registration" && i === index)))}
                                 style={{
                                   marginLeft: "8px",
                                   color: "#ef4444",
                                   cursor: "pointer",
-                                }}
-                              >
+                                }}>
                                 삭제
                               </button>
                             </span>
@@ -665,24 +492,12 @@ export function ClientForm() {
                               {pendingFile.file.name}
                               <button
                                 type="button"
-                                onClick={() =>
-                                  setPendingFiles((prev) =>
-                                    prev.filter(
-                                      (f, i) =>
-                                        !(
-                                          f.fileType ===
-                                            "business_registration" &&
-                                          i === index
-                                        )
-                                    )
-                                  )
-                                }
+                                onClick={() => setPendingFiles((prev) => prev.filter((f, i) => !(f.fileType === "business_registration" && i === index)))}
                                 style={{
                                   marginLeft: "8px",
                                   color: "#ef4444",
                                   cursor: "pointer",
-                                }}
-                              >
+                                }}>
                                 삭제
                               </button>
                             </span>
@@ -694,36 +509,12 @@ export function ClientForm() {
                     <div className="table_head">서명 등록</div>
                     <div className="table_data pd12">
                       <div className="file-upload-box">
-                        <input
-                          ref={signatureFileInputRef}
-                          type="file"
-                          accept="image/*,.pdf"
-                          className="fileInput"
-                          style={{ display: "none" }}
-                          onChange={(e) => handleFileSelect(e, "signature")}
-                          disabled={uploading || loading}
-                        />
-                        {attachments.filter((a) => a.fileType === "signature")
-                          .length === 0 &&
-                          pendingFiles.filter((f) => f.fileType === "signature")
-                            .length === 0 && (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                signatureFileInputRef.current?.click()
-                              }
-                              disabled={uploading || loading}
-                              className="file-upload-btn"
-                            >
-                              첨부파일{" "}
-                              <img
-                                src="/images/attach_icon.svg"
-                                alt="첨부"
-                                width={16}
-                                height={16}
-                              />
-                            </button>
-                          )}
+                        <input ref={signatureFileInputRef} type="file" accept="image/*,.pdf" className="fileInput" style={{ display: "none" }} onChange={(e) => handleFileSelect(e, "signature")} disabled={uploading || loading} />
+                        {attachments.filter((a) => a.fileType === "signature").length === 0 && pendingFiles.filter((f) => f.fileType === "signature").length === 0 && (
+                          <button type="button" onClick={() => signatureFileInputRef.current?.click()} disabled={uploading || loading} className="file-upload-btn">
+                            첨부파일 <img src="/images/attach_icon.svg" alt="첨부" width={16} height={16} />
+                          </button>
+                        )}
                         {attachments
                           .filter((a) => a.fileType === "signature")
                           .map((attachment, index) => (
@@ -732,29 +523,12 @@ export function ClientForm() {
                               {attachment.fileUrl && (
                                 <>
                                   {" "}
-                                  <a
-                                    href={attachment.fileUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                  >
+                                  <a href={attachment.fileUrl} target="_blank" rel="noopener noreferrer">
                                     보기
                                   </a>
                                 </>
                               )}
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setAttachments((prev) =>
-                                    prev.filter(
-                                      (a, i) =>
-                                        !(
-                                          a.fileType === "signature" &&
-                                          i === index
-                                        )
-                                    )
-                                  )
-                                }
-                              >
+                              <button type="button" onClick={() => setAttachments((prev) => prev.filter((a, i) => !(a.fileType === "signature" && i === index)))}>
                                 삭제
                               </button>
                             </span>
@@ -764,20 +538,7 @@ export function ClientForm() {
                           .map((pendingFile, index) => (
                             <span key={index} className="fileName textBlue">
                               {pendingFile.file.name}
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setPendingFiles((prev) =>
-                                    prev.filter(
-                                      (f, i) =>
-                                        !(
-                                          f.fileType === "signature" &&
-                                          i === index
-                                        )
-                                    )
-                                  )
-                                }
-                              >
+                              <button type="button" onClick={() => setPendingFiles((prev) => prev.filter((f, i) => !(f.fileType === "signature" && i === index)))}>
                                 삭제
                               </button>
                             </span>
@@ -786,53 +547,40 @@ export function ClientForm() {
                     </div>
                   </li>
                 </ul>
-                <input
-                  type="hidden"
-                  name="status"
-                  value={businessStatus || "정상"}
-                />
+                <input type="hidden" name="status" value={businessStatus || "정상"} />
               </div>
 
               {/* 담당자 정보 */}
               <div className="table_item">
                 <h2 className={`table_title ${styles.contactTitle}`}>
                   담당자 정보
-                  <span
-                    className="plus_btn"
-                    onClick={addContact}
-                    style={{ marginLeft: "10px", cursor: "pointer" }}
-                  >
+                  <span className="plus_btn" onClick={addContact} style={{ marginLeft: "10px", cursor: "pointer" }}>
                     + 담당자 추가
                   </span>
                 </h2>
                 <div className="table_wrap">
                   {contacts.map((contact, index) => (
-                    <div
-                      key={contact.id}
-                      style={{ marginTop: index > 0 ? "30px" : "0" }}
-                    >
+                    <div key={contact.id} style={{ marginTop: index > 0 ? "30px" : "0" }}>
                       <div
                         className={styles.contactHeader}
                         style={{
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "space-between",
-                        }}
-                      >
+                        }}>
                         <h3 className="table_title_sub">담당자{index + 1}</h3>
                         {contacts.length > 1 && (
                           <button
                             type="button"
                             onClick={() => removeContact(contact.id)}
                             style={{
-                              color: "#ef4444",
+                              color: "var(--text-color)",
                               cursor: "pointer",
                               background: "none",
                               border: "none",
                               fontSize: "18px",
                             }}
-                            title="삭제"
-                          >
+                            title="삭제">
                             <X size={18} />
                           </button>
                         )}
@@ -841,22 +589,13 @@ export function ClientForm() {
                         <li className="row_group">
                           <div className="table_head">이름</div>
                           <div className="table_data pd12">
-                            <input
-                              name={`contact_${contact.id}_name`}
-                              type="text"
-                              required
-                              placeholder="이름"
-                            />
+                            <input name={`contact_${contact.id}_name`} type="text" required placeholder="이름" />
                           </div>
                         </li>
                         <li className="row_group">
                           <div className="table_head">연락처</div>
                           <div className="table_data pd12">
-                            <input
-                              name={`contact_${contact.id}_phone`}
-                              type="text"
-                              placeholder="010-1234-5678"
-                            />
+                            <input name={`contact_${contact.id}_phone`} type="text" placeholder="010-1234-5678" />
                           </div>
                         </li>
                       </ul>
@@ -864,21 +603,13 @@ export function ClientForm() {
                         <li className="row_group">
                           <div className="table_head">이메일</div>
                           <div className="table_data pd12">
-                            <input
-                              name={`contact_${contact.id}_email`}
-                              type="email"
-                              placeholder="이메일"
-                            />
+                            <input name={`contact_${contact.id}_email`} type="email" placeholder="이메일" />
                           </div>
                         </li>
                         <li className="row_group">
                           <div className="table_head">비고</div>
                           <div className="table_data pd12">
-                            <input
-                              name={`contact_${contact.id}_note`}
-                              type="text"
-                              placeholder="특이사항"
-                            />
+                            <input name={`contact_${contact.id}_note`} type="text" placeholder="특이사항" />
                           </div>
                         </li>
                       </ul>
@@ -891,11 +622,7 @@ export function ClientForm() {
               <div className="table_item table_item2">
                 <h2 className="table_title">
                   사이트 정보
-                  <span
-                    className="plus_btn"
-                    onClick={addSite}
-                    style={{ marginLeft: "10px", cursor: "pointer" }}
-                  >
+                  <span className="plus_btn" onClick={addSite} style={{ marginLeft: "10px", cursor: "pointer" }}>
                     + 사이트 추가
                   </span>
                 </h2>
@@ -923,18 +650,10 @@ export function ClientForm() {
                       {sites.map((site, index) => (
                         <tr key={site.id} className="site-row">
                           <td data-th="브랜드">
-                            <input
-                              name={`site_${site.id}_brandName`}
-                              type="text"
-                              placeholder="브랜드명"
-                            />
+                            <input name={`site_${site.id}_brandName`} type="text" placeholder="브랜드명" />
                           </td>
                           <td data-th="도메인">
-                            <input
-                              name={`site_${site.id}_domain`}
-                              type="text"
-                              placeholder="https://example.com"
-                            />
+                            <input name={`site_${site.id}_domain`} type="text" placeholder="https://example.com" />
                           </td>
                           <td data-th="솔루션">
                             <select name={`site_${site.id}_solution`}>
@@ -946,18 +665,10 @@ export function ClientForm() {
                             </select>
                           </td>
                           <td data-th="아이디">
-                            <input
-                              name={`site_${site.id}_loginId`}
-                              type="text"
-                              placeholder="아이디"
-                            />
+                            <input name={`site_${site.id}_loginId`} type="text" placeholder="아이디" />
                           </td>
                           <td data-th="패스워드">
-                            <input
-                              name={`site_${site.id}_loginPassword`}
-                              type="password"
-                              placeholder="패스워드"
-                            />
+                            <input name={`site_${site.id}_loginPassword`} type="password" placeholder="패스워드" />
                           </td>
                           <td className="right">
                             {sites.length > 1 && (
@@ -967,12 +678,11 @@ export function ClientForm() {
                                 style={{
                                   background: "none",
                                   border: "none",
-                                  color: "#ef4444",
+                                  color: "var(--text-color)",
                                   cursor: "pointer",
                                   padding: "0",
                                 }}
-                                title="삭제"
-                              >
+                                title="삭제">
                                 <X size={18} />
                               </button>
                             )}
