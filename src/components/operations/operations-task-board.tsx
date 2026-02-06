@@ -425,12 +425,12 @@ export function OperationsTaskBoard({ workRequests, currentEmployeeId }: Operati
 
               {getNextStatusAction(selectedTask.status) && (
                 <div className={styles.modalActions}>
-                  <button type="button" className={styles.modalButton} onClick={() => setSelectedTask(null)}>
+                  <button type="button" className="btn btn_lg normal" onClick={() => setSelectedTask(null)}>
                     닫기
                   </button>
                   <button
                     type="button"
-                    className={`${styles.modalButton} ${styles.modalButtonPrimary}`}
+                    className="btn btn_lg primary"
                     onClick={() =>
                       setConfirmAction({
                         task: selectedTask,
@@ -452,11 +452,11 @@ export function OperationsTaskBoard({ workRequests, currentEmployeeId }: Operati
             <h3 className={styles.confirmModalTitle}>상태를 변경할까요?</h3>
             <p className={styles.confirmModalText}>{confirmAction.nextStatus === "in_progress" ? "승인된 업무를 작업중으로 변경합니다." : "작업중인 업무를 작업완료로 변경합니다."}</p>
             <div className={styles.confirmModalActions}>
-              <button type="button" className={styles.modalButton} onClick={() => setConfirmAction(null)} disabled={statusUpdating}>
+              <button type="button" className="btn btn_lg normal" onClick={() => setConfirmAction(null)} disabled={statusUpdating}>
                 취소
               </button>
-              <button type="button" className={`${styles.modalButton} ${styles.modalButtonPrimary}`} onClick={handleConfirmStatusChange} disabled={statusUpdating}>
-                변경하기
+              <button type="button" className="btn btn_lg primary" onClick={handleConfirmStatusChange} disabled={statusUpdating}>
+                변경
               </button>
             </div>
           </div>

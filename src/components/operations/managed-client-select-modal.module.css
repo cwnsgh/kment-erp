@@ -1,0 +1,114 @@
+.MclientSeletModal :global(.clientSeletModalInner) {
+    background: #fff;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 800px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    animation: work-request-list_modalFadeIn__gVv9x 0.2s ease-out;
+}
+
+.MclientSeletModal :global(.modalHeader) {
+    padding: 30px 0px 20px 0px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--text-color);
+    margin: 0 30px 20px;
+}
+
+.MclientSeletModal :global(.modalHeader h3) {
+    margin: 0;
+    font-size: 20px;
+    font-weight: var(--font-weight-bold);
+    color: var(--text-color);
+}
+
+.MclientSeletModal :global(.modalHeader button) {
+    width: 20px;
+    height: 20px;
+    border: none;
+    background: transparent;
+    font-size: 24px;
+    color: #64748b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background-color 0.2s, color 0.2s, opacity 0.2s;
+    padding: 0;
+    line-height: 1;
+    font-size: 0;
+    background: url(/images/close_icon.svg);
+}
+
+.MclientSeletModal :global(.searchBox) {
+    padding: 10px 30px 30px;
+}
+
+.MclientSeletModal :global(.searchBox form) {
+    gap: 4px;
+}
+
+.MclientSeletModal :global(.searchBox form .btn) {
+    margin: 10px auto 0;
+}
+
+
+.MclientSeletModal :global(.searchBox form .flex >div) {
+    width: 100%;
+}
+
+.MclientSeletModal :global(.searchBox form .flex >div>div) {
+    width: 180px;
+    background-color: var(--background-color);
+    padding: 20px;
+    margin-right: 20px;
+}
+
+.MclientSeletModal :global(.searchBox form .flex >div>div span) {
+    color: var(--text-color);
+    font-weight: var(--font-weight-semibold);
+}
+
+.MclientSeletModal :global(.modalTableWrap) {
+    padding: 0 30px 60px;
+}
+
+.MclientSeletModal :global(.modalTotal) {
+    font-size: 13px;
+    color: var(--text-gray);
+    font-weight: var(--font-weight-semibold);
+}
+
+.MclientSeletModal :global(.modalTotal span) {
+    color: var(--primary);
+    font-weight: var(--font-weight-bold);
+}
+
+.MclientSeletModal :global(.modalTable) {
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.MclientSeletModal :global(.modalTable tbody tr:hover) {
+    background-color: var(--hover-bg);
+}
+
+.MclientSeletModal :global(.modalTable th) {
+    text-align: center;
+    padding: 20px;
+    color: var(--text-gray);
+    font-weight: var(--font-weight-semibold);
+}
+
+.MclientSeletModal :global(.modalTable td) {
+    text-align: center;
+    color: var(--text-color);
+    font-weight: var(--font-weight-medium);
+    padding: 20px;
+}

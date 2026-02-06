@@ -478,10 +478,9 @@ export function ClientForm() {
                                 onClick={() => setAttachments((prev) => prev.filter((a, i) => !(a.fileType === "business_registration" && i === index)))}
                                 style={{
                                   marginLeft: "8px",
-                                  color: "#ef4444",
                                   cursor: "pointer",
                                 }}>
-                                삭제
+                                <X size={14} />
                               </button>
                             </span>
                           ))}
@@ -495,10 +494,9 @@ export function ClientForm() {
                                 onClick={() => setPendingFiles((prev) => prev.filter((f, i) => !(f.fileType === "business_registration" && i === index)))}
                                 style={{
                                   marginLeft: "8px",
-                                  color: "#ef4444",
                                   cursor: "pointer",
                                 }}>
-                                삭제
+                                <X size={14} />
                               </button>
                             </span>
                           ))}
@@ -529,7 +527,7 @@ export function ClientForm() {
                                 </>
                               )}
                               <button type="button" onClick={() => setAttachments((prev) => prev.filter((a, i) => !(a.fileType === "signature" && i === index)))}>
-                                삭제
+                                <X size={14} />
                               </button>
                             </span>
                           ))}
@@ -539,7 +537,7 @@ export function ClientForm() {
                             <span key={index} className="fileName textBlue">
                               {pendingFile.file.name}
                               <button type="button" onClick={() => setPendingFiles((prev) => prev.filter((f, i) => !(f.fileType === "signature" && i === index)))}>
-                                삭제
+                                <X size={14} />
                               </button>
                             </span>
                           ))}

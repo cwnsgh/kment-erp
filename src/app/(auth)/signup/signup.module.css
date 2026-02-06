@@ -1,25 +1,35 @@
 /* 회원가입 페이지 스타일 - join.html과 동일 */
 
-.joinPage {
+.SignUpPage {
   max-width: 600px;
   margin: 0 auto;
 }
 
-.joinPage :global(.page_section) {
-  /* page_section은 전역 클래스 */
+.SignUpPage :global(.pageTitle) {
+  justify-content: center;
+  position: relative;
+  margin-bottom: 30px;
 }
 
-.pageTitle {
-  display: flex;
-  flex-direction: column;
-  text-align: center;
-  gap: 30px;
-  margin-bottom: 40px;
+.SignUpPage :global(.pageTitle button) {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
 }
 
-.pageTitle h1 {
+.SignUpPage :global(.pageTitle img) {
+  width: 16px;
+  height: 16px;
+  transform: rotate(-180deg);
+}
+
+.SignUpPage :global(.pageTitle h1) {
   font-size: 32px;
   font-weight: var(--font-weight-bold);
+  line-height: 1;
 }
 
 .pageTitle p {
@@ -31,23 +41,45 @@
   font-weight: var(--font-weight-bold);
 }
 
-.whiteBox {
+.SignUpPage :global(.whiteBox) {
   background: #fff;
   border-radius: 10px;
-  padding: 40px 40px 60px 40px;
+  padding: 40px 30px;
   box-sizing: border-box;
   margin-bottom: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
 }
 
-.whiteBox.agreeBox {
+.SignUpPage :global(.whiteBox h2) {
+  font-size: 20px;
+  font-weight: var(--font-weight-bold);
+}
+
+.SignUpPage :global(.whiteBox h4) {
+  font-size: 15px;
+  color: var(--text-gray);
+  font-weight: var(--font-weight-semibold);
+}
+
+.SignUpPage :global(.whiteBox.agreeBox) {
   margin-bottom: 20px;
 }
 
-.whiteBox.agreeBox .pageSubTitle {
+.SignUpPage :global(.page_subTitle) {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 40px;
+}
+
+.SignUpPage :global(.whiteBox.agreeBox .page_subTitle) {
   margin-bottom: 20px;
 }
 
-.whiteBox.infoBox .pageSubTitle {
+.SignUpPage :global(.whiteBox.infoBox) {
+  padding-bottom: 60px;
+}
+
+.SignUpPage :global(.whiteBox.infoBox .page_subTitle) {
   padding-bottom: 20px;
   border-bottom: 1px solid var(--text-color);
   display: flex;
@@ -56,7 +88,12 @@
   line-height: 1;
   font-size: 18px;
   font-weight: var(--font-weight-bold);
-  margin-bottom: 0;
+}
+
+.SignUpPage :global(.whiteBox.infoBox .page_subTitle span) {
+  font-size: 13px;
+  color: var(--text-gray);
+  font-weight: var(--font-weight-semibold);
 }
 
 .whiteBox.infoBox .pageSubTitle .notice {
@@ -83,7 +120,7 @@
 }
 
 /* 약관 동의 */
-.agreeAll {
+.SignUpPage :global(.agreeAll) {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -93,29 +130,35 @@
   border-bottom: 1px solid var(--border-color);
 }
 
-.agreeAll label {
+.SignUpPage :global(.agreeAll span) {
   font-size: 18px;
   font-weight: var(--font-weight-bold);
   color: var(--text-color);
   cursor: pointer;
 }
 
-.agreeList {
+.SignUpPage :global(.agreeAll p) {
+  font-size: 15px;
+  color: var(--text-color);
+}
+
+.SignUpPage :global(.agreeList) {
   display: flex;
   flex-direction: column;
   gap: 30px;
 }
 
-.agreeList > div {
+.SignUpPage :global(.agreeList label) {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: var(--font-weight-semibold);
   position: relative;
+  color: var(--text-color);
 }
 
-.agreeList > div > img {
+.SignUpPage :global(.agreeList label img) {
   position: absolute;
   right: 0;
   top: 50%;
@@ -125,26 +168,26 @@
   cursor: pointer;
 }
 
-.agreeList > div label {
+.agreeList>div label {
   color: var(--text-color);
   cursor: pointer;
 }
 
-.agreeList > div label span {
+.agreeList>div label span {
   color: var(--primary);
   display: inline-block;
   margin-right: 4px;
 }
 
 /* 폼 그리드 */
-.formGrid {
-  display: grid;
-  grid-template-columns: 160px 1fr;
-  gap: 20px 0;
-  align-items: center;
+.SignUpPage :global(.formGrid) {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.formGrid label {
+.SignUpPage :global(.formGrid label) {
   font-weight: var(--font-weight-semibold);
   color: var(--text-color);
   position: relative;
@@ -157,28 +200,26 @@
   margin-right: 4px;
 }
 
-.formGrid input,
-.formGrid select {
-  height: 36px;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  padding: 4px 14px;
-  box-sizing: border-box;
-  font-size: 15px;
-  font-family: "Pretendard Variable", Pretendard, -apple-system,
-    BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI",
-    "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji",
-    "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+.SignUpPage :global(.whiteBox .upload) {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.formGrid input:focus,
-.formGrid select:focus {
-  border: 2px solid var(--primary);
-  outline: none;
+.SignUpPage :global(.whiteBox .upload .grid) {
+  align-items: flex-start;
 }
 
-.formGrid select {
-  height: 36px;
+.SignUpPage :global(.whiteBox .upload .flex) {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.SignUpPage :global(.whiteBox .upload .flex >span) {
+  font-size: 13px;
+  color: var(--text-gray);
 }
 
 .inputGroup {
@@ -200,59 +241,17 @@
   flex: 1;
 }
 
-.inputGroup :global(.btn) {
+.SignUpPage :global(.inputGroup .btn) {
   width: 70px;
   text-align: center;
   font-size: 13px;
-  line-height: 36px;
   border-radius: 4px;
-  height: 36px;
   white-space: nowrap;
   flex-shrink: 0;
+  padding: 0;
 }
 
-/* 파일 업로드 */
-.fileUploadBox {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
 
-.fileUploadBtn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 0 14px;
-  height: 36px;
-  background: var(--text-color);
-  color: #fff;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: var(--font-weight-semibold);
-  white-space: nowrap;
-}
-
-.fileUploadBtn img {
-  width: 16px;
-  height: 16px;
-  object-fit: contain;
-}
-
-.fileName {
-  font-size: 13px;
-  color: var(--text-gray);
-}
-
-.desc {
-  font-size: 13px;
-  color: var(--text-gray);
-  font-weight: var(--font-weight-medium);
-  margin-top: 10px;
-  width: 100%;
-}
 
 /* 박스 내부 */
 .boxInner {

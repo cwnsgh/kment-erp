@@ -539,7 +539,7 @@ export function AppShell({ children, session, pendingApprovalCount = 0, initialM
                       개인정보 수정
                     </button>
                     <button type="button" className="w-full rounded-md px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-slate-100">
-                      월차 신청 조회
+                      연차 신청 조회
                     </button>
                   </div>
 

@@ -121,7 +121,12 @@ textarea {
   font-size: 14px;
   width: 100%;
   background: #fff;
-  font-weight: var(--font-weight-regular);
+  font-weight: var(--font-weight-medium);
+  text-align: left;
+}
+
+input::placeholder {
+  font-size: 12px;
 }
 
 textarea {
@@ -272,6 +277,10 @@ main.bg-white {
 .btn.primary {
   background-color: var(--primary);
   color: #fff;
+}
+
+button.btn.primary:disabled {
+  opacity: 0.5;
 }
 
 .btn.primary:hover {

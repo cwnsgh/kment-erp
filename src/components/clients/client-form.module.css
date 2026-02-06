@@ -210,7 +210,8 @@
 .clientRegist :global(.fileName) {
   font-size: 13px;
   color: var(--text-color);
-  display: block;
+  display: flex;
+  align-items: center;
   margin-top: 4px;
   line-height: 1.5;
 }
@@ -223,7 +224,7 @@
 
 .clientRegist :global(.fileName button) {
   margin-left: 8px;
-  color: #ef4444;
+  color: #475569;
   cursor: pointer;
   background: none;
   border: none;
@@ -231,8 +232,12 @@
   padding: 0;
 }
 
+.clientRegist :global(.fileName button:hover) {
+  color: #1e293b;
+}
+
 .clientRegist :global(.fileName.textBlue) {
-  color: #3b82f6 !important;
+  color: var(--text-gray) !important;
 }
 
 .clientRegist :global(.table_wrap) {
@@ -266,6 +271,7 @@
   display: table;
   width: 100%;
   border-collapse: collapse;
+  border-top: 1px solid var(--border-color);
 }
 
 .siteTable thead {

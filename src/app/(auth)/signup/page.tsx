@@ -1,21 +1,13 @@
 "use client";
 
-import {
-  ChangeEvent,
-  FormEvent,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import { ChangeEvent, FormEvent, useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { signup } from "@/app/actions/signup";
-import {
-  checkBusinessNumber,
-  checkUsername,
-} from "@/app/actions/signup-validation";
+import { checkBusinessNumber, checkUsername } from "@/app/actions/signup-validation";
 import AddressSearch from "@/components/common/address-search";
 import { formatBusinessNumberInput } from "@/lib/business-number";
+import styles from "./signup.module.css";
 
 type AgreementKey = "terms" | "privacy" | "thirdParty";
 
@@ -29,13 +21,7 @@ type Contact = {
   email: string;
 };
 
-type SiteField =
-  | "brandName"
-  | "domain"
-  | "solution"
-  | "loginId"
-  | "loginPassword"
-  | "type";
+type SiteField = "brandName" | "domain" | "solution" | "loginId" | "loginPassword" | "type";
 
 type Site = {
   id: string;
@@ -69,10 +55,7 @@ const agreementItems: {
   },
 ];
 
-const createId = () =>
-  typeof crypto !== "undefined" && "randomUUID" in crypto
-    ? crypto.randomUUID()
-    : Math.random().toString(36).slice(2);
+const createId = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : Math.random().toString(36).slice(2));
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -110,27 +93,18 @@ export default function SignUpPage() {
     businessItem: "",
   });
 
-  const handleAddressComplete = (data: {
-    zonecode: string;
-    address: string;
-    addressType: "R" | "J";
-    buildingName?: string;
-  }) => {
+  const handleAddressComplete = (data: { zonecode: string; address: string; addressType: "R" | "J"; buildingName?: string }) => {
     setForm((prev) => ({
       ...prev,
       postalCode: data.zonecode,
-      address:
-        data.address + (data.buildingName ? ` ${data.buildingName}` : ""),
+      address: data.address + (data.buildingName ? ` ${data.buildingName}` : ""),
     }));
   };
 
-  const [businessRegistrationFile, setBusinessRegistrationFile] =
-    useState<File | null>(null);
+  const [businessRegistrationFile, setBusinessRegistrationFile] = useState<File | null>(null);
   const [signatureFile, setSignatureFile] = useState<File | null>(null);
 
-  const [contacts, setContacts] = useState<Contact[]>([
-    { id: createId(), name: "", phone: "", title: "", email: "" },
-  ]);
+  const [contacts, setContacts] = useState<Contact[]>([{ id: createId(), name: "", phone: "", title: "", email: "" }]);
 
   const [sites, setSites] = useState<Site[]>([
     {
@@ -144,10 +118,7 @@ export default function SignUpPage() {
     },
   ]);
 
-  const allChecked = useMemo(
-    () => Object.values(agreements).every(Boolean),
-    [agreements]
-  );
+  const allChecked = useMemo(() => Object.values(agreements).every(Boolean), [agreements]);
 
   const handleToggleAll = () => {
     const next = !allChecked;
@@ -165,12 +136,9 @@ export default function SignUpPage() {
     }));
   };
 
-  const handleInputChange = (
-    event: ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  const handleInputChange = (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = event.target;
-    const nextValue =
-      name === "businessNumber" ? formatBusinessNumberInput(value) : value;
+    const nextValue = name === "businessNumber" ? formatBusinessNumberInput(value) : value;
     setForm((prev) => ({
       ...prev,
       [name]: nextValue,
@@ -234,10 +202,7 @@ export default function SignUpPage() {
     }
   };
 
-  const handleFileChange = (
-    event: ChangeEvent<HTMLInputElement>,
-    type: "businessRegistration" | "signature"
-  ) => {
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>, type: "businessRegistration" | "signature") => {
     const file = event.target.files?.[0] ?? null;
     if (type === "businessRegistration") {
       setBusinessRegistrationFile(file);
@@ -246,35 +211,20 @@ export default function SignUpPage() {
     }
   };
 
-  const handleContactChange = (
-    id: string,
-    field: ContactField,
-    value: string
-  ) => {
-    setContacts((prev) =>
-      prev.map((contact) =>
-        contact.id === id ? { ...contact, [field]: value } : contact
-      )
-    );
+  const handleContactChange = (id: string, field: ContactField, value: string) => {
+    setContacts((prev) => prev.map((contact) => (contact.id === id ? { ...contact, [field]: value } : contact)));
   };
 
   const addContact = () => {
-    setContacts((prev) => [
-      ...prev,
-      { id: createId(), name: "", phone: "", title: "", email: "" },
-    ]);
+    setContacts((prev) => [...prev, { id: createId(), name: "", phone: "", title: "", email: "" }]);
   };
 
   const removeContact = (id: string) => {
-    setContacts((prev) =>
-      prev.length > 1 ? prev.filter((contact) => contact.id !== id) : prev
-    );
+    setContacts((prev) => (prev.length > 1 ? prev.filter((contact) => contact.id !== id) : prev));
   };
 
   const handleSiteChange = (id: string, field: SiteField, value: string) => {
-    setSites((prev) =>
-      prev.map((site) => (site.id === id ? { ...site, [field]: value } : site))
-    );
+    setSites((prev) => prev.map((site) => (site.id === id ? { ...site, [field]: value } : site)));
   };
 
   const addSite = () => {
@@ -293,9 +243,7 @@ export default function SignUpPage() {
   };
 
   const removeSite = (id: string) => {
-    setSites((prev) =>
-      prev.length > 1 ? prev.filter((site) => site.id !== id) : prev
-    );
+    setSites((prev) => (prev.length > 1 ? prev.filter((site) => site.id !== id) : prev));
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -314,12 +262,7 @@ export default function SignUpPage() {
     }
 
     // 필수 입력 확인
-    if (
-      !form.username ||
-      !form.password ||
-      !form.businessNumber ||
-      !form.companyName
-    ) {
+    if (!form.username || !form.password || !form.businessNumber || !form.companyName) {
       alert("필수 항목을 모두 입력해주세요.");
       return;
     }
@@ -421,85 +364,45 @@ export default function SignUpPage() {
       }
     } catch (error) {
       setLoading(false);
-      alert(
-        "오류가 발생했습니다: " +
-          (error instanceof Error ? error.message : "알 수 없는 오류")
-      );
+      alert("오류가 발생했습니다: " + (error instanceof Error ? error.message : "알 수 없는 오류"));
     }
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-8 bg-white p-8 rounded-lg shadow-sm max-w-xl mx-auto"
-    >
-      <div className="flex items-center gap-4 mb-8">
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="inline-flex items-center justify-center w-10 h-10 rounded-full border border-slate-300 text-slate-600 hover:bg-slate-50 hover:border-slate-400 transition-colors"
-          aria-label="뒤로가기"
-        >
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
+    <form onSubmit={handleSubmit} className={`${styles.SignUpPage}  p-8 rounded-lg shadow-sm max-w-xl mx-auto`}>
+      <div className="flex items-center pageTitle">
+        <button type="button" onClick={() => router.back()} className="inline-flex items-center justify-center w-10 h-10" aria-label="뒤로가기">
+          <img src="/images/arrow_icon.svg" alt="" />
         </button>
-        <h1 className="text-2xl font-semibold text-slate-900">회원가입</h1>
+        <h1>회원가입</h1>
       </div>
 
-      <section className="space-y-4">
-        <p className="text-sm text-slate-600 mb-4">
-          필수항목 및 선택항목 약관에 동의해 주세요.
-        </p>
-        <label className="flex cursor-pointer items-center gap-3 py-3">
-          <input
-            type="checkbox"
-            checked={allChecked}
-            onChange={handleToggleAll}
-            className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
-          />
-          <span className="text-sm font-medium text-slate-800">
-            전체 약관 동의
-          </span>
+      <section className="whiteBox agreeBox">
+        <h2 className="page_subTitle">약관 동의</h2>
+        <p className="text-sm text-slate-600 mb-4">필수항목 및 선택항목 약관에 동의해 주세요.</p>
+        <label className="agreeAll">
+          <input type="checkbox" checked={allChecked} onChange={handleToggleAll} className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary" />
+          <span className="text-sm font-medium text-slate-800">전체 약관 동의</span>
         </label>
-        <div className="space-y-3 pl-7">
+        <div className="agreeList">
           {agreementItems.map((item) => (
-            <label
-              key={item.id}
-              className="flex cursor-pointer items-center gap-3 py-2"
-            >
-              <input
-                type="checkbox"
-                checked={agreements[item.id]}
-                onChange={() => handleAgreementChange(item.id)}
-                className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
-              />
-              <span className="text-sm font-medium text-slate-800">
-                {item.label}
+            <label key={item.id}>
+              <input type="checkbox" checked={agreements[item.id]} onChange={() => handleAgreementChange(item.id)} className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary" />
+              <span>{item.label}</span>
+              <span>
+                <img src="/images/arrow_icon.svg" alt="" />
               </span>
-              <span className="text-slate-400">→</span>
             </label>
           ))}
         </div>
       </section>
 
-      <section className="space-y-6 border-t border-slate-200 pt-8 mt-8">
-        <h2 className="text-lg font-semibold text-slate-900">가입 정보 입력</h2>
-        <p className="text-sm text-slate-600 mb-6">
-          * 표시는 반드시 입력하셔야 합니다.
-        </p>
-        <div className="space-y-4">
-          <div>
+      <section className="whiteBox infoBox">
+        <h2 className="page_subTitle">
+          가입 정보 입력<span>* 표시는 반드시 입력하셔야 합니다.</span>
+        </h2>
+        <div className="formGrid">
+          <div className="inputGroup">
             <TextField
               label="아이디 *"
               name="username"
@@ -507,51 +410,20 @@ export default function SignUpPage() {
               value={form.username}
               onChange={handleInputChange}
               suffix={
-                <button
-                  type="button"
-                  onClick={handleCheckUsername}
-                  disabled={checkingUsername || !form.username.trim()}
-                  className="px-4 py-2 text-sm font-medium text-white bg-primary rounded hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
+                <button type="button" onClick={handleCheckUsername} disabled={checkingUsername || !form.username.trim()} className="btn btn_md primary rounded hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed">
                   {checkingUsername ? "확인중..." : "중복확인"}
                 </button>
               }
             />
-            {usernameStatus.checked && (
-              <p
-                className={`mt-1 ml-[156px] text-xs ${
-                  usernameStatus.available ? "text-green-600" : "text-red-600"
-                }`}
-              >
-                {usernameStatus.message}
-              </p>
-            )}
+            {usernameStatus.checked && <p className={`mt-1 ml-[156px] text-xs ${usernameStatus.available ? "text-green-600" : "text-red-600"}`}>{usernameStatus.message}</p>}
           </div>
-          <PasswordField
-            label="비밀번호 *"
-            name="password"
-            value={form.password}
-            onChange={handleInputChange}
-            placeholder="대소문자/숫자/특수문자 중 3가지 이상 조합, 8자~16자"
-          />
-          <PasswordField
-            label="비밀번호 확인 *"
-            name="confirmPassword"
-            value={form.confirmPassword}
-            onChange={handleInputChange}
-            placeholder="비밀번호를 다시 입력하세요"
-          />
+          <PasswordField label="비밀번호 *" name="password" value={form.password} onChange={handleInputChange} placeholder="대소문자/숫자/특수문자 중 3가지 이상 조합, 8자~16자" />
+          <PasswordField label="비밀번호 확인 *" name="confirmPassword" value={form.confirmPassword} onChange={handleInputChange} placeholder="비밀번호를 다시 입력하세요" />
         </div>
-      </section>
-
-      <section className="space-y-6 border-t border-slate-200 pt-8 mt-8">
-        <div>
-          <h2 className="text-lg font-semibold text-slate-900 mb-4">
-            사업자 정보 입력
-          </h2>
-          <div className="border-t border-slate-200"></div>
+        <div className="mt-16">
+          <h2 className="page_subTitle">사업자 정보 입력</h2>
         </div>
-        <div className="space-y-4">
+        <div className="space-y-4 inputGroup">
           <div>
             <TextField
               label="사업자등록번호 *"
@@ -559,46 +431,17 @@ export default function SignUpPage() {
               placeholder="숫자만 입력"
               value={form.businessNumber}
               onChange={handleInputChange}
-            inputMode="numeric"
+              inputMode="numeric"
               suffix={
-                <button
-                  type="button"
-                  onClick={handleCheckBusinessNumber}
-                  disabled={
-                    checkingBusinessNumber || !form.businessNumber.trim()
-                  }
-                  className="px-4 py-2 text-sm font-medium text-white bg-primary rounded hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
+                <button type="button" onClick={handleCheckBusinessNumber} disabled={checkingBusinessNumber || !form.businessNumber.trim()} className="btn btn_md primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed">
                   {checkingBusinessNumber ? "확인중..." : "중복확인"}
                 </button>
               }
             />
-            {businessNumberStatus.checked && (
-              <p
-                className={`mt-1 ml-[156px] text-xs ${
-                  businessNumberStatus.available
-                    ? "text-green-600"
-                    : "text-red-600"
-                }`}
-              >
-                {businessNumberStatus.message}
-              </p>
-            )}
+            {businessNumberStatus.checked && <p className={`mt-1 ml-[156px] text-xs ${businessNumberStatus.available ? "text-green-600" : "text-red-600"}`}>{businessNumberStatus.message}</p>}
           </div>
-          <TextField
-            label="상호(법인명) *"
-            name="companyName"
-            placeholder="예: 케이멘트 주식회사"
-            value={form.companyName}
-            onChange={handleInputChange}
-          />
-          <TextField
-            label="대표자 *"
-            name="ceoName"
-            placeholder="대표자 성함"
-            value={form.ceoName}
-            onChange={handleInputChange}
-          />
+          <TextField label="상호(법인명) *" name="companyName" placeholder="예: 케이멘트 주식회사" value={form.companyName} onChange={handleInputChange} />
+          <TextField label="대표자 *" name="ceoName" placeholder="대표자 성함" value={form.ceoName} onChange={handleInputChange} />
           <TextField
             label="사업자주소 *"
             name="address"
@@ -607,227 +450,83 @@ export default function SignUpPage() {
             onChange={handleInputChange}
             suffix={
               <AddressSearch onComplete={handleAddressComplete}>
-                <button
-                  type="button"
-                  className="px-4 py-2 text-sm font-medium text-white bg-primary rounded hover:bg-primary/90"
-                >
+                <button type="button" className="btn btn_md primary hover:bg-primary/90">
                   주소검색
                 </button>
               </AddressSearch>
             }
           />
-          {form.postalCode && (
-            <TextField
-              label="우편번호"
-              name="postalCode"
-              value={form.postalCode}
-              onChange={handleInputChange}
-              readOnly
-              className="opacity-75"
-            />
-          )}
-          <TextField
-            label="상세 주소"
-            name="addressDetail"
-            placeholder="건물, 층/호수 등 추가 정보"
-            value={form.addressDetail}
-            onChange={handleInputChange}
-          />
-          <TextField
-            label="업태 *"
-            name="businessType"
-            placeholder="예: 도소매"
-            value={form.businessType}
-            onChange={handleInputChange}
-          />
-          <TextField
-            label="종목 *"
-            name="businessItem"
-            placeholder="예: 소프트웨어 개발"
-            value={form.businessItem}
-            onChange={handleInputChange}
-          />
+          {form.postalCode && <TextField label="우편번호" name="postalCode" value={form.postalCode} onChange={handleInputChange} readOnly className="opacity-75" />}
+          <TextField label="상세 주소" name="addressDetail" placeholder="건물, 층/호수 등 추가 정보" value={form.addressDetail} onChange={handleInputChange} />
+          <TextField label="업태 *" name="businessType" placeholder="예: 도소매" value={form.businessType} onChange={handleInputChange} />
+          <TextField label="종목 *" name="businessItem" placeholder="예: 소프트웨어 개발" value={form.businessItem} onChange={handleInputChange} />
         </div>
 
-        <div className="space-y-4">
-          <FileField
-            label="사업자 등록증 첨부"
-            file={businessRegistrationFile}
-            onChange={(event) =>
-              handleFileChange(event, "businessRegistration")
-            }
-          />
-          <FileField
-            label="서명 등록"
-            description="*관리상품 고객의 경우 필수로 등록해주세요."
-            file={signatureFile}
-            onChange={(event) => handleFileChange(event, "signature")}
-          />
+        <div className="upload">
+          <FileField label="사업자 등록증 첨부" file={businessRegistrationFile} onChange={(event) => handleFileChange(event, "businessRegistration")} />
+          <FileField label="서명 등록" description="*관리상품 고객의 경우 필수로 등록해주세요." file={signatureFile} onChange={(event) => handleFileChange(event, "signature")} />
         </div>
 
-        <div className="space-y-5 border-t border-slate-200 pt-8 mt-8">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-slate-900">
-              담당자 정보
+        <div className="space-y-5 pt-8 mt-8">
+          <div>
+            <h3 className="page_subTitle">
+              담당자 정보{" "}
+              <button type="button" onClick={addContact} className="plus_btn">
+                + 담당자 추가
+              </button>
             </h3>
-            <button
-              type="button"
-              onClick={addContact}
-              className="text-sm font-medium text-primary hover:underline"
-            >
-              + 담당자 추가
-            </button>
           </div>
-          <div className="space-y-4">
+          <div className="space-y-10">
             {contacts.map((contact, index) => (
-              <div
-                key={contact.id}
-                className="border border-slate-200 rounded-lg p-4 bg-slate-50"
-              >
+              <div key={contact.id} className="">
                 <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-base font-semibold text-slate-900">
-                    담당자 {index + 1}
-                  </h4>
+                  <h4 className="text-base font-semibold text-slate-900">담당자 {index + 1}</h4>
                   {contacts.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeContact(contact.id)}
-                      className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition"
-                      title="삭제"
-                    >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
+                    <button type="button" onClick={() => removeContact(contact.id)} className="w-6 h-6 flex items-center justify-center text-slate-400  rounded transition" title="삭제" style={{ color: "var(--text-color)" }}>
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                       </svg>
                     </button>
                   )}
                 </div>
                 <div className="space-y-4">
-                  <Input
-                    label="이름 *"
-                    value={contact.name}
-                    onChange={(event) =>
-                      handleContactChange(
-                        contact.id,
-                        "name",
-                        event.target.value
-                      )
-                    }
-                    placeholder="담당자 이름"
-                  />
-                  <Input
-                    label="이메일 *"
-                    value={contact.email}
-                    onChange={(event) =>
-                      handleContactChange(
-                        contact.id,
-                        "email",
-                        event.target.value
-                      )
-                    }
-                    placeholder="example@company.com"
-                    type="email"
-                  />
-                  <PhoneInputField
-                    label="휴대폰 번호 *"
-                    value={contact.phone}
-                    onChange={(value) =>
-                      handleContactChange(contact.id, "phone", value)
-                    }
-                  />
+                  <Input label="이름 *" value={contact.name} onChange={(event) => handleContactChange(contact.id, "name", event.target.value)} placeholder="담당자 이름" />
+                  <Input label="이메일 *" value={contact.email} onChange={(event) => handleContactChange(contact.id, "email", event.target.value)} placeholder="example@company.com" type="email" />
+                  <PhoneInputField label="휴대폰 번호 *" value={contact.phone} onChange={(value) => handleContactChange(contact.id, "phone", value)} />
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="space-y-5 border-t border-slate-200 pt-8 mt-8">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-slate-900">
-              사이트 정보
+        <div className="space-y-10 pt-8 mt-8">
+          <div>
+            <h3 className="page_subTitle">
+              사이트 정보{" "}
+              <button type="button" onClick={addSite} className="plus_btn">
+                + 사이트 추가
+              </button>
             </h3>
-            <button
-              type="button"
-              onClick={addSite}
-              className="text-sm font-medium text-primary hover:underline"
-            >
-              + 사이트 추가
-            </button>
           </div>
           <div className="space-y-4">
             {sites.map((site, index) => (
-              <div
-                key={site.id}
-                className="border border-slate-200 rounded-lg p-4 bg-slate-50"
-              >
+              <div key={site.id} className="">
                 <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-base font-semibold text-slate-900">
-                    사이트 {index + 1}
-                  </h4>
+                  <h4 className="text-base font-semibold text-slate-900">사이트 {index + 1}</h4>
                   {sites.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeSite(site.id)}
-                      className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition"
-                      title="삭제"
-                    >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
+                    <button type="button" onClick={() => removeSite(site.id)} className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition" title="삭제" style={{ color: "var(--text-color)" }}>
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                       </svg>
                     </button>
                   )}
                 </div>
                 <div className="space-y-4">
-                  <Input
-                    label="브랜드"
-                    value={site.brandName}
-                    onChange={(event) =>
-                      handleSiteChange(site.id, "brandName", event.target.value)
-                    }
-                    placeholder="브랜드명"
-                  />
-                  <Input
-                    label="도메인"
-                    value={site.domain}
-                    onChange={(event) =>
-                      handleSiteChange(site.id, "domain", event.target.value)
-                    }
-                    placeholder="example.com"
-                  />
+                  <Input label="브랜드" value={site.brandName} onChange={(event) => handleSiteChange(site.id, "brandName", event.target.value)} placeholder="브랜드명" />
+                  <Input label="도메인" value={site.domain} onChange={(event) => handleSiteChange(site.id, "domain", event.target.value)} placeholder="example.com" />
                   <div className="grid grid-cols-[140px_1fr] items-center gap-4">
-                    <label className="text-sm font-medium text-slate-700">
-                      솔루션
-                    </label>
-                    <select
-                      value={site.solution}
-                      onChange={(event) =>
-                        handleSiteChange(
-                          site.id,
-                          "solution",
-                          event.target.value
-                        )
-                      }
-                      className="w-full rounded border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                    >
+                    <label className="text-sm font-medium text-slate-700">솔루션</label>
+                    <select value={site.solution} onChange={(event) => handleSiteChange(site.id, "solution", event.target.value)} className="w-full rounded border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary">
                       <option value="">선택하세요</option>
                       <option value="카페24">카페24</option>
                       <option value="고도몰">고도몰</option>
@@ -836,38 +535,11 @@ export default function SignUpPage() {
                       <option value="기타">기타</option>
                     </select>
                   </div>
-                  <Input
-                    label="관리자 아이디"
-                    value={site.loginId}
-                    onChange={(event) =>
-                      handleSiteChange(site.id, "loginId", event.target.value)
-                    }
-                    placeholder="관리자 로그인 아이디"
-                  />
-                  <Input
-                    label="관리자 패스워드"
-                    value={site.loginPassword}
-                    onChange={(event) =>
-                      handleSiteChange(
-                        site.id,
-                        "loginPassword",
-                        event.target.value
-                      )
-                    }
-                    placeholder="관리자 로그인 패스워드"
-                    type="password"
-                  />
+                  <Input label="관리자 아이디" value={site.loginId} onChange={(event) => handleSiteChange(site.id, "loginId", event.target.value)} placeholder="관리자 로그인 아이디" />
+                  <Input label="관리자 패스워드" value={site.loginPassword} onChange={(event) => handleSiteChange(site.id, "loginPassword", event.target.value)} placeholder="관리자 로그인 패스워드" type="password" />
                   <div className="grid grid-cols-[140px_1fr] items-center gap-4">
-                    <label className="text-sm font-medium text-slate-700">
-                      유형
-                    </label>
-                    <select
-                      value={site.type}
-                      onChange={(event) =>
-                        handleSiteChange(site.id, "type", event.target.value)
-                      }
-                      className="w-full rounded border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                    >
+                    <label className="text-sm font-medium text-slate-700">유형</label>
+                    <select value={site.type} onChange={(event) => handleSiteChange(site.id, "type", event.target.value)} className="w-full rounded border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary">
                       <option value="">선택하세요</option>
                       <option value="신규">신규</option>
                       <option value="리뉴얼">리뉴얼</option>
@@ -884,12 +556,8 @@ export default function SignUpPage() {
         </div>
       </section>
 
-      <div className="flex justify-center pt-8 border-t border-slate-200 mt-8">
-        <button
-          type="submit"
-          disabled={!allChecked || loading}
-          className="inline-flex w-full justify-center bg-primary px-8 py-4 text-base font-semibold text-white transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-slate-300"
-        >
+      <div className="flex justify-center mt-8">
+        <button type="submit" disabled={!allChecked || loading} className="inline-flex w-full justify-center btn primary px-8 py-4 text-base font-semibold text-white transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-slate-300">
           {loading ? "처리 중..." : "회원가입"}
         </button>
       </div>
@@ -909,34 +577,12 @@ type TextFieldProps = {
   inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
 };
 
-function TextField({
-  label,
-  name,
-  placeholder,
-  value,
-  onChange,
-  suffix,
-  readOnly,
-  className,
-  inputMode,
-}: TextFieldProps) {
+function TextField({ label, name, placeholder, value, onChange, suffix, readOnly, className, inputMode }: TextFieldProps) {
   return (
-    <div
-      className={`grid grid-cols-[140px_1fr] items-center gap-4 ${
-        className || ""
-      }`}
-    >
+    <div className={`grid grid-cols-[140px_1fr] items-center gap-4 ${className || ""}`}>
       <label className="text-sm font-medium text-slate-700">{label}</label>
       <div className="flex items-center gap-2">
-        <input
-          name={name}
-          value={value}
-          onChange={onChange}
-          placeholder={placeholder}
-          readOnly={readOnly}
-          inputMode={inputMode}
-          className="flex-1 rounded border border-slate-200 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:bg-slate-100 disabled:cursor-not-allowed"
-        />
+        <input name={name} value={value} onChange={onChange} placeholder={placeholder} readOnly={readOnly} inputMode={inputMode} className="flex-1 rounded border border-slate-200 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:bg-slate-100 disabled:cursor-not-allowed" />
         {suffix}
       </div>
     </div>
@@ -951,24 +597,11 @@ type PasswordFieldProps = {
   placeholder?: string;
 };
 
-function PasswordField({
-  label,
-  name,
-  value,
-  onChange,
-  placeholder,
-}: PasswordFieldProps) {
+function PasswordField({ label, name, value, onChange, placeholder }: PasswordFieldProps) {
   return (
     <div className="grid grid-cols-[140px_1fr] items-center gap-4">
       <label className="text-sm font-medium text-slate-700">{label}</label>
-      <input
-        type="password"
-        name={name}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        className="w-full rounded border border-slate-200 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-      />
+      <input type="password" name={name} value={value} onChange={onChange} placeholder={placeholder} className="w-full rounded border border-slate-200 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
     </div>
   );
 }
@@ -981,50 +614,19 @@ type FileFieldProps = {
   extraAction?: ReactNode;
 };
 
-function FileField({
-  label,
-  description,
-  file,
-  onChange,
-  extraAction,
-}: FileFieldProps) {
-  const inputId = useMemo(
-    () => label.replace(/\s+/g, "-").toLowerCase(),
-    [label]
-  );
+function FileField({ label, description, file, onChange, extraAction }: FileFieldProps) {
+  const inputId = useMemo(() => label.replace(/\s+/g, "-").toLowerCase(), [label]);
 
   return (
     <div className="grid grid-cols-[140px_1fr] items-center gap-4">
       <label className="text-sm font-medium text-slate-700">{label}</label>
       <div className="flex items-center gap-2">
-        <input
-          type="file"
-          onChange={onChange}
-          className="hidden"
-          id={inputId}
-        />
-        <label
-          htmlFor={inputId}
-          className="inline-flex cursor-pointer items-center justify-center gap-2 px-4 py-2 text-sm text-white bg-slate-500 rounded hover:bg-slate-600"
-        >
-          <span>첨부파일</span>
-          <svg
-            className="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
-            />
-          </svg>
+        <input type="file" onChange={onChange} className="hidden" id={inputId} />
+        <label htmlFor={inputId} className="inline-flex cursor-pointer items-center justify-center gap-2 px-4 py-2 text-white bg-slate-500 rounded hover:bg-slate-600">
+          <span style={{ fontSize: "12px" }}>첨부파일</span>
+          <img src="/images/attach_icon.svg" alt="" style={{ width: "12px", filter: "invert(1)" }} />
         </label>
-        {description && (
-          <span className="text-xs text-slate-500">{description}</span>
-        )}
+        {description && <span className="text-xs text-slate-500">{description}</span>}
         {file && (
           <span className="text-sm text-slate-600">
             {file.name} ({Math.round(file.size / 1024)}KB)
@@ -1044,23 +646,11 @@ type InputProps = {
   type?: string;
 };
 
-function Input({
-  label,
-  value,
-  onChange,
-  placeholder,
-  type = "text",
-}: InputProps) {
+function Input({ label, value, onChange, placeholder, type = "text" }: InputProps) {
   return (
     <div className="grid grid-cols-[140px_1fr] items-center gap-4">
       <label className="text-sm font-medium text-slate-700">{label}</label>
-      <input
-        type={type}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        className="w-full rounded border border-slate-200 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-      />
+      <input type={type} value={value} onChange={onChange} placeholder={placeholder} className="w-full rounded border border-slate-200 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
     </div>
   );
 }
@@ -1097,11 +687,7 @@ function PhoneInputField({ label, value, onChange }: PhoneInputFieldProps) {
     <div className="grid grid-cols-[140px_1fr] items-center gap-4">
       <label className="text-sm font-medium text-slate-700">{label}</label>
       <div className="flex items-center gap-2">
-        <select
-          value={prefix}
-          onChange={handlePrefixChange}
-          className="w-16 rounded border border-slate-200 px-2 py-2 text-sm text-slate-700 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-        >
+        <select value={prefix} onChange={handlePrefixChange} className="w-16 rounded border border-slate-200 px-2 py-2 text-sm text-slate-700 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary">
           <option value="010">010</option>
           <option value="011">011</option>
           <option value="016">016</option>
@@ -1110,23 +696,9 @@ function PhoneInputField({ label, value, onChange }: PhoneInputFieldProps) {
           <option value="019">019</option>
         </select>
         <span className="text-slate-400">-</span>
-        <input
-          type="text"
-          value={middle}
-          onChange={handleMiddleChange}
-          placeholder="1234"
-          maxLength={4}
-          className="w-16 rounded border border-slate-200 px-2 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary text-center"
-        />
+        <input type="text" value={middle} onChange={handleMiddleChange} placeholder="1234" maxLength={4} className="w-16 rounded border border-slate-200 px-2 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary text-center" />
         <span className="text-slate-400">-</span>
-        <input
-          type="text"
-          value={last}
-          onChange={handleLastChange}
-          placeholder="5678"
-          maxLength={4}
-          className="w-16 rounded border border-slate-200 px-2 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary text-center"
-        />
+        <input type="text" value={last} onChange={handleLastChange} placeholder="5678" maxLength={4} className="w-16 rounded border border-slate-200 px-2 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary text-center" />
       </div>
     </div>
   );
