@@ -114,6 +114,10 @@
   margin: 0;
 }
 
+.manageClientList :global(.table_group .table_item .table_row .row_group .table_data.attach) {
+  color: var(--text-gray);
+}
+
 .manageClientList :global(.table_group .table_item .table_row .row_group .table_data .flex) {
   width: 100%;
   gap: 8px;
