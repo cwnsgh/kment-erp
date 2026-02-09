@@ -18,9 +18,10 @@ type ClientSelectModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onSelect: (clientId: string) => void;
+  allowAllClients?: boolean; // true면 모든 거래처 선택 가능 (계약 등록용)
 };
 
-export function ClientSelectModal({ isOpen, onClose, onSelect }: ClientSelectModalProps) {
+export function ClientSelectModal({ isOpen, onClose, onSelect, allowAllClients = false }: ClientSelectModalProps) {
   const [searchType, setSearchType] = useState<"name" | "ceo">("name");
   const [searchKeyword, setSearchKeyword] = useState("");
   const [clients, setClients] = useState<Client[]>([]);
@@ -110,7 +111,11 @@ export function ClientSelectModal({ isOpen, onClose, onSelect }: ClientSelectMod
                         <td className="px-4 py-3 text-sm text-slate-700">{client.name}</td>
                         <td className="px-4 py-3 text-sm text-slate-700">{client.ceo_name || "-"}</td>
                         <td className="px-4 py-3">
-                          <button type="button" onClick={() => handleSelect(client.id)} disabled={client.hasManagedProduct || false} className="btn btn_md primary disabled:opacity-50 disabled:cursor-not-allowed">
+                          <button 
+                            type="button" 
+                            onClick={() => handleSelect(client.id)} 
+                            disabled={!allowAllClients && (client.hasManagedProduct || false)} 
+                            className="btn btn_md primary disabled:opacity-50 disabled:cursor-not-allowed">
                             선택
                           </button>
                         </td>
