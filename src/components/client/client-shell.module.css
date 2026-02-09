@@ -13,7 +13,7 @@
   align-items: center;
   justify-content: space-between;
   height: 80px;
-  background: var(--brand-dark, #1e293b);
+  background: #000;
   color: #fff;
   padding: 0 32px;
   position: sticky;
@@ -24,7 +24,7 @@
 .headerLeft {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 2rem;
 }
 
 .menuToggle {
@@ -47,8 +47,6 @@
 
 .menuToggleMini {
   display: inline-flex;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 50%;
   width: 40px;
   height: 40px;
@@ -71,6 +69,11 @@
   letter-spacing: 1px;
 }
 
+.logo img {
+  width: 100px;
+  filter: invert(0);
+}
+
 .headerRight {
   display: flex;
   align-items: center;
@@ -89,6 +92,10 @@
 }
 
 /* 알림 버튼 */
+.notificationWrap {
+  position: relative;
+}
+
 .notificationButton {
   position: relative;
   display: inline-flex;
@@ -97,12 +104,11 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: none;
   border: none;
+  background: transparent;
   color: #fff;
   cursor: pointer;
   transition: background-color 0.2s;
-  text-decoration: none;
 }
 
 .notificationButton:hover {
@@ -111,21 +117,17 @@
 
 .notificationBadge {
   position: absolute;
-  top: 6px;
-  right: 6px;
-  background: #ef4444;
+  top: 4px;
+  right: 3px;
+  background: #dc2626;
   color: #fff;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
-  padding: 2px 6px;
+  padding: 1px 4px;
   border-radius: 10px;
   min-width: 18px;
   text-align: center;
-  line-height: 1.4;
-}
-
-.notificationWrap {
-  position: relative;
+  line-height: 1.5;
 }
 
 .notifyContainer {
@@ -134,7 +136,7 @@
   top: calc(100% + 10px);
   width: 360px;
   border-radius: 10px;
-  background: #fff;
+  background: var(--background-color);
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.15);
   z-index: 60;
   overflow: hidden;
@@ -144,14 +146,16 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px;
-  border-bottom: 1px solid #e5e7eb;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border-color);
+  margin: 0 20px;
 }
 
 .notifyTitle {
   font-size: 16px;
   font-weight: var(--font-weight-bold);
-  color: #111827;
+  color: var(--primary);
+  line-height: 1;
 }
 
 .notifyAllRead {
@@ -166,11 +170,13 @@
 .notifyContent {
   max-height: 360px;
   overflow-y: auto;
+  padding-bottom: 40px;
 }
 
 .notifyArea {
   display: flex;
   flex-direction: column;
+  gap: 20px;
 }
 
 .notifySection {
@@ -179,56 +185,56 @@
 }
 
 .notifySection+.notifySection {
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--border-color);
 }
 
 .notifySectionHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 16px;
+  padding: 10px 20px;
   background: #f8fafc;
 }
 
 .notifySectionTitle {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: var(--font-weight-semibold);
-  color: #64748b;
+  color: var(--text-gray);
 }
 
 .notifySectionCount {
   font-size: 12px;
-  color: #64748b;
-  background: #eef2f7;
+  color: var(--primary);
+  background: var(--status-blue);
   border-radius: 999px;
   padding: 2px 8px;
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-bold);
 }
 
 .notifySectionBody {
   display: flex;
   flex-direction: column;
+  gap: 10px;
 }
 
 .notifyItem {
   text-align: left;
-  width: 100%;
+  width: calc(100% - 40px);
   border: none;
   background: #fff;
   padding: 14px 16px;
-  border-bottom: 1px solid #f1f5f9;
   cursor: pointer;
-  transition: background-color 0.2s;
-  opacity: 0.92;
+  transition: all 0.2s;
+  margin: 0 auto;
+  border-radius: 10px;
 }
 
 .notifyItem:hover {
-  background: #f8fafc;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .notifyApprovalItem {
-  background: #fffaf3;
-  border-left: 3px solid #f59e0b;
+  background: rgba(59, 130, 246, 0.03);
 }
 
 .notifyActivityItem {
@@ -259,9 +265,20 @@
 }
 
 .notifyActions {
+  width: 10px;
+  height: 10px;
+  border: none;
+  background: transparent;
+  font-size: 24px;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  transition: background-color 0.2s, color 0.2s, opacity 0.2s;
+  padding: 0;
+  line-height: 1;
+  font-size: 0;
+  background: url(/images/close_icon.svg);
 }
 
 .notifyTitleRow {
@@ -276,63 +293,62 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-size: 13px;
 }
 
 .notifyTag {
   font-size: 11px;
   font-weight: var(--font-weight-semibold);
-  padding: 2px 6px;
+  padding: 4px 6px;
   border-radius: 999px;
   border: 1px solid transparent;
   white-space: nowrap;
 }
 
 .notifyTagApproval {
-  color: #b45309;
-  background: #fff3e0;
-  border-color: #fed7aa;
+  color: var(--primary);
+  background: var(--status-blue);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
 }
 
 .notifyTagActivity {
-  color: #475569;
-  background: #f1f5f9;
-  border-color: #e2e8f0;
-}
-
-.notifyDot {
-  width: 8px;
-  height: 8px;
-  background: #ef4444;
-  border-radius: 50%;
-  flex-shrink: 0;
+  color: var(--text-gray);
+  background: var(--status-gray);
+  line-height: 1;
 }
 
 .notifyDeleteButton {
   border: none;
   background: transparent;
   color: #94a3b8;
-  font-size: 12px;
+  font-size: 0px;
   cursor: pointer;
   padding: 2px 4px;
   border-radius: 4px;
 }
 
-.notifyDeleteButton:hover {
-  background: #f1f5f9;
-  color: #475569;
+
+.notifyDot {
+  width: 8px;
+  height: 8px;
+  background: #ef4444;
+  border-radius: 50%;
 }
 
 .notifyMid {
-  margin-top: 6px;
-  font-size: 13px;
-  color: #374151;
+  margin-top: 30px;
+  font-size: 14px;
+  font-weight: var(--font-weight-medium);
+  color: var(--text-color);
   line-height: 1.5;
 }
 
 .notifyBot {
   margin-top: 8px;
-  font-size: 12px;
-  color: #9ca3af;
+  font-size: 13px;
+  color: var(--text-gray);
+  text-align: right;
 }
 
 .notifyEmpty {
@@ -340,6 +356,33 @@
   text-align: center;
   font-size: 13px;
   color: #6b7280;
+}
+
+.submenu>li>a {
+  color: var(--text-gray);
+  font-size: 16px;
+  font-weight: var(--font-weight-semibold);
+  transition: all 0.3s;
+  text-decoration: none;
+}
+
+.arlam {
+  display: block;
+  padding: 4px;
+  background-color: var(--primary);
+  border-radius: 4px;
+  color: #fff;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+  text-indent: 0;
+  min-width: 27px;
+  text-align: center;
+  box-sizing: border-box;
+  font-size: 13px;
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  line-height: 1;
 }
 
 /* 프로필 메뉴 */
@@ -579,6 +622,10 @@
   transform: translate(-50%, -50%);
 }
 
+.iconC {
+  display: none;
+}
+
 .menuItem:hover .iconB,
 .menuItem.active .iconB {
   display: none !important;
@@ -602,7 +649,9 @@
 }
 
 .arlam {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 4px;
   background-color: var(--primary);
   border-radius: 4px;
@@ -615,6 +664,8 @@
   font-size: 13px;
   position: absolute;
   right: 20px;
+  aspect-ratio: 1/1;
+  font-weight: var(--font-weight-bold);
 }
 
 /* 메인 컨텐츠 */
@@ -637,31 +688,26 @@
 }
 
 .contentInner {
-  max-width: 1300px;
+  max-width: 72rem;
   margin: 0 auto;
   width: 100%;
 }
 
 /* 푸터 */
 .footer {
-  background: var(--brand-dark, #1e293b);
+  background: #0c1324;
   padding: 20px 24px;
   font-size: 12px;
   color: #fff;
-  text-align: center;
+  text-align: left;
   position: relative;
   z-index: 20;
-  min-height: 60px;
   box-sizing: border-box;
   width: 100%;
   margin-left: 0;
 }
 
-.footerInner {
-  max-width: 1300px;
-  margin: 0 auto;
-  width: 100%;
-}
+.footerInner {}
 
 /* 모바일 오버레이 */
 .overlay {

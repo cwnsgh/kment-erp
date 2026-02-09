@@ -7,15 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Menu, Bell, User, LogOut } from "lucide-react";
 import { ClientSession } from "@/lib/auth";
 import { logout } from "@/app/actions/auth";
-import {
-  getPendingWorkRequestsByClientId,
-  getClientUnreadNotificationCount,
-  getClientNotifications,
-  markClientNotificationAsRead,
-  markAllClientNotificationsAsRead,
-  deleteClientNotification,
-  Notification,
-} from "@/app/actions/work-request";
+import { getPendingWorkRequestsByClientId, getClientUnreadNotificationCount, getClientNotifications, markClientNotificationAsRead, markAllClientNotificationsAsRead, deleteClientNotification, Notification } from "@/app/actions/work-request";
 import { ClientPasswordChangeModal } from "@/components/client/client-password-change-modal";
 import styles from "./client-shell.module.css";
 
@@ -45,9 +37,7 @@ export function ClientShell({ children, session }: ClientShellProps) {
       try {
         const result = await getPendingWorkRequestsByClientId(session.id);
         if (result.success && result.data) {
-          const pending = result.data.filter(
-            (r) => r.status === "pending"
-          ).length;
+          const pending = result.data.filter((r) => r.status === "pending").length;
           setPendingApprovalCount(pending);
         }
       } catch (error) {
@@ -79,25 +69,16 @@ export function ClientShell({ children, session }: ClientShellProps) {
       fetchUnreadCount();
     };
 
-    window.addEventListener(
-      "client-notifications:updated",
-      handleNotificationsUpdated
-    );
+    window.addEventListener("client-notifications:updated", handleNotificationsUpdated);
     return () => {
-      window.removeEventListener(
-        "client-notifications:updated",
-        handleNotificationsUpdated
-      );
+      window.removeEventListener("client-notifications:updated", handleNotificationsUpdated);
     };
   }, [fetchUnreadCount]);
 
   // 프로필 메뉴 외부 클릭 시 닫기
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (
-        profileMenuRef.current &&
-        !profileMenuRef.current.contains(event.target as Node)
-      ) {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
         setProfileMenuOpen(false);
       }
     }
@@ -114,10 +95,7 @@ export function ClientShell({ children, session }: ClientShellProps) {
   // 알림 드롭다운 외부 클릭 시 닫기
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (
-        notificationRef.current &&
-        !notificationRef.current.contains(event.target as Node)
-      ) {
+      if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
         setNotificationOpen(false);
       }
     }
@@ -165,11 +143,7 @@ export function ClientShell({ children, session }: ClientShellProps) {
     if (!notification.is_read) {
       const result = await markClientNotificationAsRead(notification.id);
       if (result.success) {
-        setNotifications((prev) =>
-          prev.map((n) =>
-            n.id === notification.id ? { ...n, is_read: true } : n
-          )
-        );
+        setNotifications((prev) => prev.map((n) => (n.id === notification.id ? { ...n, is_read: true } : n)));
         setUnreadNotificationCount((prev) => Math.max(0, prev - 1));
         notifyUnreadCountUpdated();
         router.refresh();
@@ -177,11 +151,7 @@ export function ClientShell({ children, session }: ClientShellProps) {
     }
 
     if (notification.work_request_id) {
-      router.push(
-        `/client/approvals?workRequestId=${encodeURIComponent(
-          notification.work_request_id
-        )}`
-      );
+      router.push(`/client/approvals?workRequestId=${encodeURIComponent(notification.work_request_id)}`);
     }
   };
 
@@ -195,17 +165,12 @@ export function ClientShell({ children, session }: ClientShellProps) {
     }
   };
 
-  const handleDeleteNotification = async (
-    event: React.MouseEvent<HTMLButtonElement>,
-    notification: Notification
-  ) => {
+  const handleDeleteNotification = async (event: React.MouseEvent<HTMLButtonElement>, notification: Notification) => {
     event.preventDefault();
     event.stopPropagation();
     const result = await deleteClientNotification(notification.id);
     if (result.success) {
-      setNotifications((prev) =>
-        prev.filter((item) => item.id !== notification.id)
-      );
+      setNotifications((prev) => prev.filter((item) => item.id !== notification.id));
       if (!notification.is_read) {
         setUnreadNotificationCount((prev) => Math.max(0, prev - 1));
         notifyUnreadCountUpdated();
@@ -216,16 +181,10 @@ export function ClientShell({ children, session }: ClientShellProps) {
 
   const formatNotificationDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(
-      2,
-      "0"
-    )}.${String(date.getDate()).padStart(2, "0")} ${String(
-      date.getHours()
-    ).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+    return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, "0")}.${String(date.getDate()).padStart(2, "0")} ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
   };
 
-  const isApprovalNotification = (notification: Notification) =>
-    notification.type === "work_requested";
+  const isApprovalNotification = (notification: Notification) => notification.type === "work_requested";
 
   const getNotificationTagLabel = (notification: Notification) => {
     switch (notification.type) {
@@ -245,9 +204,7 @@ export function ClientShell({ children, session }: ClientShellProps) {
   };
 
   const approvalNotifications = notifications.filter(isApprovalNotification);
-  const activityNotifications = notifications.filter(
-    (notification) => !isApprovalNotification(notification)
-  );
+  const activityNotifications = notifications.filter((notification) => !isApprovalNotification(notification));
 
   const formatDate = () => {
     return new Date().toLocaleDateString("ko-KR", {
@@ -263,39 +220,23 @@ export function ClientShell({ children, session }: ClientShellProps) {
       {/* 헤더 - 최상단 */}
       <header className={styles.header}>
         <div className={styles.headerLeft}>
-          <button
-            type="button"
-            className={styles.menuToggle}
-            onClick={() => setSidebarOpen((prev) => !prev)}
-          >
-            <Menu size={18} />
+          <button type="button" className={styles.menuToggle} onClick={() => setSidebarOpen((prev) => !prev)}>
+            <Menu size={24} />
             <span className="sr-only">메뉴 열기</span>
           </button>
-          <button
-            type="button"
-            className={styles.menuToggleMini}
-            onClick={() => setSidebarMini((prev) => !prev)}
-          >
-            <Menu size={18} />
+          <button type="button" className={styles.menuToggleMini} onClick={() => setSidebarMini((prev) => !prev)}>
+            <Menu size={24} />
             <span className="sr-only">사이드바 축소</span>
           </button>
           <Link href="/client/dashboard" className={styles.logo}>
-            KMENT
+            <img src="/images/kment-logo.svg" alt="" />
           </Link>
         </div>
         <div className={styles.headerRight}>
           <div className={styles.notificationWrap} ref={notificationRef}>
-            <button
-              type="button"
-              className={styles.notificationButton}
-              onClick={handleToggleNotifications}
-            >
+            <button type="button" className={styles.notificationButton} onClick={handleToggleNotifications}>
               <Bell size={20} />
-              {unreadNotificationCount > 0 && (
-                <span className={styles.notificationBadge}>
-                  {unreadNotificationCount}
-                </span>
-              )}
+              {unreadNotificationCount > 0 && <span className={styles.notificationBadge}>{unreadNotificationCount}</span>}
               <span className="sr-only">알림</span>
             </button>
             {notificationOpen && (
@@ -303,20 +244,14 @@ export function ClientShell({ children, session }: ClientShellProps) {
                 <div className={styles.notifyHeader}>
                   <p className={styles.notifyTitle}>알림</p>
                   {unreadNotificationCount > 0 && (
-                    <button
-                      type="button"
-                      className={styles.notifyAllRead}
-                      onClick={handleAllNotificationsRead}
-                    >
+                    <button type="button" className={styles.notifyAllRead} onClick={handleAllNotificationsRead}>
                       모두 읽음
                     </button>
                   )}
                 </div>
                 <div className={styles.notifyContent}>
                   {notificationLoading ? (
-                    <div className={styles.notifyEmpty}>
-                      알림을 불러오는 중...
-                    </div>
+                    <div className={styles.notifyEmpty}>알림을 불러오는 중...</div>
                   ) : notifications.length === 0 ? (
                     <div className={styles.notifyEmpty}>알림이 없습니다.</div>
                   ) : (
@@ -324,53 +259,20 @@ export function ClientShell({ children, session }: ClientShellProps) {
                       {approvalNotifications.length > 0 && (
                         <div className={styles.notifySection}>
                           <div className={styles.notifySectionHeader}>
-                            <p className={styles.notifySectionTitle}>
-                              승인 필요
-                            </p>
-                            <span className={styles.notifySectionCount}>
-                              {approvalNotifications.length}
-                            </span>
+                            <p className={styles.notifySectionTitle}>승인 필요</p>
+                            <span className={styles.notifySectionCount}>{approvalNotifications.length}</span>
                           </div>
                           <div className={styles.notifySectionBody}>
                             {approvalNotifications.map((notification) => (
-                              <button
-                                type="button"
-                                key={notification.id}
-                                className={`${styles.notifyItem} ${
-                                  styles.notifyApprovalItem
-                                } ${
-                                  !notification.is_read
-                                    ? styles.notifyUnread
-                                    : ""
-                                }`}
-                                onClick={() =>
-                                  handleNotificationClick(notification)
-                                }
-                              >
+                              <button type="button" key={notification.id} className={`${styles.notifyItem} ${styles.notifyApprovalItem} ${!notification.is_read ? styles.notifyUnread : ""}`} onClick={() => handleNotificationClick(notification)}>
                                 <div className={styles.notifyTop}>
                                   <div className={styles.notifyTitleRow}>
                                     <p>{notification.title || "알림"}</p>
-                                    <span
-                                      className={`${styles.notifyTag} ${styles.notifyTagApproval}`}
-                                    >
-                                      {getNotificationTagLabel(notification)}
-                                    </span>
+                                    <span className={`${styles.notifyTag} ${styles.notifyTagApproval}`}>{getNotificationTagLabel(notification)}</span>
                                   </div>
                                   <div className={styles.notifyActions}>
-                                    {!notification.is_read && (
-                                      <span className={styles.notifyDot} />
-                                    )}
-                                    <button
-                                      type="button"
-                                      className={styles.notifyDeleteButton}
-                                      aria-label="알림 삭제"
-                                      onClick={(event) =>
-                                        handleDeleteNotification(
-                                          event,
-                                          notification
-                                        )
-                                      }
-                                    >
+                                    {!notification.is_read && <span className={styles.notifyDot} />}
+                                    <button type="button" className={styles.notifyDeleteButton} aria-label="알림 삭제" onClick={(event) => handleDeleteNotification(event, notification)}>
                                       x
                                     </button>
                                   </div>
@@ -378,11 +280,7 @@ export function ClientShell({ children, session }: ClientShellProps) {
                                 <div className={styles.notifyMid}>
                                   <p>{notification.message}</p>
                                 </div>
-                                <div className={styles.notifyBot}>
-                                  {formatNotificationDate(
-                                    notification.created_at
-                                  )}
-                                </div>
+                                <div className={styles.notifyBot}>{formatNotificationDate(notification.created_at)}</div>
                               </button>
                             ))}
                           </div>
@@ -392,50 +290,19 @@ export function ClientShell({ children, session }: ClientShellProps) {
                         <div className={styles.notifySection}>
                           <div className={styles.notifySectionHeader}>
                             <p className={styles.notifySectionTitle}>내 활동</p>
-                            <span className={styles.notifySectionCount}>
-                              {activityNotifications.length}
-                            </span>
+                            <span className={styles.notifySectionCount}>{activityNotifications.length}</span>
                           </div>
                           <div className={styles.notifySectionBody}>
                             {activityNotifications.map((notification) => (
-                              <button
-                                type="button"
-                                key={notification.id}
-                                className={`${styles.notifyItem} ${
-                                  styles.notifyActivityItem
-                                } ${
-                                  !notification.is_read
-                                    ? styles.notifyUnread
-                                    : ""
-                                }`}
-                                onClick={() =>
-                                  handleNotificationClick(notification)
-                                }
-                              >
+                              <button type="button" key={notification.id} className={`${styles.notifyItem} ${styles.notifyActivityItem} ${!notification.is_read ? styles.notifyUnread : ""}`} onClick={() => handleNotificationClick(notification)}>
                                 <div className={styles.notifyTop}>
                                   <div className={styles.notifyTitleRow}>
                                     <p>{notification.title || "알림"}</p>
-                                    <span
-                                      className={`${styles.notifyTag} ${styles.notifyTagActivity}`}
-                                    >
-                                      {getNotificationTagLabel(notification)}
-                                    </span>
+                                    <span className={`${styles.notifyTag} ${styles.notifyTagActivity}`}>{getNotificationTagLabel(notification)}</span>
                                   </div>
                                   <div className={styles.notifyActions}>
-                                    {!notification.is_read && (
-                                      <span className={styles.notifyDot} />
-                                    )}
-                                    <button
-                                      type="button"
-                                      className={styles.notifyDeleteButton}
-                                      aria-label="알림 삭제"
-                                      onClick={(event) =>
-                                        handleDeleteNotification(
-                                          event,
-                                          notification
-                                        )
-                                      }
-                                    >
+                                    {!notification.is_read && <span className={styles.notifyDot} />}
+                                    <button type="button" className={styles.notifyDeleteButton} aria-label="알림 삭제" onClick={(event) => handleDeleteNotification(event, notification)}>
                                       x
                                     </button>
                                   </div>
@@ -443,11 +310,7 @@ export function ClientShell({ children, session }: ClientShellProps) {
                                 <div className={styles.notifyMid}>
                                   <p>{notification.message}</p>
                                 </div>
-                                <div className={styles.notifyBot}>
-                                  {formatNotificationDate(
-                                    notification.created_at
-                                  )}
-                                </div>
+                                <div className={styles.notifyBot}>{formatNotificationDate(notification.created_at)}</div>
                               </button>
                             ))}
                           </div>
@@ -462,14 +325,8 @@ export function ClientShell({ children, session }: ClientShellProps) {
           <div className={styles.dateText}>{formatDate()}</div>
           <div className={styles.userName}>{session.name}님</div>
           <div className={styles.profileMenu} ref={profileMenuRef}>
-            <button
-              type="button"
-              onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-              className={styles.profileButton}
-            >
-              <span className={styles.profileInitial}>
-                {session.name.charAt(0).toUpperCase()}
-              </span>
+            <button type="button" onClick={() => setProfileMenuOpen(!profileMenuOpen)} className={styles.profileButton}>
+              <span className={styles.profileInitial}>{session.name.charAt(0).toUpperCase()}</span>
             </button>
 
             {profileMenuOpen && (
@@ -497,8 +354,7 @@ export function ClientShell({ children, session }: ClientShellProps) {
                       onClick={() => {
                         setProfileMenuOpen(false);
                         setPasswordModalOpen(true);
-                      }}
-                    >
+                      }}>
                       개인정보 수정
                     </button>
                   </div>
@@ -507,11 +363,7 @@ export function ClientShell({ children, session }: ClientShellProps) {
                   <div className={styles.profileDivider} />
 
                   {/* 로그아웃 */}
-                  <button
-                    type="button"
-                    onClick={handleLogout}
-                    className={styles.profileLogoutButton}
-                  >
+                  <button type="button" onClick={handleLogout} className={styles.profileLogoutButton}>
                     <LogOut size={16} />
                     <span>로그아웃</span>
                   </button>
@@ -525,22 +377,11 @@ export function ClientShell({ children, session }: ClientShellProps) {
       {/* 중간 영역 - 사이드바와 메인 컨텐츠 */}
       <div className={styles.mainContainer}>
         {/* 사이드바 */}
-        <aside
-          className={`${styles.sidebar} ${
-            sidebarMini ? styles.sidebarMini : ""
-          } ${sidebarOpen ? styles.sidebarOpen : ""}`}
-        >
+        <aside className={`${styles.sidebar} ${sidebarMini ? styles.sidebarMini : ""} ${sidebarOpen ? styles.sidebarOpen : ""}`}>
           <nav className={styles.sidebarNav}>
             <ul className={styles.menuList}>
-              <li
-                className={`${styles.menuItem} ${
-                  pathname === "/client/dashboard" ? styles.active : ""
-                }`}
-              >
-                <Link
-                  href="/client/dashboard"
-                  onClick={() => setSidebarOpen(false)}
-                >
+              <li className={`${styles.menuItem} ${pathname === "/client/dashboard" ? styles.active : ""}`}>
+                <Link href="/client/dashboard" onClick={() => setSidebarOpen(false)}>
                   <span className={styles.icon}>
                     <Image
                       src="/images/home_icon.svg"
@@ -572,15 +413,8 @@ export function ClientShell({ children, session }: ClientShellProps) {
                   <span className={styles.menuText}>대시보드</span>
                 </Link>
               </li>
-              <li
-                className={`${styles.menuItem} ${
-                  pathname === "/client/approvals" ? styles.active : ""
-                }`}
-              >
-                <Link
-                  href="/client/approvals"
-                  onClick={() => setSidebarOpen(false)}
-                >
+              <li className={`${styles.menuItem} ${pathname === "/client/approvals" ? styles.active : ""}`}>
+                <Link href="/client/approvals" onClick={() => setSidebarOpen(false)}>
                   <span className={styles.icon}>
                     <Image
                       src="/images/check_round_icon.svg"
@@ -610,20 +444,11 @@ export function ClientShell({ children, session }: ClientShellProps) {
                     />
                   </span>
                   <span className={styles.menuText}>승인 현황</span>
-                  {pendingApprovalCount > 0 && (
-                    <span className={styles.arlam}>{pendingApprovalCount}</span>
-                  )}
+                  {pendingApprovalCount > 0 && <span className={styles.arlam}>{pendingApprovalCount}</span>}
                 </Link>
               </li>
-              <li
-                className={`${styles.menuItem} ${
-                  pathname === "/client/tasks" ? styles.active : ""
-                }`}
-              >
-                <Link
-                  href="/client/tasks"
-                  onClick={() => setSidebarOpen(false)}
-                >
+              <li className={`${styles.menuItem} ${pathname === "/client/tasks" ? styles.active : ""}`}>
+                <Link href="/client/tasks" onClick={() => setSidebarOpen(false)}>
                   <span className={styles.icon}>
                     <Image
                       src="/images/graph_icon.svg"
@@ -660,10 +485,7 @@ export function ClientShell({ children, session }: ClientShellProps) {
         </aside>
 
         {/* 메인 컨텐츠 영역 */}
-        <div
-          className={styles.contentArea}
-          style={{ marginLeft: sidebarMini ? "90px" : "280px" }}
-        >
+        <div className={styles.contentArea} style={{ marginLeft: sidebarMini ? "90px" : "280px" }}>
           <main className={styles.mainContent}>
             <div className={styles.contentInner}>{children}</div>
           </main>
@@ -678,16 +500,10 @@ export function ClientShell({ children, session }: ClientShellProps) {
       </footer>
 
       {/* 모바일 오버레이 */}
-      {sidebarOpen && (
-        <div className={styles.overlay} onClick={() => setSidebarOpen(false)} />
-      )}
+      {sidebarOpen && <div className={styles.overlay} onClick={() => setSidebarOpen(false)} />}
 
       {/* 비밀번호 변경 모달 */}
-      <ClientPasswordChangeModal
-        isOpen={passwordModalOpen}
-        onClose={() => setPasswordModalOpen(false)}
-        clientId={session.id}
-      />
+      <ClientPasswordChangeModal isOpen={passwordModalOpen} onClose={() => setPasswordModalOpen(false)} clientId={session.id} />
     </div>
   );
 }

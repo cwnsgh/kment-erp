@@ -3,38 +3,6 @@
   /* 기본 스타일은 전역 CSS 사용 */
 }
 
-/* Button Styles */
-.customerWorkList :global(.btn) {
-  border: none;
-  border-radius: 6px;
-  font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-  font-size: 15px;
-  display: inline-block;
-  transition: all 0.2s;
-}
-
-.customerWorkList :global(.btn.primary) {
-  background-color: var(--primary);
-  color: #fff;
-}
-
-.customerWorkList :global(.btn.normal) {
-  background-color: #fff;
-  color: var(--text-color);
-  border: 1px solid var(--border-color);
-}
-
-.customerWorkList :global(.btn.normal:hover) {
-  background-color: var(--background-color);
-}
-
-.customerWorkList :global(.btn_lg) {
-  height: 42px;
-  padding: 0 20px;
-  line-height: 42px;
-  font-size: 15px;
-}
 
 /* Page Section Styles */
 .customerWorkList :global(.page_section) {
@@ -60,7 +28,7 @@
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
   width: 100%;
-  padding: 60px 50px 100px;
+  padding: 50px 30px 100px;
   box-sizing: border-box;
   position: relative;
 }
@@ -69,15 +37,12 @@
 .customerWorkList :global(.table_group) {
   display: flex;
   flex-direction: column;
-  gap: 60px;
   width: 100%;
   font-size: 14px;
   font-weight: var(--font-weight-semibold);
 }
 
-.boxInner {
-  padding: 24px;
-}
+.boxInner {}
 
 /* 검색 박스 */
 .searchBox {
@@ -86,19 +51,13 @@
 
 .pageSubTitle {
   font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 24px;
-  color: #1e293b;
+  font-weight: var(--font-weight-bold);
+  margin-bottom: 40px;
+  color: var(--text-color);
 }
 
 .companyName {
-  color: #3b82f6;
-  font-weight: 700;
-}
-
-.workCount {
-  color: #64748b;
-  font-weight: 400;
+  color: var(--primary);
 }
 
 /* 테이블 아이템 (라디오 버튼 그룹) - 검색 박스용 */
@@ -115,82 +74,41 @@
 .searchRowGroup {
   display: flex;
   align-items: center;
-  padding: 16px;
-  background: #f8fafc;
-  border-radius: 8px;
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .searchTableHead {
-  min-width: 120px;
+  min-width: 180px;
   font-size: 14px;
+  background-color: var(--background-color);
   font-weight: 600;
-  color: #1e293b;
+  padding: 20px;
+  color: var(--text-color);
+  font-weight: var(--font-weight-semibold);
 }
 
 .searchTableData {
   display: flex;
-  gap: 24px;
   align-items: center;
   flex: 1;
+  padding: 18px 10px 18px 20px;
+  width: calc(100% - 180px);
 }
 
-.searchTableData input[type="radio"] {
-  width: 18px;
-  height: 18px;
-  margin: 0;
-  cursor: pointer;
-  accent-color: #3b82f6;
-}
 
-.searchTableData label {
-  font-size: 14px;
-  color: #475569;
-  cursor: pointer;
-  margin: 0;
-  user-select: none;
-}
 
 /* 버튼 래퍼 */
 .btnWrap {
   display: flex;
   gap: 12px;
-  justify-content: flex-end;
-  margin-top: 20px;
+  justify-content: center;
 }
 
-.btnWrap .btn_lg {
-  padding: 12px 24px;
-  font-size: 14px;
-  font-weight: 500;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btnWrap .btn_lg.primary {
-  background: #3b82f6;
-  color: #fff;
-}
-
-.btnWrap .btn_lg.primary:hover {
-  background: #2563eb;
-}
-
-.btnWrap .btn_lg.normal {
-  background: #fff;
-  color: #374151;
-  border: 1px solid #d1d5db;
-}
-
-.btnWrap .btn_lg.normal:hover {
-  background: #f9fafb;
-  border-color: #9ca3af;
-}
 
 /* 리스트 테이블 컨테이너 */
 .listTable {
-  margin-top: 24px !important;
+  margin-top: 80px !important;
   width: 100% !important;
 }
 
@@ -204,8 +122,9 @@
 }
 
 .topTotal {
-  font-size: 14px !important;
-  color: #64748b !important;
+  font-size: 13px !important;
+  color: var(--text-gray);
+  font-weight: var(--font-weight-semibold);
 }
 
 .topTotal p {
@@ -213,39 +132,16 @@
 }
 
 .topTotal span {
-  color: #3b82f6 !important;
-  font-weight: 600 !important;
+  color: var(--primary);
+  font-weight: var(--font-weight-bold);
 }
 
 .topBtnGroup {
   display: flex !important;
-  gap: 12px !important;
+  gap: 6px !important;
   align-items: center !important;
 }
 
-.excelBtn {
-  cursor: pointer !important;
-}
-
-.viewSelect {
-  padding: 8px 12px !important;
-  border: 1px solid #d1d5db !important;
-  border-radius: 6px !important;
-  background: #fff !important;
-  font-size: 14px !important;
-  color: #374151 !important;
-  cursor: pointer !important;
-  outline: none !important;
-}
-
-.viewSelect:hover {
-  border-color: #9ca3af !important;
-}
-
-.viewSelect:focus {
-  border-color: #3b82f6 !important;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
-}
 
 /* 테이블 래퍼 (모듈 CSS) */
 .tableWrap {
@@ -258,17 +154,17 @@
   width: 100% !important;
   border-collapse: collapse !important;
   background: #fff !important;
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .tableWrap thead th {
-  background: #f8fafc !important;
-  padding: 14px 12px !important;
+  padding: 24px !important;
   text-align: center !important;
-  font-weight: 600 !important;
-  font-size: 13px !important;
-  color: #1e293b !important;
-  border-bottom: 1px solid #e5e7eb !important;
-  border-right: 1px solid #e5e7eb !important;
+  font-weight: var(--font-weight-semibold);
+  font-size: 15px !important;
+  color: var(--text-gray);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .tableWrap thead th:last-child {
@@ -289,11 +185,8 @@
 }
 
 .tableWrap tbody td {
-  padding: 14px 12px !important;
+  padding: 24px 0px !important;
   text-align: center !important;
-  font-size: 13px !important;
-  color: #475569 !important;
-  border-right: 1px solid #e5e7eb !important;
 }
 
 .tableWrap tbody td:last-child {
@@ -301,7 +194,7 @@
 }
 
 .text_overflow {
-  max-width: 300px;
+  max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -312,63 +205,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-/* 작업 상태 뱃지 - 원본 CSS에 맞춤 */
-.workOngoing {
-  display: inline-block;
-  font-size: 14px;
-  color: #1e293b;
-  font-weight: 600;
-  background-color: #e5e7eb;
-  padding: 5px 7px;
-  border-radius: 4px;
-  line-height: 1;
-}
-
-.workComplete {
-  display: inline-block;
-  font-size: 14px;
-  color: #fff;
-  font-weight: 600;
-  background-color: #64748b;
-  padding: 5px 7px;
-  border-radius: 4px;
-  line-height: 1;
-}
-
-/* 승인여부 라벨 스타일 - 원본 CSS에 맞춤 */
-.approvalRequest {
-  display: inline-block;
-  font-size: 14px;
-  color: #fff;
-  font-weight: 600;
-  background-color: #3b82f6;
-  padding: 5px 7px;
-  border-radius: 4px;
-  line-height: 1;
-}
-
-.approvalComplete {
-  display: inline-block;
-  font-size: 14px;
-  color: #fff;
-  font-weight: 600;
-  background-color: #64748b;
-  padding: 5px 7px;
-  border-radius: 4px;
-  line-height: 1;
-}
-
-.approvalRefusal {
-  display: inline-block;
-  font-size: 14px;
-  color: #fff;
-  font-weight: 600;
-  background-color: #dc2626;
-  padding: 5px 7px;
-  border-radius: 4px;
-  line-height: 1;
 }
 
 /* 페이지네이션 */
@@ -458,7 +294,7 @@
 
 .detailModalInner {
   background: #fff;
-  border-radius: 8px;
+  border-radius: 10px;
   width: 100%;
   max-width: 800px;
   max-height: 90vh;
@@ -473,6 +309,7 @@
     opacity: 0;
     transform: scale(0.95);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -480,24 +317,25 @@
 }
 
 .detailModalHeader {
-  padding: 20px 24px;
-  border-bottom: 1px solid #e5e7eb;
+  padding: 30px 0px 20px 0px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-shrink: 0;
+  border-bottom: 1px solid var(--text-color);
+  margin: 0 30px 20px;
 }
 
 .detailModalHeader h3 {
   margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: #1e293b;
+  font-size: 20px;
+  font-weight: var(--font-weight-bold);
+  color: var(--text-color);
 }
 
 .detailModalClose {
-  width: 32px;
-  height: 32px;
+  width: 20px;
+  height: 20px;
   border: none;
   background: transparent;
   font-size: 24px;
@@ -507,20 +345,17 @@
   align-items: center;
   justify-content: center;
   border-radius: 4px;
-  transition: all 0.2s;
+  transition: background-color 0.2s, color 0.2s, opacity 0.2s;
   padding: 0;
   line-height: 1;
-}
-
-.detailModalClose:hover {
-  background: #f1f5f9;
-  color: #1e293b;
+  font-size: 0;
+  background: url(/images/close_icon.svg);
 }
 
 .detailModalBody {
   flex: 1;
   overflow-y: auto;
-  padding: 24px;
+  padding: 20px 30px;
 }
 
 .detailModalBody.scroll {
@@ -528,47 +363,14 @@
 }
 
 .detailModalFooter {
-  padding: 16px 24px;
-  border-top: 1px solid #e5e7eb;
+  padding: 20px 30px;
+  border-top: 1px solid var(--border-color);
   display: flex;
-  gap: 12px;
-  justify-content: flex-end;
+  gap: 10px;
+  justify-content: center;
   flex-shrink: 0;
 }
 
-.detailModalFooter .btn {
-  padding: 10px 20px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  border: none;
-  transition: all 0.2s;
-}
-
-.detailModalFooter .btnLg {
-  padding: 12px 24px;
-}
-
-.detailModalFooter .btn.normal {
-  background: #fff;
-  color: #374151;
-  border: 1px solid #d1d5db;
-}
-
-.detailModalFooter .btn.normal:hover {
-  background: #f9fafb;
-  border-color: #9ca3af;
-}
-
-.detailModalFooter .btn.primary {
-  background: #3b82f6;
-  color: #fff;
-}
-
-.detailModalFooter .btn.primary:hover {
-  background: #2563eb;
-}
 
 /* 테이블 그룹 스타일 (모달용) - 원본 CSS에 맞춤 */
 .tableGroup {
@@ -586,8 +388,8 @@
 }
 
 .tableTitle {
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: var(--font-weight-bold);
   margin: 0 0 20px 0;
   padding: 0;
   display: flex;
@@ -636,7 +438,7 @@
   box-sizing: border-box;
   z-index: 1;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: flex-start;
 }
 
@@ -652,8 +454,8 @@
 }
 
 .tableData.fontB {
-  font-weight: 600;
-  color: #1e293b;
+  font-weight: var(--font-weight-bold);
+  color: var(--primary);
 }
 
 .tableData.center {
@@ -701,6 +503,39 @@
   font-weight: 700;
 }
 
+
+/* 서명 이미지 */
+.signImg {
+  width: 24px;
+  height: 24px;
+  margin-left: 8px;
+  object-fit: contain;
+}
+
+/* 반응형 - 모바일 */
+@media (max-width: 768px) {
+  .detailModalInner {
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .detailModalBody {
+    padding: 16px;
+  }
+
+  .tableHead {
+    min-width: 120px;
+    padding: 12px 16px;
+    font-size: 13px;
+  }
+
+  .tableData {
+    padding: 12px 16px;
+    font-size: 13px;
+  }
+}
+
 /* 진행상황 상태 배지 (관리 상품 정보용) - 원본 CSS에 맞춤 */
 .statusOngoing {
   display: inline-block;
@@ -744,36 +579,4 @@
   padding: 5px 10px;
   border-radius: 4px;
   line-height: 1;
-}
-
-/* 서명 이미지 */
-.signImg {
-  width: 24px;
-  height: 24px;
-  margin-left: 8px;
-  object-fit: contain;
-}
-
-/* 반응형 - 모바일 */
-@media (max-width: 768px) {
-  .detailModalInner {
-    max-width: 100%;
-    max-height: 100vh;
-    border-radius: 0;
-  }
-
-  .detailModalBody {
-    padding: 16px;
-  }
-
-  .tableHead {
-    min-width: 120px;
-    padding: 12px 16px;
-    font-size: 13px;
-  }
-
-  .tableData {
-    padding: 12px 16px;
-    font-size: 13px;
-  }
 }

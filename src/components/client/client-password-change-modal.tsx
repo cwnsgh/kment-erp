@@ -10,11 +10,7 @@ type ClientPasswordChangeModalProps = {
   clientId: string;
 };
 
-export function ClientPasswordChangeModal({
-  isOpen,
-  onClose,
-  clientId,
-}: ClientPasswordChangeModalProps) {
+export function ClientPasswordChangeModal({ isOpen, onClose, clientId }: ClientPasswordChangeModalProps) {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -79,77 +75,38 @@ export function ClientPasswordChangeModal({
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
           <h2>비밀번호 변경</h2>
-          <button
-            type="button"
-            className={styles.closeButton}
-            onClick={handleClose}
-          >
+          <button type="button" className={styles.closeButton} onClick={handleClose}>
             ×
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className={styles.form}>
           {success ? (
-            <div className={styles.successMessage}>
-              비밀번호가 성공적으로 변경되었습니다.
-            </div>
+            <div className={styles.successMessage}>비밀번호가 성공적으로 변경되었습니다.</div>
           ) : (
             <>
               {error && <div className={styles.errorMessage}>{error}</div>}
 
               <div className={styles.formGroup}>
                 <label htmlFor="currentPassword">현재 비밀번호</label>
-                <input
-                  type="password"
-                  id="currentPassword"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  placeholder="현재 비밀번호를 입력하세요"
-                  disabled={isLoading}
-                  autoComplete="current-password"
-                />
+                <input type="password" id="currentPassword" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} placeholder="현재 비밀번호를 입력하세요" disabled={isLoading} autoComplete="current-password" />
               </div>
 
               <div className={styles.formGroup}>
                 <label htmlFor="newPassword">새 비밀번호</label>
-                <input
-                  type="password"
-                  id="newPassword"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="새 비밀번호를 입력하세요 (최소 6자)"
-                  disabled={isLoading}
-                  autoComplete="new-password"
-                />
+                <input type="password" id="newPassword" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="새 비밀번호를 입력하세요 (최소 6자)" disabled={isLoading} autoComplete="new-password" />
               </div>
 
               <div className={styles.formGroup}>
                 <label htmlFor="confirmPassword">새 비밀번호 확인</label>
-                <input
-                  type="password"
-                  id="confirmPassword"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="새 비밀번호를 다시 입력하세요"
-                  disabled={isLoading}
-                  autoComplete="new-password"
-                />
+                <input type="password" id="confirmPassword" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="새 비밀번호를 다시 입력하세요" disabled={isLoading} autoComplete="new-password" />
               </div>
 
               <div className={styles.buttonGroup}>
-                <button
-                  type="button"
-                  className={styles.cancelButton}
-                  onClick={handleClose}
-                  disabled={isLoading}
-                >
+                <button type="button" className="btn btn_lg normal" onClick={handleClose} disabled={isLoading}>
                   취소
                 </button>
-                <button
-                  type="submit"
-                  className={styles.submitButton}
-                  disabled={isLoading}
-                >
+                <button type="submit" className="btn btn_lg primary" disabled={isLoading}>
                   {isLoading ? "변경 중..." : "변경"}
                 </button>
               </div>
@@ -160,4 +117,3 @@ export function ClientPasswordChangeModal({
     </div>
   );
 }
-
