@@ -523,6 +523,7 @@
   transition: background-color 0.2s !important;
   white-space: nowrap !important;
   margin: 0 auto !important;
+  max-width: 100px;
 }
 
 .workTable td :global(.file-upload-btn:hover) {
