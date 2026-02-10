@@ -1,6 +1,7 @@
 /* CSS 변수 참조 (globals.css에서 정의됨) */
 /* --primary, --text-color, --border-color, --background-color, --font-weight-* */
 
+
 /* 컨테이너 */
 .container {
   display: flex;
@@ -175,7 +176,8 @@
   padding: 48px 16px;
   text-align: center;
   font-size: 14px;
-  color: #64748b;
+  color: var(--text-gray);
+  margin-top: 20px;
 }
 
 /* 작업 목록 */

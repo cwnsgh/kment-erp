@@ -16,10 +16,9 @@ export default async function OperationsTaskPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="관리업무 현황"
-        description="요청된 관리 업무의 진행도를 확인하고 히스토리를 관리합니다."
-      />
+      {/*
+      <PageHeader title="관리업무 현황" description="요청된 관리 업무의 진행도를 확인하고 히스토리를 관리합니다." />     
+       */}
       <OperationsTaskBoard workRequests={workRequests} currentEmployeeId={session.id} />
     </div>
   );

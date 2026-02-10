@@ -239,123 +239,128 @@ export function OperationsTaskBoard({ workRequests, currentEmployeeId }: Operati
   };
 
   return (
-    <div className="white_box">
-      <header className={styles.header}>
-        <div className={styles.headerActions}>
-          <select value={searchField} onChange={(event) => setSearchField(event.target.value as "all" | "client" | "brand")} className={styles.searchSelect}>
-            <option value="all">전체</option>
-            <option value="client">거래처</option>
-            <option value="brand">브랜드</option>
-          </select>
-          <div className={styles.searchWrapper}>
-            <input
-              value={searchQuery}
-              onChange={(event) => {
-                setSearchQuery(event.target.value);
-                setShowSuggestions(true);
-              }}
-              onFocus={() => setShowSuggestions(true)}
-              onBlur={() => {
-                setTimeout(() => setShowSuggestions(false), 150);
-              }}
-              placeholder="거래처 또는 브랜드명 검색"
-              className={styles.searchInput}
-            />
-            {showSuggestions && suggestions.length > 0 && (
-              <div className={styles.suggestions}>
-                {suggestions.map((value) => (
-                  <button key={value} type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => handleSuggestionSelect(value)} className={styles.suggestionItem}>
-                    {value}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </header>
-      <div className={styles.filterGroup}>
-        {/* 담당자 필터 */}
-        <select value={employeeFilter} onChange={(e) => setEmployeeFilter(e.target.value)} className={styles.employeeSelect}>
-          <option value="all">전체 담당자</option>
-          {employees.map((emp) => (
-            <option key={emp.id} value={emp.id}>
-              {emp.name}
-            </option>
-          ))}
-        </select>
-        {/* 진행상황 필터 */}
-        <button type="button" onClick={() => setProgressFilter("all")} className={`${styles.filterButton} ${progressFilter === "all" ? styles.filterButtonActive : ""}`}>
-          전체 ({progressCounts.all})
-        </button>
-        <button type="button" onClick={() => setProgressFilter("waiting")} className={`${styles.filterButton} ${progressFilter === "waiting" ? styles.filterButtonActive : ""}`}>
-          대기 ({progressCounts.waiting})
-        </button>
-        <button type="button" onClick={() => setProgressFilter("in_progress")} className={`${styles.filterButton} ${progressFilter === "in_progress" ? styles.filterButtonActive : ""}`}>
-          진행중 ({progressCounts.in_progress})
-        </button>
-        <button type="button" onClick={() => setProgressFilter("completed")} className={`${styles.filterButton} ${progressFilter === "completed" ? styles.filterButtonActive : ""}`}>
-          작업완료 ({progressCounts.completed})
-        </button>
-        <button type="button" onClick={() => setProgressFilter("rejected")} className={`${styles.filterButton} ${progressFilter === "rejected" ? styles.filterButtonActive : ""}`}>
-          반려 ({progressCounts.rejected})
-        </button>
+    <div>
+      <div className="page_title">
+        <h1>관리 업무 현황</h1>
       </div>
-      {filteredRequests.length === 0 ? (
-        <div className={styles.emptyState}>표시할 관리업무가 없습니다.</div>
-      ) : (
-        <div className={styles.taskList}>
-          {filteredRequests.map((operation) => {
-            const requestStatus = getRequestStatusLabel(operation.status);
-            const progressStatus = getProgressLabel(operation.status);
-            return (
-              <article
-                key={operation.id}
-                className={styles.taskItem}
-                role="button"
-                tabIndex={0}
-                onClick={() => setSelectedTask(operation)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    setSelectedTask(operation);
-                  }
-                }}>
-                <div className={styles.taskItemContent}>
-                  <div className={styles.taskItemLeft}>
-                    <p className={styles.taskTitle}>{operation.work_content || "관리 업무"}</p>
-                    <p className={styles.taskMeta}>
-                      <span className={styles.taskMetaNormal}>{operation.client_name || "거래처"}</span>
-                      <span className={styles.taskMetaSeparator}>·</span>
-                      <span className={styles.taskMetaBold}>{operation.brand_name}</span>
-                    </p>
-                  </div>
-                  <div className={styles.taskItemRight}>
-                    {operation.status === "pending" || operation.status === "approved" || operation.status === "rejected" ? <span className={`${styles.statusBadge} ${requestTone[requestStatus] || styles.statusBadgeDefault}`}>요청 {requestStatus}</span> : null}
-                    <span className={`${styles.progressBadge} ${progressTone[progressStatus] || styles.progressBadgeDefault}`}>{progressStatus}</span>
-                  </div>
+      <div className="white_box">
+        <header className={styles.header}>
+          <div className={styles.headerActions}>
+            <select value={searchField} onChange={(event) => setSearchField(event.target.value as "all" | "client" | "brand")} className={styles.searchSelect}>
+              <option value="all">전체</option>
+              <option value="client">거래처</option>
+              <option value="brand">브랜드</option>
+            </select>
+            <div className={styles.searchWrapper}>
+              <input
+                value={searchQuery}
+                onChange={(event) => {
+                  setSearchQuery(event.target.value);
+                  setShowSuggestions(true);
+                }}
+                onFocus={() => setShowSuggestions(true)}
+                onBlur={() => {
+                  setTimeout(() => setShowSuggestions(false), 150);
+                }}
+                placeholder="거래처 또는 브랜드명 검색"
+                className={styles.searchInput}
+              />
+              {showSuggestions && suggestions.length > 0 && (
+                <div className={styles.suggestions}>
+                  {suggestions.map((value) => (
+                    <button key={value} type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => handleSuggestionSelect(value)} className={styles.suggestionItem}>
+                      {value}
+                    </button>
+                  ))}
                 </div>
-                <div className={styles.taskFooter}>
-                  <span>담당자: {operation.manager || "-"}</span>
-                  <div className={styles.taskFooterActions}>
-                    <span>최근 업데이트: {formatDate(operation.updated_at)}</span>
-                    {operation.status === "pending" && operation.employee_id === currentEmployeeId && (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleCancelRequest(operation.id, operation.employee_id || "");
-                        }}
-                        disabled={cancellingRequestId === operation.id}
-                        className={styles.cancelButton}>
-                        {cancellingRequestId === operation.id ? "취소 중..." : "요청 취소"}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </article>
-            );
-          })}
+              )}
+            </div>
+          </div>
+        </header>
+        <div className={styles.filterGroup}>
+          {/* 담당자 필터 */}
+          <select value={employeeFilter} onChange={(e) => setEmployeeFilter(e.target.value)} className={styles.employeeSelect}>
+            <option value="all">전체 담당자</option>
+            {employees.map((emp) => (
+              <option key={emp.id} value={emp.id}>
+                {emp.name}
+              </option>
+            ))}
+          </select>
+          {/* 진행상황 필터 */}
+          <button type="button" onClick={() => setProgressFilter("all")} className={`${styles.filterButton} ${progressFilter === "all" ? styles.filterButtonActive : ""}`}>
+            전체 ({progressCounts.all})
+          </button>
+          <button type="button" onClick={() => setProgressFilter("waiting")} className={`${styles.filterButton} ${progressFilter === "waiting" ? styles.filterButtonActive : ""}`}>
+            대기 ({progressCounts.waiting})
+          </button>
+          <button type="button" onClick={() => setProgressFilter("in_progress")} className={`${styles.filterButton} ${progressFilter === "in_progress" ? styles.filterButtonActive : ""}`}>
+            진행중 ({progressCounts.in_progress})
+          </button>
+          <button type="button" onClick={() => setProgressFilter("completed")} className={`${styles.filterButton} ${progressFilter === "completed" ? styles.filterButtonActive : ""}`}>
+            작업완료 ({progressCounts.completed})
+          </button>
+          <button type="button" onClick={() => setProgressFilter("rejected")} className={`${styles.filterButton} ${progressFilter === "rejected" ? styles.filterButtonActive : ""}`}>
+            반려 ({progressCounts.rejected})
+          </button>
         </div>
-      )}
+        {filteredRequests.length === 0 ? (
+          <div className={styles.emptyState}>표시할 관리업무가 없습니다.</div>
+        ) : (
+          <div className={styles.taskList}>
+            {filteredRequests.map((operation) => {
+              const requestStatus = getRequestStatusLabel(operation.status);
+              const progressStatus = getProgressLabel(operation.status);
+              return (
+                <article
+                  key={operation.id}
+                  className={styles.taskItem}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setSelectedTask(operation)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      setSelectedTask(operation);
+                    }
+                  }}>
+                  <div className={styles.taskItemContent}>
+                    <div className={styles.taskItemLeft}>
+                      <p className={styles.taskTitle}>{operation.work_content || "관리 업무"}</p>
+                      <p className={styles.taskMeta}>
+                        <span className={styles.taskMetaNormal}>{operation.client_name || "거래처"}</span>
+                        <span className={styles.taskMetaSeparator}>·</span>
+                        <span className={styles.taskMetaBold}>{operation.brand_name}</span>
+                      </p>
+                    </div>
+                    <div className={styles.taskItemRight}>
+                      {operation.status === "pending" || operation.status === "approved" || operation.status === "rejected" ? <span className={`${styles.statusBadge} ${requestTone[requestStatus] || styles.statusBadgeDefault}`}>요청 {requestStatus}</span> : null}
+                      <span className={`${styles.progressBadge} ${progressTone[progressStatus] || styles.progressBadgeDefault}`}>{progressStatus}</span>
+                    </div>
+                  </div>
+                  <div className={styles.taskFooter}>
+                    <span>담당자: {operation.manager || "-"}</span>
+                    <div className={styles.taskFooterActions}>
+                      <span>최근 업데이트: {formatDate(operation.updated_at)}</span>
+                      {operation.status === "pending" && operation.employee_id === currentEmployeeId && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCancelRequest(operation.id, operation.employee_id || "");
+                          }}
+                          disabled={cancellingRequestId === operation.id}
+                          className={styles.cancelButton}>
+                          {cancellingRequestId === operation.id ? "취소 중..." : "요청 취소"}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
+      </div>
 
       {selectedTask && (
         <div className={styles.modalOverlay} onClick={() => setSelectedTask(null)}>
