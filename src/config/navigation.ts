@@ -101,6 +101,7 @@ export const mainNav: NavItem[] = [
       },
       { label: "회원가입 승인 관리", href: "/staff/approvals", badge: 0 },
       { label: "메뉴 권한 관리", href: "/admin/permissions" },
+      { label: "작업 내용 관리", href: "/admin/work-content" },
     ],
   },
 ];

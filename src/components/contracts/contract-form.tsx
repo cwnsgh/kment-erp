@@ -3,6 +3,9 @@
 import { useState, FormEvent, useEffect } from "react";
 import { getClientForManagedRegistration } from "@/app/actions/managed-client";
 import { getAllEmployees } from "@/app/actions/work-request";
+import { getActiveContractTypes, getActiveWorkContentsByContractType } from "@/app/actions/contract-type";
+import { createContract, uploadContractFile } from "@/app/actions/contract";
+import { useRouter } from "next/navigation";
 import { ClientSelectModal } from "../operations/client-select-modal";
 import styles from "./contract-form.module.css";
 
@@ -10,6 +13,7 @@ type ClientData = {
   id: string;
   name: string;
   sites: Array<{
+    id: string;
     brandName: string;
     domain: string;
     solution: string;
@@ -25,13 +29,19 @@ type ClientData = {
   }>;
 };
 
+type WorkContentData = {
+  workContentId: string;
+  workContentName: string;
+  modificationCount: string;
+};
+
 type ContractData = {
   id: string;
   siteId: string;
   brandName: string;
   contractName: string;
   contractDate: string;
-  contractType: string;
+  contractTypeId: string;
   draftDueDate: string;
   demoDueDate: string;
   finalCompletionDate: string;
@@ -41,8 +51,7 @@ type ContractData = {
   installmentAmount: string;
   contractNote: string;
   contractFunctionality: string;
-  pcModification: string;
-  mobileModification: string;
+  workContents: WorkContentData[];
   contractFile: File | null;
   estimateFile: File | null;
   primaryContact: string;
@@ -51,12 +60,14 @@ type ContractData = {
 };
 
 export function ContractForm() {
+  const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [clientData, setClientData] = useState<ClientData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [contracts, setContracts] = useState<ContractData[]>([]);
   const [employees, setEmployees] = useState<Array<{ id: string; name: string }>>([]);
+  const [contractTypes, setContractTypes] = useState<Array<{ id: string; name: string }>>([]);
 
   // 직원 목록 로드
   useEffect(() => {
@@ -69,6 +80,17 @@ export function ContractForm() {
     loadEmployees();
   }, []);
 
+  // 계약 종목 목록 로드
+  useEffect(() => {
+    const loadContractTypes = async () => {
+      const result = await getActiveContractTypes();
+      if (result.success && result.data) {
+        setContractTypes(result.data);
+      }
+    };
+    loadContractTypes();
+  }, []);
+
   const handleSelectClient = async (clientId: string) => {
     setIsLoading(true);
     setError("");
@@ -77,7 +99,15 @@ export function ContractForm() {
       setClientData({
         id: result.client.id,
         name: result.client.name,
-        sites: result.client.sites || [],
+        sites: (result.client.sites || []).map((s: any) => ({
+          id: s.id,
+          brandName: s.brandName,
+          domain: s.domain,
+          solution: s.solution,
+          loginId: s.loginId,
+          loginPassword: s.loginPassword,
+          type: s.type,
+        })),
         contacts: result.client.contacts || [],
       });
       // 첫 번째 계약 초기화
@@ -89,7 +119,7 @@ export function ContractForm() {
             brandName: "",
             contractName: "",
             contractDate: "",
-            contractType: "신규",
+            contractTypeId: "",
             draftDueDate: "",
             demoDueDate: "",
             finalCompletionDate: "",
@@ -99,8 +129,7 @@ export function ContractForm() {
             installmentAmount: "",
             contractNote: "",
             contractFunctionality: "",
-            pcModification: "",
-            mobileModification: "",
+            workContents: [],
             contractFile: null,
             estimateFile: null,
             primaryContact: "",
@@ -128,7 +157,7 @@ export function ContractForm() {
         brandName: "",
         contractName: "",
         contractDate: "",
-        contractType: "신규",
+        contractTypeId: "",
         draftDueDate: "",
         demoDueDate: "",
         finalCompletionDate: "",
@@ -138,8 +167,7 @@ export function ContractForm() {
         installmentAmount: "",
         contractNote: "",
         contractFunctionality: "",
-        pcModification: "",
-        mobileModification: "",
+        workContents: [],
         contractFile: null,
         estimateFile: null,
         primaryContact: "",
@@ -157,20 +185,67 @@ export function ContractForm() {
     setContracts(contracts.filter((c) => c.id !== contractId));
   };
 
-  const handleContractChange = (contractId: string, field: keyof ContractData, value: any) => {
+  const handleContractChange = async (contractId: string, field: keyof ContractData, value: any) => {
+    // 먼저 상태 업데이트
+    const updatedContracts = contracts.map((contract) => {
+      if (contract.id === contractId) {
+        // 브랜드명 선택 시 siteId도 함께 업데이트
+        if (field === "brandName") {
+          const site = clientData?.sites.find((s) => s.brandName === value);
+          return {
+            ...contract,
+            brandName: value,
+            siteId: site ? site.id : "",
+          };
+        }
+        // 계약 종목 변경 시 작업 내용 초기화
+        if (field === "contractTypeId") {
+          return { ...contract, contractTypeId: value, workContents: [] };
+        }
+        return { ...contract, [field]: value };
+      }
+      return contract;
+    });
+
+    setContracts(updatedContracts);
+
+    // 계약 종목 변경 시 작업 내용 로드
+    if (field === "contractTypeId" && value) {
+      const result = await getActiveWorkContentsByContractType(value);
+      if (result.success && result.data) {
+        // 업데이트된 contracts를 사용하여 작업 내용 추가
+        setContracts((prevContracts) =>
+          prevContracts.map((contract) => {
+            if (contract.id === contractId) {
+              return {
+                ...contract,
+                contractTypeId: value,
+                workContents: result.data!.map((wc) => ({
+                  workContentId: wc.id,
+                  workContentName: wc.work_content_name,
+                  modificationCount: "0",
+                })),
+              };
+            }
+            return contract;
+          })
+        );
+      }
+    }
+  };
+
+  const handleWorkContentChange = (contractId: string, workContentId: string, modificationCount: string) => {
     setContracts(
       contracts.map((contract) => {
         if (contract.id === contractId) {
-          // 브랜드명 선택 시 siteId도 함께 업데이트
-          if (field === "brandName") {
-            const site = clientData?.sites.find((s) => s.brandName === value);
-            return {
-              ...contract,
-              brandName: value,
-              siteId: site ? `${clientData?.id}-${site.brandName}` : "",
-            };
-          }
-          return { ...contract, [field]: value };
+          return {
+            ...contract,
+            workContents: contract.workContents.map((wc) =>
+              wc.workContentId === workContentId
+                ? { ...wc, modificationCount }
+                : wc
+            ),
+          };
         }
         return contract;
       })
@@ -203,14 +278,38 @@ export function ContractForm() {
     for (const contract of contracts) {
       if (!contract.brandName) {
         setError("브랜드명을 선택해주세요.");
+        setIsLoading(false);
+        return;
+      }
+      if (!contract.siteId) {
+        setError("사이트 ID가 없습니다. 브랜드명을 다시 선택해주세요.");
+        setIsLoading(false);
         return;
       }
       if (!contract.contractName) {
         setError("계약명을 입력해주세요.");
+        setIsLoading(false);
         return;
       }
       if (!contract.contractDate) {
         setError("계약일을 입력해주세요.");
+        setIsLoading(false);
+        return;
+      }
+      if (!contract.contractTypeId) {
+        setError("계약 종목을 선택해주세요.");
+        setIsLoading(false);
+        return;
+      }
+      if (!contract.primaryContact) {
+        setError("주 담당자를 선택해주세요.");
+        setIsLoading(false);
+        return;
+      }
+      // 분납인 경우 분납 금액 확인
+      if (contract.paymentProgress === "installment" && !contract.installmentAmount) {
+        setError("분납을 선택한 경우 분납 금액을 입력해주세요.");
+        setIsLoading(false);
         return;
       }
     }
@@ -218,12 +317,74 @@ export function ContractForm() {
     setIsLoading(true);
     setError("");
 
-    // TODO: Server Action 호출하여 계약 저장
-    console.log("계약 데이터:", { clientId: clientData.id, contracts });
+    try {
+      // 파일 업로드 처리
+      const contractsWithFiles = await Promise.all(
+        contracts.map(async (contract) => {
+          let contractFileUrl: string | undefined;
+          let estimateFileUrl: string | undefined;
 
-    // 임시로 성공 메시지
-    alert("계약이 등록되었습니다.");
-    setIsLoading(false);
+          // 계약서 파일 업로드
+          if (contract.contractFile) {
+            const uploadResult = await uploadContractFile(contract.contractFile, "contract");
+            if (!uploadResult.success) {
+              throw new Error(uploadResult.error || "계약서 파일 업로드에 실패했습니다.");
+            }
+            contractFileUrl = uploadResult.url;
+          }
+
+          // 견적서 파일 업로드
+          if (contract.estimateFile) {
+            const uploadResult = await uploadContractFile(contract.estimateFile, "estimate");
+            if (!uploadResult.success) {
+              throw new Error(uploadResult.error || "견적서 파일 업로드에 실패했습니다.");
+            }
+            estimateFileUrl = uploadResult.url;
+          }
+
+          return {
+            siteId: contract.siteId,
+            contractName: contract.contractName,
+            contractDate: contract.contractDate,
+            contractTypeId: contract.contractTypeId,
+            draftDueDate: contract.draftDueDate || undefined,
+            demoDueDate: contract.demoDueDate || undefined,
+            finalCompletionDate: contract.finalCompletionDate || undefined,
+            openDueDate: contract.openDueDate || undefined,
+            contractAmount: parseFloat(contract.contractAmount) || 0,
+            paymentProgress: contract.paymentProgress,
+            installmentAmount: contract.installmentAmount ? parseFloat(contract.installmentAmount) : undefined,
+            contractNote: contract.contractNote || undefined,
+            contractFunctionality: contract.contractFunctionality || undefined,
+            workContents: contract.workContents.map((wc) => ({
+              workContentId: wc.workContentId,
+              modificationCount: parseInt(wc.modificationCount) || 0,
+            })),
+            contractFileUrl,
+            estimateFileUrl,
+            primaryContact: contract.primaryContact,
+            secondaryContact: contract.secondaryContact || undefined,
+            workNote: contract.workNote || undefined,
+          };
+        })
+      );
+
+      // 계약 저장
+      const result = await createContract(clientData.id, contractsWithFiles);
+
+      if (!result.success) {
+        setError(result.error || "계약 등록에 실패했습니다.");
+        setIsLoading(false);
+        return;
+      }
+
+      // 성공 시 계약 목록 페이지로 이동
+      alert("계약이 등록되었습니다.");
+      router.push("/contracts");
+    } catch (err: any) {
+      setError(err.message || "계약 등록 중 오류가 발생했습니다.");
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -367,12 +528,16 @@ export function ContractForm() {
                         <div className="table_head">계약 종목</div>
                         <div className="table_data">
                           <select
-                            value={contract.contractType}
-                            onChange={(e) => handleContractChange(contract.id, "contractType", e.target.value)}
-                            className="w-full border border-slate-200 rounded px-3 py-2 text-sm">
-                            <option value="신규">신규</option>
-                            <option value="갱신">갱신</option>
-                            <option value="추가">추가</option>
+                            value={contract.contractTypeId}
+                            onChange={(e) => handleContractChange(contract.id, "contractTypeId", e.target.value)}
+                            className="w-full border border-slate-200 rounded px-3 py-2 text-sm"
+                            required>
+                            <option value="">계약 종목을 선택하세요</option>
+                            {contractTypes.map((type) => (
+                              <option key={type.id} value={type.id}>
+                                {type.name}
+                              </option>
+                            ))}
                           </select>
                         </div>
                       </li>
@@ -499,40 +664,51 @@ export function ContractForm() {
                       </li>
                     </ul>
 
-                    <ul className="table_row">
-                      <li className="row_group">
-                        <div className="table_head">PC 수정</div>
-                        <div className="table_data">
-                          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                            <input
-                              type="text"
-                              value={contract.pcModification}
-                              onChange={(e) => handleContractChange(contract.id, "pcModification", e.target.value)}
-                              placeholder="0"
-                              className="border border-slate-200 rounded px-3 py-2 text-sm"
-                              style={{ width: "80px" }}
-                            />
-                            <span>회</span>
+                    {contract.contractTypeId && contract.workContents.length > 0 && (
+                      <ul className="table_row">
+                        <li className="row_group" style={{ width: "100%" }}>
+                          <div className="table_head">작업 내용 및 수정 횟수</div>
+                          <div className="table_data">
+                            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                              {contract.workContents.map((workContent) => (
+                                <div
+                                  key={workContent.workContentId}
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "10px",
+                                    padding: "8px",
+                                    backgroundColor: "#f9f9f9",
+                                    borderRadius: "4px",
+                                  }}>
+                                  <span style={{ minWidth: "120px", fontSize: "13px" }}>
+                                    {workContent.workContentName}
+                                  </span>
+                                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                    <input
+                                      type="number"
+                                      value={workContent.modificationCount}
+                                      onChange={(e) =>
+                                        handleWorkContentChange(
+                                          contract.id,
+                                          workContent.workContentId,
+                                          e.target.value
+                                        )
+                                      }
+                                      placeholder="0"
+                                      className="border border-slate-200 rounded px-3 py-2 text-sm"
+                                      style={{ width: "80px" }}
+                                      min="0"
+                                    />
+                                    <span>회</span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
                           </div>
-                        </div>
-                      </li>
-                      <li className="row_group">
-                        <div className="table_head">모바일 수정</div>
-                        <div className="table_data">
-                          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                            <input
-                              type="text"
-                              value={contract.mobileModification}
-                              onChange={(e) => handleContractChange(contract.id, "mobileModification", e.target.value)}
-                              placeholder="0"
-                              className="border border-slate-200 rounded px-3 py-2 text-sm"
-                              style={{ width: "80px" }}
-                            />
-                            <span>회</span>
-                          </div>
-                        </div>
-                      </li>
-                    </ul>
+                        </li>
+                      </ul>
+                    )}
 
                     <ul className="table_row">
                       <li className="row_group">

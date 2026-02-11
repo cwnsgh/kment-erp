@@ -1,15 +1,29 @@
+import { Suspense } from "react";
 import { ContractTable } from '@/components/contracts/contract-table';
-import { PageHeader } from '@/components/layout/page-header';
+import { getContracts } from '@/app/actions/contract';
+import styles from "./page.module.css";
+
+async function ContractsContent() {
+  const result = await getContracts();
+  const contracts = result.success ? result.contracts || [] : [];
+
+  return <ContractTable initialContracts={contracts} />;
+}
 
 export default function ContractListPage() {
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="계약 조회"
-        description="거래처와 연결된 계약을 검색하고 상태를 확인합니다."
-        cta={{ label: '계약 등록', href: '/contracts/new' }}
-      />
-      <ContractTable />
+    <div className={`${styles.contractsPage} page_section`}>
+      <div className="page_title">
+        <h1>계약 조회</h1>
+        <div className="btn_wrap">
+          <a href="/contracts/new" className="btn btn_lg primary">
+            계약 등록
+          </a>
+        </div>
+      </div>
+      <Suspense fallback={<div className="text-sm text-gray-500">로딩 중...</div>}>
+        <ContractsContent />
+      </Suspense>
     </div>
   );
 }
