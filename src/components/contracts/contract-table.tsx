@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { getContracts } from "@/app/actions/contract";
+import { useState, useEffect, FormEvent } from "react";
+import { getContracts, getContractDetail } from "@/app/actions/contract";
+import { ContractDetailPanel, type ContractDetailData } from "./contract-detail-panel";
 import styles from "./contract-table.module.css";
 
 type ContractRow = {
@@ -21,7 +22,6 @@ type ContractTableProps = {
   initialContracts: ContractRow[];
 };
 
-// 진행상태 매핑
 const mapPaymentProgress = (progress: string): "정상" | "미납" => {
   const progressMap: Record<string, "정상" | "미납"> = {
     paid: "정상",
@@ -31,14 +31,16 @@ const mapPaymentProgress = (progress: string): "정상" | "미납" => {
   return progressMap[progress] || "미납";
 };
 
-// 금액 포맷팅
 const formatAmount = (amount: number | null): string => {
   if (amount === null || amount === undefined) return "-";
   return new Intl.NumberFormat("ko-KR").format(amount);
 };
 
-// 잔금 계산 (계약금액 - 분납금액)
-const calculateRemaining = (contractAmount: number, installmentAmount: number | null, paymentProgress: string): number => {
+const calculateRemaining = (
+  contractAmount: number,
+  installmentAmount: number | null,
+  paymentProgress: string
+): number => {
   if (paymentProgress === "paid") return 0;
   if (paymentProgress === "unpaid") return contractAmount;
   if (paymentProgress === "installment" && installmentAmount) {
@@ -57,14 +59,17 @@ export function ContractTable({ initialContracts }: ContractTableProps) {
   const [contractDateTo, setContractDateTo] = useState("");
   const [loading, setLoading] = useState(false);
   const [contracts, setContracts] = useState<ContractRow[]>(initialContracts);
+  const [showDeleteMenu, setShowDeleteMenu] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [detailData, setDetailData] = useState<ContractDetailData | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
 
-  // initialContracts가 변경되면 contracts도 업데이트
   useEffect(() => {
     setContracts(initialContracts);
   }, [initialContracts]);
 
-  // 검색 및 필터링
-  const handleSearch = async () => {
+  const handleSearch = async (e?: FormEvent) => {
+    if (e) e.preventDefault();
     setLoading(true);
     const result = await getContracts({
       searchKeyword: searchQuery || undefined,
@@ -82,7 +87,6 @@ export function ContractTable({ initialContracts }: ContractTableProps) {
     setLoading(false);
   };
 
-  // 초기화
   const handleReset = async () => {
     setSearchQuery("");
     setPaymentProgressFilter("all");
@@ -112,255 +116,325 @@ export function ContractTable({ initialContracts }: ContractTableProps) {
   };
 
   const handleRowSelect = (id: string) => {
-    const newSelected = new Set(selectedRows);
-    if (newSelected.has(id)) {
-      newSelected.delete(id);
-    } else {
-      newSelected.add(id);
-    }
-    setSelectedRows(newSelected);
+    const next = new Set(selectedRows);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setSelectedRows(next);
   };
 
-  // 날짜 포맷팅
+  const openDetail = async (contractId: string) => {
+    setDetailOpen(true);
+    setDetailData(null);
+    setDetailLoading(true);
+    const result = await getContractDetail(contractId);
+    setDetailLoading(false);
+    if (result.success && result.detail) {
+      setDetailData(result.detail);
+    } else {
+      alert(result.error ?? "계약 상세를 불러올 수 없습니다.");
+      setDetailOpen(false);
+    }
+  };
+
   const formatDate = (dateString: string): string => {
     if (!dateString) return "";
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}.${month}.${day}`;
+    const d = new Date(dateString);
+    return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
   };
 
   return (
-    <div className={`${styles.contractTable} white_box`}>
-      {/* 검색 및 필터 섹션 */}
-      <div className={styles.searchSection}>
-        <div className={styles.searchRow}>
-          <div className={styles.searchItem}>
-            <label className={styles.searchLabel}>검색분류</label>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="계약명, 회사명, 브랜드명 검색"
-              className={styles.searchInput}
-              onKeyPress={(e) => {
-                if (e.key === "Enter") {
-                  handleSearch();
-                }
-              }}
-            />
-          </div>
-          <div className={styles.searchItem}>
-            <label className={styles.searchLabel}>진행상태</label>
-            <div className={styles.radioGroup}>
-              <label className={styles.radioLabel}>
+    <div className={styles.contractList}>
+      {/* 검색 영역 - 관리고객 조회와 동일 구조 */}
+      <div className={`${styles.searchBox} search_box table_group`}>
+        <div className={styles.tableItem}>
+          <ul className={styles.tableRow}>
+            <li className={styles.rowGroup}>
+              <div className={styles.tableHead}>검색분류</div>
+              <div className={`${styles.tableData} ${styles.pd12}`}>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                  placeholder="계약명, 회사명, 브랜드명 검색"
+                  className={styles.searchInput}
+                />
+              </div>
+            </li>
+            <li className={styles.rowGroup}>
+              <div className={styles.tableHead}>진행상태</div>
+              <div className={styles.tableData}>
                 <input
                   type="radio"
-                  name="paymentProgress"
+                  id="contract_progress_all"
+                  name="contract_progress"
                   checked={paymentProgressFilter === "all"}
                   onChange={() => setPaymentProgressFilter("all")}
                 />
-                전체
-              </label>
-              <label className={styles.radioLabel}>
+                <label htmlFor="contract_progress_all">전체</label>
                 <input
                   type="radio"
-                  name="paymentProgress"
+                  id="contract_progress_paid"
+                  name="contract_progress"
                   checked={paymentProgressFilter === "paid"}
                   onChange={() => setPaymentProgressFilter("paid")}
                 />
-                정상
-              </label>
-              <label className={styles.radioLabel}>
+                <label htmlFor="contract_progress_paid">정상</label>
                 <input
                   type="radio"
-                  name="paymentProgress"
+                  id="contract_progress_unpaid"
+                  name="contract_progress"
                   checked={paymentProgressFilter === "unpaid"}
                   onChange={() => setPaymentProgressFilter("unpaid")}
                 />
-                미납
-              </label>
-            </div>
-          </div>
-          <div className={styles.searchItem}>
-            <label className={styles.searchLabel}>계약일</label>
-            <div className={styles.dateRange}>
-              <input
-                type="date"
-                value={contractDateFrom}
-                onChange={(e) => setContractDateFrom(e.target.value)}
-                className={styles.dateInput}
-              />
-              <span>~</span>
-              <input
-                type="date"
-                value={contractDateTo}
-                onChange={(e) => setContractDateTo(e.target.value)}
-                className={styles.dateInput}
-              />
-            </div>
-          </div>
-          <div className={styles.searchButtons}>
-            <button type="button" onClick={handleSearch} className="btn btn_md primary" disabled={loading}>
-              검색
-            </button>
-            <button type="button" onClick={handleReset} className="btn btn_md normal" disabled={loading}>
-              초기화
-            </button>
-          </div>
+                <label htmlFor="contract_progress_unpaid">미납</label>
+              </div>
+            </li>
+            <li className={styles.rowGroup}>
+              <div className={styles.tableHead}>계약일</div>
+              <div className={`${styles.tableData} ${styles.pd12}`}>
+                <div className={styles.dateGroup}>
+                  <input
+                    type="date"
+                    id="contract-date-from"
+                    value={contractDateFrom}
+                    onChange={(e) => setContractDateFrom(e.target.value)}
+                    className={styles.dateInput}
+                  />
+                  <label
+                    htmlFor="contract-date-from"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      (document.getElementById("contract-date-from") as HTMLInputElement)?.showPicker?.();
+                    }}
+                  >
+                    <img src="/images/date_icon.svg" alt="날짜" width={24} height={24} style={{ width: 24, height: 24, display: "block" }} />
+                  </label>
+                  <span>~</span>
+                  <input
+                    type="date"
+                    id="contract-date-to"
+                    value={contractDateTo}
+                    onChange={(e) => setContractDateTo(e.target.value)}
+                    className={styles.dateInput}
+                  />
+                  <label
+                    htmlFor="contract-date-to"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      (document.getElementById("contract-date-to") as HTMLInputElement)?.showPicker?.();
+                    }}
+                  >
+                    <img src="/images/date_icon.svg" alt="날짜" width={24} height={24} style={{ width: 24, height: 24, display: "block" }} />
+                  </label>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+        <div className={styles.btnWrap}>
+          <button type="button" className="btn btn_lg primary" onClick={() => handleSearch()} disabled={loading}>
+            검색
+          </button>
+          <button type="button" className="btn btn_lg normal" onClick={handleReset} disabled={loading}>
+            초기화
+          </button>
         </div>
       </div>
 
-      {/* 결과 요약 및 액션 */}
-      <div className={styles.tableHeader}>
-        <div className={styles.resultSummary}>
-          총 {totalItems}건의 계약이 조회되었습니다.
-        </div>
-        <div className={styles.tableActions}>
-          <button type="button" onClick={handleSelectAll} className="btn btn_sm normal">
-            전체 선택
-          </button>
-          {selectedRows.size > 0 && (
-            <button type="button" className="btn btn_sm primary">
-              선택 삭제
+      {/* 리스트 테이블 영역 */}
+      <div className={styles.listTable}>
+        <div className={styles.tableTop}>
+          <div className={styles.topTotal}>
+            <p>
+              총 <span>{totalItems}</span>건의 계약이 조회되었습니다.
+            </p>
+          </div>
+          <div className={styles.topBtnGroup}>
+            <div
+              className={`${styles.deleteBtn} ${showDeleteMenu ? styles.show : ""}`}
+              onMouseEnter={() => setShowDeleteMenu(true)}
+              onMouseLeave={() => setShowDeleteMenu(false)}
+            >
+              <button
+                type="button"
+                className="btn primary btn_md"
+                id="contractDeleteClick"
+                onClick={() => setShowDeleteMenu(!showDeleteMenu)}
+              >
+                삭제
+              </button>
+              <ul className={styles.deleteGroup}>
+                <li>
+                  <button type="button" className="btn normal btn_md" onClick={() => { handleSelectAll(); setShowDeleteMenu(false); }}>
+                    전체 선택
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    className="btn primary btn_md"
+                    onClick={() => { setShowDeleteMenu(false); }}
+                    disabled={selectedRows.size === 0}
+                  >
+                    선택 삭제
+                  </button>
+                </li>
+              </ul>
+            </div>
+            <button type="button" className={`${styles.excelBtn} btn btn_md normal`}>
+              엑셀다운로드
             </button>
-          )}
-          <button type="button" className="btn btn_sm success">
-            엑셀다운로드
-          </button>
-          <select
-            value={itemsPerPage}
-            onChange={(e) => {
-              setItemsPerPage(Number(e.target.value));
-              setCurrentPage(1);
-            }}
-            className={styles.pageSizeSelect}>
-            <option value={10}>10개씩보기</option>
-            <option value={20}>20개씩보기</option>
-            <option value={50}>50개씩보기</option>
-            <option value={100}>100개씩보기</option>
-          </select>
+            <select
+              className={styles.viewSelect}
+              value={itemsPerPage}
+              onChange={(e) => {
+                setItemsPerPage(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+            >
+              <option value={10}>10개씩 보기</option>
+              <option value={20}>20개씩 보기</option>
+              <option value={50}>50개씩 보기</option>
+              <option value={100}>100개씩 보기</option>
+            </select>
+          </div>
         </div>
-      </div>
-
-      {/* 테이블 */}
-      <div className={styles.tableWrapper}>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>
-                <input
-                  type="checkbox"
-                  checked={selectedRows.size === currentContracts.length && currentContracts.length > 0}
-                  onChange={handleSelectAll}
-                />
-              </th>
-              <th>계약일</th>
-              <th>회사명</th>
-              <th>브랜드</th>
-              <th>계약명</th>
-              <th>진행상태</th>
-              <th>계약종목</th>
-              <th>계약금액 (잔금)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
+        <div className={styles.tableWrap}>
+          <table>
+            <colgroup>
+              <col style={{ width: "5%" }} />
+              <col style={{ width: "10%" }} />
+              <col style={{ width: "15%" }} />
+              <col style={{ width: "12%" }} />
+              <col style={{ width: "18%" }} />
+              <col style={{ width: "10%" }} />
+              <col style={{ width: "12%" }} />
+              <col style={{ width: "18%" }} />
+            </colgroup>
+            <thead>
               <tr>
-                <td colSpan={8} style={{ textAlign: "center", padding: "40px" }}>
-                  로딩 중...
-                </td>
+                <th>
+                  <input
+                    type="checkbox"
+                    id="contractCheckAll"
+                    checked={currentContracts.length > 0 && selectedRows.size === currentContracts.length}
+                    onChange={handleSelectAll}
+                  />
+                </th>
+                <th>계약일</th>
+                <th>회사명</th>
+                <th>브랜드</th>
+                <th>계약명</th>
+                <th>진행상태</th>
+                <th>계약종목</th>
+                <th>계약금액 (잔금)</th>
               </tr>
-            ) : currentContracts.length === 0 ? (
-              <tr>
-                <td colSpan={8} style={{ textAlign: "center", padding: "40px" }}>
-                  조회된 계약이 없습니다.
-                </td>
-              </tr>
-            ) : (
-              currentContracts.map((contract) => {
-                const progress = mapPaymentProgress(contract.payment_progress);
-                const remaining = calculateRemaining(
-                  contract.contract_amount,
-                  contract.installment_amount,
-                  contract.payment_progress
-                );
-                return (
-                  <tr key={contract.id}>
-                    <td>
-                      <input
-                        type="checkbox"
-                        checked={selectedRows.has(contract.id)}
-                        onChange={() => handleRowSelect(contract.id)}
-                      />
-                    </td>
-                    <td>{formatDate(contract.contract_date)}</td>
-                    <td>{contract.client_name}</td>
-                    <td>{contract.brand_name}</td>
-                    <td>{contract.contract_name}</td>
-                    <td>
-                      <span
-                        className={`${styles.statusBadge} ${
-                          progress === "정상" ? styles.statusNormal : styles.statusUnpaid
-                        }`}>
-                        {progress}
-                      </span>
-                    </td>
-                    <td>{contract.contract_type_name}</td>
-                    <td>
-                      {formatAmount(contract.contract_amount)} ({formatAmount(remaining)})
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan={8} style={{ textAlign: "center", padding: "30px 0" }}>
+                    로딩 중...
+                  </td>
+                </tr>
+              ) : currentContracts.length === 0 ? (
+                <tr>
+                  <td colSpan={8} style={{ textAlign: "center", padding: "30px 0" }}>
+                    조회된 계약이 없습니다.
+                  </td>
+                </tr>
+              ) : (
+                currentContracts.map((contract) => {
+                  const progress = mapPaymentProgress(contract.payment_progress);
+                  const remaining = calculateRemaining(
+                    contract.contract_amount,
+                    contract.installment_amount,
+                    contract.payment_progress
+                  );
+                  return (
+                    <tr
+                      key={contract.id}
+                      onClick={(e) => {
+                        const target = e.target as HTMLElement;
+                        if (target.closest("input[type=checkbox]")) return;
+                        openDetail(contract.id);
+                      }}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <td onClick={(e) => e.stopPropagation()}>
+                        <input
+                          type="checkbox"
+                          checked={selectedRows.has(contract.id)}
+                          onChange={() => handleRowSelect(contract.id)}
+                        />
+                      </td>
+                      <td>{formatDate(contract.contract_date)}</td>
+                      <td>{contract.client_name}</td>
+                      <td>{contract.brand_name}</td>
+                      <td>{contract.contract_name}</td>
+                      <td>
+                        <span className={progress === "정상" ? `${styles.statusBadge} ${styles.statusNormal}` : `${styles.statusBadge} ${styles.statusUnpaid}`}>
+                          {progress}
+                        </span>
+                      </td>
+                      <td>{contract.contract_type_name}</td>
+                      <td>
+                        {formatAmount(contract.contract_amount)} ({formatAmount(remaining)})
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* 페이지네이션 */}
       {totalPages > 1 && (
-        <div className={styles.pagination}>
-          <button
-            type="button"
-            onClick={() => setCurrentPage(1)}
-            disabled={currentPage === 1}
-            className={styles.pageButton}>
-            &lt;&lt;
-          </button>
-          <button
-            type="button"
-            onClick={() => setCurrentPage(currentPage - 1)}
-            disabled={currentPage === 1}
-            className={styles.pageButton}>
-            &lt;
-          </button>
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-            <button
-              key={page}
-              type="button"
-              onClick={() => setCurrentPage(page)}
-              className={`${styles.pageButton} ${currentPage === page ? styles.pageButtonActive : ""}`}>
-              {page}
-            </button>
-          ))}
-          <button
-            type="button"
-            onClick={() => setCurrentPage(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className={styles.pageButton}>
-            &gt;
-          </button>
-          <button
-            type="button"
-            onClick={() => setCurrentPage(totalPages)}
-            disabled={currentPage === totalPages}
-            className={styles.pageButton}>
-            &gt;&gt;
-          </button>
+        <div className={`${styles.pagination} pagination`}>
+          <ul>
+            <li
+              className={`${styles.page} ${styles.first} ${currentPage === 1 ? styles.disabled : ""}`}
+              style={{ cursor: currentPage === 1 ? "not-allowed" : "pointer" }}
+              onClick={() => currentPage !== 1 && setCurrentPage(1)}
+            />
+            <li
+              className={`${styles.page} ${styles.prev} ${currentPage === 1 ? styles.disabled : ""}`}
+              style={{ cursor: currentPage === 1 ? "not-allowed" : "pointer" }}
+              onClick={() => currentPage !== 1 && setCurrentPage(currentPage - 1)}
+            />
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <li
+                key={page}
+                className={`${styles.page} ${currentPage === page ? styles.active : ""}`}
+                style={{ cursor: "pointer" }}
+                onClick={() => setCurrentPage(page)}
+              >
+                {page}
+              </li>
+            ))}
+            <li
+              className={`${styles.page} ${styles.next} ${currentPage === totalPages ? styles.disabled : ""}`}
+              style={{ cursor: currentPage === totalPages ? "not-allowed" : "pointer" }}
+              onClick={() => currentPage !== totalPages && setCurrentPage(currentPage + 1)}
+            />
+            <li
+              className={`${styles.page} ${styles.last} ${currentPage === totalPages ? styles.disabled : ""}`}
+              style={{ cursor: currentPage === totalPages ? "not-allowed" : "pointer" }}
+              onClick={() => currentPage !== totalPages && setCurrentPage(totalPages)}
+            />
+          </ul>
         </div>
       )}
+
+      <ContractDetailPanel
+        isOpen={detailOpen}
+        onClose={() => setDetailOpen(false)}
+        detail={detailData}
+        isLoading={detailLoading}
+      />
     </div>
   );
 }

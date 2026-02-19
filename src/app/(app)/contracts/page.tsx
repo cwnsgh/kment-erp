@@ -21,9 +21,13 @@ export default function ContractListPage() {
           </a>
         </div>
       </div>
-      <Suspense fallback={<div className="text-sm text-gray-500">로딩 중...</div>}>
-        <ContractsContent />
-      </Suspense>
+      <div className={styles.whiteBox}>
+        <div className={styles.boxInner}>
+          <Suspense fallback={<div className="text-sm text-gray-500">로딩 중...</div>}>
+            <ContractsContent />
+          </Suspense>
+        </div>
+      </div>
     </div>
   );
 }

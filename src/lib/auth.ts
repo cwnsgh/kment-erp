@@ -23,7 +23,7 @@ const CLIENT_SESSION_COOKIE = 'client_session';
 
 /**
  * 세션 생성 (로그인 시 사용)
- * 세션 쿠키는 브라우저를 닫으면 삭제됨 (자동로그인 없음)
+ * maxAge 없음 = 세션 쿠키 → 브라우저를 모두 닫으면 쿠키 삭제되어 다시 열 때 로그인 필요.
  */
 export async function createSession(employeeId: string) {
   const supabase = await getSupabaseServerClient();

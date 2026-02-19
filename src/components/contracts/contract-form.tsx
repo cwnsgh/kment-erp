@@ -7,6 +7,7 @@ import { getActiveContractTypes, getActiveWorkContentsByContractType } from "@/a
 import { createContract, uploadContractFile } from "@/app/actions/contract";
 import { useRouter } from "next/navigation";
 import { ClientSelectModal } from "../operations/client-select-modal";
+import { formatAmountInput, parseAmountInput } from "@/lib/format-amount";
 import styles from "./contract-form.module.css";
 
 type ClientData = {
@@ -599,8 +600,8 @@ export function ContractForm() {
                         <div className="table_data">
                           <input
                             type="text"
-                            value={contract.contractAmount}
-                            onChange={(e) => handleContractChange(contract.id, "contractAmount", e.target.value)}
+                            value={formatAmountInput(contract.contractAmount)}
+                            onChange={(e) => handleContractChange(contract.id, "contractAmount", parseAmountInput(e.target.value))}
                             placeholder="계약금액을 입력하세요"
                             className="w-full border border-slate-200 rounded px-3 py-2 text-sm"
                           />
@@ -622,8 +623,8 @@ export function ContractForm() {
                             {contract.paymentProgress === "installment" && (
                               <input
                                 type="text"
-                                value={contract.installmentAmount}
-                                onChange={(e) => handleContractChange(contract.id, "installmentAmount", e.target.value)}
+                                value={formatAmountInput(contract.installmentAmount)}
+                                onChange={(e) => handleContractChange(contract.id, "installmentAmount", parseAmountInput(e.target.value))}
                                 placeholder="분납 금액"
                                 className="border border-slate-200 rounded px-3 py-2 text-sm"
                                 style={{ width: "150px" }}
