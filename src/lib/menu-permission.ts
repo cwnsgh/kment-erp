@@ -18,6 +18,7 @@ const pathToMenuKeyMap: Record<string, string> = {
   "/contracts/new": "contract-register",
   "/contracts/status": "contract-status",
   "/contracts/tasks": "contract-tasks",
+  "/contracts/tasks/new": "contract-task-register",
   
   // 일정 관리
   "/schedule/new": "schedule-register",

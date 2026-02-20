@@ -1,5 +1,6 @@
 "use server";
 
+import { formatBusinessNumber } from "@/lib/business-number";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 import { getSession, requireAuth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
@@ -515,6 +516,157 @@ export async function updateContract(
     return {
       success: false,
       error: error.message || "계약 수정에 실패했습니다.",
+    };
+  }
+}
+
+/**
+ * 계약 현황 페이지용: 월/분기/연간 집계 + 월별 상세 계약 목록
+ */
+export async function getContractStatusData(year: number, month: number): Promise<{
+  success: boolean;
+  error?: string;
+  data?: {
+    monthLabel: string;
+    monthContractCount: number;
+    monthSales: number;
+    quarterLabel: string;
+    quarterSales: number;
+    monthlyDetail: Array<{
+      id: string;
+      contract_date: string;
+      business_registration_number: string;
+      client_name: string;
+      ceo_name: string;
+      primary_contact_name: string | null;
+      payment_progress: string;
+      contract_type_name: string;
+      contract_amount: number;
+      remaining: number;
+    }>;
+    yearlyMonthlySales: {
+      totalAmount: number;
+      totalCount: number;
+      byMonth: Record<number, number>;
+    };
+  };
+}> {
+  try {
+    await requireAuth();
+    const supabase = await getSupabaseServerClient();
+
+    const monthStart = `${year}-${String(month).padStart(2, "0")}-01`;
+    const lastDay = new Date(year, month, 0).getDate();
+    const monthEnd = `${year}-${String(month).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`;
+
+    const quarterStartMonth = Math.floor((month - 1) / 3) * 3 + 1;
+    const quarterEndMonth = quarterStartMonth + 2;
+    const quarterStart = `${year}-${String(quarterStartMonth).padStart(2, "0")}-01`;
+    const quarterEndLastDay = new Date(year, quarterEndMonth, 0).getDate();
+    const quarterEnd = `${year}-${String(quarterEndMonth).padStart(2, "0")}-${String(quarterEndLastDay).padStart(2, "0")}`;
+
+    const yearStart = `${year}-01-01`;
+    const yearEnd = `${year}-12-31`;
+
+    // 해당 월 계약 목록 (상세 테이블용) + client 사업자번호/대표자
+    const { data: monthRows, error: monthError } = await supabase
+      .from("contract")
+      .select(`
+        id,
+        contract_date,
+        contract_amount,
+        payment_progress,
+        installment_amount,
+        client:client_id ( name, business_registration_number, ceo_name ),
+        contract_type:contract_type_id ( name ),
+        primary_contact_employee:primary_contact ( name )
+      `)
+      .gte("contract_date", monthStart)
+      .lte("contract_date", monthEnd)
+      .order("contract_date", { ascending: true });
+
+    if (monthError) throw monthError;
+
+    const monthlyDetail = (monthRows ?? []).map((row: any) => {
+      const client = row.client && !Array.isArray(row.client) ? row.client : (Array.isArray(row.client) ? row.client[0] : null);
+      const contractType = Array.isArray(row.contract_type) ? row.contract_type[0] : row.contract_type;
+      const primaryEmp = Array.isArray(row.primary_contact_employee) ? row.primary_contact_employee[0] : row.primary_contact_employee;
+      const amount = Number(row.contract_amount ?? 0);
+      const installment = row.installment_amount != null ? Number(row.installment_amount) : null;
+      const progress = row.payment_progress ?? "unpaid";
+      let remaining = amount;
+      if (progress === "paid") remaining = 0;
+      else if (progress === "installment" && installment != null) remaining = amount - installment;
+      const clientName = client?.name ?? "";
+      const businessNo = client?.business_registration_number ?? "";
+      const ceoName = client?.ceo_name ?? "";
+      return {
+        id: row.id,
+        contract_date: row.contract_date,
+        business_registration_number: formatBusinessNumber(businessNo),
+        client_name: clientName,
+        ceo_name: ceoName,
+        primary_contact_name: primaryEmp?.name ?? null,
+        payment_progress: progress,
+        contract_type_name: contractType?.name ?? "",
+        contract_amount: amount,
+        remaining,
+      };
+    });
+
+    const monthContractCount = monthlyDetail.length;
+    const monthSales = monthlyDetail.reduce((sum, r) => sum + r.contract_amount, 0);
+
+    // 분기 매출
+    const { data: quarterRows } = await supabase
+      .from("contract")
+      .select("contract_amount")
+      .gte("contract_date", quarterStart)
+      .lte("contract_date", quarterEnd);
+    const quarterSales = (quarterRows ?? []).reduce((sum: number, r: any) => sum + Number(r.contract_amount ?? 0), 0);
+
+    // 해당 연도 월별 매출 (1~12월)
+    const { data: yearRows } = await supabase
+      .from("contract")
+      .select("contract_date, contract_amount")
+      .gte("contract_date", yearStart)
+      .lte("contract_date", yearEnd);
+
+    const byMonth: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0 };
+    let totalAmount = 0;
+    let totalCount = 0;
+    (yearRows ?? []).forEach((r: any) => {
+      const d = r.contract_date;
+      if (!d) return;
+      const m = parseInt(d.slice(5, 7), 10);
+      if (m >= 1 && m <= 12) {
+        byMonth[m] = (byMonth[m] ?? 0) + Number(r.contract_amount ?? 0);
+      }
+      totalAmount += Number(r.contract_amount ?? 0);
+      totalCount += 1;
+    });
+
+    return {
+      success: true,
+      data: {
+        monthLabel: `${year}.${String(month).padStart(2, "0")}`,
+        monthContractCount,
+        monthSales,
+        quarterLabel: `${year}.${String(quarterStartMonth).padStart(2, "0")}-${year}.${String(quarterEndMonth).padStart(2, "0")}`,
+        quarterSales,
+        monthlyDetail,
+        yearlyMonthlySales: {
+          totalAmount,
+          totalCount,
+          byMonth,
+        },
+      },
+    };
+  } catch (error: any) {
+    console.error("계약 현황 조회 오류:", error);
+    return {
+      success: false,
+      error: error.message || "계약 현황을 불러오지 못했습니다.",
     };
   }
 }

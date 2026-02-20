@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { WorkRequest, getClientSignatureUrl, getWorkRequestDetailForClient } from "@/app/actions/work-request";
 import { buildExcelFilename, downloadExcel } from "@/lib/excel-download";
 import styles from "./client-approval-page.module.css";
@@ -9,18 +9,39 @@ type WorkRequestWithEmployee = WorkRequest & {
   employee_name?: string | null;
 };
 
+type ContractWorkRequestItem = {
+  id: string;
+  contract_id: string;
+  contract_name: string;
+  work_content_name: string | null;
+  brand_name: string;
+  manager: string;
+  work_period: string | null;
+  work_content: string | null;
+  memo: string | null;
+  status: string;
+  created_at: string;
+  employee_name: string | null;
+};
+
 type ClientApprovalPageProps = {
   initialWorkRequests: WorkRequest[];
   clientName?: string;
 };
 
 export function ClientApprovalPage({ initialWorkRequests, clientName = "" }: ClientApprovalPageProps) {
+  const [activeTab, setActiveTab] = useState<"manage" | "contract">("manage");
   const [workRequests, setWorkRequests] = useState<WorkRequestWithEmployee[]>(initialWorkRequests as WorkRequestWithEmployee[]);
+  const [contractWorkRequests, setContractWorkRequests] = useState<ContractWorkRequestItem[]>([]);
+  const [contractTotalCount, setContractTotalCount] = useState(0);
+  const [contractPage, setContractPage] = useState(1);
+  const [contractItemsPerPage, setContractItemsPerPage] = useState(10);
   const [isPending, startTransition] = useTransition();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const itemsPerPageOptions = [10, 50, 100, 200];
   const [approvalTargetId, setApprovalTargetId] = useState<string | null>(null);
+  const [approvalTargetType, setApprovalTargetType] = useState<"work_request" | "contract_work_request">("work_request");
   const [approvingRequestId, setApprovingRequestId] = useState<string | null>(null);
   const [signatureUrl, setSignatureUrl] = useState<string | null>(null);
   const [signatureLoading, setSignatureLoading] = useState(false);
@@ -62,7 +83,7 @@ export function ClientApprovalPage({ initialWorkRequests, clientName = "" }: Cli
     isLoading: false,
   });
 
-  // 승인 현황 통계 계산
+  // 승인 현황 통계 계산 (관리 업무)
   const approvalStats = {
     pending: workRequests.filter((r) => r.status === "pending").length,
     rejected: workRequests.filter((r) => r.status === "rejected").length,
@@ -70,6 +91,30 @@ export function ClientApprovalPage({ initialWorkRequests, clientName = "" }: Cli
   };
 
   const totalCount = workRequests.length;
+
+  const loadContractData = async (page: number, limit: number) => {
+    startTransition(async () => {
+      try {
+        const response = await fetch(`/api/client/contract-work-requests?statusFilter=all&page=${page}&limit=${limit}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data) {
+            setContractWorkRequests(data.data);
+            setContractTotalCount(data.totalCount ?? 0);
+            setContractPage(page);
+          }
+        }
+      } catch (error) {
+        console.error("계약 업무 요청 조회 오류:", error);
+      }
+    });
+  };
+
+  useEffect(() => {
+    if (activeTab === "contract") {
+      loadContractData(1, contractItemsPerPage);
+    }
+  }, [activeTab]);
 
   const loadData = async (page: number, limit: number) => {
     startTransition(async () => {
@@ -124,8 +169,9 @@ export function ClientApprovalPage({ initialWorkRequests, clientName = "" }: Cli
     }
   };
 
-  const handleOpenApprovalModal = async (workRequestId: string) => {
+  const handleOpenApprovalModal = async (workRequestId: string, type: "work_request" | "contract_work_request" = "work_request") => {
     setApprovalTargetId(workRequestId);
+    setApprovalTargetType(type);
     setSignatureUrl(null);
     setSignatureError(null);
     setSignatureLoading(true);
@@ -145,10 +191,63 @@ export function ClientApprovalPage({ initialWorkRequests, clientName = "" }: Cli
 
   const handleConfirmApprove = async () => {
     if (!approvalTargetId) return;
-    await handleApprove(approvalTargetId);
+    if (approvalTargetType === "contract_work_request") {
+      await handleContractApprove(approvalTargetId);
+    } else {
+      await handleApprove(approvalTargetId);
+    }
     setApprovalTargetId(null);
     setSignatureUrl(null);
     setSignatureError(null);
+  };
+
+  const handleContractApprove = async (requestId: string) => {
+    if (approvingRequestId) return;
+    setApprovingRequestId(requestId);
+    try {
+      const response = await fetch(`/api/contract-work-request/${requestId}/approve`, { method: "POST" });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          loadContractData(contractPage, contractItemsPerPage);
+        } else {
+          alert(data.error || "승인 처리에 실패했습니다.");
+        }
+      } else {
+        const err = await response.json().catch(() => ({}));
+        alert(err.error || "승인 처리에 실패했습니다.");
+      }
+    } catch (error) {
+      console.error("계약 업무 승인 오류:", error);
+      alert("승인 처리 중 오류가 발생했습니다.");
+    } finally {
+      setApprovingRequestId(null);
+    }
+  };
+
+  const handleContractReject = async (requestId: string) => {
+    const reason = window.prompt("거절 사유를 입력해 주세요 (선택)");
+    if (reason === null) return;
+    try {
+      const response = await fetch(`/api/contract-work-request/${requestId}/reject`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rejectionReason: reason || "" }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          loadContractData(contractPage, contractItemsPerPage);
+        } else {
+          alert(data.error || "거절 처리에 실패했습니다.");
+        }
+      } else {
+        alert("거절 처리에 실패했습니다.");
+      }
+    } catch (error) {
+      console.error("계약 업무 거절 오류:", error);
+      alert("거절 처리 중 오류가 발생했습니다.");
+    }
   };
 
   const handleReject = async (workRequestId: string) => {
@@ -273,7 +372,17 @@ export function ClientApprovalPage({ initialWorkRequests, clientName = "" }: Cli
   const paginatedRequests = workRequests.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
   const totalPages = Math.ceil(totalCount / itemsPerPage);
 
-  const currentWorkType = detailModal.workRequest ? ((detailModal.workRequest as any).work_type as string | null) : null;
+  const contractStats = {
+    pending: contractWorkRequests.filter((r) => r.status === "pending").length,
+    rejected: contractWorkRequests.filter((r) => r.status === "rejected").length,
+    approved: contractWorkRequests.filter((r) => r.status === "approved").length,
+  };
+  const contractTotalPages = Math.ceil(contractTotalCount / contractItemsPerPage);
+  const paginatedContractRequests = contractWorkRequests;
+
+  const currentWorkType = detailModal.workRequest
+    ? ((detailModal.workRequest as any).work_type as string | null)
+    : null;
 
   return (
     <section className={`${styles.approvalList} page_section`}>
@@ -283,10 +392,30 @@ export function ClientApprovalPage({ initialWorkRequests, clientName = "" }: Cli
 
       <div className="white_box">
         <div className={styles.boxInner}>
+          <div className={styles.tabRow}>
+            <button
+              type="button"
+              className={`${styles.tab} ${activeTab === "manage" ? styles.tabActive : ""}`}
+              onClick={() => setActiveTab("manage")}>
+              관리 업무
+            </button>
+            <button
+              type="button"
+              className={`${styles.tab} ${activeTab === "contract" ? styles.tabActive : ""}`}
+              onClick={() => setActiveTab("contract")}>
+              계약 업무
+            </button>
+          </div>
+
           <h2 className={styles.pageSubTitle}>
-            <span className={styles.companyName}>{clientName || "(주)케이먼트코퍼레이션"}</span> 승인 내역 <span className={styles.workCount}>({totalCount}건)</span>
+            <span className={styles.companyName}>{clientName || "(주)케이먼트코퍼레이션"}</span> 승인 내역{" "}
+            <span className={styles.workCount}>
+              ({activeTab === "manage" ? totalCount : contractTotalCount}건)
+            </span>
           </h2>
 
+          {activeTab === "manage" && (
+            <>
           <div className={styles.statusBox}>
             <div className={styles.request}>
               <span>승인요청</span>
@@ -320,7 +449,7 @@ export function ClientApprovalPage({ initialWorkRequests, clientName = "" }: Cli
                   엑셀다운로드
                 </div>
                 <select
-                  className={`{styles.viewSelect} viewSelect`}
+                  className={`${styles.viewSelect} viewSelect`}
                   value={itemsPerPage}
                   onChange={(e) => {
                     const newLimit = parseInt(e.target.value, 10);
@@ -408,7 +537,6 @@ export function ClientApprovalPage({ initialWorkRequests, clientName = "" }: Cli
               </table>
             </div>
           </div>
-        </div>
 
         {totalPages > 1 && (
           <div className={styles.pagination}>
@@ -439,6 +567,138 @@ export function ClientApprovalPage({ initialWorkRequests, clientName = "" }: Cli
             </ul>
           </div>
         )}
+            </>
+          )}
+
+          {activeTab === "contract" && (
+            <>
+          <div className={styles.statusBox}>
+            <div className={styles.request}>
+              <span>승인요청</span>
+              <p className="font_b">{contractStats.pending}건</p>
+            </div>
+            <div className={styles.refusal}>
+              <span>승인반려</span>
+              <p className="font_b">{contractStats.rejected}건</p>
+            </div>
+            <div className={styles.complete}>
+              <span>승인완료</span>
+              <p className="font_b">{contractStats.approved}건</p>
+            </div>
+          </div>
+          <div className={styles.listTable}>
+            <div className={styles.tableTop}>
+              <div className={styles.topTotal}>
+                <p>총 <span>{contractTotalCount}건</span>의 계약 업무 승인현황이 조회되었습니다.</p>
+              </div>
+              <div className={styles.topBtnGroup}>
+                <select
+                  className="viewSelect"
+                  value={contractItemsPerPage}
+                  onChange={(e) => {
+                    const newLimit = parseInt(e.target.value, 10);
+                    setContractItemsPerPage(newLimit);
+                    loadContractData(1, newLimit);
+                  }}>
+                  {itemsPerPageOptions.map((option) => (
+                    <option key={option} value={option}>{option}개씩 보기</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className={styles.tableWrap}>
+              <table>
+                <colgroup>
+                  <col style={{ width: "8%" }} />
+                  <col style={{ width: "14%" }} />
+                  <col style={{ width: "12%" }} />
+                  <col style={{ width: "10%" }} />
+                  <col style={{ width: "10%" }} />
+                  <col style={{ width: "10%" }} />
+                  <col style={{ width: "auto" }} />
+                  <col style={{ width: "12%" }} />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th>번호</th>
+                    <th>계약명</th>
+                    <th>작업유형</th>
+                    <th>브랜드</th>
+                    <th>담당자</th>
+                    <th>요청일</th>
+                    <th>작업내용</th>
+                    <th>승인여부</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedContractRequests.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} style={{ textAlign: "center", padding: "40px" }}>
+                        계약 업무 요청 내역이 없습니다.
+                      </td>
+                    </tr>
+                  ) : (
+                    paginatedContractRequests.map((req, index) => (
+                      <tr key={req.id}>
+                        <td>{(contractPage - 1) * contractItemsPerPage + index + 1}</td>
+                        <td>{req.contract_name}</td>
+                        <td>{req.work_content_name ?? "-"}</td>
+                        <td>{req.brand_name}</td>
+                        <td>{req.employee_name ?? req.manager ?? "-"}</td>
+                        <td>{formatDate(req.created_at)}</td>
+                        <td className={styles.text_overflow}><p>{req.work_content || "-"}</p></td>
+                        <td>
+                          {req.status === "pending" ? (
+                            <div className={styles.actionButtons}>
+                              <button
+                                type="button"
+                                className={`${styles.btnSm} ${styles.primary} btn btn_md primary`}
+                                onClick={() => handleOpenApprovalModal(req.id, "contract_work_request")}
+                                disabled={!!approvingRequestId}>
+                                {approvingRequestId === req.id ? "승인 중..." : "승인하기"}
+                              </button>
+                              <button
+                                type="button"
+                                className={`${styles.btnSm} ${styles.danger} btn btn_md danger`}
+                                onClick={() => handleContractReject(req.id)}
+                                disabled={!!approvingRequestId}>
+                                반려하기
+                              </button>
+                            </div>
+                          ) : (
+                            <span className={getStatusClass(req.status)}>{getStatusLabel(req.status)}</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          {contractTotalPages > 1 && (
+            <div className={styles.pagination}>
+              <ul>
+                <li className={`${styles.page} ${styles.first} ${contractPage === 1 ? styles.disabled : ""}`} onClick={() => contractPage > 1 && loadContractData(1, contractItemsPerPage)}></li>
+                <li className={`${styles.page} ${styles.prev} ${contractPage === 1 ? styles.disabled : ""}`} onClick={() => contractPage > 1 && loadContractData(contractPage - 1, contractItemsPerPage)}></li>
+                {Array.from({ length: Math.min(contractTotalPages, 5) }, (_, i) => {
+                  let pageNum = contractTotalPages <= 5 ? i + 1 : contractPage - 2 + i;
+                  if (contractTotalPages > 5 && contractPage <= 3) pageNum = i + 1;
+                  else if (contractTotalPages > 5 && contractPage >= contractTotalPages - 2) pageNum = contractTotalPages - 4 + i;
+                  return (
+                    <li key={pageNum} className={`${styles.page} ${contractPage === pageNum ? styles.active : ""}`} onClick={() => loadContractData(pageNum, contractItemsPerPage)}>
+                      {pageNum}
+                    </li>
+                  );
+                })}
+                <li className={`${styles.page} ${styles.next} ${contractPage === contractTotalPages ? styles.disabled : ""}`} onClick={() => contractPage < contractTotalPages && loadContractData(contractPage + 1, contractItemsPerPage)}></li>
+                <li className={`${styles.page} ${styles.last} ${contractPage === contractTotalPages ? styles.disabled : ""}`} onClick={() => contractPage < contractTotalPages && loadContractData(contractTotalPages, contractItemsPerPage)}></li>
+              </ul>
+            </div>
+          )}
+            </>
+          )}
+        </div>
       </div>
 
       {approvalTargetId && (
@@ -451,7 +711,7 @@ export function ClientApprovalPage({ initialWorkRequests, clientName = "" }: Cli
               <div className={styles.signatureState}>서명을 불러오는 중...</div>
             ) : signatureUrl ? (
               <div className={styles.signatureBox}>
-                <img src={signatureUrl} alt="서명 이미지" className={styles.signatureImage} />
+                <img src={signatureUrl ?? undefined} alt="서명 이미지" className={styles.signatureImage} />
               </div>
             ) : (
               <div className={styles.signatureState}>{signatureError || "저장된 서명이 없습니다. 서명 없이도 승인할 수 있습니다."}</div>
@@ -486,49 +746,52 @@ export function ClientApprovalPage({ initialWorkRequests, clientName = "" }: Cli
             {detailModal.isLoading ? (
               <div className={styles.detailLoading}>로딩 중...</div>
             ) : detailModal.workRequest ? (
+              (() => {
+                const wr = detailModal.workRequest;
+                return (
               <div className={styles.detailBody}>
                 <div className={styles.detailGrid}>
                   <div>
                     <span className={styles.detailLabel}>승인 상태</span>
-                    <p className={styles.detailValue}>{getStatusLabel(detailModal.workRequest.status)}</p>
+                    <p className={styles.detailValue}>{getStatusLabel(wr.status)}</p>
                   </div>
                   <div>
                     <span className={styles.detailLabel}>담당자</span>
-                    <p className={styles.detailValue}>{detailModal.workRequest.employee_name || "-"}</p>
+                    <p className={styles.detailValue}>{wr.employee_name || "-"}</p>
                   </div>
                   <div>
                     <span className={styles.detailLabel}>요청일</span>
-                    <p className={styles.detailValue}>{formatDate(detailModal.workRequest.created_at)}</p>
+                    <p className={styles.detailValue}>{formatDate(wr.created_at)}</p>
                   </div>
                   <div>
                     <span className={styles.detailLabel}>작업기간</span>
-                    <p className={styles.detailValue}>{formatWorkPeriod(detailModal.workRequest.start_date, detailModal.workRequest.end_date)}</p>
+                    <p className={styles.detailValue}>{formatWorkPeriod(wr.start_date, wr.end_date)}</p>
                   </div>
                   <div>
                     <span className={styles.detailLabel}>관리 유형</span>
-                    <p className={styles.detailValue}>{getWorkTypeLabel((detailModal.workRequest as any).work_type)}</p>
+                    <p className={styles.detailValue}>{getWorkTypeLabel((wr as any).work_type)}</p>
                   </div>
                   {currentWorkType === "maintenance" && (
                     <div>
                       <span className={styles.detailLabel}>세부 유형</span>
-                      <p className={styles.detailValue}>{getWorkTypeDetailLabel((detailModal.workRequest as any).work_type_detail)}</p>
+                      <p className={styles.detailValue}>{getWorkTypeDetailLabel((wr as any).work_type_detail)}</p>
                     </div>
                   )}
                   {currentWorkType === "deduct" && (
                     <div>
                       <span className={styles.detailLabel}>금액</span>
-                      <p className={styles.detailValue}>{(detailModal.workRequest as any).cost ? Number((detailModal.workRequest as any).cost).toLocaleString("ko-KR") : "-"}</p>
+                      <p className={styles.detailValue}>{(wr as any).cost ? Number((wr as any).cost).toLocaleString("ko-KR") : "-"}</p>
                     </div>
                   )}
                   {currentWorkType === "maintenance" && (
                     <div>
                       <span className={styles.detailLabel}>횟수</span>
-                      <p className={styles.detailValue}>{(detailModal.workRequest as any).count ?? "-"}</p>
+                      <p className={styles.detailValue}>{(wr as any).count ?? "-"}</p>
                     </div>
                   )}
                 </div>
 
-                {detailModal.workRequest.managed_client?.productType1 === "maintenance" && (
+                {wr.managed_client?.productType1 === "maintenance" && (
                   <div className={styles.detailRemaining}>
                     <span className={styles.detailLabel}>잔여 횟수</span>
                     <div className={styles.detailRemainingColumns}>
@@ -537,24 +800,24 @@ export function ClientApprovalPage({ initialWorkRequests, clientName = "" }: Cli
                         <ul className={styles.detailRemainingList}>
                           <li>
                             텍스트 수정
-                            <b>{detailModal.workRequest.managed_client?.detailTextEditCount ?? "-"}</b>
+                            <b>{wr.managed_client?.detailTextEditCount ?? "-"}</b>
                           </li>
                           <li>
                             코딩 수정
-                            <b>{detailModal.workRequest.managed_client?.detailCodingEditCount ?? "-"}</b>
+                            <b>{wr.managed_client?.detailCodingEditCount ?? "-"}</b>
                           </li>
                           <li>
                             이미지 수정
-                            <b>{detailModal.workRequest.managed_client?.detailImageEditCount ?? "-"}</b>
+                            <b>{wr.managed_client?.detailImageEditCount ?? "-"}</b>
                           </li>
                           <li>
                             팝업 디자인
-                            <b>{detailModal.workRequest.managed_client?.detailPopupDesignCount ?? "-"}</b>
+                            <b>{wr.managed_client?.detailPopupDesignCount ?? "-"}</b>
                           </li>
-                          {detailModal.workRequest.managed_client?.productType2 === "premium" && (
+                          {wr.managed_client?.productType2 === "premium" && (
                             <li>
                               배너 디자인
-                              <b>{detailModal.workRequest.managed_client?.detailBannerDesignCount ?? "-"}</b>
+                              <b>{wr.managed_client?.detailBannerDesignCount ?? "-"}</b>
                             </li>
                           )}
                         </ul>
@@ -565,24 +828,24 @@ export function ClientApprovalPage({ initialWorkRequests, clientName = "" }: Cli
                         <ul className={styles.detailRemainingList}>
                           <li>
                             텍스트 수정
-                            <b>{detailModal.workRequest.approval_text_edit_count ?? detailModal.workRequest.managed_client?.detailTextEditCount ?? "-"}</b>
+                            <b>{wr.approval_text_edit_count ?? wr.managed_client?.detailTextEditCount ?? "-"}</b>
                           </li>
                           <li>
                             코딩 수정
-                            <b>{detailModal.workRequest.approval_coding_edit_count ?? detailModal.workRequest.managed_client?.detailCodingEditCount ?? "-"}</b>
+                            <b>{wr.approval_coding_edit_count ?? wr.managed_client?.detailCodingEditCount ?? "-"}</b>
                           </li>
                           <li>
                             이미지 수정
-                            <b>{detailModal.workRequest.approval_image_edit_count ?? detailModal.workRequest.managed_client?.detailImageEditCount ?? "-"}</b>
+                            <b>{wr.approval_image_edit_count ?? wr.managed_client?.detailImageEditCount ?? "-"}</b>
                           </li>
                           <li>
                             팝업 디자인
-                            <b>{detailModal.workRequest.approval_popup_design_count ?? detailModal.workRequest.managed_client?.detailPopupDesignCount ?? "-"}</b>
+                            <b>{wr.approval_popup_design_count ?? wr.managed_client?.detailPopupDesignCount ?? "-"}</b>
                           </li>
-                          {(detailModal.workRequest.approval_banner_design_count !== null || detailModal.workRequest.managed_client?.productType2 === "premium") && (
+                          {(wr.approval_banner_design_count !== null || wr.managed_client?.productType2 === "premium") && (
                             <li>
                               배너 디자인
-                              <b>{detailModal.workRequest.approval_banner_design_count ?? detailModal.workRequest.managed_client?.detailBannerDesignCount ?? "-"}</b>
+                              <b>{wr.approval_banner_design_count ?? wr.managed_client?.detailBannerDesignCount ?? "-"}</b>
                             </li>
                           )}
                         </ul>
@@ -591,29 +854,17 @@ export function ClientApprovalPage({ initialWorkRequests, clientName = "" }: Cli
                   </div>
                 )}
 
-                {detailModal.workRequest.managed_client?.productType1 === "deduct" && (
+                {wr.managed_client?.productType1 === "deduct" && (
                   <div className={styles.detailRemaining}>
                     <span className={styles.detailLabel}>승인 후 잔여 금액</span>
                     <p className={styles.detailValue}>
                       {(() => {
-                        // 승인 후 스냅샷이 있으면 그것을 표시
-                        if (detailModal.workRequest.approval_remaining_amount) {
-                          console.log("[승인 후] approval_remaining_amount:", detailModal.workRequest.approval_remaining_amount);
-                          return detailModal.workRequest.approval_remaining_amount.toLocaleString("ko-KR");
+                        if (wr.approval_remaining_amount != null) {
+                          return wr.approval_remaining_amount.toLocaleString("ko-KR");
                         }
-
-                        // 승인 전이면 현재 금액 - 요청 금액 계산
-                        const currentAmount = detailModal.workRequest.managed_client?.totalAmount || 0;
-                        const requestCost = (detailModal.workRequest as any).cost || 0;
+                        const currentAmount = wr.managed_client?.totalAmount || 0;
+                        const requestCost = (wr as any).cost || 0;
                         const remainingAmount = Math.max(0, currentAmount - requestCost);
-
-                        console.log("[승인 전] 계산:", {
-                          currentAmount,
-                          requestCost,
-                          remainingAmount,
-                          status: detailModal.workRequest.status,
-                        });
-
                         return remainingAmount.toLocaleString("ko-KR");
                       })()}
                     </p>
@@ -622,9 +873,11 @@ export function ClientApprovalPage({ initialWorkRequests, clientName = "" }: Cli
 
                 <div className={styles.detailContent}>
                   <span className={styles.detailLabel}>작업 내용</span>
-                  <p className={styles.detailText}>{detailModal.workRequest.work_content || "-"}</p>
+                  <p className={styles.detailText}>{wr.work_content || "-"}</p>
                 </div>
               </div>
+                );
+              })()
             ) : (
               <div className={styles.detailLoading}>업무 정보를 불러올 수 없습니다.</div>
             )}

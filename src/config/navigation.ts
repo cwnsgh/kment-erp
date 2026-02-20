@@ -41,6 +41,7 @@ export const mainNav: NavItem[] = [
       { label: "계약 등록", href: "/contracts/new" },
       { label: "계약 현황", href: "/contracts/status" },
       { label: "업무 현황", href: "/contracts/tasks" },
+      { label: "업무 등록", href: "/contracts/tasks/new" },
     ],
   },
   {

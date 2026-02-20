@@ -1,0 +1,41 @@
+/* 계약 업무 등록 - 관리업무등록과 동일한 틀(manageStyles) 사용, 아래는 계약 전용 보조 스타일 */
+
+.errorBox {
+  margin-bottom: 20px;
+  padding: 12px 14px;
+  background-color: #fee;
+  border: 1px solid #fcc;
+  border-radius: 6px;
+  color: var(--negative);
+  font-size: 13px;
+}
+
+.loading,
+.empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-gray);
+  font-size: 14px;
+}
+
+.workContentsBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.workContentChip {
+  display: inline-block;
+  padding: 6px 12px;
+  background: var(--background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-color);
+}
+
+.contractWorkTable {
+  min-width: 900px;
+}

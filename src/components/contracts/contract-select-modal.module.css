@@ -1,0 +1,125 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.modalInner {
+  background: #fff;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.modalHeader {
+  padding: 24px 24px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.modalHeader h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: var(--font-weight-bold);
+  color: var(--text-color);
+}
+
+.closeBtn {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent url(/images/close_icon.svg) center/contain no-repeat;
+  cursor: pointer;
+  padding: 0;
+  font-size: 0;
+}
+
+.searchBox {
+  padding: 16px 24px;
+}
+
+.searchForm {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.searchInput {
+  flex: 1;
+  max-width: 280px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.tableWrap {
+  padding: 0 24px 24px;
+  overflow: auto;
+  flex: 1;
+}
+
+.total {
+  font-size: 13px;
+  color: var(--text-gray);
+  margin-bottom: 8px;
+}
+
+.total span {
+  color: var(--primary);
+  font-weight: var(--font-weight-bold);
+}
+
+.modalTable {
+  width: 100%;
+  border-collapse: collapse;
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.modalTable th {
+  text-align: center;
+  padding: 12px 16px;
+  background: var(--background-color);
+  font-size: 13px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-gray);
+}
+
+.modalTable td {
+  padding: 12px 16px;
+  font-size: 14px;
+  color: var(--text-color);
+  border-top: 1px solid var(--border-color);
+}
+
+.selectRow {
+  cursor: pointer;
+}
+
+.selectRow:hover {
+  background: var(--hover-bg);
+}
+
+.error,
+.loading {
+  padding: 20px;
+  text-align: center;
+  color: var(--text-gray);
+}
+
+.error {
+  color: var(--negative);
+}

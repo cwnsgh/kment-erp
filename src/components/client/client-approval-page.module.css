@@ -51,6 +51,36 @@
   font-weight: var(--font-weight-bold);
 }
 
+.tabRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.tab {
+  padding: 10px 20px;
+  border: 1px solid var(--border-color);
+  background: var(--background-color);
+  border-radius: 8px;
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+}
+
+.tab:hover {
+  background: #eee;
+}
+
+.tabActive {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.tabActive:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
 /* 상태 통계 박스 */
 .statusBox {
   display: flex;
