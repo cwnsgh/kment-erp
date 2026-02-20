@@ -289,6 +289,113 @@ export async function getContractWorkRequestsByContract(contractId: string): Pro
   }
 }
 
+/** 계약 업무 현황 페이지용 목록 조회 (담당자/회사·브랜드/진행상태/등록일 필터) */
+export async function getContractWorkRequestsForBoard(filters?: {
+  employeeId?: string | null;
+  searchKeyword?: string;
+  statusFilter?: "all" | "pending" | "approved" | "in_progress" | "completed" | "rejected" | "deleted";
+  dateFrom?: string;
+  dateTo?: string;
+}): Promise<{
+  success: boolean;
+  data?: Array<{
+    id: string;
+    contract_id: string;
+    contract_name: string;
+    client_name: string;
+    brand_name: string;
+    manager: string;
+    employee_name: string | null;
+    created_at: string;
+    work_content: string | null;
+    work_content_name: string | null;
+    status: string;
+  }>;
+  error?: string;
+}> {
+  try {
+    await requireAuth();
+    const supabase = await getSupabaseServerClient();
+
+    let query = supabase
+      .from("contract_work_request")
+      .select(`
+        id,
+        contract_id,
+        brand_name,
+        manager,
+        work_content,
+        status,
+        created_at,
+        employee_id,
+        contract:contract_id ( contract_name, client:client_id ( name ) ),
+        employee:employee_id ( name ),
+        contract_work_content:contract_work_content_id (
+          contract_type_work_content:work_content_id ( work_content_name )
+        )
+      `)
+      .order("created_at", { ascending: false });
+
+    if (filters?.employeeId) {
+      query = query.eq("employee_id", filters.employeeId);
+    }
+    if (filters?.statusFilter && filters.statusFilter !== "all") {
+      query = query.eq("status", filters.statusFilter);
+    }
+    if (filters?.dateFrom) {
+      query = query.gte("created_at", `${filters.dateFrom}T00:00:00.000Z`);
+    }
+    if (filters?.dateTo) {
+      query = query.lte("created_at", `${filters.dateTo}T23:59:59.999Z`);
+    }
+
+    const { data: rows, error } = await query;
+    if (error) throw error;
+
+    let list = (rows ?? []).map((r: any) => {
+      const contract = Array.isArray(r.contract) ? r.contract[0] : r.contract;
+      const client = contract?.client;
+      const clientData = Array.isArray(client) ? client[0] : client;
+      const emp = Array.isArray(r.employee) ? r.employee[0] : r.employee;
+      const cwc = r.contract_work_content;
+      const wc = cwc?.contract_type_work_content;
+      const workContentName = Array.isArray(wc) ? wc[0]?.work_content_name : wc?.work_content_name;
+      return {
+        id: r.id,
+        contract_id: r.contract_id,
+        contract_name: contract?.contract_name ?? "",
+        client_name: clientData?.name ?? "",
+        brand_name: r.brand_name ?? "",
+        manager: r.manager ?? "",
+        employee_name: emp?.name ?? null,
+        created_at: r.created_at,
+        work_content: r.work_content ?? null,
+        work_content_name: workContentName ?? null,
+        status: r.status ?? "pending",
+      };
+    });
+
+    if (filters?.searchKeyword?.trim()) {
+      const kw = filters.searchKeyword.trim().toLowerCase();
+      list = list.filter(
+        (item) =>
+          item.client_name.toLowerCase().includes(kw) ||
+          item.brand_name.toLowerCase().includes(kw) ||
+          (item.contract_name || "").toLowerCase().includes(kw)
+      );
+    }
+
+    return { success: true, data: list };
+  } catch (error: any) {
+    console.error("계약 업무 현황 목록 조회 오류:", error);
+    return {
+      success: false,
+      error: error.message ?? "목록 조회에 실패했습니다.",
+      data: [],
+    };
+  }
+}
+
 /** 클라이언트의 계약 업무 요청 목록 (승인 페이지용) */
 export async function getClientContractWorkRequests(
   clientIdOrEmpty: string,

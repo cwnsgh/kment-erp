@@ -1,0 +1,564 @@
+/* 계약 업무 현황 - 이미지 기준 필터·테이블·페이지네이션 */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* 제목·버튼 행: 관리 업무 현황 등과 동일하게 */
+.wrap :global(.page_title) {
+  width: 100%;
+  text-align: left;
+  margin: 0 auto 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.wrap :global(.page_title h1) {
+  font-size: 32px;
+  font-weight: var(--font-weight-bold);
+}
+
+.filterBox {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+  padding: 24px 30px;
+  margin-bottom: 20px;
+  box-sizing: border-box;
+}
+
+.filterRow {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.filterRow:last-of-type {
+  border-bottom: none;
+}
+
+.filterLabel {
+  font-size: 14px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-color);
+  width: 140px;
+  flex-shrink: 0;
+}
+
+.filterControl {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.filterRowActions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding-top: 20px;
+}
+
+.dateSep {
+  color: var(--text-color);
+  font-size: 14px;
+}
+
+.filterSelect,
+.filterInput {
+  height: 36px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 0 12px;
+  font-size: 14px;
+  color: var(--text-color);
+  background: #fff;
+  min-width: 140px;
+}
+
+.filterSelect {
+  cursor: pointer;
+  appearance: none;
+  background: url(/images/select_arrow.svg) no-repeat center right 10px;
+  padding-right: 32px;
+  background-size: 12px 10px;
+}
+
+.filterInput {
+  min-width: 180px;
+}
+
+.filterInputFull {
+  flex: 1;
+  min-width: 0;
+  height: 36px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 0 12px;
+  font-size: 14px;
+  color: var(--text-color);
+  background: #fff;
+}
+
+.filterControl .filterSelect {
+  min-width: 200px;
+}
+
+.filterInput[type="date"] {
+  cursor: pointer;
+}
+
+.statusFilterGroup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.statusFilterItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text-color);
+}
+
+.statusFilterItem input {
+  cursor: pointer;
+}
+
+.btnSearch {
+  padding: 8px 20px;
+  font-size: 14px;
+  font-weight: var(--font-weight-semibold);
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  background: var(--primary);
+  color: #fff;
+}
+
+.btnReset {
+  padding: 8px 20px;
+  font-size: 14px;
+  font-weight: var(--font-weight-semibold);
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  background: #fff;
+  color: var(--text-color);
+}
+
+.tableBox {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+  padding: 0 30px 30px;
+  box-sizing: border-box;
+}
+
+.tableTop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 0 16px;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 0;
+}
+
+.topTotal {
+  font-size: 14px;
+  color: var(--text-color);
+}
+
+.topTotal span {
+  font-weight: var(--font-weight-bold);
+  color: var(--primary);
+}
+
+.topBtnGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btnSelectAll,
+.btnDeleteSelected {
+  padding: 6px 14px;
+  font-size: 13px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  background: #fff;
+  color: var(--text-color);
+}
+
+.btnDeleteSelected {
+  border-color: var(--negative);
+  color: var(--negative);
+}
+
+.btnExcel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  font-size: 13px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  background: var(--primary);
+  color: #fff;
+}
+
+.viewSelect {
+  height: 36px;
+  padding: 0 32px 0 12px;
+  font-size: 13px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: #fff url(/images/select_arrow.svg) no-repeat center right 10px;
+  background-size: 12px 10px;
+  cursor: pointer;
+  appearance: none;
+}
+
+.tableWrap {
+  overflow-x: auto;
+  margin-top: 0;
+}
+
+.dataTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.dataTable thead {
+  background: var(--background-color);
+}
+
+.dataTable th {
+  padding: 14px 12px;
+  text-align: left;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-color);
+  border-bottom: 1px solid var(--border-color);
+  white-space: nowrap;
+}
+
+.dataTable th:first-child {
+  width: 40px;
+  text-align: center;
+}
+
+.dataTable td {
+  padding: 14px 12px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-color);
+  vertical-align: middle;
+}
+
+.dataTable td:first-child {
+  text-align: center;
+}
+
+.dataTable tbody tr:hover {
+  background: var(--hover-bg);
+}
+
+.rowClickable {
+  cursor: pointer;
+}
+
+.cellCheck {
+  width: 40px;
+  text-align: center;
+}
+
+.cellNum {
+  width: 60px;
+  text-align: center;
+}
+
+.cellContent {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: var(--font-weight-semibold);
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.statusPending {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.statusInProgress {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.statusCompleted {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.statusApproved {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+
+.statusRejected {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.statusDeleted {
+  color: var(--text-gray);
+}
+
+.emptyState {
+  padding: 48px 20px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-gray);
+}
+
+.pagination {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.pagination ul {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.pagination li {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  font-size: 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+  color: var(--text-color);
+}
+
+.pagination li:hover:not(.disabled):not(.active) {
+  background: var(--hover-bg);
+}
+
+.pagination li.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination li.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+  cursor: default;
+}
+
+/* 상세/확인 모달 */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 16px;
+}
+
+.modalOverlayConfirm {
+  z-index: 60;
+}
+
+.modalContainer {
+  width: 100%;
+  max-width: 560px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  overflow-y: auto;
+  max-height: 90vh;
+}
+
+.modalContainerConfirm {
+  max-width: 400px;
+  padding: 30px;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--border-color);
+  padding: 24px 24px 16px;
+}
+
+.modalHeaderLeft {
+  display: flex;
+  flex-direction: column;
+}
+
+.modalTitle {
+  font-size: 18px;
+  font-weight: var(--font-weight-bold);
+  color: var(--text-color);
+  margin: 0;
+}
+
+.modalSubtitle {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--text-gray);
+}
+
+.modalSubtitleNormal {
+  font-weight: var(--font-weight-normal);
+  color: #64748b;
+}
+
+.modalSubtitleSeparator {
+  margin: 0 4px;
+  color: #cbd5e1;
+}
+
+.modalSubtitleBold {
+  font-weight: var(--font-weight-semibold);
+  color: #1e293b;
+}
+
+.modalCloseButton {
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: transparent url(/images/close_icon.svg) no-repeat center;
+  background-size: contain;
+  cursor: pointer;
+  padding: 0;
+  font-size: 0;
+  flex-shrink: 0;
+}
+
+.modalContent {
+  padding-bottom: 24px;
+}
+
+.modalGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  font-size: 14px;
+  color: var(--text-color);
+  padding: 0 24px;
+}
+
+@media (min-width: 480px) {
+  .modalGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.modalGridItem {
+  display: flex;
+  align-items: stretch;
+  border-top: 1px solid var(--border-color);
+  margin-top: -1px;
+}
+
+.modalGridLabel {
+  width: 100px;
+  padding: 12px 12px 12px 0;
+  background: var(--background-color);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-color);
+  flex-shrink: 0;
+}
+
+.modalGridValue {
+  padding: 12px 0;
+  color: var(--text-color);
+}
+
+.modalContentBox {
+  margin: 20px 24px 0;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: #f8fafc;
+  padding: 12px 16px;
+  font-size: 14px;
+}
+
+.modalContentBoxLabel {
+  font-size: 13px;
+  color: var(--text-gray);
+}
+
+.modalContentBoxText {
+  margin-top: 8px;
+  white-space: pre-wrap;
+  font-weight: var(--font-weight-medium);
+  color: var(--text-color);
+}
+
+.modalActions {
+  padding: 20px 24px 0;
+  border-top: 1px solid var(--border-color);
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.confirmModalTitle {
+  font-size: 18px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-color);
+  margin: 0;
+}
+
+.confirmModalText {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--text-gray);
+}
+
+.confirmModalActions {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}

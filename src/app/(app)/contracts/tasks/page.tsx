@@ -1,22 +1,20 @@
-import { ContractTaskBoard } from '@/components/contracts/contract-task-board';
-import { PageHeader } from '@/components/layout/page-header';
+import { getSession } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { getContractWorkRequestsForBoard } from "@/app/actions/contract-work-request";
+import { ContractTaskStatusBoard } from "@/components/contracts/contract-task-status-board";
 
-export default function ContractTaskPage() {
+export default async function ContractTasksPage() {
+  const session = await getSession();
+  if (!session || session.type !== "employee") {
+    redirect("/login");
+  }
+
+  const result = await getContractWorkRequestsForBoard({});
+  const initialData = result.success && result.data ? result.data : [];
+
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="계약 업무 현황"
-        description="계약별 진행 업무, 승인 상태, 담당자 기록을 관리합니다."
-      />
-      <ContractTaskBoard />
+    <div className="page_section">
+      <ContractTaskStatusBoard initialData={initialData} currentEmployeeId={session.id} />
     </div>
   );
 }
-
-
-
-
-
-
-
-
