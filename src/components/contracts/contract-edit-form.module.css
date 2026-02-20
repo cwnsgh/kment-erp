@@ -1,0 +1,11 @@
+/* 계약 수정 폼 전용: 에러 블록만 (테이블/폼 레이아웃은 contract-form.module.css 와 동일하게 공유) */
+
+.errorBlock {
+  margin-bottom: 20px;
+  padding: 12px 14px;
+  background-color: #fee;
+  border: 1px solid #fcc;
+  border-radius: 6px;
+  color: var(--negative);
+  font-size: 13px;
+}

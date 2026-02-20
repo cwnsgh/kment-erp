@@ -201,7 +201,7 @@ export async function getClientForManagedRegistration(clientId: string) {
         .order("created_at", { ascending: true }),
       supabase
         .from("client_site")
-        .select("brand_name, domain, solution, login_id, login_password, type")
+        .select("id, brand_name, domain, solution, login_id, login_password, type")
         .eq("client_id", clientId)
         .order("created_at", { ascending: true }),
       supabase
@@ -254,6 +254,7 @@ export async function getClientForManagedRegistration(clientId: string) {
           })) || [],
         sites:
           sites?.map((s) => ({
+            id: s.id,
             brandName: s.brand_name || "",
             domain: s.domain || "",
             solution: s.solution || "",
@@ -673,6 +674,7 @@ export async function getManagedClientDetail(managedClientId: string) {
           })) || [],
         sites:
           sites?.map((s) => ({
+            id: s.id,
             brandName: s.brand_name || "",
             domain: s.domain || "",
             solution: s.solution || "",

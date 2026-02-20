@@ -1,0 +1,324 @@
+/* 계약 상세조회 모달 - 거래처 상세조회와 동일한 룩앤필 */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: contractDetailFadeIn 0.2s ease-out;
+}
+
+@keyframes contractDetailFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.contractDetailModal {
+  background: #fff;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  animation: contractDetailModalIn 0.2s ease-out;
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+@keyframes contractDetailModalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.detailModalHeader {
+  padding: 30px 0 20px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--text-color);
+  margin: 0 30px 20px;
+}
+
+.detailModalHeader h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: var(--font-weight-bold);
+  color: var(--text-color);
+}
+
+.detailModalClose {
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: transparent url(/images/close_icon.svg) center/20px no-repeat;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  font-size: 0;
+}
+
+.contractDetailModalWrapper {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 30px;
+  min-height: 0;
+}
+
+.loading {
+  padding: 40px 0;
+  text-align: center;
+  color: var(--text-gray);
+  font-size: 14px;
+}
+
+.attachLink {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+.attachLink:hover {
+  text-decoration: none;
+}
+
+.footer {
+  flex-shrink: 0;
+  padding: 20px 30px;
+  border-top: 1px solid var(--border-color);
+  background: #fff;
+  display: flex;
+  justify-content: center;
+}
+
+/* ===== 거래처 상세조회와 동일한 table_group 스타일 ===== */
+
+.contractDetailModalWrapper :global(.table_group) {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  width: 100%;
+  font-size: 14px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.contractDetailModalWrapper :global(.table_group .table_item) {
+  width: 100%;
+}
+
+.contractDetailModalWrapper :global(.table_group .table_item .table_title) {
+  font-size: 18px;
+  font-weight: var(--font-weight-bold);
+  margin-bottom: 20px;
+  justify-content: space-between;
+  display: flex;
+  align-items: center;
+}
+
+.contractDetailModalWrapper :global(.table_group .table_item .table_row) {
+  display: flex;
+  align-items: stretch;
+  border-top: 1px solid var(--border-color);
+  width: 100%;
+  margin: 0;
+  list-style: none;
+  padding: 0;
+}
+
+.contractDetailModalWrapper :global(.table_group .table_item .table_row:first-child) {
+  border-top: 1px solid var(--border-color);
+}
+
+.contractDetailModalWrapper :global(.table_group .table_item .table_row:last-child) {
+  border-bottom: 1px solid var(--border-color);
+  box-sizing: border-box;
+}
+
+.contractDetailModalWrapper :global(.table_group .table_item .table_row .row_group) {
+  flex: 1;
+  display: flex;
+  position: relative;
+  min-width: 0;
+}
+
+.contractDetailModalWrapper :global(.table_group .table_item .table_row .row_group:after) {
+  content: "";
+  display: block;
+  width: 180px;
+  height: 100%;
+  background-color: var(--background-color);
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: -1;
+}
+
+.contractDetailModalWrapper :global(.table_group .table_item .table_row .row_group .table_head) {
+  width: 180px;
+  min-width: 180px;
+  padding: 18px 20px;
+  background: var(--background-color);
+  box-sizing: border-box;
+  z-index: 1;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-color);
+  border: none;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  margin: 0;
+}
+
+.contractDetailModalWrapper :global(.table_group .table_item .table_row .row_group .table_data) {
+  padding: 18px 20px;
+  box-sizing: border-box;
+  word-break: break-all;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex: 1;
+  min-width: 0;
+  color: var(--text-color);
+  background: #fff;
+  border: none;
+  margin: 0;
+}
+
+.contractDetailModalWrapper :global(.table_group .table_item .table_row .row_group .table_data.attach) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.contractDetailModalWrapper :global(.table_group .table_item .table_row .row_group .table_data.attach a) {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+.contractDetailModalWrapper :global(.table_group .table_item .table_title_sub) {
+  font-size: 15px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-gray);
+  margin-bottom: 20px;
+}
+
+/* 사이트 정보 테이블 (row_group_modal) */
+.contractDetailModalWrapper :global(.table_group .table_item.table_item2_modal) {
+  width: 100%;
+}
+
+.contractDetailModalWrapper :global(.table_group .table_item.table_item2_modal .table_row) {
+  display: flex;
+  align-items: stretch;
+  border-top: 1px solid var(--border-color);
+  width: 100%;
+  margin: 0;
+  list-style: none;
+  padding: 0;
+}
+
+.contractDetailModalWrapper :global(.table_group .table_item.table_item2_modal .table_row:first-child) {
+  border-top: 1px solid var(--border-color);
+}
+
+.contractDetailModalWrapper :global(.table_group .table_item.table_item2_modal .table_row:last-child) {
+  border-bottom: 1px solid var(--border-color);
+  box-sizing: border-box;
+}
+
+.contractDetailModalWrapper :global(.table_group .table_item.table_item2_modal .table_row .row_group_modal) {
+  flex: 1;
+  display: flex;
+  position: relative;
+  min-width: 0;
+  width: 100%;
+}
+
+.contractDetailModalWrapper :global(.table_group .table_item.table_item2_modal .table_row .row_group_modal .table_head) {
+  padding: 18px 20px;
+  background: var(--background-color);
+  box-sizing: border-box;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-color);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  text-align: center;
+}
+
+.contractDetailModalWrapper :global(.table_group .table_item.table_item2_modal .table_row .row_group_modal .table_head.width20) {
+  width: 20%;
+  flex: 0 0 20%;
+}
+
+.contractDetailModalWrapper :global(.table_group .table_item.table_item2_modal .table_row .row_group_modal .table_head.width15) {
+  width: 15%;
+  flex: 0 0 15%;
+}
+
+.contractDetailModalWrapper :global(.table_group .table_item.table_item2_modal .table_row .row_group_modal .table_data) {
+  padding: 18px 20px;
+  box-sizing: border-box;
+  word-break: break-all;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-color);
+  background: #fff;
+  border: none;
+  margin: 0;
+  text-align: center;
+}
+
+.contractDetailModalWrapper :global(.table_group .table_item.table_item2_modal .table_row .row_group_modal .table_data.width20) {
+  width: 20%;
+  flex: 0 0 20%;
+}
+
+.contractDetailModalWrapper :global(.table_group .table_item.table_item2_modal .table_row .row_group_modal .table_data.width15) {
+  width: 15%;
+  flex: 0 0 15%;
+}
+
+/* 비고 텍스트 박스 */
+.contractDetailModalWrapper :global(.table_group .table_item .text_box) {
+  width: 100%;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  height: 180px;
+  overflow-y: auto;
+  padding: 20px;
+  box-sizing: border-box;
+  background: #fff;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-color);
+}
+
+.contractDetailModalWrapper :global(.table_group .table_item .text_box.scroll) {
+  overflow-y: auto;
+}
+
+.contractDetailModalWrapper :global(.table_group .table_item .text_box p) {
+  margin: 0;
+  padding: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}

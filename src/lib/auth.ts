@@ -20,10 +20,10 @@ export interface ClientSession {
 
 const EMPLOYEE_SESSION_COOKIE = 'employee_session';
 const CLIENT_SESSION_COOKIE = 'client_session';
-const SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7일
 
 /**
  * 세션 생성 (로그인 시 사용)
+ * maxAge 없음 = 세션 쿠키 → 브라우저를 모두 닫으면 쿠키 삭제되어 다시 열 때 로그인 필요.
  */
 export async function createSession(employeeId: string) {
   const supabase = await getSupabaseServerClient();
@@ -70,7 +70,6 @@ export async function createSession(employeeId: string) {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
-    maxAge: SESSION_MAX_AGE,
     path: '/',
   });
 
@@ -108,7 +107,6 @@ export async function createClientSession(clientId: string) {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
-    maxAge: SESSION_MAX_AGE,
     path: '/',
   });
 

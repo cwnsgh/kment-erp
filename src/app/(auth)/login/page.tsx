@@ -1,15 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useEffect } from "react";
 import { login } from "@/app/actions/auth";
 import styles from "./login.module.css";
+
+const REMEMBERED_CLIENT_ID_KEY = "login_remembered_client_id";
+const REMEMBERED_EMPLOYEE_ID_KEY = "login_remembered_employee_id";
+
+function getRememberedId(userType: "employee" | "client"): string {
+  if (typeof window === "undefined") return "";
+  const key =
+    userType === "client" ? REMEMBERED_CLIENT_ID_KEY : REMEMBERED_EMPLOYEE_ID_KEY;
+  return localStorage.getItem(key) ?? "";
+}
 
 export default function LoginPage() {
   const [userType, setUserType] = useState<"employee" | "client">("client");
   const [form, setForm] = useState({
-    username: "", // 아이디 또는 이메일
+    username: "",
     password: "",
     remember: true,
   });
@@ -17,10 +26,25 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showHelpBox, setShowHelpBox] = useState(false);
 
+  // 탭별로 저장된 아이디 불러오기 (사업자 탭 → 사업자 아이디, 직원 탭 → 직원 이메일)
+  useEffect(() => {
+    const saved = getRememberedId(userType);
+    setForm((prev) => ({ ...prev, username: saved }));
+  }, [userType]);
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError("");
     setIsLoading(true);
+
+    // 아이디 기억하기: 선택 시 해당 탭(사업자/직원) 아이디만 저장, 해제 시 삭제
+    const key =
+      userType === "client" ? REMEMBERED_CLIENT_ID_KEY : REMEMBERED_EMPLOYEE_ID_KEY;
+    if (form.remember && form.username.trim()) {
+      localStorage.setItem(key, form.username.trim());
+    } else {
+      localStorage.removeItem(key);
+    }
 
     try {
       const result = await login(form.username, form.password, userType);
@@ -129,12 +153,17 @@ export default function LoginPage() {
                 type="checkbox"
                 id="remember_id"
                 checked={form.remember}
-                onChange={(event) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    remember: event.target.checked,
-                  }))
-                }
+                onChange={(event) => {
+                  const checked = event.target.checked;
+                  if (!checked && typeof window !== "undefined") {
+                    const key =
+                      userType === "client"
+                        ? REMEMBERED_CLIENT_ID_KEY
+                        : REMEMBERED_EMPLOYEE_ID_KEY;
+                    localStorage.removeItem(key);
+                  }
+                  setForm((prev) => ({ ...prev, remember: checked }));
+                }}
                 disabled={isLoading}
               />
               <label htmlFor="remember_id">아이디 기억하기</label>
