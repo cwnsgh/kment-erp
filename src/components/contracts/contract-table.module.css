@@ -64,6 +64,10 @@
   line-height: 25px !important;
 }
 
+.searchBox .tableData input {
+  margin-top: 3px;
+}
+
 .searchBox .tableData.pd12 {
   padding-top: 12px !important;
   padding-bottom: 12px !important;
@@ -86,7 +90,7 @@
   width: 100% !important;
 }
 
-.searchBox .dateGroup > span {
+.searchBox .dateGroup>span {
   margin: 0 10px !important;
   color: var(--text-gray) !important;
   font-size: 14px !important;
@@ -113,6 +117,7 @@
   vertical-align: middle !important;
   flex-shrink: 0 !important;
 }
+
 
 .searchBox .btnWrap {
   display: flex !important;
@@ -199,7 +204,7 @@
   color: var(--text-gray) !important;
 }
 
-.listTable .topTotal p > span {
+.listTable .topTotal p>span {
   color: var(--primary) !important;
   font-weight: var(--font-weight-bold) !important;
 }
@@ -263,10 +268,6 @@
   font-weight: var(--font-weight-medium) !important;
 }
 
-.listTable .tableWrap {
-  padding: 0 30px !important;
-}
-
 .listTable .tableWrap table {
   text-align: center !important;
   width: 100% !important;
@@ -295,7 +296,7 @@
 }
 
 .listTable .tableWrap table td {
-  padding: 16px 10px !important;
+  padding: 30px 10px !important;
   font-size: 14px !important;
   font-weight: var(--font-weight-medium) !important;
   vertical-align: middle !important;

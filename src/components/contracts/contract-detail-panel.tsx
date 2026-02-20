@@ -83,13 +83,7 @@ function paymentLabel(progress: string): string {
   return map[progress] ?? progress;
 }
 
-function FileLinks({
-  items,
-  emptyText = "-",
-}: {
-  items: Array<{ file_name: string | null; file_url: string }>;
-  emptyText?: string;
-}) {
+function FileLinks({ items, emptyText = "-" }: { items: Array<{ file_name: string | null; file_url: string }>; emptyText?: string }) {
   if (items.length === 0) return <>{emptyText}</>;
   return (
     <>
@@ -187,10 +181,7 @@ export function ContractDetailPanel({ detail, isOpen, onClose, isLoading }: Cont
                   <li className="row_group">
                     <div className="table_head">사업자 등록증 첨부</div>
                     <div className="table_data attach">
-                      <FileLinks
-                        items={detail.clientAttachments.filter((a) => a.file_type === "business_registration")}
-                        emptyText="등록된 파일이 없습니다"
-                      />
+                      <FileLinks items={detail.clientAttachments.filter((a) => a.file_type === "business_registration")} emptyText="등록된 파일이 없습니다" />
                     </div>
                   </li>
                 </ul>
@@ -337,6 +328,8 @@ export function ContractDetailPanel({ detail, isOpen, onClose, isLoading }: Cont
                     <div className="table_head">계약비고</div>
                     <div className="table_data">{detail.contract.contract_note ?? ""}</div>
                   </li>
+                </ul>
+                <ul className="table_row">
                   <li className="row_group">
                     <div className="table_head">계약가능성</div>
                     <div className="table_data">{detail.contract.contract_functionality ?? ""}</div>
@@ -346,19 +339,13 @@ export function ContractDetailPanel({ detail, isOpen, onClose, isLoading }: Cont
                   <li className="row_group">
                     <div className="table_head">계약서류 첨부</div>
                     <div className="table_data attach">
-                      <FileLinks
-                        items={detail.contractAttachments.filter((a) => a.file_type === "contract")}
-                        emptyText="등록된 파일이 없습니다"
-                      />
+                      <FileLinks items={detail.contractAttachments.filter((a) => a.file_type === "contract")} emptyText="등록된 파일이 없습니다" />
                     </div>
                   </li>
                   <li className="row_group">
                     <div className="table_head">견적서류 첨부</div>
                     <div className="table_data attach">
-                      <FileLinks
-                        items={detail.contractAttachments.filter((a) => a.file_type === "estimate")}
-                        emptyText="등록된 파일이 없습니다"
-                      />
+                      <FileLinks items={detail.contractAttachments.filter((a) => a.file_type === "estimate")} emptyText="등록된 파일이 없습니다" />
                     </div>
                   </li>
                 </ul>

@@ -21,19 +21,34 @@
 .workContentsBar {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.workContentsBar div {
+  width: 50%;
 }
 
 .workContentChip {
   display: inline-block;
-  padding: 6px 12px;
-  background: var(--background-color);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
   font-size: 13px;
   font-weight: var(--font-weight-semibold);
   color: var(--text-color);
+  display: flex;
+}
+
+.workContentHead {
+  background-color: var(--background-color);
+}
+
+.workContentChip span {
+  width: 50%;
+  display: inline-block;
+  padding: 20px;
+  font-size: 14px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-colors);
 }
 
 .contractWorkTable {

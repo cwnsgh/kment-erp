@@ -3,13 +3,7 @@
 import { useState, useTransition } from "react";
 import Image from "next/image";
 import { ContractSelectModal } from "./contract-select-modal";
-import {
-  getContractForTaskRegistration,
-  getContractWorkRequestsByContract,
-  createContractWorkRequest,
-  updateContractWorkRequestStatus,
-  deleteContractWorkRequest,
-} from "@/app/actions/contract-work-request";
+import { getContractForTaskRegistration, getContractWorkRequestsByContract, createContractWorkRequest, updateContractWorkRequestStatus, deleteContractWorkRequest } from "@/app/actions/contract-work-request";
 import styles from "./contract-task-registration-form.module.css";
 import manageStyles from "../operations/manage-work-registration-form.module.css";
 
@@ -85,7 +79,7 @@ export function ContractTaskRegistrationForm({ employeeName }: ContractTaskRegis
                 memo: "",
               },
             ]
-          : []
+          : [],
       );
     } else {
       setError(detail.error ?? "계약 정보를 불러올 수 없습니다.");
@@ -230,15 +224,9 @@ export function ContractTaskRegistrationForm({ employeeName }: ContractTaskRegis
           </button>
         </div>
 
-        {error && (
-          <div className={styles.errorBox}>
-            {error}
-          </div>
-        )}
+        {error && <div className={styles.errorBox}>{error}</div>}
 
-        {isLoading && !contractData && (
-          <div className={styles.loading}>계약 정보를 불러오는 중...</div>
-        )}
+        {isLoading && !contractData && <div className={styles.loading}>계약 정보를 불러오는 중...</div>}
 
         {contractData && contract && client && (
           <div className="box_inner">
@@ -359,7 +347,9 @@ export function ContractTaskRegistrationForm({ employeeName }: ContractTaskRegis
                 {siteOpen && (
                   <div className="table_wrap">
                     {sites.length === 0 ? (
-                      <div className="table_data" style={{ padding: "18px 20px" }}>사이트 정보가 없습니다.</div>
+                      <div className="table_data" style={{ padding: "18px 20px" }}>
+                        사이트 정보가 없습니다.
+                      </div>
                     ) : (
                       <table className="site-table">
                         <colgroup>
@@ -405,185 +395,177 @@ export function ContractTaskRegistrationForm({ employeeName }: ContractTaskRegis
 
               {/* 업무 등록 */}
               <div className={`table_item table_item2 ${manageStyles.workRegistration}`}>
-                <h2 className="table_title">{contract.contract_name}</h2>
+                <h2 className="table_title">
+                  {contract.contract_name}{" "}
+                  <div style={{ textAlign: "right", marginBottom: 12 }}>
+                    <button type="button" onClick={addNewRow} className="plus_btn">
+                      + 업무 추가
+                    </button>
+                  </div>
+                </h2>
                 <div className={styles.workContentsBar}>
                   {workContents.map((wc) => (
-                    <span key={wc.id} className={styles.workContentChip}>
-                      {wc.work_content_name} {wc.modification_count}회
-                    </span>
+                    <div>
+                      {" "}
+                      <span key={wc.id} className={styles.workContentChip}>
+                        <span className={styles.workContentHead}>{wc.work_content_name}</span>
+                        <span>{wc.modification_count}회</span>
+                      </span>
+                    </div>
                   ))}
                 </div>
-                <div style={{ textAlign: "right", marginBottom: 12 }}>
-                  <button type="button" onClick={addNewRow} className="btn">
-                    + 업무 추가
-                  </button>
-                </div>
+
                 <div className="table_wrap">
-                <table className={`${manageStyles.workTable} ${manageStyles.maintenanceTable} ${styles.contractWorkTable}`}>
-                  <colgroup>
-                    <col style={{ width: "12%" }} />
-                    <col style={{ width: "8%" }} />
-                    <col style={{ width: "12%" }} />
-                    <col style={{ width: "10%" }} />
-                    <col style={{ width: "12%" }} />
-                    <col style={{ width: "auto" }} />
-                    <col style={{ width: "auto" }} />
-                    <col style={{ width: "14%" }} />
-                  </colgroup>
-                  <thead>
-                    <tr>
-                      <th>브랜드</th>
-                      <th>담당자</th>
-                      <th>작업기간</th>
-                      <th>첨부파일</th>
-                      <th>작업유형</th>
-                      <th>작업내용</th>
-                      <th>메모</th>
-                      <th>승인요청</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {requests.map((r) => (
-                      <tr key={r.id}>
-                        <td data-th="브랜드">{r.brand_name}</td>
-                        <td data-th="담당자">{r.manager}</td>
-                        <td data-th="작업기간">{r.work_period ? formatDate(r.work_period) : "-"}</td>
-                        <td data-th="첨부파일">{r.attachment_name ? <a href={r.attachment_url ?? "#"} target="_blank" rel="noopener noreferrer">{r.attachment_name}</a> : "-"}</td>
-                        <td data-th="작업유형">{r.work_content_name ?? "-"}</td>
-                        <td data-th="작업내용" className={manageStyles.inputCell}>{r.work_content ?? "-"}</td>
-                        <td data-th="메모" className={manageStyles.inputCell}>{r.memo ?? "-"}</td>
-                        <td data-th="승인요청" className={manageStyles.buttonCell}>
-                          {r.status === "pending" && <span className={manageStyles.approvalWait}>승인대기</span>}
-                          {r.status === "approved" && (
-                            <select
-                              value=""
-                              onChange={(e) => {
-                                const v = e.target.value as "in_progress" | "completed";
-                                if (v) handleStatusChange(r.id, v);
-                              }}>
-                              <option value="">선택</option>
-                              <option value="in_progress">작업중</option>
-                              <option value="completed">작업완료</option>
-                            </select>
-                          )}
-                          {(r.status === "in_progress" || r.status === "completed") && (
-                            <>
-                              <span>{getStatusLabel(r.status)}</span>
-                              <button type="button" className="btn btn_sm danger" onClick={() => handleDeleteRequest(r.id)}>삭제</button>
-                            </>
-                          )}
-                          {(r.status === "rejected" || r.status === "deleted") && <span>{getStatusLabel(r.status)}</span>}
-                        </td>
+                  <table className={`${manageStyles.workTable} ${manageStyles.maintenanceTable} ${styles.contractWorkTable}`}>
+                    <colgroup>
+                      <col style={{ width: "12%" }} />
+                      <col style={{ width: "8%" }} />
+                      <col style={{ width: "12%" }} />
+                      <col style={{ width: "10%" }} />
+                      <col style={{ width: "12%" }} />
+                      <col style={{ width: "auto" }} />
+                      <col style={{ width: "auto" }} />
+                      <col style={{ width: "100px" }} />
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th>브랜드</th>
+                        <th>담당자</th>
+                        <th>작업기간</th>
+                        <th>첨부파일</th>
+                        <th>작업유형</th>
+                        <th>작업내용</th>
+                        <th>메모</th>
+                        <th>승인요청</th>
                       </tr>
-                    ))}
-                    {newRows.map((row) => (
-                      <tr key={row.id}>
-                        <td data-th="브랜드" className={manageStyles.selectCell}>
-                          <select
-                            value={row.brandName}
-                            onChange={(e) => updateNewRow(row.id, "brandName", e.target.value)}>
-                            <option value="">선택</option>
-                            {sites.map((s) => (
-                              <option key={s.id} value={s.brand_name ?? ""}>{s.brand_name ?? ""}</option>
-                            ))}
-                          </select>
-                        </td>
-                        <td data-th="담당자" className={manageStyles.inputCell}>
-                          <input
-                            type="text"
-                            value={row.manager}
-                            onChange={(e) => updateNewRow(row.id, "manager", e.target.value)}
-                            placeholder="담당자"
-                          />
-                        </td>
-                        <td data-th="작업기간" className={manageStyles.dateCell}>
-                          <input
-                            type="date"
-                            value={row.workPeriod}
-                            onChange={(e) => updateNewRow(row.id, "workPeriod", e.target.value)}
-                          />
-                        </td>
-                        <td data-th="첨부파일" className={manageStyles.inputCell}>
-                          <div className="file-upload-box">
-                            <input
-                              type="file"
-                              className="fileInput"
-                              data-work-id={row.id}
-                              hidden
-                              onChange={(e) => updateNewRow(row.id, "attachment", e.target.files?.[0] ?? null)}
-                            />
-                            {!row.attachment ? (
-                              <div
-                                className="file-upload-btn"
-                                onClick={() => (document.querySelector(`.fileInput[data-work-id="${row.id}"]`) as HTMLInputElement)?.click()}>
-                                <span>첨부파일</span>
-                                <Image src="/images/attach_icon.svg" alt="" width={12} height={12} style={{ display: "inline-block", margin: 0 }} />
-                              </div>
+                    </thead>
+                    <tbody>
+                      {requests.map((r) => (
+                        <tr key={r.id}>
+                          <td data-th="브랜드">{r.brand_name}</td>
+                          <td data-th="담당자">{r.manager}</td>
+                          <td data-th="작업기간">{r.work_period ? formatDate(r.work_period) : "-"}</td>
+                          <td data-th="첨부파일">
+                            {r.attachment_name ? (
+                              <a href={r.attachment_url ?? "#"} target="_blank" rel="noopener noreferrer">
+                                {r.attachment_name}
+                              </a>
                             ) : (
-                              <div className={manageStyles.fileNameContainer}>
-                                <span className="fileName">{row.attachment.name}</span>
-                                <button
-                                  type="button"
-                                  className={manageStyles.fileRemoveBtn}
-                                  onClick={() => {
-                                    updateNewRow(row.id, "attachment", null);
-                                    const input = document.querySelector(`.fileInput[data-work-id="${row.id}"]`) as HTMLInputElement;
-                                    if (input) input.value = "";
-                                  }}>
-                                  <Image src="/images/close_icon.svg" alt="제거" width={14} height={14} />
-                                </button>
-                              </div>
+                              "-"
                             )}
-                          </div>
-                        </td>
-                        <td data-th="작업유형" className={manageStyles.selectCell}>
-                          <select
-                            value={row.contractWorkContentId}
-                            onChange={(e) => updateNewRow(row.id, "contractWorkContentId", e.target.value)}>
-                            {workContents.map((wc) => (
-                              <option key={wc.id} value={wc.id}>{wc.work_content_name}</option>
-                            ))}
-                          </select>
-                        </td>
-                        <td data-th="작업내용" className={manageStyles.inputCell}>
-                          <input
-                            type="text"
-                            value={row.workContent}
-                            onChange={(e) => updateNewRow(row.id, "workContent", e.target.value)}
-                            placeholder="작업내용"
-                          />
-                        </td>
-                        <td data-th="메모" className={manageStyles.inputCell}>
-                          <input
-                            type="text"
-                            value={row.memo}
-                            onChange={(e) => updateNewRow(row.id, "memo", e.target.value)}
-                            placeholder="메모"
-                          />
-                        </td>
-                        <td data-th="승인요청" className={manageStyles.buttonCell}>
-                          <button
-                            type="button"
-                            className={`btn ${manageStyles.approvalRequest}`}
-                            onClick={() => handleSubmitRequest(row)}
-                            disabled={isLoading}>
-                            승인요청
-                          </button>
-                          <button type="button" className="btn btn_sm normal" onClick={() => removeNewRow(row.id)}>취소</button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                          </td>
+                          <td data-th="작업유형">{r.work_content_name ?? "-"}</td>
+                          <td data-th="작업내용" className={manageStyles.inputCell}>
+                            {r.work_content ?? "-"}
+                          </td>
+                          <td data-th="메모" className={manageStyles.inputCell}>
+                            {r.memo ?? "-"}
+                          </td>
+                          <td data-th="승인요청" className={manageStyles.buttonCell}>
+                            {r.status === "pending" && <span className={manageStyles.approvalWait}>승인대기</span>}
+                            {r.status === "approved" && (
+                              <select
+                                value=""
+                                onChange={(e) => {
+                                  const v = e.target.value as "in_progress" | "completed";
+                                  if (v) handleStatusChange(r.id, v);
+                                }}>
+                                <option value="">선택</option>
+                                <option value="in_progress">작업중</option>
+                                <option value="completed">작업완료</option>
+                              </select>
+                            )}
+                            {(r.status === "in_progress" || r.status === "completed") && (
+                              <>
+                                <span>{getStatusLabel(r.status)}</span>
+                                <button type="button" className="btn btn_sm danger" onClick={() => handleDeleteRequest(r.id)}>
+                                  삭제
+                                </button>
+                              </>
+                            )}
+                            {(r.status === "rejected" || r.status === "deleted") && <span>{getStatusLabel(r.status)}</span>}
+                          </td>
+                        </tr>
+                      ))}
+                      {newRows.map((row) => (
+                        <tr key={row.id}>
+                          <td data-th="브랜드" className={manageStyles.selectCell}>
+                            <select value={row.brandName} onChange={(e) => updateNewRow(row.id, "brandName", e.target.value)}>
+                              <option value="">선택</option>
+                              {sites.map((s) => (
+                                <option key={s.id} value={s.brand_name ?? ""}>
+                                  {s.brand_name ?? ""}
+                                </option>
+                              ))}
+                            </select>
+                          </td>
+                          <td data-th="담당자" className={manageStyles.inputCell}>
+                            <input type="text" value={row.manager} onChange={(e) => updateNewRow(row.id, "manager", e.target.value)} placeholder="담당자" />
+                          </td>
+                          <td data-th="작업기간" className={manageStyles.dateCell}>
+                            <input type="date" value={row.workPeriod} onChange={(e) => updateNewRow(row.id, "workPeriod", e.target.value)} />
+                          </td>
+                          <td data-th="첨부파일" className={manageStyles.inputCell}>
+                            <div className="file-upload-box">
+                              <input type="file" className="fileInput" data-work-id={row.id} hidden onChange={(e) => updateNewRow(row.id, "attachment", e.target.files?.[0] ?? null)} />
+                              {!row.attachment ? (
+                                <div className="file-upload-btn" onClick={() => (document.querySelector(`.fileInput[data-work-id="${row.id}"]`) as HTMLInputElement)?.click()}>
+                                  <span>첨부파일</span>
+                                  <Image src="/images/attach_icon.svg" alt="" width={12} height={12} style={{ display: "inline-block", margin: 0 }} />
+                                </div>
+                              ) : (
+                                <div className={manageStyles.fileNameContainer}>
+                                  <span className="fileName">{row.attachment.name}</span>
+                                  <button
+                                    type="button"
+                                    className={manageStyles.fileRemoveBtn}
+                                    onClick={() => {
+                                      updateNewRow(row.id, "attachment", null);
+                                      const input = document.querySelector(`.fileInput[data-work-id="${row.id}"]`) as HTMLInputElement;
+                                      if (input) input.value = "";
+                                    }}>
+                                    <Image src="/images/close_icon.svg" alt="제거" width={14} height={14} />
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                          <td data-th="작업유형" className={manageStyles.selectCell}>
+                            <select value={row.contractWorkContentId} onChange={(e) => updateNewRow(row.id, "contractWorkContentId", e.target.value)}>
+                              {workContents.map((wc) => (
+                                <option key={wc.id} value={wc.id}>
+                                  {wc.work_content_name}
+                                </option>
+                              ))}
+                            </select>
+                          </td>
+                          <td data-th="작업내용" className={manageStyles.inputCell}>
+                            <input type="text" value={row.workContent} onChange={(e) => updateNewRow(row.id, "workContent", e.target.value)} placeholder="작업내용" />
+                          </td>
+                          <td data-th="메모" className={manageStyles.inputCell}>
+                            <input type="text" value={row.memo} onChange={(e) => updateNewRow(row.id, "memo", e.target.value)} placeholder="메모" />
+                          </td>
+                          <td data-th="승인요청" className={manageStyles.buttonCell}>
+                            <div>
+                              <button type="button" className={`btn  ${manageStyles.approvalRequest}`} onClick={() => handleSubmitRequest(row)} disabled={isLoading}>
+                                승인요청
+                              </button>
+                              <button type="button" className={`btn  ${manageStyles.approvalDelete}`} onClick={() => removeNewRow(row.id)}>
+                                취소
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
           </div>
         )}
 
-        {!contractData && !isLoading && (
-          <div className={styles.empty}>계약 불러오기를 선택한 뒤 계약을 선택해 주세요.</div>
-        )}
+        {!contractData && !isLoading && <div className={styles.empty}>계약 불러오기를 선택한 뒤 계약을 선택해 주세요.</div>}
       </div>
     </section>
   );

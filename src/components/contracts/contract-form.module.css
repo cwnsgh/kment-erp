@@ -86,6 +86,30 @@
   margin: 0;
 }
 
+.contractRegist :global(.file-upload-btn) {
+  background: var(--text-gray);
+  color: rgb(255, 255, 255);
+  border: none;
+  padding: 0px 14px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  height: 32px;
+  line-height: 32px;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  width: fit-content;
+}
+
+.contractRegist :global(.file-upload-btn img) {
+  width: 12px;
+  filter: invert(1);
+}
+
 /* 납부 진행 라디오 버튼 그룹 - 줄바꿈 방지 */
 .paymentProgressGroup {
   min-width: 350px;

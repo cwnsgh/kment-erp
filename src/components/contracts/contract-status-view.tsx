@@ -86,7 +86,7 @@ export function ContractStatusView({ data, year, month }: ContractStatusViewProp
       params.set("month", String(m));
       router.push(`/contracts/status?${params.toString()}`);
     },
-    [router, searchParams]
+    [router, searchParams],
   );
 
   const isThisMonth = year === thisYear && month === thisMonth;
@@ -98,43 +98,28 @@ export function ContractStatusView({ data, year, month }: ContractStatusViewProp
     <div className={styles.wrap}>
       {/* 필터 */}
       <div className={styles.filterBar}>
-        <button
-          type="button"
-          onClick={() => setPeriod(thisYear, thisMonth)}
-          className={`${styles.filterBtn} ${isThisMonth ? styles.filterBtnPrimary : styles.filterBtnDefault}`}>
+        <button type="button" onClick={() => setPeriod(thisYear, thisMonth)} className={`${styles.filterBtn} ${isThisMonth ? styles.filterBtnPrimary : styles.filterBtnDefault}`}>
           이번달
         </button>
-        <button
-          type="button"
-          onClick={() => setPeriod(lastMonthYear, lastMonth)}
-          className={`${styles.filterBtn} ${isLastMonth ? styles.filterBtnPrimary : styles.filterBtnDefault}`}>
+        <button type="button" onClick={() => setPeriod(lastMonthYear, lastMonth)} className={`${styles.filterBtn} ${isLastMonth ? styles.filterBtnPrimary : styles.filterBtnDefault}`}>
           지난달
         </button>
         <span className={styles.filterLabel}>직접선택</span>
-        <select
-          value={customYear}
-          onChange={(e) => setCustomYear(parseInt(e.target.value, 10))}
-          className={styles.filterSelect}>
+        <select value={customYear} onChange={(e) => setCustomYear(parseInt(e.target.value, 10))} className={styles.filterSelect}>
           {[thisYear, thisYear - 1, thisYear - 2].map((y) => (
             <option key={y} value={y}>
               {y}년
             </option>
           ))}
         </select>
-        <select
-          value={customMonth}
-          onChange={(e) => setCustomMonth(parseInt(e.target.value, 10))}
-          className={styles.filterSelect}>
+        <select value={customMonth} onChange={(e) => setCustomMonth(parseInt(e.target.value, 10))} className={styles.filterSelect}>
           {monthNames.map((m) => (
             <option key={m} value={m}>
               {m}월
             </option>
           ))}
         </select>
-        <button
-          type="button"
-          onClick={() => setPeriod(customYear, customMonth)}
-          className={styles.queryBtn}>
+        <button type="button" onClick={() => setPeriod(customYear, customMonth)} className={` btn btn_lg primary`}>
           조회
         </button>
       </div>
@@ -144,17 +129,26 @@ export function ContractStatusView({ data, year, month }: ContractStatusViewProp
         <div className={styles.kpiCard}>
           <p className={styles.kpiCardLabel}>이번달 계약 건수</p>
           <p className={styles.kpiCardPeriod}>{data.monthLabel}</p>
-          <p className={styles.kpiCardValue}>{data.monthContractCount}건</p>
+          <p className={styles.kpiCardValue}>
+            {data.monthContractCount}
+            <span>건</span>
+          </p>
         </div>
         <div className={styles.kpiCard}>
           <p className={styles.kpiCardLabel}>이번달 매출액</p>
           <p className={styles.kpiCardPeriod}>{data.monthLabel}</p>
-          <p className={styles.kpiCardValue}>{formatAmount(data.monthSales)}원</p>
+          <p className={styles.kpiCardValue}>
+            {formatAmount(data.monthSales)}
+            <span>원</span>
+          </p>
         </div>
         <div className={styles.kpiCard}>
           <p className={styles.kpiCardLabel}>분기 매출</p>
           <p className={styles.kpiCardPeriod}>{data.quarterLabel}</p>
-          <p className={styles.kpiCardValue}>{formatAmount(data.quarterSales)}원</p>
+          <p className={styles.kpiCardValue}>
+            {formatAmount(data.quarterSales)}
+            <span>원</span>
+          </p>
         </div>
       </div>
 
@@ -162,7 +156,7 @@ export function ContractStatusView({ data, year, month }: ContractStatusViewProp
       <section className={styles.tableSection}>
         <div className={styles.tableSectionHeader}>
           <h2 className={styles.tableSectionTitle}>
-            월별 상세 계약건 <span className={styles.tableSectionTitleSub}>({data.monthLabel})</span>
+            월별 상세 계약건 <span className={styles.tableSectionTitleSub}>{data.monthLabel}</span>
           </h2>
         </div>
         <div className={styles.tableWrap}>
@@ -188,24 +182,14 @@ export function ContractStatusView({ data, year, month }: ContractStatusViewProp
                 </tr>
               ) : (
                 data.monthlyDetail.map((row) => (
-                  <tr
-                    key={row.id}
-                    onClick={() => openDetail(row.id)}
-                    className={styles.tableRowClickable}>
+                  <tr key={row.id} onClick={() => openDetail(row.id)} className={styles.tableRowClickable}>
                     <td>{formatDate(row.contract_date)}</td>
                     <td>{row.business_registration_number}</td>
                     <td>{row.client_name}</td>
                     <td>{row.ceo_name}</td>
                     <td>{row.primary_contact_name ?? "-"}</td>
                     <td>
-                      <span
-                        className={`${styles.badge} ${
-                          progressLabel(row.payment_progress) === "정상"
-                            ? styles.badgeNormal
-                            : styles.badgeUnpaid
-                        }`}>
-                        {progressLabel(row.payment_progress)}
-                      </span>
+                      <span className={`${styles.badge} ${progressLabel(row.payment_progress) === "정상" ? styles.badgeNormal : styles.badgeUnpaid}`}>{progressLabel(row.payment_progress)}</span>
                     </td>
                     <td>{row.contract_type_name || "-"}</td>
                     <td>
@@ -224,8 +208,7 @@ export function ContractStatusView({ data, year, month }: ContractStatusViewProp
         <div className={styles.monthlySectionHeader}>
           <h2 className={styles.monthlySectionTitle}>월별 매출</h2>
           <p className={styles.monthlyTotal}>
-            총 매출합계 <span className={styles.monthlyTotalAmount}>{formatAmount(data.yearlyMonthlySales.totalAmount)}원</span>{" "}
-            <span className={styles.monthlyTotalCount}>({data.yearlyMonthlySales.totalCount}건)</span>
+            총 매출합계 <span className={styles.monthlyTotalAmount}>{formatAmount(data.yearlyMonthlySales.totalAmount)}원</span> <span className={styles.monthlyTotalCount}>({data.yearlyMonthlySales.totalCount}건)</span>
           </p>
         </div>
         <div className={styles.monthlyTwoCol}>
@@ -235,9 +218,7 @@ export function ContractStatusView({ data, year, month }: ContractStatusViewProp
               return (
                 <div key={m} className={styles.monthlyCell}>
                   <span className={styles.monthlyCellLeft}>{m}월</span>
-                  <span className={styles.monthlyCellRight}>
-                    {amount > 0 ? `${formatAmount(amount)}원` : "데이터 없음"}
-                  </span>
+                  <span className={`${styles.monthlyCellRight} ${amount > 0 ? "" : styles.noData}`}>{amount > 0 ? `${formatAmount(amount)}원` : "데이터 없음"}</span>
                 </div>
               );
             })}
@@ -248,9 +229,7 @@ export function ContractStatusView({ data, year, month }: ContractStatusViewProp
               return (
                 <div key={m} className={styles.monthlyCell}>
                   <span className={styles.monthlyCellLeft}>{m}월</span>
-                  <span className={styles.monthlyCellRight}>
-                    {amount > 0 ? `${formatAmount(amount)}원` : "데이터 없음"}
-                  </span>
+                  <span className={`${styles.monthlyCellRight} ${amount > 0 ? "" : styles.noData}`}>{amount > 0 ? `${formatAmount(amount)}원` : "데이터 없음"}</span>
                 </div>
               );
             })}
@@ -258,12 +237,7 @@ export function ContractStatusView({ data, year, month }: ContractStatusViewProp
         </div>
       </section>
 
-      <ContractDetailPanel
-        isOpen={detailOpen}
-        onClose={() => setDetailOpen(false)}
-        detail={detailData}
-        isLoading={detailLoading}
-      />
+      <ContractDetailPanel isOpen={detailOpen} onClose={() => setDetailOpen(false)} detail={detailData} isLoading={detailLoading} />
     </div>
   );
 }

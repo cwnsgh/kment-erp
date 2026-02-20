@@ -465,6 +465,19 @@
   text-align: center;
 }
 
+.approvalDelete {
+  display: inline-block;
+  padding: 6px 12px;
+  background-color: var(--negative);
+  color: #fff;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  white-space: nowrap;
+  text-align: center;
+}
+
 .approvalWait {
   display: inline-block;
   padding: 6px 12px;

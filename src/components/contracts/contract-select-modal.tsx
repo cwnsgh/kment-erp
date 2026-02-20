@@ -44,7 +44,7 @@ export function ContractSelectModal({ isOpen, onClose, onSelect }: ContractSelec
           client_name: c.client_name,
           brand_name: c.brand_name,
           contract_date: c.contract_date,
-        }))
+        })),
       );
     } else {
       setError(result.error || "계약 목록을 불러올 수 없습니다.");
@@ -80,14 +80,8 @@ export function ContractSelectModal({ isOpen, onClose, onSelect }: ContractSelec
         </div>
         <div className={styles.searchBox}>
           <form onSubmit={handleSearch} className={styles.searchForm}>
-            <input
-              type="text"
-              placeholder="계약명 검색"
-              value={searchKeyword}
-              onChange={(e) => setSearchKeyword(e.target.value)}
-              className={styles.searchInput}
-            />
-            <button type="submit" className="btn btn_md primary">
+            <input type="text" placeholder="계약명 검색" value={searchKeyword} onChange={(e) => setSearchKeyword(e.target.value)} className={styles.searchInput} />
+            <button type="submit" className="btn btn_lg primary">
               검색
             </button>
           </form>
@@ -98,7 +92,9 @@ export function ContractSelectModal({ isOpen, onClose, onSelect }: ContractSelec
             <p className={styles.loading}>로딩 중...</p>
           ) : (
             <>
-              <p className={styles.total}>총 <span>{contracts.length}</span>건</p>
+              <p className={styles.total}>
+                총 <span>{contracts.length}건</span>의 계약이 조회되었습니다.
+              </p>
               <table className={styles.modalTable}>
                 <thead>
                   <tr>
@@ -106,7 +102,7 @@ export function ContractSelectModal({ isOpen, onClose, onSelect }: ContractSelec
                     <th>거래처</th>
                     <th>브랜드</th>
                     <th>계약일</th>
-                    <th></th>
+                    <th>선택</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -116,7 +112,11 @@ export function ContractSelectModal({ isOpen, onClose, onSelect }: ContractSelec
                       <td>{c.client_name}</td>
                       <td>{c.brand_name}</td>
                       <td>{formatDate(c.contract_date)}</td>
-                      <td><button type="button" className="btn btn_sm primary">선택</button></td>
+                      <td>
+                        <button type="button" className="btn btn_md primary">
+                          선택
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>

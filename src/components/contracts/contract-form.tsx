@@ -229,7 +229,7 @@ export function ContractForm() {
               };
             }
             return contract;
-          })
+          }),
         );
       }
     }
@@ -241,15 +241,11 @@ export function ContractForm() {
         if (contract.id === contractId) {
           return {
             ...contract,
-            workContents: contract.workContents.map((wc) =>
-              wc.workContentId === workContentId
-                ? { ...wc, modificationCount }
-                : wc
-            ),
+            workContents: contract.workContents.map((wc) => (wc.workContentId === workContentId ? { ...wc, modificationCount } : wc)),
           };
         }
         return contract;
-      })
+      }),
     );
   };
 
@@ -260,7 +256,7 @@ export function ContractForm() {
           return { ...contract, [field]: file };
         }
         return contract;
-      })
+      }),
     );
   };
 
@@ -367,7 +363,7 @@ export function ContractForm() {
             secondaryContact: contract.secondaryContact || undefined,
             workNote: contract.workNote || undefined,
           };
-        })
+        }),
       );
 
       // 계약 저장
@@ -456,346 +452,227 @@ export function ContractForm() {
                 <div className="table_item">
                   <h2 className="table_title">
                     계약 정보
-                    <button 
-                      type="button" 
-                      onClick={handleAddContract} 
-                      className={styles.addContractButton}
-                      style={{ fontSize: "13px", background: "none", border: "none", padding: 0, cursor: "pointer" }}>
+                    <button type="button" onClick={handleAddContract} className={styles.addContractButton} style={{ fontSize: "13px", background: "none", border: "none", padding: 0, cursor: "pointer" }}>
                       + 계약 추가
                     </button>
                   </h2>
 
                   {contracts.map((contract, index) => (
                     <div key={contract.id} style={{ marginTop: index > 0 ? "40px" : "0" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <h3 className="table_title_sub">
                           계약 {index + 1} {contract.contractName ? `(${contract.contractName})` : "(등록 시 계약명으로 변경)"}
                         </h3>
                         {contracts.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveContract(contract.id)}
-                            className="btn btn_sm normal"
-                            style={{ fontSize: "13px" }}>
+                          <button type="button" onClick={() => handleRemoveContract(contract.id)} className="btn btn_sm normal" style={{ fontSize: "13px" }}>
                             계약 삭제
                           </button>
                         )}
                       </div>
 
-                    <ul className="table_row">
-                      <li className="row_group">
-                        <div className="table_head">브랜드명</div>
-                        <div className="table_data">
-                          <select
-                            value={contract.brandName}
-                            onChange={(e) => handleContractChange(contract.id, "brandName", e.target.value)}
-                            className="w-full border border-slate-200 rounded px-3 py-2 text-sm">
-                            <option value="">브랜드명을 선택하세요</option>
-                            {clientData.sites.map((site) => (
-                              <option key={site.brandName} value={site.brandName}>
-                                {site.brandName}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </li>
-                      <li className="row_group">
-                        <div className="table_head">계약명</div>
-                        <div className="table_data">
-                          <input
-                            type="text"
-                            value={contract.contractName}
-                            onChange={(e) => handleContractChange(contract.id, "contractName", e.target.value)}
-                            placeholder="계약명을 입력하세요"
-                            className="w-full border border-slate-200 rounded px-3 py-2 text-sm"
-                          />
-                        </div>
-                      </li>
-                    </ul>
-
-                    <ul className="table_row">
-                      <li className="row_group">
-                        <div className="table_head">계약일</div>
-                        <div className="table_data">
-                          <input
-                            type="date"
-                            value={contract.contractDate}
-                            onChange={(e) => handleContractChange(contract.id, "contractDate", e.target.value)}
-                            className="w-full border border-slate-200 rounded px-3 py-2 text-sm"
-                          />
-                        </div>
-                      </li>
-                      <li className="row_group">
-                        <div className="table_head">계약 종목</div>
-                        <div className="table_data">
-                          <select
-                            value={contract.contractTypeId}
-                            onChange={(e) => handleContractChange(contract.id, "contractTypeId", e.target.value)}
-                            className="w-full border border-slate-200 rounded px-3 py-2 text-sm"
-                            required>
-                            <option value="">계약 종목을 선택하세요</option>
-                            {contractTypes.map((type) => (
-                              <option key={type.id} value={type.id}>
-                                {type.name}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </li>
-                    </ul>
-
-                    <ul className="table_row">
-                      <li className="row_group">
-                        <div className="table_head">시안 완료 예정일</div>
-                        <div className="table_data">
-                          <input
-                            type="date"
-                            value={contract.draftDueDate}
-                            onChange={(e) => handleContractChange(contract.id, "draftDueDate", e.target.value)}
-                            className="w-full border border-slate-200 rounded px-3 py-2 text-sm"
-                          />
-                        </div>
-                      </li>
-                      <li className="row_group">
-                        <div className="table_head">데모 완료 예정일</div>
-                        <div className="table_data">
-                          <input
-                            type="date"
-                            value={contract.demoDueDate}
-                            onChange={(e) => handleContractChange(contract.id, "demoDueDate", e.target.value)}
-                            className="w-full border border-slate-200 rounded px-3 py-2 text-sm"
-                          />
-                        </div>
-                      </li>
-                    </ul>
-
-                    <ul className="table_row">
-                      <li className="row_group">
-                        <div className="table_head">최종 완료일</div>
-                        <div className="table_data">
-                          <input
-                            type="date"
-                            value={contract.finalCompletionDate}
-                            onChange={(e) => handleContractChange(contract.id, "finalCompletionDate", e.target.value)}
-                            className="w-full border border-slate-200 rounded px-3 py-2 text-sm"
-                          />
-                        </div>
-                      </li>
-                      <li className="row_group">
-                        <div className="table_head">오픈 예정일</div>
-                        <div className="table_data">
-                          <input
-                            type="date"
-                            value={contract.openDueDate}
-                            onChange={(e) => handleContractChange(contract.id, "openDueDate", e.target.value)}
-                            className="w-full border border-slate-200 rounded px-3 py-2 text-sm"
-                          />
-                        </div>
-                      </li>
-                    </ul>
-
-                    <ul className="table_row">
-                      <li className="row_group">
-                        <div className="table_head">계약금액</div>
-                        <div className="table_data">
-                          <input
-                            type="text"
-                            value={formatAmountInput(contract.contractAmount)}
-                            onChange={(e) => handleContractChange(contract.id, "contractAmount", parseAmountInput(e.target.value))}
-                            placeholder="계약금액을 입력하세요"
-                            className="w-full border border-slate-200 rounded px-3 py-2 text-sm"
-                          />
-                        </div>
-                      </li>
-                      <li className="row_group">
-                        <div className="table_head">납부 진행</div>
-                        <div className="table_data">
-                          <div style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "nowrap" }}>
-                            <select
-                              value={contract.paymentProgress}
-                              onChange={(e) => handleContractChange(contract.id, "paymentProgress", e.target.value)}
-                              className="w-full border border-slate-200 rounded px-3 py-2 text-sm"
-                              style={{ width: "120px" }}>
-                              <option value="paid">완납</option>
-                              <option value="unpaid">미납</option>
-                              <option value="installment">분납</option>
-                            </select>
-                            {contract.paymentProgress === "installment" && (
-                              <input
-                                type="text"
-                                value={formatAmountInput(contract.installmentAmount)}
-                                onChange={(e) => handleContractChange(contract.id, "installmentAmount", parseAmountInput(e.target.value))}
-                                placeholder="분납 금액"
-                                className="border border-slate-200 rounded px-3 py-2 text-sm"
-                                style={{ width: "150px" }}
-                              />
-                            )}
-                          </div>
-                        </div>
-                      </li>
-                    </ul>
-
-                    <ul className="table_row">
-                      <li className="row_group" style={{ width: "100%" }}>
-                        <div className="table_head">계약 비고</div>
-                        <div className="table_data">
-                          <textarea
-                            value={contract.contractNote}
-                            onChange={(e) => handleContractChange(contract.id, "contractNote", e.target.value)}
-                            placeholder="계약 비고를 입력하세요"
-                            className="w-full border border-slate-200 rounded px-3 py-2 text-sm"
-                            rows={3}
-                          />
-                        </div>
-                      </li>
-                    </ul>
-
-                    <ul className="table_row">
-                      <li className="row_group" style={{ width: "100%" }}>
-                        <div className="table_head">계약 기능성</div>
-                        <div className="table_data">
-                          <textarea
-                            value={contract.contractFunctionality}
-                            onChange={(e) => handleContractChange(contract.id, "contractFunctionality", e.target.value)}
-                            placeholder="계약 기능성을 입력하세요"
-                            className="w-full border border-slate-200 rounded px-3 py-2 text-sm"
-                            rows={3}
-                          />
-                        </div>
-                      </li>
-                    </ul>
-
-                    {contract.contractTypeId && contract.workContents.length > 0 && (
                       <ul className="table_row">
-                        <li className="row_group" style={{ width: "100%" }}>
-                          <div className="table_head">작업 내용 및 수정 횟수</div>
+                        <li className="row_group">
+                          <div className="table_head">브랜드명</div>
                           <div className="table_data">
-                            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                              {contract.workContents.map((workContent) => (
-                                <div
-                                  key={workContent.workContentId}
-                                  style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "10px",
-                                    padding: "8px",
-                                    backgroundColor: "#f9f9f9",
-                                    borderRadius: "4px",
-                                  }}>
-                                  <span style={{ minWidth: "120px", fontSize: "13px" }}>
-                                    {workContent.workContentName}
-                                  </span>
-                                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                                    <input
-                                      type="number"
-                                      value={workContent.modificationCount}
-                                      onChange={(e) =>
-                                        handleWorkContentChange(
-                                          contract.id,
-                                          workContent.workContentId,
-                                          e.target.value
-                                        )
-                                      }
-                                      placeholder="0"
-                                      className="border border-slate-200 rounded px-3 py-2 text-sm"
-                                      style={{ width: "80px" }}
-                                      min="0"
-                                    />
-                                    <span>회</span>
-                                  </div>
-                                </div>
+                            <select value={contract.brandName} onChange={(e) => handleContractChange(contract.id, "brandName", e.target.value)} className="w-full border border-slate-200 rounded px-3 py-2 text-sm">
+                              <option value="">브랜드명을 선택하세요</option>
+                              {clientData.sites.map((site) => (
+                                <option key={site.brandName} value={site.brandName}>
+                                  {site.brandName}
+                                </option>
                               ))}
+                            </select>
+                          </div>
+                        </li>
+                        <li className="row_group">
+                          <div className="table_head">계약명</div>
+                          <div className="table_data">
+                            <input type="text" value={contract.contractName} onChange={(e) => handleContractChange(contract.id, "contractName", e.target.value)} placeholder="계약명을 입력하세요" className="w-full border border-slate-200 rounded px-3 py-2 text-sm" />
+                          </div>
+                        </li>
+                      </ul>
+
+                      <ul className="table_row">
+                        <li className="row_group">
+                          <div className="table_head">계약일</div>
+                          <div className="table_data">
+                            <input type="date" value={contract.contractDate} onChange={(e) => handleContractChange(contract.id, "contractDate", e.target.value)} className="w-full border border-slate-200 rounded px-3 py-2 text-sm" />
+                          </div>
+                        </li>
+                        <li className="row_group">
+                          <div className="table_head">계약 종목</div>
+                          <div className="table_data">
+                            <select value={contract.contractTypeId} onChange={(e) => handleContractChange(contract.id, "contractTypeId", e.target.value)} className="w-full border border-slate-200 rounded px-3 py-2 text-sm" required>
+                              <option value="">계약 종목을 선택하세요</option>
+                              {contractTypes.map((type) => (
+                                <option key={type.id} value={type.id}>
+                                  {type.name}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        </li>
+                      </ul>
+
+                      <ul className="table_row">
+                        <li className="row_group">
+                          <div className="table_head">시안 완료 예정일</div>
+                          <div className="table_data">
+                            <input type="date" value={contract.draftDueDate} onChange={(e) => handleContractChange(contract.id, "draftDueDate", e.target.value)} className="w-full border border-slate-200 rounded px-3 py-2 text-sm" />
+                          </div>
+                        </li>
+                        <li className="row_group">
+                          <div className="table_head">데모 완료 예정일</div>
+                          <div className="table_data">
+                            <input type="date" value={contract.demoDueDate} onChange={(e) => handleContractChange(contract.id, "demoDueDate", e.target.value)} className="w-full border border-slate-200 rounded px-3 py-2 text-sm" />
+                          </div>
+                        </li>
+                      </ul>
+
+                      <ul className="table_row">
+                        <li className="row_group">
+                          <div className="table_head">최종 완료일</div>
+                          <div className="table_data">
+                            <input type="date" value={contract.finalCompletionDate} onChange={(e) => handleContractChange(contract.id, "finalCompletionDate", e.target.value)} className="w-full border border-slate-200 rounded px-3 py-2 text-sm" />
+                          </div>
+                        </li>
+                        <li className="row_group">
+                          <div className="table_head">오픈 예정일</div>
+                          <div className="table_data">
+                            <input type="date" value={contract.openDueDate} onChange={(e) => handleContractChange(contract.id, "openDueDate", e.target.value)} className="w-full border border-slate-200 rounded px-3 py-2 text-sm" />
+                          </div>
+                        </li>
+                      </ul>
+
+                      <ul className="table_row">
+                        <li className="row_group">
+                          <div className="table_head">계약금액</div>
+                          <div className="table_data">
+                            <input type="text" value={formatAmountInput(contract.contractAmount)} onChange={(e) => handleContractChange(contract.id, "contractAmount", parseAmountInput(e.target.value))} placeholder="계약금액을 입력하세요" className="w-full border border-slate-200 rounded px-3 py-2 text-sm" />
+                          </div>
+                        </li>
+                        <li className="row_group">
+                          <div className="table_head">납부 진행</div>
+                          <div className="table_data">
+                            <div style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "nowrap" }}>
+                              <select value={contract.paymentProgress} onChange={(e) => handleContractChange(contract.id, "paymentProgress", e.target.value)} className="w-full border border-slate-200 rounded px-3 py-2 text-sm" style={{ width: "120px" }}>
+                                <option value="paid">완납</option>
+                                <option value="unpaid">미납</option>
+                                <option value="installment">분납</option>
+                              </select>
+                              {contract.paymentProgress === "installment" && <input type="text" value={formatAmountInput(contract.installmentAmount)} onChange={(e) => handleContractChange(contract.id, "installmentAmount", parseAmountInput(e.target.value))} placeholder="분납 금액" className="border border-slate-200 rounded px-3 py-2 text-sm" style={{ width: "150px" }} />}
                             </div>
                           </div>
                         </li>
                       </ul>
-                    )}
 
-                    <ul className="table_row">
-                      <li className="row_group">
-                        <div className="table_head">계약서 첨부</div>
-                        <div className="table_data">
-                          <label className="btn btn_sm normal" style={{ cursor: "pointer" }}>
-                            첨부파일
-                            <input
-                              type="file"
-                              onChange={(e) => handleFileChange(contract.id, "contractFile", e.target.files?.[0] || null)}
-                              style={{ display: "none" }}
-                              accept=".pdf,.jpg,.jpeg,.png"
-                            />
-                          </label>
-                          {contract.contractFile && <span style={{ marginLeft: "8px" }}>{contract.contractFile.name}</span>}
-                        </div>
-                      </li>
-                      <li className="row_group">
-                        <div className="table_head">견적서 첨부</div>
-                        <div className="table_data">
-                          <label className="btn btn_sm normal" style={{ cursor: "pointer" }}>
-                            첨부파일
-                            <input
-                              type="file"
-                              onChange={(e) => handleFileChange(contract.id, "estimateFile", e.target.files?.[0] || null)}
-                              style={{ display: "none" }}
-                              accept=".pdf,.jpg,.jpeg,.png"
-                            />
-                          </label>
-                          {contract.estimateFile && <span style={{ marginLeft: "8px" }}>{contract.estimateFile.name}</span>}
-                        </div>
-                      </li>
-                    </ul>
+                      <ul className="table_row">
+                        <li className="row_group" style={{ width: "100%" }}>
+                          <div className="table_head">계약 비고</div>
+                          <div className="table_data">
+                            <textarea value={contract.contractNote} onChange={(e) => handleContractChange(contract.id, "contractNote", e.target.value)} placeholder="계약 비고를 입력하세요" className="w-full border border-slate-200 rounded px-3 py-2 text-sm" rows={3} />
+                          </div>
+                        </li>
+                      </ul>
 
-                    <ul className="table_row">
-                      <li className="row_group">
-                        <div className="table_head">주 담당자</div>
-                        <div className="table_data">
-                          <select
-                            value={contract.primaryContact}
-                            onChange={(e) => handleContractChange(contract.id, "primaryContact", e.target.value)}
-                            className="w-full border border-slate-200 rounded px-3 py-2 text-sm"
-                            required
-                          >
-                            <option value="">선택하세요</option>
-                            {employees.map((employee) => (
-                              <option key={employee.id} value={employee.id}>
-                                {employee.name}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </li>
-                      <li className="row_group">
-                        <div className="table_head">부 담당자</div>
-                        <div className="table_data">
-                          <select
-                            value={contract.secondaryContact}
-                            onChange={(e) => handleContractChange(contract.id, "secondaryContact", e.target.value)}
-                            className="w-full border border-slate-200 rounded px-3 py-2 text-sm"
-                          >
-                            <option value="">선택하세요 (선택사항)</option>
-                            {employees.map((employee) => (
-                              <option key={employee.id} value={employee.id}>
-                                {employee.name}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </li>
-                    </ul>
+                      <ul className="table_row">
+                        <li className="row_group" style={{ width: "100%" }}>
+                          <div className="table_head">계약 기능성</div>
+                          <div className="table_data">
+                            <textarea value={contract.contractFunctionality} onChange={(e) => handleContractChange(contract.id, "contractFunctionality", e.target.value)} placeholder="계약 기능성을 입력하세요" className="w-full border border-slate-200 rounded px-3 py-2 text-sm" rows={3} />
+                          </div>
+                        </li>
+                      </ul>
 
-                    <ul className="table_row">
-                      <li className="row_group" style={{ width: "100%" }}>
-                        <div className="table_head">업무 비고</div>
-                        <div className="table_data">
-                          <textarea
-                            value={contract.workNote}
-                            onChange={(e) => handleContractChange(contract.id, "workNote", e.target.value)}
-                            placeholder="업무 비고를 입력하세요"
-                            className="w-full border border-slate-200 rounded px-3 py-2 text-sm"
-                            rows={3}
-                          />
-                        </div>
-                      </li>
-                    </ul>
+                      {contract.contractTypeId && contract.workContents.length > 0 && (
+                        <ul className="table_row">
+                          <li className="row_group" style={{ width: "100%" }}>
+                            <div className="table_head">작업 내용 및 수정 횟수</div>
+                            <div className="table_data" style={{ padding: "0px" }}>
+                              <div style={{ display: "flex", gap: "30px", flexWrap: "wrap" }}>
+                                {contract.workContents.map((workContent) => (
+                                  <div
+                                    key={workContent.workContentId}
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "10px",
+                                      padding: "18px 20px",
+                                      borderRadius: "4px",
+                                    }}>
+                                    <span style={{ minWidth: "120px", fontSize: "13px" }}>{workContent.workContentName}</span>
+                                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                      <input type="number" value={workContent.modificationCount} onChange={(e) => handleWorkContentChange(contract.id, workContent.workContentId, e.target.value)} placeholder="0" className="border border-slate-200 rounded px-3 py-2 text-sm" style={{ width: "80px" }} min="0" />
+                                      <span>회</span>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </li>
+                        </ul>
+                      )}
+
+                      <ul className="table_row">
+                        <li className="row_group">
+                          <div className="table_head">계약서 첨부</div>
+                          <div className="table_data">
+                            <label className="file-upload-btn" style={{ cursor: "pointer" }}>
+                              첨부파일 <img src="/images/attach_icon.svg" alt="첨부" width={16} height={16} />
+                              <input type="file" onChange={(e) => handleFileChange(contract.id, "contractFile", e.target.files?.[0] || null)} style={{ display: "none" }} accept=".pdf,.jpg,.jpeg,.png" />
+                            </label>
+                            {contract.contractFile && <span style={{ marginLeft: "8px" }}>{contract.contractFile.name}</span>}
+                          </div>
+                        </li>
+                        <li className="row_group">
+                          <div className="table_head">견적서 첨부</div>
+                          <div className="table_data">
+                            <label className="file-upload-btn" style={{ cursor: "pointer" }}>
+                              첨부파일 <img src="/images/attach_icon.svg" alt="첨부" width={16} height={16} />
+                              <input type="file" onChange={(e) => handleFileChange(contract.id, "estimateFile", e.target.files?.[0] || null)} style={{ display: "none" }} accept=".pdf,.jpg,.jpeg,.png" />
+                            </label>
+                            {contract.estimateFile && <span style={{ marginLeft: "8px" }}>{contract.estimateFile.name}</span>}
+                          </div>
+                        </li>
+                      </ul>
+
+                      <ul className="table_row">
+                        <li className="row_group">
+                          <div className="table_head">주 담당자</div>
+                          <div className="table_data">
+                            <select value={contract.primaryContact} onChange={(e) => handleContractChange(contract.id, "primaryContact", e.target.value)} className="w-full border border-slate-200 rounded px-3 py-2 text-sm" required>
+                              <option value="">선택하세요</option>
+                              {employees.map((employee) => (
+                                <option key={employee.id} value={employee.id}>
+                                  {employee.name}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        </li>
+                        <li className="row_group">
+                          <div className="table_head">부 담당자</div>
+                          <div className="table_data">
+                            <select value={contract.secondaryContact} onChange={(e) => handleContractChange(contract.id, "secondaryContact", e.target.value)} className="w-full border border-slate-200 rounded px-3 py-2 text-sm">
+                              <option value="">선택하세요 (선택사항)</option>
+                              {employees.map((employee) => (
+                                <option key={employee.id} value={employee.id}>
+                                  {employee.name}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        </li>
+                      </ul>
+
+                      <ul className="table_row">
+                        <li className="row_group" style={{ width: "100%" }}>
+                          <div className="table_head">업무 비고</div>
+                          <div className="table_data">
+                            <textarea value={contract.workNote} onChange={(e) => handleContractChange(contract.id, "workNote", e.target.value)} placeholder="업무 비고를 입력하세요" className="w-full border border-slate-200 rounded px-3 py-2 text-sm" rows={3} />
+                          </div>
+                        </li>
+                      </ul>
                     </div>
                   ))}
                 </div>
@@ -805,12 +682,7 @@ export function ContractForm() {
         </div>
       </form>
 
-      <ClientSelectModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        onSelect={handleSelectClient}
-        allowAllClients={true}
-      />
+      <ClientSelectModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSelect={handleSelectClient} allowAllClients={true} />
     </section>
   );
 }

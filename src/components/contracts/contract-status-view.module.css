@@ -3,7 +3,7 @@
 .wrap {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 30px;
   width: 100%;
   box-sizing: border-box;
 }
@@ -28,8 +28,9 @@
 }
 
 .filterBtnPrimary {
-  background: var(--primary);
+  background: var(--text-gray);
   color: #fff;
+  border-radius: 4px;
 }
 
 .filterBtnPrimary:hover {
@@ -37,8 +38,10 @@
 }
 
 .filterBtnDefault {
-  background: #f1f5f9;
+  background: #fff;
+  border: 1px solid var(--border-color);
   color: #334155;
+  border-radius: 4px;
 }
 
 .filterBtnDefault:hover {
@@ -47,16 +50,21 @@
 
 .filterLabel {
   font-size: 14px;
-  color: #475569;
-  margin-right: 4px;
+  color: var(--text-color);
+  font-weight: var(--font-weight-semibold);
+  padding: 8px;
+  position: relative;
+  margin-left: 16px;
+  display: none;
 }
+
 
 .filterSelect {
   border: 1px solid #cbd5e1;
   padding: 6px 8px;
   font-size: 14px;
   border-radius: 0;
-  background: #fff;
+  background-color: #fff !important;
   box-sizing: border-box;
 }
 
@@ -79,7 +87,7 @@
 /* KPI 카드 3개 - 계약 조회와 동일한 상자 느낌 */
 .kpiGrid {
   display: grid;
-  gap: 16px;
+  gap: 25px;
   grid-template-columns: repeat(3, 1fr);
 }
 
@@ -92,36 +100,48 @@
 /* 안쪽 네모 = 큰 네모와 동일한 테두리·그림자 */
 .kpiCard {
   background: #fff;
-  border: 1px solid #e2e8f0;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
-  padding: 20px;
+  padding: 30px;
   box-sizing: border-box;
+  line-height: 1;
 }
 
 .kpiCardLabel {
-  font-size: 14px;
-  color: #64748b;
+  font-size: 20px;
+  color: var(--text-color);
+  font-weight: var(--font-weight-bold);
+  display: inline-block;
 }
 
 .kpiCardPeriod {
-  font-size: 12px;
-  color: #94a3b8;
-  margin-top: 4px;
+  font-size: 14px;
+  color: var(--text-gray);
+  display: inline-block;
+  margin-left: 15px;
 }
 
 .kpiCardValue {
-  font-size: 24px;
-  font-weight: 700;
-  color: #0f172a;
-  margin-top: 8px;
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--text-color);
+  margin-top: 40px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.kpiCardValue span {
+  font-size: 20px;
+  font-weight: var(--font-weight-bold);
 }
 
 /* 월별 상세 계약건 테이블 섹션 */
 /* 월별 상세 계약건 - 큰 네모와 동일한 테두리·그림자 */
 .tableSection {
   background: #fff;
-  border: 1px solid #e2e8f0;
+
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
   overflow: hidden;
@@ -133,22 +153,26 @@
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid #e2e8f0;
-  padding: 16px 20px;
+  padding: 40px 30px;
 }
 
 .tableSectionTitle {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1e293b;
+  font-size: 20px;
+  font-weight: var(--font-weight-bold);
+  color: var(--text-color);
 }
 
 .tableSectionTitleSub {
-  font-weight: 400;
-  color: #64748b;
+  font-weight: var(--font-weight-medium);
+  color: var(--text-gray);
+  font-size: 14px;
+  display: inline-block;
+  margin-left: 15px;
 }
 
 .tableWrap {
   overflow-x: auto;
+  padding-bottom: 40px;
 }
 
 .table {
@@ -156,41 +180,74 @@
   min-width: 800px;
   font-size: 14px;
   border-collapse: collapse;
-  table-layout: fixed; /* 데이터 유무와 관계없이 열 너비 고정 */
+  table-layout: fixed;
+  /* 데이터 유무와 관계없이 열 너비 고정 */
 }
 
 .table thead tr {
-  border-bottom: 1px solid #e2e8f0;
-  background: #f8fafc;
+  border-bottom: 1px solid var(--border-color);
   text-align: center;
-  color: #475569;
+  color: var(--text-gray);
+  font-weight: var(--font-weight-semibold);
 }
 
 .table th {
-  padding: 12px 16px;
+  padding: 24px 16px;
   font-weight: 500;
 }
 
 /* 열 너비 고정 (데이터 있/없어도 동일) */
 .table th:nth-child(1),
-.table td:nth-child(1) { width: 10%; }   /* 계약일 */
+.table td:nth-child(1) {
+  width: 10%;
+}
+
+/* 계약일 */
 .table th:nth-child(2),
-.table td:nth-child(2) { width: 11%; }   /* 사업자 등록 번호 */
+.table td:nth-child(2) {
+  width: 13%;
+}
+
+/* 사업자 등록 번호 */
 .table th:nth-child(3),
-.table td:nth-child(3) { width: 20%; }   /* 회사명 */
+.table td:nth-child(3) {
+  width: 18%;
+}
+
+/* 회사명 */
 .table th:nth-child(4),
-.table td:nth-child(4) { width: 10%; }   /* 대표자명 */
+.table td:nth-child(4) {
+  width: 10%;
+}
+
+/* 대표자명 */
 .table th:nth-child(5),
-.table td:nth-child(5) { width: 10%; }   /* 담당자 */
+.table td:nth-child(5) {
+  width: 10%;
+}
+
+/* 담당자 */
 .table th:nth-child(6),
-.table td:nth-child(6) { width: 8%; }    /* 진행상태 */
+.table td:nth-child(6) {
+  width: 8%;
+}
+
+/* 진행상태 */
 .table th:nth-child(7),
-.table td:nth-child(7) { width: 12%; }   /* 계약종목 */
+.table td:nth-child(7) {
+  width: 12%;
+}
+
+/* 계약종목 */
 .table th:nth-child(8),
-.table td:nth-child(8) { width: 19%; }   /* 계약금액 (잔금) */
+.table td:nth-child(8) {
+  width: 15%;
+}
+
+/* 계약금액 (잔금) */
 
 .table tbody tr {
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .table tbody tr:hover {
@@ -202,8 +259,9 @@
 }
 
 .table td {
-  padding: 12px 16px;
-  color: #334155;
+  padding: 24px 16px;
+  color: var(--text-color);
+  font-weight: var(--font-weight-medium);
   word-break: break-all;
   text-align: center;
 }
@@ -236,17 +294,16 @@
 /* 월별 매출 - 큰 네모와 동일한 테두리·그림자 */
 .monthlySection {
   background: #fff;
-  border: 1px solid #e2e8f0;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
-  padding: 20px;
+  padding: 40px 30px;
   box-sizing: border-box;
 }
 
 .monthlySectionTitle {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1e293b;
+  font-size: 20px;
+  font-weight: var(--font-weight-bold);
+  color: var(--text-color);
 }
 
 /* 월별 매출 헤더: 왼쪽 제목, 오른쪽 총 매출합계 */
@@ -255,29 +312,32 @@
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 8px;
 }
 
 .monthlyTotal {
-  font-size: 14px;
-  color: #475569;
+  font-size: 16px;
+  color: var(--text-color);
+  font-weight: var(--font-weight-bold);
 }
 
 .monthlyTotalAmount {
-  font-weight: 600;
-  color: #0f172a;
+  font-weight: var(--font-weight-bold);
+  color: var(--text-color);
+  margin-left: 40px;
 }
 
 .monthlyTotalCount {
-  color: #64748b;
+  color: var(--text-color);
+  font-size: 15px;
+  font-weight: var(--font-weight-bold);
 }
 
 /* 1~6월 / 7~12월 두 묶음(두 컬럼) */
 .monthlyTwoCol {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 24px 40px;
-  margin-top: 16px;
+  gap: 0 20px;
+  margin-top: 40px;
 }
 
 @media (max-width: 640px) {
@@ -289,14 +349,15 @@
 .monthlyCol {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  border-radius: 10px;
+  overflow: hidden;
+  padding: 30px;
+  background: var(--background-color);
+  gap: 30px;
 }
 
 .monthlyCell {
-  border: 1px solid #e2e8f0;
   border-radius: 0;
-  background: rgba(248, 250, 252, 0.8);
-  padding: 10px 14px;
   box-sizing: border-box;
   display: flex;
   align-items: center;
@@ -305,14 +366,21 @@
 }
 
 .monthlyCellLeft {
-  font-size: 12px;
-  color: #64748b;
+  font-size: 16px;
+  color: var(--text-gray);
+  font-weight: var(--font-weight-semibold);
 }
 
 .monthlyCellRight {
-  font-size: 14px;
-  font-weight: 500;
-  color: #1e293b;
+  font-size: 16px;
+  font-weight: var(--font-weight-bold);
+  color: var(--text-color);
+}
+
+.monthlyCellRight.noData {
+  font-size: 13px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-gray);
 }
 
 .monthlyCellLabel {
