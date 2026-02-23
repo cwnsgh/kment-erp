@@ -28,7 +28,7 @@
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
   width: 100%;
-  padding: 50px 30px 100px;
+  padding: 50px 0 100px;
   box-sizing: border-box;
   position: relative;
 }
@@ -40,6 +40,7 @@
   font-weight: var(--font-weight-bold);
   margin-bottom: 40px;
   color: var(--text-color);
+  padding: 0 30px;
 }
 
 .companyName {
@@ -53,21 +54,24 @@
 
 .tabRow {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   margin-bottom: 20px;
 }
 
 .tab {
-  padding: 10px 20px;
-  border: 1px solid var(--border-color);
-  background: var(--background-color);
-  border-radius: 8px;
-  font-weight: var(--font-weight-bold);
+  padding: 10px;
+  background: var(--border-color);
+  border-radius: 4px;
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
+  font-size: 16px;
+  color: var(--text-gray);
+  transition: all 0.3s;
 }
 
 .tab:hover {
-  background: #eee;
+  background: var(--primary);
+  color: #fff;
 }
 
 .tabActive {
@@ -88,6 +92,7 @@
   background-color: var(--background-color);
   border: 1px solid var(--border-color);
   border-radius: 10px;
+  margin: 0 30px;
 }
 
 .statusBox>div {
@@ -155,6 +160,7 @@
   align-items: center !important;
   margin-bottom: 20px !important;
   gap: 12px !important;
+  padding: 0 30px;
 }
 
 .topTotal {
@@ -309,6 +315,7 @@
   justify-content: center;
   flex-wrap: nowrap;
   align-items: center;
+  flex-direction: column;
 }
 
 
@@ -536,9 +543,11 @@
 
 .detailRemaining {
   border-bottom: 1px solid var(--border-color);
+  border-top: 1px solid var(--border-color);
   margin: 0 30px;
   font-size: 14px;
   display: flex;
+  margin-top: -1px;
 }
 
 .detailRemaining span {
@@ -629,16 +638,34 @@
 }
 
 .signatureTitle {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: var(--font-weight-bold);
   margin: 0;
-  color: #1e293b;
+  color: var(--text-color);
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.signatureTitle button {
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: transparent url(/images/close_icon.svg) no-repeat center;
+  background-size: contain;
+  cursor: pointer;
+  padding: 0;
+  font-size: 0;
+  flex-shrink: 0;
+
 }
 
 .signatureDesc {
   margin-top: 8px;
   font-size: 14px;
-  color: #64748b;
+  color: var(--text-gray);
+  text-align: left;
 }
 
 .signatureBox {
@@ -664,9 +691,14 @@
   margin-top: 20px;
   padding: 18px;
   font-size: 14px;
-  color: #64748b;
-  background: #f8fafc;
-  border-radius: 10px;
+  color: var(--text-gray);
+  background: var(--background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80px;
 }
 
 .signatureActions {

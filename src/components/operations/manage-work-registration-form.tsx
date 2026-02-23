@@ -1,5 +1,6 @@
 "use client";
 
+import { X } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
 import { getManagedClientDetail } from "@/app/actions/managed-client";
@@ -900,7 +901,7 @@ export function ManageWorkRegistrationForm({ employeeName }: ManageWorkRegistrat
                     {managedClientData.productType1 === "deduct" ? (
                       <>
                         <div style={{ textAlign: "right", position: "absolute", right: "0", top: "0" }}>
-                          <button type="button" onClick={handleAddDeductWork} className="btn">
+                          <button type="button" onClick={handleAddDeductWork} className="plus_btn">
                             + 업무 추가
                           </button>
                         </div>
@@ -911,8 +912,9 @@ export function ManageWorkRegistrationForm({ employeeName }: ManageWorkRegistrat
                             <col style={{ width: "15%" }} />
                             <col style={{ width: "12%" }} />
                             <col style={{ width: "14%" }} />
-                            <col style={{ width: "27%" }} />
-                            <col style={{ width: "8%" }} />
+                            <col style={{ width: "auto" }} />
+                            <col style={{ width: "100px" }} />
+                            <col style={{ width: "20px" }} />
                           </colgroup>
                           <thead>
                             <tr>
@@ -923,12 +925,13 @@ export function ManageWorkRegistrationForm({ employeeName }: ManageWorkRegistrat
                               <th>비용</th>
                               <th>작업내용</th>
                               <th></th>
+                              <th></th>
                             </tr>
                           </thead>
                           <tbody id="workBody">
                             {deductWorks.map((work) => (
                               <tr key={work.id} className={styles.workRow}>
-                                <td data-th="브랜드" className={styles.selectCell}>
+                                <td data-th="브랜드" className={styles.selectCell} style={{ verticalAlign: "top" }}>
                                   <select
                                     value={work.brandName}
                                     onChange={(e) =>
@@ -951,10 +954,10 @@ export function ManageWorkRegistrationForm({ employeeName }: ManageWorkRegistrat
                                     ))}
                                   </select>
                                 </td>
-                                <td data-th="담당자" className={styles.inputCell}>
+                                <td data-th="담당자" className={styles.inputCell} style={{ verticalAlign: "top" }}>
                                   <input type="text" placeholder="담당자" value={work.manager} readOnly />
                                 </td>
-                                <td data-th="작업기간" className={styles.dateCell}>
+                                <td data-th="작업기간" className={styles.dateCell} style={{ verticalAlign: "top" }}>
                                   <input
                                     type="date"
                                     className={styles.dateRange}
@@ -974,7 +977,7 @@ export function ManageWorkRegistrationForm({ employeeName }: ManageWorkRegistrat
                                     }
                                   />
                                 </td>
-                                <td data-th="첨부파일" className={styles.inputCell}>
+                                <td data-th="첨부파일" className={styles.inputCell} style={{ verticalAlign: "top" }}>
                                   <div className="file-upload-box">
                                     <input
                                       type="file"
@@ -1024,7 +1027,7 @@ export function ManageWorkRegistrationForm({ employeeName }: ManageWorkRegistrat
                                     )}
                                   </div>
                                 </td>
-                                <td data-th="비용" className={styles.inputCell}>
+                                <td data-th="비용" className={styles.inputCell} style={{ verticalAlign: "top" }}>
                                   <input
                                     type="text"
                                     placeholder=""
@@ -1040,7 +1043,7 @@ export function ManageWorkRegistrationForm({ employeeName }: ManageWorkRegistrat
                                     }}
                                   />
                                 </td>
-                                <td data-th="작업내용" className={styles.textareaCell}>
+                                <td data-th="작업내용" className={styles.textareaCell} style={{ verticalAlign: "top" }}>
                                   <textarea
                                     placeholder=""
                                     className={styles.textArea}
@@ -1058,27 +1061,13 @@ export function ManageWorkRegistrationForm({ employeeName }: ManageWorkRegistrat
                                       )
                                     }></textarea>
                                 </td>
-                                <td data-th="" className={styles.buttonCell}>
+                                <td data-th="" className={styles.buttonCell} style={{ verticalAlign: "top" }}>
                                   <div
                                     style={{
                                       display: "flex",
                                       gap: "4px",
                                       flexDirection: "column",
                                     }}>
-                                    <button
-                                      type="button"
-                                      onClick={() => handleRemoveDeductWork(work.id)}
-                                      style={{
-                                        padding: "6px 8px",
-                                        fontSize: "12px",
-                                        background: "var(--negative)",
-                                        color: "#fff",
-                                        border: "none",
-                                        borderRadius: "4px",
-                                        cursor: "pointer",
-                                      }}>
-                                      삭제
-                                    </button>
                                     <span
                                       className={work.status === "wait" ? styles.approvalWait : styles.approvalRequest}
                                       style={{
@@ -1089,6 +1078,12 @@ export function ManageWorkRegistrationForm({ employeeName }: ManageWorkRegistrat
                                       {isLoading ? "요청중..." : work.status === "wait" ? "승인대기" : "승인요청"}
                                     </span>
                                   </div>
+                                </td>
+                                <td data-th="" className={styles.buttonCell} style={{ paddingLeft: "0", paddingRight: "0", paddingTop: "32px" }}>
+                                  {" "}
+                                  <button type="button" onClick={() => handleRemoveDeductWork(work.id)}>
+                                    <X size={18} />
+                                  </button>
                                 </td>
                               </tr>
                             ))}
@@ -1110,9 +1105,10 @@ export function ManageWorkRegistrationForm({ employeeName }: ManageWorkRegistrat
                             <col style={{ width: "13%" }} />
                             <col style={{ width: "13%" }} />
                             <col style={{ width: "10%" }} />
-                            <col style={{ width: "20%" }} />
-                            <col style={{ width: "6%" }} />
-                            <col style={{ width: "8%" }} />
+                            <col style={{ width: "auto" }} />
+                            <col style={{ width: "100px" }} />
+                            <col style={{ width: "100px" }} />
+                            <col style={{ width: "20px" }} />
                           </colgroup>
                           <thead>
                             <tr>
@@ -1124,6 +1120,7 @@ export function ManageWorkRegistrationForm({ employeeName }: ManageWorkRegistrat
                               <th>작업내용</th>
                               <th>횟수</th>
                               <th></th>
+                              <th></th>
                             </tr>
                           </thead>
                           <tbody id="workBodyMaintenance">
@@ -1133,7 +1130,7 @@ export function ManageWorkRegistrationForm({ employeeName }: ManageWorkRegistrat
 
                               return (
                                 <tr key={task.id} className={styles.workRow}>
-                                  <td data-th="브랜드" className={styles.selectCell}>
+                                  <td data-th="브랜드" className={styles.selectCell} style={{ verticalAlign: "top" }}>
                                     <select
                                       value={task.brandName}
                                       onChange={(e) =>
@@ -1156,10 +1153,10 @@ export function ManageWorkRegistrationForm({ employeeName }: ManageWorkRegistrat
                                       ))}
                                     </select>
                                   </td>
-                                  <td data-th="담당자" className={styles.inputCell}>
+                                  <td data-th="담당자" className={styles.inputCell} style={{ verticalAlign: "top" }}>
                                     <input type="text" placeholder="담당자" value={task.manager || employeeName} readOnly />
                                   </td>
-                                  <td data-th="작업기간" className={styles.dateCell}>
+                                  <td data-th="작업기간" className={styles.dateCell} style={{ verticalAlign: "top" }}>
                                     <input
                                       type="date"
                                       className={styles.dateRange}
@@ -1179,7 +1176,7 @@ export function ManageWorkRegistrationForm({ employeeName }: ManageWorkRegistrat
                                       style={{ width: "100%" }}
                                     />
                                   </td>
-                                  <td data-th="작업유형" className={styles.selectCell}>
+                                  <td data-th="작업유형" className={styles.selectCell} style={{ verticalAlign: "top" }}>
                                     <select value={task.workType || ""} onChange={(e) => handleWorkTypeChange(task.id, e.target.value)}>
                                       <option value="">작업 유형 선택</option>
                                       {workTypeOptions.map((option: { value: string; label: string; remaining: number }) => (
@@ -1199,7 +1196,7 @@ export function ManageWorkRegistrationForm({ employeeName }: ManageWorkRegistrat
                                       </div>
                                     )}
                                   </td>
-                                  <td data-th="첨부파일" className={styles.inputCell}>
+                                  <td data-th="첨부파일" className={styles.inputCell} style={{ verticalAlign: "top" }}>
                                     <div className="file-upload-box">
                                       <input
                                         type="file"
@@ -1258,7 +1255,7 @@ export function ManageWorkRegistrationForm({ employeeName }: ManageWorkRegistrat
                                       )}
                                     </div>
                                   </td>
-                                  <td data-th="작업내용" className={styles.textareaCell}>
+                                  <td data-th="작업내용" className={styles.textareaCell} style={{ verticalAlign: "top" }}>
                                     <textarea
                                       placeholder=""
                                       className={styles.textArea}
@@ -1277,7 +1274,7 @@ export function ManageWorkRegistrationForm({ employeeName }: ManageWorkRegistrat
                                       }
                                     />
                                   </td>
-                                  <td data-th="횟수" className={styles.numberCell}>
+                                  <td data-th="횟수" className={styles.numberCell} style={{ verticalAlign: "top" }}>
                                     <input
                                       type="number"
                                       placeholder="1"
@@ -1298,27 +1295,8 @@ export function ManageWorkRegistrationForm({ employeeName }: ManageWorkRegistrat
                                       }
                                     />
                                   </td>
-                                  <td data-th="" className={styles.buttonCell}>
-                                    <div
-                                      style={{
-                                        display: "flex",
-                                        gap: "4px",
-                                        flexDirection: "column",
-                                      }}>
-                                      <button
-                                        type="button"
-                                        onClick={() => handleRemoveWork(task.id)}
-                                        style={{
-                                          padding: "6px 8px",
-                                          fontSize: "12px",
-                                          background: "var(--negative)",
-                                          color: "#fff",
-                                          border: "none",
-                                          borderRadius: "4px",
-                                          cursor: "pointer",
-                                        }}>
-                                        삭제
-                                      </button>
+                                  <td data-th="" className={styles.buttonCell} style={{ verticalAlign: "top" }}>
+                                    <div>
                                       <span
                                         className={task.status === "wait" ? styles.approvalWait : styles.approvalRequest}
                                         style={{
@@ -1329,6 +1307,11 @@ export function ManageWorkRegistrationForm({ employeeName }: ManageWorkRegistrat
                                         {isLoading ? "요청중..." : task.status === "wait" ? "승인대기" : "승인요청"}
                                       </span>
                                     </div>
+                                  </td>
+                                  <td data-th="" className={styles.buttonCell} style={{ paddingLeft: "0", paddingRight: "0", paddingTop: "32px" }}>
+                                    <button type="button" onClick={() => handleRemoveWork(task.id)}>
+                                      <X size={18} />
+                                    </button>
                                   </td>
                                 </tr>
                               );

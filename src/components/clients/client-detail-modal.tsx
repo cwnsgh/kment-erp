@@ -207,10 +207,10 @@ export function ClientDetailModal({ client, isOpen, onClose }: ClientDetailModal
                 <li className="row_group_modal">
                   <div className="table_head width20">브랜드</div>
                   <div className="table_head width20">도메인</div>
-                  <div className="table_head width15">솔루션</div>
-                  <div className="table_head width15">아이디</div>
-                  <div className="table_head width15">패스워드</div>
-                  <div className="table_head width15">유형</div>
+                  <div className="table_head width20">솔루션</div>
+                  <div className="table_head width20">아이디</div>
+                  <div className="table_head width20">패스워드</div>
+                  {/*</li>div className="table_head width15">유형</div>*/}
                 </li>
               </ul>
               {client.sites.length > 0 ? (
@@ -219,10 +219,10 @@ export function ClientDetailModal({ client, isOpen, onClose }: ClientDetailModal
                     <li className="row_group_modal">
                       <div className="table_data width20">{site.brandName || ""}</div>
                       <div className="table_data width20">{site.domain || ""}</div>
-                      <div className="table_data width15">{site.solution || ""}</div>
-                      <div className="table_data width15">{site.loginId || ""}</div>
-                      <div className="table_data width15">{site.loginPassword || ""}</div>
-                      <div className="table_data width15">{site.type || ""}</div>
+                      <div className="table_data width20">{site.solution || ""}</div>
+                      <div className="table_data width20">{site.loginId || ""}</div>
+                      <div className="table_data width20">{site.loginPassword || ""}</div>
+                      {/*<div className="table_data width15">{site.type || ""}</div>*/}
                     </li>
                   </ul>
                 ))

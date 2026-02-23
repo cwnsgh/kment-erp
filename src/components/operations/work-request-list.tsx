@@ -762,6 +762,7 @@ export default function WorkRequestList({ clientId, clientName, currentEmployeeI
               <div style={{ display: "flex", gap: "8px", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
                 <h3>관리 업무 상세조회</h3>
                 <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                  {/*
                   {detailModal.workRequest && detailModal.workRequest.status !== "deleted" && detailModal.workRequest.status !== "pending" && (
                     <button
                       type="button"
@@ -775,7 +776,7 @@ export default function WorkRequestList({ clientId, clientName, currentEmployeeI
                       style={{ marginRight: "8px" }}>
                       {deletingRequestId === detailModal.workRequest?.id ? "삭제 중..." : "삭제"}
                     </button>
-                  )}
+                  )}*/}
                   <button type="button" className={styles.detailModalClose} onClick={handleCloseDetailModal}>
                     ×
                   </button>

@@ -1,5 +1,6 @@
 "use client";
 
+import { X } from "lucide-react";
 import { useState, useTransition } from "react";
 import Image from "next/image";
 import { ContractSelectModal } from "./contract-select-modal";
@@ -219,7 +220,7 @@ export function ContractTaskRegistrationForm({ employeeName }: ContractTaskRegis
 
       <div className="white_box">
         <div className={manageStyles.importBtnWrapper}>
-          <button type="button" className="import_btn btn btn_md black" onClick={() => setIsModalOpen(true)}>
+          <button type="button" className="import_btn btn btn_md black" style={{ position: "relative", top: "0", right: "0", marginBottom: "40px" }} onClick={() => setIsModalOpen(true)}>
             계약 불러오기
           </button>
         </div>
@@ -301,7 +302,7 @@ export function ContractTaskRegistrationForm({ employeeName }: ContractTaskRegis
                 </h2>
                 {contactOpen && (
                   <div className="table_wrap">
-                    <ul className="table_row">
+                    <ul className="table_row" style={{ borderBottom: "1px solid var(--border-color)", marginBottom: "30px" }}>
                       <li className="row_group">
                         <div className="table_head">주 담당자</div>
                         <div className="table_data">{contract.primary_contact_name ?? "-"}</div>
@@ -426,6 +427,7 @@ export function ContractTaskRegistrationForm({ employeeName }: ContractTaskRegis
                       <col style={{ width: "auto" }} />
                       <col style={{ width: "auto" }} />
                       <col style={{ width: "100px" }} />
+                      <col style={{ width: "20px" }} />
                     </colgroup>
                     <thead>
                       <tr>
@@ -436,7 +438,8 @@ export function ContractTaskRegistrationForm({ employeeName }: ContractTaskRegis
                         <th>작업유형</th>
                         <th>작업내용</th>
                         <th>메모</th>
-                        <th>승인요청</th>
+                        <th>진행상황</th>
+                        <th></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -478,9 +481,9 @@ export function ContractTaskRegistrationForm({ employeeName }: ContractTaskRegis
                             {(r.status === "in_progress" || r.status === "completed") && (
                               <>
                                 <span>{getStatusLabel(r.status)}</span>
-                                <button type="button" className="btn btn_sm danger" onClick={() => handleDeleteRequest(r.id)}>
-                                  삭제
-                                </button>
+                                {/* <button type="button" className="btn" onClick={() => handleDeleteRequest(r.id)}>
+                                  <X size={18} />
+                                </button> */}
                               </>
                             )}
                             {(r.status === "rejected" || r.status === "deleted") && <span>{getStatusLabel(r.status)}</span>}
@@ -550,10 +553,12 @@ export function ContractTaskRegistrationForm({ employeeName }: ContractTaskRegis
                               <button type="button" className={`btn  ${manageStyles.approvalRequest}`} onClick={() => handleSubmitRequest(row)} disabled={isLoading}>
                                 승인요청
                               </button>
-                              <button type="button" className={`btn  ${manageStyles.approvalDelete}`} onClick={() => removeNewRow(row.id)}>
-                                취소
-                              </button>
                             </div>
+                          </td>
+                          <td data-th="" className={manageStyles.buttonCell} style={{ paddingLeft: "0", paddingRight: "0", paddingTop: "32px" }}>
+                            <button type="button" className={`btn`} onClick={() => removeNewRow(row.id)}>
+                              <X size={18} />
+                            </button>
                           </td>
                         </tr>
                       ))}

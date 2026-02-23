@@ -1,5 +1,6 @@
 "use client";
 
+import { X } from "lucide-react";
 import { useState, useTransition, useEffect } from "react";
 import { WorkRequest, getClientSignatureUrl, getWorkRequestDetailForClient } from "@/app/actions/work-request";
 import { buildExcelFilename, downloadExcel } from "@/lib/excel-download";
@@ -380,322 +381,307 @@ export function ClientApprovalPage({ initialWorkRequests, clientName = "" }: Cli
   const contractTotalPages = Math.ceil(contractTotalCount / contractItemsPerPage);
   const paginatedContractRequests = contractWorkRequests;
 
-  const currentWorkType = detailModal.workRequest
-    ? ((detailModal.workRequest as any).work_type as string | null)
-    : null;
+  const currentWorkType = detailModal.workRequest ? ((detailModal.workRequest as any).work_type as string | null) : null;
 
   return (
     <section className={`${styles.approvalList} page_section`}>
       <div className="page_title">
         <h1>승인 현황</h1>
       </div>
-
+      <div className={styles.tabRow}>
+        <button type="button" className={`${styles.tab} ${activeTab === "manage" ? styles.tabActive : ""}`} onClick={() => setActiveTab("manage")}>
+          관리 업무
+        </button>
+        <button type="button" className={`${styles.tab} ${activeTab === "contract" ? styles.tabActive : ""}`} onClick={() => setActiveTab("contract")}>
+          계약 업무
+        </button>
+      </div>
       <div className="white_box">
         <div className={styles.boxInner}>
-          <div className={styles.tabRow}>
-            <button
-              type="button"
-              className={`${styles.tab} ${activeTab === "manage" ? styles.tabActive : ""}`}
-              onClick={() => setActiveTab("manage")}>
-              관리 업무
-            </button>
-            <button
-              type="button"
-              className={`${styles.tab} ${activeTab === "contract" ? styles.tabActive : ""}`}
-              onClick={() => setActiveTab("contract")}>
-              계약 업무
-            </button>
-          </div>
-
           <h2 className={styles.pageSubTitle}>
-            <span className={styles.companyName}>{clientName || "(주)케이먼트코퍼레이션"}</span> 승인 내역{" "}
-            <span className={styles.workCount}>
-              ({activeTab === "manage" ? totalCount : contractTotalCount}건)
-            </span>
+            <span className={styles.companyName}>{clientName || "(주)케이먼트코퍼레이션"}</span> 승인 내역 <span className={styles.workCount}>({activeTab === "manage" ? totalCount : contractTotalCount}건)</span>
           </h2>
 
           {activeTab === "manage" && (
             <>
-          <div className={styles.statusBox}>
-            <div className={styles.request}>
-              <span>승인요청</span>
-              <p className="font_b">{approvalStats.pending}건</p>
-            </div>
-            <div className={styles.refusal}>
-              <span>승인반려</span>
-              <p className="font_b">{approvalStats.rejected}건</p>
-            </div>
-            <div className={styles.complete}>
-              <span>승인완료</span>
-              <p className="font_b">{approvalStats.approved}건</p>
-            </div>
-          </div>
-
-          <div className={styles.listTable}>
-            <div className={styles.tableTop}>
-              <div className={styles.topTotal}>
-                <p>
-                  총 <span>{totalCount}건</span>의 승인현황이 조회되었습니다.
-                </p>
+              <div className={styles.statusBox}>
+                <div className={styles.request}>
+                  <span>승인요청</span>
+                  <p className="font_b">{approvalStats.pending}건</p>
+                </div>
+                <div className={styles.refusal}>
+                  <span>승인반려</span>
+                  <p className="font_b">{approvalStats.rejected}건</p>
+                </div>
+                <div className={styles.complete}>
+                  <span>승인완료</span>
+                  <p className="font_b">{approvalStats.approved}건</p>
+                </div>
               </div>
-              <div className={styles.topBtnGroup}>
-                <div className={styles.deleteBtn}>
-                  <ul className={styles.deleteGroup}>
-                    <li className={`btn normal btn_md`}>전체 선택</li>
-                    <li className={`btn primary btn_md`}>선택 삭제</li>
+
+              <div className={styles.listTable}>
+                <div className={styles.tableTop}>
+                  <div className={styles.topTotal}>
+                    <p>
+                      총 <span>{totalCount}건</span>의 승인현황이 조회되었습니다.
+                    </p>
+                  </div>
+                  <div className={styles.topBtnGroup}>
+                    <div className={styles.deleteBtn}>
+                      <ul className={styles.deleteGroup}>
+                        <li className={`btn normal btn_md`}>전체 선택</li>
+                        <li className={`btn primary btn_md`}>선택 삭제</li>
+                      </ul>
+                    </div>
+                    <div className={`${styles.excelBtn} btn btn_md normal excel_btn`} onClick={handleExcelDownload}>
+                      엑셀다운로드
+                    </div>
+                    <select
+                      className={`${styles.viewSelect} viewSelect`}
+                      value={itemsPerPage}
+                      onChange={(e) => {
+                        const newLimit = parseInt(e.target.value, 10);
+                        setItemsPerPage(newLimit);
+                        loadData(1, newLimit);
+                      }}>
+                      {itemsPerPageOptions.map((option) => (
+                        <option key={option} value={option}>
+                          {option}개씩 보기
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className={styles.tableWrap}>
+                  <table>
+                    <colgroup>
+                      <col style={{ width: "10%" }} />
+                      <col style={{ width: "15%" }} />
+                      <col style={{ width: "13%" }} />
+                      <col style={{ width: "20%" }} />
+                      <col style={{ width: "auto" }} />
+                      <col style={{ width: "15%" }} />
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th>번호</th>
+                        <th>브랜드명</th>
+                        <th>담당자</th>
+                        <th>요청날짜</th>
+                        <th>작업내용</th>
+                        <th>승인여부</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {paginatedRequests.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} style={{ textAlign: "center", padding: "40px" }}>
+                            승인 요청 내역이 없습니다.
+                          </td>
+                        </tr>
+                      ) : (
+                        paginatedRequests.map((request, index) => (
+                          <tr key={request.id} onClick={() => handleOpenDetailModal(request.id)} className={styles.clickableRow}>
+                            <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
+                            <td>{request.brand_name}</td>
+                            <td>{(request as WorkRequestWithEmployee).employee_name || "-"}</td>
+                            <td>{formatDate(request.created_at)}</td>
+                            <td className={`${styles.text_overflow}`}>
+                              <p>{request.work_content || "-"}</p>
+                            </td>
+                            <td>
+                              {request.status === "pending" ? (
+                                <div className={styles.actionButtons}>
+                                  <button
+                                    type="button"
+                                    className={`${styles.btnSm} ${styles.primary} btn btn_md primary`}
+                                    onClick={(event) => {
+                                      event.stopPropagation();
+                                      handleOpenApprovalModal(request.id);
+                                    }}
+                                    disabled={isPending || approvingRequestId === request.id}>
+                                    {approvingRequestId === request.id ? "승인 중..." : "승인하기"}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className={`${styles.btnSm} ${styles.danger} btn btn_md danger`}
+                                    onClick={(event) => {
+                                      event.stopPropagation();
+                                      handleReject(request.id);
+                                    }}
+                                    disabled={isPending || approvingRequestId === request.id}>
+                                    반려하기
+                                  </button>
+                                </div>
+                              ) : (
+                                <span className={getStatusClass(request.status)}>{getStatusLabel(request.status)}</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {totalPages > 1 && (
+                <div className={styles.pagination}>
+                  <ul>
+                    <li className={`${styles.page} ${styles.first} ${currentPage === 1 ? styles.disabled : ""}`} onClick={() => currentPage > 1 && loadData(1, itemsPerPage)}></li>
+                    <li className={`${styles.page} ${styles.prev} ${currentPage === 1 ? styles.disabled : ""}`} onClick={() => currentPage > 1 && loadData(currentPage - 1, itemsPerPage)}></li>
+
+                    {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                      let pageNum;
+                      if (totalPages <= 5) {
+                        pageNum = i + 1;
+                      } else if (currentPage <= 3) {
+                        pageNum = i + 1;
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNum = totalPages - 4 + i;
+                      } else {
+                        pageNum = currentPage - 2 + i;
+                      }
+                      return (
+                        <li key={pageNum} className={`${styles.page} ${currentPage === pageNum ? styles.active : ""}`} onClick={() => loadData(pageNum, itemsPerPage)}>
+                          {pageNum}
+                        </li>
+                      );
+                    })}
+
+                    <li className={`${styles.page} ${styles.next} ${currentPage === totalPages ? styles.disabled : ""}`} onClick={() => currentPage < totalPages && loadData(currentPage + 1, itemsPerPage)}></li>
+                    <li className={`${styles.page} ${styles.last} ${currentPage === totalPages ? styles.disabled : ""}`} onClick={() => currentPage < totalPages && loadData(totalPages, itemsPerPage)}></li>
                   </ul>
                 </div>
-                <div className={`${styles.excelBtn} btn btn_md normal excel_btn`} onClick={handleExcelDownload}>
-                  엑셀다운로드
-                </div>
-                <select
-                  className={`${styles.viewSelect} viewSelect`}
-                  value={itemsPerPage}
-                  onChange={(e) => {
-                    const newLimit = parseInt(e.target.value, 10);
-                    setItemsPerPage(newLimit);
-                    loadData(1, newLimit);
-                  }}>
-                  {itemsPerPageOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {option}개씩 보기
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className={styles.tableWrap}>
-              <table>
-                <colgroup>
-                  <col style={{ width: "10%" }} />
-                  <col style={{ width: "15%" }} />
-                  <col style={{ width: "13%" }} />
-                  <col style={{ width: "20%" }} />
-                  <col style={{ width: "auto" }} />
-                  <col style={{ width: "15%" }} />
-                </colgroup>
-                <thead>
-                  <tr>
-                    <th>번호</th>
-                    <th>브랜드명</th>
-                    <th>담당자</th>
-                    <th>요청날짜</th>
-                    <th>작업내용</th>
-                    <th>승인여부</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedRequests.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} style={{ textAlign: "center", padding: "40px" }}>
-                        승인 요청 내역이 없습니다.
-                      </td>
-                    </tr>
-                  ) : (
-                    paginatedRequests.map((request, index) => (
-                      <tr key={request.id} onClick={() => handleOpenDetailModal(request.id)} className={styles.clickableRow}>
-                        <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
-                        <td>{request.brand_name}</td>
-                        <td>{(request as WorkRequestWithEmployee).employee_name || "-"}</td>
-                        <td>{formatDate(request.created_at)}</td>
-                        <td className={`${styles.text_overflow}`}>
-                          <p>{request.work_content || "-"}</p>
-                        </td>
-                        <td>
-                          {request.status === "pending" ? (
-                            <div className={styles.actionButtons}>
-                              <button
-                                type="button"
-                                className={`${styles.btnSm} ${styles.primary} btn btn_md primary`}
-                                onClick={(event) => {
-                                  event.stopPropagation();
-                                  handleOpenApprovalModal(request.id);
-                                }}
-                                disabled={isPending || approvingRequestId === request.id}>
-                                {approvingRequestId === request.id ? "승인 중..." : "승인하기"}
-                              </button>
-                              <button
-                                type="button"
-                                className={`${styles.btnSm} ${styles.danger} btn btn_md danger`}
-                                onClick={(event) => {
-                                  event.stopPropagation();
-                                  handleReject(request.id);
-                                }}
-                                disabled={isPending || approvingRequestId === request.id}>
-                                반려하기
-                              </button>
-                            </div>
-                          ) : (
-                            <span className={getStatusClass(request.status)}>{getStatusLabel(request.status)}</span>
-                          )}
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-        {totalPages > 1 && (
-          <div className={styles.pagination}>
-            <ul>
-              <li className={`${styles.page} ${styles.first} ${currentPage === 1 ? styles.disabled : ""}`} onClick={() => currentPage > 1 && loadData(1, itemsPerPage)}></li>
-              <li className={`${styles.page} ${styles.prev} ${currentPage === 1 ? styles.disabled : ""}`} onClick={() => currentPage > 1 && loadData(currentPage - 1, itemsPerPage)}></li>
-
-              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                let pageNum;
-                if (totalPages <= 5) {
-                  pageNum = i + 1;
-                } else if (currentPage <= 3) {
-                  pageNum = i + 1;
-                } else if (currentPage >= totalPages - 2) {
-                  pageNum = totalPages - 4 + i;
-                } else {
-                  pageNum = currentPage - 2 + i;
-                }
-                return (
-                  <li key={pageNum} className={`${styles.page} ${currentPage === pageNum ? styles.active : ""}`} onClick={() => loadData(pageNum, itemsPerPage)}>
-                    {pageNum}
-                  </li>
-                );
-              })}
-
-              <li className={`${styles.page} ${styles.next} ${currentPage === totalPages ? styles.disabled : ""}`} onClick={() => currentPage < totalPages && loadData(currentPage + 1, itemsPerPage)}></li>
-              <li className={`${styles.page} ${styles.last} ${currentPage === totalPages ? styles.disabled : ""}`} onClick={() => currentPage < totalPages && loadData(totalPages, itemsPerPage)}></li>
-            </ul>
-          </div>
-        )}
+              )}
             </>
           )}
 
           {activeTab === "contract" && (
             <>
-          <div className={styles.statusBox}>
-            <div className={styles.request}>
-              <span>승인요청</span>
-              <p className="font_b">{contractStats.pending}건</p>
-            </div>
-            <div className={styles.refusal}>
-              <span>승인반려</span>
-              <p className="font_b">{contractStats.rejected}건</p>
-            </div>
-            <div className={styles.complete}>
-              <span>승인완료</span>
-              <p className="font_b">{contractStats.approved}건</p>
-            </div>
-          </div>
-          <div className={styles.listTable}>
-            <div className={styles.tableTop}>
-              <div className={styles.topTotal}>
-                <p>총 <span>{contractTotalCount}건</span>의 계약 업무 승인현황이 조회되었습니다.</p>
+              <div className={styles.statusBox}>
+                <div className={styles.request}>
+                  <span>승인요청</span>
+                  <p className="font_b">{contractStats.pending}건</p>
+                </div>
+                <div className={styles.refusal}>
+                  <span>승인반려</span>
+                  <p className="font_b">{contractStats.rejected}건</p>
+                </div>
+                <div className={styles.complete}>
+                  <span>승인완료</span>
+                  <p className="font_b">{contractStats.approved}건</p>
+                </div>
               </div>
-              <div className={styles.topBtnGroup}>
-                <select
-                  className="viewSelect"
-                  value={contractItemsPerPage}
-                  onChange={(e) => {
-                    const newLimit = parseInt(e.target.value, 10);
-                    setContractItemsPerPage(newLimit);
-                    loadContractData(1, newLimit);
-                  }}>
-                  {itemsPerPageOptions.map((option) => (
-                    <option key={option} value={option}>{option}개씩 보기</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <div className={styles.tableWrap}>
-              <table>
-                <colgroup>
-                  <col style={{ width: "8%" }} />
-                  <col style={{ width: "14%" }} />
-                  <col style={{ width: "12%" }} />
-                  <col style={{ width: "10%" }} />
-                  <col style={{ width: "10%" }} />
-                  <col style={{ width: "10%" }} />
-                  <col style={{ width: "auto" }} />
-                  <col style={{ width: "12%" }} />
-                </colgroup>
-                <thead>
-                  <tr>
-                    <th>번호</th>
-                    <th>계약명</th>
-                    <th>작업유형</th>
-                    <th>브랜드</th>
-                    <th>담당자</th>
-                    <th>요청일</th>
-                    <th>작업내용</th>
-                    <th>승인여부</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedContractRequests.length === 0 ? (
-                    <tr>
-                      <td colSpan={8} style={{ textAlign: "center", padding: "40px" }}>
-                        계약 업무 요청 내역이 없습니다.
-                      </td>
-                    </tr>
-                  ) : (
-                    paginatedContractRequests.map((req, index) => (
-                      <tr key={req.id}>
-                        <td>{(contractPage - 1) * contractItemsPerPage + index + 1}</td>
-                        <td>{req.contract_name}</td>
-                        <td>{req.work_content_name ?? "-"}</td>
-                        <td>{req.brand_name}</td>
-                        <td>{req.employee_name ?? req.manager ?? "-"}</td>
-                        <td>{formatDate(req.created_at)}</td>
-                        <td className={styles.text_overflow}><p>{req.work_content || "-"}</p></td>
-                        <td>
-                          {req.status === "pending" ? (
-                            <div className={styles.actionButtons}>
-                              <button
-                                type="button"
-                                className={`${styles.btnSm} ${styles.primary} btn btn_md primary`}
-                                onClick={() => handleOpenApprovalModal(req.id, "contract_work_request")}
-                                disabled={!!approvingRequestId}>
-                                {approvingRequestId === req.id ? "승인 중..." : "승인하기"}
-                              </button>
-                              <button
-                                type="button"
-                                className={`${styles.btnSm} ${styles.danger} btn btn_md danger`}
-                                onClick={() => handleContractReject(req.id)}
-                                disabled={!!approvingRequestId}>
-                                반려하기
-                              </button>
-                            </div>
-                          ) : (
-                            <span className={getStatusClass(req.status)}>{getStatusLabel(req.status)}</span>
-                          )}
-                        </td>
+              <div className={styles.listTable}>
+                <div className={styles.tableTop}>
+                  <div className={styles.topTotal}>
+                    <p>
+                      총 <span>{contractTotalCount}건</span>의 계약 업무 승인현황이 조회되었습니다.
+                    </p>
+                  </div>
+                  <div className={styles.topBtnGroup}>
+                    <select
+                      className="viewSelect"
+                      value={contractItemsPerPage}
+                      onChange={(e) => {
+                        const newLimit = parseInt(e.target.value, 10);
+                        setContractItemsPerPage(newLimit);
+                        loadContractData(1, newLimit);
+                      }}>
+                      {itemsPerPageOptions.map((option) => (
+                        <option key={option} value={option}>
+                          {option}개씩 보기
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <div className={styles.tableWrap}>
+                  <table>
+                    <colgroup>
+                      <col style={{ width: "8%" }} />
+                      <col style={{ width: "14%" }} />
+                      <col style={{ width: "12%" }} />
+                      <col style={{ width: "10%" }} />
+                      <col style={{ width: "10%" }} />
+                      <col style={{ width: "10%" }} />
+                      <col style={{ width: "auto" }} />
+                      <col style={{ width: "12%" }} />
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th>번호</th>
+                        <th>계약명</th>
+                        <th>작업유형</th>
+                        <th>브랜드</th>
+                        <th>담당자</th>
+                        <th>요청일</th>
+                        <th>작업내용</th>
+                        <th>승인여부</th>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-          {contractTotalPages > 1 && (
-            <div className={styles.pagination}>
-              <ul>
-                <li className={`${styles.page} ${styles.first} ${contractPage === 1 ? styles.disabled : ""}`} onClick={() => contractPage > 1 && loadContractData(1, contractItemsPerPage)}></li>
-                <li className={`${styles.page} ${styles.prev} ${contractPage === 1 ? styles.disabled : ""}`} onClick={() => contractPage > 1 && loadContractData(contractPage - 1, contractItemsPerPage)}></li>
-                {Array.from({ length: Math.min(contractTotalPages, 5) }, (_, i) => {
-                  let pageNum = contractTotalPages <= 5 ? i + 1 : contractPage - 2 + i;
-                  if (contractTotalPages > 5 && contractPage <= 3) pageNum = i + 1;
-                  else if (contractTotalPages > 5 && contractPage >= contractTotalPages - 2) pageNum = contractTotalPages - 4 + i;
-                  return (
-                    <li key={pageNum} className={`${styles.page} ${contractPage === pageNum ? styles.active : ""}`} onClick={() => loadContractData(pageNum, contractItemsPerPage)}>
-                      {pageNum}
-                    </li>
-                  );
-                })}
-                <li className={`${styles.page} ${styles.next} ${contractPage === contractTotalPages ? styles.disabled : ""}`} onClick={() => contractPage < contractTotalPages && loadContractData(contractPage + 1, contractItemsPerPage)}></li>
-                <li className={`${styles.page} ${styles.last} ${contractPage === contractTotalPages ? styles.disabled : ""}`} onClick={() => contractPage < contractTotalPages && loadContractData(contractTotalPages, contractItemsPerPage)}></li>
-              </ul>
-            </div>
-          )}
+                    </thead>
+                    <tbody>
+                      {paginatedContractRequests.length === 0 ? (
+                        <tr>
+                          <td colSpan={8} style={{ textAlign: "center", padding: "40px" }}>
+                            계약 업무 요청 내역이 없습니다.
+                          </td>
+                        </tr>
+                      ) : (
+                        paginatedContractRequests.map((req, index) => (
+                          <tr key={req.id}>
+                            <td>{(contractPage - 1) * contractItemsPerPage + index + 1}</td>
+                            <td>{req.contract_name}</td>
+                            <td>{req.work_content_name ?? "-"}</td>
+                            <td>{req.brand_name}</td>
+                            <td>{req.employee_name ?? req.manager ?? "-"}</td>
+                            <td>{formatDate(req.created_at)}</td>
+                            <td className={styles.text_overflow}>
+                              <p>{req.work_content || "-"}</p>
+                            </td>
+                            <td>
+                              {req.status === "pending" ? (
+                                <div className={styles.actionButtons}>
+                                  <button type="button" className={`${styles.btnSm} ${styles.primary} btn btn_md primary`} onClick={() => handleOpenApprovalModal(req.id, "contract_work_request")} disabled={!!approvingRequestId}>
+                                    {approvingRequestId === req.id ? "승인 중..." : "승인하기"}
+                                  </button>
+                                  <button type="button" className={`${styles.btnSm} ${styles.danger} btn btn_md danger`} onClick={() => handleContractReject(req.id)} disabled={!!approvingRequestId}>
+                                    반려하기
+                                  </button>
+                                </div>
+                              ) : (
+                                <span className={getStatusClass(req.status)}>{getStatusLabel(req.status)}</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              {contractTotalPages > 1 && (
+                <div className={styles.pagination}>
+                  <ul>
+                    <li className={`${styles.page} ${styles.first} ${contractPage === 1 ? styles.disabled : ""}`} onClick={() => contractPage > 1 && loadContractData(1, contractItemsPerPage)}></li>
+                    <li className={`${styles.page} ${styles.prev} ${contractPage === 1 ? styles.disabled : ""}`} onClick={() => contractPage > 1 && loadContractData(contractPage - 1, contractItemsPerPage)}></li>
+                    {Array.from({ length: Math.min(contractTotalPages, 5) }, (_, i) => {
+                      let pageNum = contractTotalPages <= 5 ? i + 1 : contractPage - 2 + i;
+                      if (contractTotalPages > 5 && contractPage <= 3) pageNum = i + 1;
+                      else if (contractTotalPages > 5 && contractPage >= contractTotalPages - 2) pageNum = contractTotalPages - 4 + i;
+                      return (
+                        <li key={pageNum} className={`${styles.page} ${contractPage === pageNum ? styles.active : ""}`} onClick={() => loadContractData(pageNum, contractItemsPerPage)}>
+                          {pageNum}
+                        </li>
+                      );
+                    })}
+                    <li className={`${styles.page} ${styles.next} ${contractPage === contractTotalPages ? styles.disabled : ""}`} onClick={() => contractPage < contractTotalPages && loadContractData(contractPage + 1, contractItemsPerPage)}></li>
+                    <li className={`${styles.page} ${styles.last} ${contractPage === contractTotalPages ? styles.disabled : ""}`} onClick={() => contractPage < contractTotalPages && loadContractData(contractTotalPages, contractItemsPerPage)}></li>
+                  </ul>
+                </div>
+              )}
             </>
           )}
         </div>
@@ -704,7 +690,9 @@ export function ClientApprovalPage({ initialWorkRequests, clientName = "" }: Cli
       {approvalTargetId && (
         <div className={styles.signatureOverlay} onClick={() => setApprovalTargetId(null)}>
           <div className={styles.signatureModal} onClick={(event) => event.stopPropagation()}>
-            <h3 className={styles.signatureTitle}>서명 확인</h3>
+            <h3 className={styles.signatureTitle}>
+              서명 확인 <button type="button" onClick={() => setApprovalTargetId(null)} disabled={isPending || !!(approvalTargetId && approvingRequestId === approvalTargetId)}></button>
+            </h3>
             <p className={styles.signatureDesc}>저장된 서명을 확인한 후 승인해 주세요.</p>
 
             {signatureLoading ? (
@@ -718,10 +706,10 @@ export function ClientApprovalPage({ initialWorkRequests, clientName = "" }: Cli
             )}
 
             <div className={styles.signatureActions}>
-              <button type="button" className={`btn normal btn_md`} onClick={() => setApprovalTargetId(null)} disabled={isPending || !!(approvalTargetId && approvingRequestId === approvalTargetId)}>
+              <button type="button" className={`btn normal btn_lg`} onClick={() => setApprovalTargetId(null)} disabled={isPending || !!(approvalTargetId && approvingRequestId === approvalTargetId)}>
                 취소
               </button>
-              <button type="button" className={`btn primary btn_md`} onClick={handleConfirmApprove} disabled={isPending || !!(approvalTargetId && approvingRequestId === approvalTargetId)}>
+              <button type="button" className={`btn primary btn_lg`} onClick={handleConfirmApprove} disabled={isPending || !!(approvalTargetId && approvingRequestId === approvalTargetId)}>
                 {approvalTargetId && approvingRequestId === approvalTargetId ? "승인 중..." : signatureUrl ? "확인 후 승인" : "서명 없이 승인"}
               </button>
             </div>
@@ -749,133 +737,133 @@ export function ClientApprovalPage({ initialWorkRequests, clientName = "" }: Cli
               (() => {
                 const wr = detailModal.workRequest;
                 return (
-              <div className={styles.detailBody}>
-                <div className={styles.detailGrid}>
-                  <div>
-                    <span className={styles.detailLabel}>승인 상태</span>
-                    <p className={styles.detailValue}>{getStatusLabel(wr.status)}</p>
-                  </div>
-                  <div>
-                    <span className={styles.detailLabel}>담당자</span>
-                    <p className={styles.detailValue}>{wr.employee_name || "-"}</p>
-                  </div>
-                  <div>
-                    <span className={styles.detailLabel}>요청일</span>
-                    <p className={styles.detailValue}>{formatDate(wr.created_at)}</p>
-                  </div>
-                  <div>
-                    <span className={styles.detailLabel}>작업기간</span>
-                    <p className={styles.detailValue}>{formatWorkPeriod(wr.start_date, wr.end_date)}</p>
-                  </div>
-                  <div>
-                    <span className={styles.detailLabel}>관리 유형</span>
-                    <p className={styles.detailValue}>{getWorkTypeLabel((wr as any).work_type)}</p>
-                  </div>
-                  {currentWorkType === "maintenance" && (
-                    <div>
-                      <span className={styles.detailLabel}>세부 유형</span>
-                      <p className={styles.detailValue}>{getWorkTypeDetailLabel((wr as any).work_type_detail)}</p>
-                    </div>
-                  )}
-                  {currentWorkType === "deduct" && (
-                    <div>
-                      <span className={styles.detailLabel}>금액</span>
-                      <p className={styles.detailValue}>{(wr as any).cost ? Number((wr as any).cost).toLocaleString("ko-KR") : "-"}</p>
-                    </div>
-                  )}
-                  {currentWorkType === "maintenance" && (
-                    <div>
-                      <span className={styles.detailLabel}>횟수</span>
-                      <p className={styles.detailValue}>{(wr as any).count ?? "-"}</p>
-                    </div>
-                  )}
-                </div>
-
-                {wr.managed_client?.productType1 === "maintenance" && (
-                  <div className={styles.detailRemaining}>
-                    <span className={styles.detailLabel}>잔여 횟수</span>
-                    <div className={styles.detailRemainingColumns}>
-                      <div className={styles.detailRemainingBox}>
-                        <p className={styles.detailRemainingTitle}>승인 전</p>
-                        <ul className={styles.detailRemainingList}>
-                          <li>
-                            텍스트 수정
-                            <b>{wr.managed_client?.detailTextEditCount ?? "-"}</b>
-                          </li>
-                          <li>
-                            코딩 수정
-                            <b>{wr.managed_client?.detailCodingEditCount ?? "-"}</b>
-                          </li>
-                          <li>
-                            이미지 수정
-                            <b>{wr.managed_client?.detailImageEditCount ?? "-"}</b>
-                          </li>
-                          <li>
-                            팝업 디자인
-                            <b>{wr.managed_client?.detailPopupDesignCount ?? "-"}</b>
-                          </li>
-                          {wr.managed_client?.productType2 === "premium" && (
-                            <li>
-                              배너 디자인
-                              <b>{wr.managed_client?.detailBannerDesignCount ?? "-"}</b>
-                            </li>
-                          )}
-                        </ul>
+                  <div className={styles.detailBody}>
+                    <div className={styles.detailGrid}>
+                      <div>
+                        <span className={styles.detailLabel}>승인 상태</span>
+                        <p className={styles.detailValue}>{getStatusLabel(wr.status)}</p>
                       </div>
-
-                      <div className={styles.detailRemainingBox}>
-                        <p className={styles.detailRemainingTitle}>승인 후</p>
-                        <ul className={styles.detailRemainingList}>
-                          <li>
-                            텍스트 수정
-                            <b>{wr.approval_text_edit_count ?? wr.managed_client?.detailTextEditCount ?? "-"}</b>
-                          </li>
-                          <li>
-                            코딩 수정
-                            <b>{wr.approval_coding_edit_count ?? wr.managed_client?.detailCodingEditCount ?? "-"}</b>
-                          </li>
-                          <li>
-                            이미지 수정
-                            <b>{wr.approval_image_edit_count ?? wr.managed_client?.detailImageEditCount ?? "-"}</b>
-                          </li>
-                          <li>
-                            팝업 디자인
-                            <b>{wr.approval_popup_design_count ?? wr.managed_client?.detailPopupDesignCount ?? "-"}</b>
-                          </li>
-                          {(wr.approval_banner_design_count !== null || wr.managed_client?.productType2 === "premium") && (
-                            <li>
-                              배너 디자인
-                              <b>{wr.approval_banner_design_count ?? wr.managed_client?.detailBannerDesignCount ?? "-"}</b>
-                            </li>
-                          )}
-                        </ul>
+                      <div>
+                        <span className={styles.detailLabel}>담당자</span>
+                        <p className={styles.detailValue}>{wr.employee_name || "-"}</p>
                       </div>
+                      <div>
+                        <span className={styles.detailLabel}>요청일</span>
+                        <p className={styles.detailValue}>{formatDate(wr.created_at)}</p>
+                      </div>
+                      <div>
+                        <span className={styles.detailLabel}>작업기간</span>
+                        <p className={styles.detailValue}>{formatWorkPeriod(wr.start_date, wr.end_date)}</p>
+                      </div>
+                      <div>
+                        <span className={styles.detailLabel}>관리 유형</span>
+                        <p className={styles.detailValue}>{getWorkTypeLabel((wr as any).work_type)}</p>
+                      </div>
+                      {currentWorkType === "maintenance" && (
+                        <div>
+                          <span className={styles.detailLabel}>세부 유형</span>
+                          <p className={styles.detailValue}>{getWorkTypeDetailLabel((wr as any).work_type_detail)}</p>
+                        </div>
+                      )}
+                      {currentWorkType === "deduct" && (
+                        <div>
+                          <span className={styles.detailLabel}>금액</span>
+                          <p className={styles.detailValue}>{(wr as any).cost ? Number((wr as any).cost).toLocaleString("ko-KR") : "-"}</p>
+                        </div>
+                      )}
+                      {currentWorkType === "maintenance" && (
+                        <div>
+                          <span className={styles.detailLabel}>횟수</span>
+                          <p className={styles.detailValue}>{(wr as any).count ?? "-"}</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {wr.managed_client?.productType1 === "maintenance" && (
+                      <div className={styles.detailRemaining}>
+                        <span className={styles.detailLabel}>잔여 횟수</span>
+                        <div className={styles.detailRemainingColumns}>
+                          <div className={styles.detailRemainingBox}>
+                            <p className={styles.detailRemainingTitle}>승인 전</p>
+                            <ul className={styles.detailRemainingList}>
+                              <li>
+                                텍스트 수정
+                                <b>{wr.managed_client?.detailTextEditCount ?? "-"}</b>
+                              </li>
+                              <li>
+                                코딩 수정
+                                <b>{wr.managed_client?.detailCodingEditCount ?? "-"}</b>
+                              </li>
+                              <li>
+                                이미지 수정
+                                <b>{wr.managed_client?.detailImageEditCount ?? "-"}</b>
+                              </li>
+                              <li>
+                                팝업 디자인
+                                <b>{wr.managed_client?.detailPopupDesignCount ?? "-"}</b>
+                              </li>
+                              {wr.managed_client?.productType2 === "premium" && (
+                                <li>
+                                  배너 디자인
+                                  <b>{wr.managed_client?.detailBannerDesignCount ?? "-"}</b>
+                                </li>
+                              )}
+                            </ul>
+                          </div>
+
+                          <div className={styles.detailRemainingBox}>
+                            <p className={styles.detailRemainingTitle}>승인 후</p>
+                            <ul className={styles.detailRemainingList}>
+                              <li>
+                                텍스트 수정
+                                <b>{wr.approval_text_edit_count ?? wr.managed_client?.detailTextEditCount ?? "-"}</b>
+                              </li>
+                              <li>
+                                코딩 수정
+                                <b>{wr.approval_coding_edit_count ?? wr.managed_client?.detailCodingEditCount ?? "-"}</b>
+                              </li>
+                              <li>
+                                이미지 수정
+                                <b>{wr.approval_image_edit_count ?? wr.managed_client?.detailImageEditCount ?? "-"}</b>
+                              </li>
+                              <li>
+                                팝업 디자인
+                                <b>{wr.approval_popup_design_count ?? wr.managed_client?.detailPopupDesignCount ?? "-"}</b>
+                              </li>
+                              {(wr.approval_banner_design_count !== null || wr.managed_client?.productType2 === "premium") && (
+                                <li>
+                                  배너 디자인
+                                  <b>{wr.approval_banner_design_count ?? wr.managed_client?.detailBannerDesignCount ?? "-"}</b>
+                                </li>
+                              )}
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {wr.managed_client?.productType1 === "deduct" && (
+                      <div className={styles.detailRemaining}>
+                        <span className={styles.detailLabel}>승인 후 잔여 금액</span>
+                        <p className={styles.detailValue}>
+                          {(() => {
+                            if (wr.approval_remaining_amount != null) {
+                              return wr.approval_remaining_amount.toLocaleString("ko-KR");
+                            }
+                            const currentAmount = wr.managed_client?.totalAmount || 0;
+                            const requestCost = (wr as any).cost || 0;
+                            const remainingAmount = Math.max(0, currentAmount - requestCost);
+                            return remainingAmount.toLocaleString("ko-KR");
+                          })()}
+                        </p>
+                      </div>
+                    )}
+
+                    <div className={styles.detailContent}>
+                      <span className={styles.detailLabel}>작업 내용</span>
+                      <p className={styles.detailText}>{wr.work_content || "-"}</p>
                     </div>
                   </div>
-                )}
-
-                {wr.managed_client?.productType1 === "deduct" && (
-                  <div className={styles.detailRemaining}>
-                    <span className={styles.detailLabel}>승인 후 잔여 금액</span>
-                    <p className={styles.detailValue}>
-                      {(() => {
-                        if (wr.approval_remaining_amount != null) {
-                          return wr.approval_remaining_amount.toLocaleString("ko-KR");
-                        }
-                        const currentAmount = wr.managed_client?.totalAmount || 0;
-                        const requestCost = (wr as any).cost || 0;
-                        const remainingAmount = Math.max(0, currentAmount - requestCost);
-                        return remainingAmount.toLocaleString("ko-KR");
-                      })()}
-                    </p>
-                  </div>
-                )}
-
-                <div className={styles.detailContent}>
-                  <span className={styles.detailLabel}>작업 내용</span>
-                  <p className={styles.detailText}>{wr.work_content || "-"}</p>
-                </div>
-              </div>
                 );
               })()
             ) : (
