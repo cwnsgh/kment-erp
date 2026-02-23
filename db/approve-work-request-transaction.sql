@@ -19,6 +19,12 @@ declare
   v_deducted numeric;
   v_total numeric;
   v_remaining numeric;
+  v_count int;
+  v_te int;
+  v_co int;
+  v_im int;
+  v_po int;
+  v_ba int;
 begin
   select *
     into v_wr
@@ -75,17 +81,48 @@ begin
            approval_deducted_amount = v_deducted,
            approval_remaining_amount = v_remaining
      where id = v_wr.id;
-  elsif v_wr.work_type = 'maintenance' then
+  elsif v_wr.work_type = 'maintenance' and v_wr.managed_client_id is not null then
+    -- 유지보수형: 승인 전 잔여 저장 후 차감, 승인 후 잔여를 work_request에 저장
+    v_count := coalesce(v_wr.count, 0);
+    -- 승인 전 = 현재 managed_client 값 (차감 전)
+    v_te := greatest(0, coalesce(v_mc.detail_text_edit_count, 0) - case when v_wr.work_type_detail = 'textEdit' then v_count else 0 end);
+    v_co := greatest(0, coalesce(v_mc.detail_coding_edit_count, 0) - case when v_wr.work_type_detail = 'codingEdit' then v_count else 0 end);
+    v_im := greatest(0, coalesce(v_mc.detail_image_edit_count, 0) - case when v_wr.work_type_detail = 'imageEdit' then v_count else 0 end);
+    v_po := greatest(0, coalesce(v_mc.detail_popup_design_count, 0) - case when v_wr.work_type_detail = 'popupDesign' then v_count else 0 end);
+    v_ba := greatest(0, coalesce(v_mc.detail_banner_design_count, 0) - case when v_wr.work_type_detail = 'bannerDesign' then v_count else 0 end);
+
+    update erp.managed_client
+       set detail_text_edit_count = v_te,
+           detail_coding_edit_count = v_co,
+           detail_image_edit_count = v_im,
+           detail_popup_design_count = v_po,
+           detail_banner_design_count = v_ba,
+           updated_at = now()
+     where id = v_wr.managed_client_id;
+
+    -- work_request: 승인 전(차감 전) 스냅샷 + 승인 후(차감 후) 스냅샷 저장
     update erp.work_request
        set status = 'approved',
            approved_at = now(),
            approved_by = p_client_id,
            updated_at = now(),
-           approval_text_edit_count = coalesce(v_mc.detail_text_edit_count, 0),
-           approval_coding_edit_count = coalesce(v_mc.detail_coding_edit_count, 0),
-           approval_image_edit_count = coalesce(v_mc.detail_image_edit_count, 0),
-           approval_popup_design_count = coalesce(v_mc.detail_popup_design_count, 0),
-           approval_banner_design_count = coalesce(v_mc.detail_banner_design_count, 0)
+           approval_before_text_edit_count = coalesce(v_mc.detail_text_edit_count, 0),
+           approval_before_coding_edit_count = coalesce(v_mc.detail_coding_edit_count, 0),
+           approval_before_image_edit_count = coalesce(v_mc.detail_image_edit_count, 0),
+           approval_before_popup_design_count = coalesce(v_mc.detail_popup_design_count, 0),
+           approval_before_banner_design_count = coalesce(v_mc.detail_banner_design_count, 0),
+           approval_text_edit_count = v_te,
+           approval_coding_edit_count = v_co,
+           approval_image_edit_count = v_im,
+           approval_popup_design_count = v_po,
+           approval_banner_design_count = v_ba
+     where id = v_wr.id;
+  elsif v_wr.work_type = 'maintenance' then
+    update erp.work_request
+       set status = 'approved',
+           approved_at = now(),
+           approved_by = p_client_id,
+           updated_at = now()
      where id = v_wr.id;
   else
     update erp.work_request

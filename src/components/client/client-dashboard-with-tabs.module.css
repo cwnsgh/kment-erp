@@ -1,0 +1,410 @@
+/* 대시보드 탭 래퍼 */
+.section {
+  max-width: 72rem;
+  margin: 0 auto 100px;
+}
+
+.pageTitle {
+  text-align: left;
+  margin: 0 auto 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pageTitleHeading {
+  font-size: 32px;
+  font-weight: var(--font-weight-semibold);
+  margin: 0;
+}
+
+.pageTitleName {
+  color: var(--primary);
+  font-weight: var(--font-weight-bold);
+}
+
+.notificationBadge {
+  font-size: 14px;
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.tabRow {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.tab {
+  padding: 8px 18px;
+  font-size: 14px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-color);
+  background-color: var(--border-color);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.tab:hover:not(.tabActive) {
+  background-color: var(--gray_bg, #e5e7eb);
+  color: var(--text-gray);
+}
+
+.tabActive {
+  background-color: var(--primary);
+  color: #fff;
+}
+
+.tabContent {
+  margin-top: 0;
+}
+
+/* 계약 탭: 계약 카드 목록 */
+.contractNote {
+  font-size: 14px;
+  color: var(--text-gray);
+  margin: 0 0 24px;
+}
+
+.contractList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.contractCard {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+  padding: 24px 28px;
+  border: 1px solid var(--border-color);
+}
+
+.contractCardTitle {
+  font-size: 18px;
+  font-weight: var(--font-weight-bold);
+  margin: 0 0 16px;
+}
+
+.contractCardMeta {
+  font-size: 14px;
+  color: var(--text-gray);
+  margin: 0 0 16px;
+}
+
+.contractCardGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px 24px;
+  font-size: 14px;
+}
+
+.contractCardLabel {
+  color: var(--text-gray);
+}
+
+.contractCardValue {
+  font-weight: var(--font-weight-semibold);
+}
+
+.contractEmpty {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+  padding: 48px 28px;
+  text-align: center;
+  color: var(--text-gray);
+  font-size: 15px;
+}
+
+/* 계약 탭: 슬라이드 + 관리업무와 동일한 틀 (type_box type_c, 승인/작업 현황) */
+.slideWrap {
+  position: relative;
+}
+
+.slideControl {
+  position: absolute;
+  top: 50px;
+  right: 50px;
+  display: flex;
+  z-index: 10;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.slidePagination {
+  margin: 0;
+  font-weight: var(--font-weight-bold);
+  font-size: 16px;
+  color: var(--text-color);
+}
+
+.slidePaginationCurrent {
+  color: var(--primary);
+}
+
+.slideArrows {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.slideArrow {
+  width: 32px;
+  height: 32px;
+  border-radius: 100px;
+  background: var(--gray_bg, #f5f5f5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  border: none;
+  padding: 0;
+}
+
+.slideArrow:hover {
+  background-color: var(--primary);
+}
+
+.slideArrow:hover img {
+  filter: brightness(0) invert(1);
+}
+
+.slideArrowPrev img {
+  transform: rotate(180deg);
+}
+
+.slideArrow img {
+  width: 10px;
+  height: 10px;
+}
+
+.typeBoxC {
+  margin-bottom: 50px;
+}
+
+.typeBoxC .boxTitle {
+  font-size: 20px;
+  font-weight: var(--font-weight-bold);
+  margin: 0 0 18px;
+}
+
+.typeBoxC .typePeriod {
+  font-size: 16px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-gray);
+  margin: 0 0 40px;
+}
+
+.typeContentC {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  margin-top: 40px;
+}
+
+.typeContentC > div {
+  display: flex;
+  align-items: stretch;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-color);
+  min-width: 0;
+}
+
+.typeContentC > div:nth-child(n + 3) {
+  border-top: 1px solid var(--border-color);
+}
+
+.typeContentC > div > .typeHead {
+  flex: 0 0 50%;
+  box-sizing: border-box;
+  font-size: 15px;
+  padding: 24px 20px;
+  background-color: var(--background-color, #f9f9f9);
+  font-weight: var(--font-weight-semibold);
+  margin: 0;
+  min-width: 0;
+}
+
+.typeContentC > div > .typeData {
+  flex: 0 0 50%;
+  box-sizing: border-box;
+  font-size: 15px;
+  padding: 24px 10px 24px 20px;
+  margin: 0;
+  min-width: 0;
+}
+
+.typeDataNow {
+  font-weight: var(--font-weight-bold);
+}
+
+.typeDataTotal {
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-gray);
+}
+
+.flexBox {
+  display: flex;
+  margin-top: 50px;
+  gap: 30px;
+}
+
+.flexBox > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.approvalBox {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--background-color, #f9f9f9);
+  padding: 24px 40px;
+  margin-top: 30px;
+}
+
+.approvalBox > div {
+  text-align: center;
+}
+
+.approvalBox > div span {
+  display: block;
+  font-size: 14px;
+  color: var(--text-gray);
+  margin-bottom: 8px;
+}
+
+.approvalBox > div p {
+  margin: 0;
+  font-size: 18px;
+  font-weight: var(--font-weight-bold);
+}
+
+.tableWrap {
+  margin-top: 40px;
+}
+
+.tableWrap table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tableWrap th,
+.tableWrap td {
+  padding: 20px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 14px;
+}
+
+.tableWrap th {
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-gray);
+}
+
+.tableWrap td span {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+
+/* 승인/작업 뱃지 - 시안: 승인요청(강조), 승인완료·작업완료(회색), 승인반려(빨강), 작업대기·작업중(연회색) */
+.approvalRequest {
+  background-color: var(--positive);
+  color: #fff;
+}
+
+.approvalComplete {
+  background-color: var(--text-gray);
+  color: #fff;
+}
+
+.approvalRefusal {
+  background-color: var(--negative);
+  color: #fff;
+}
+
+.workWaiting {
+  background-color: var(--border-color);
+  color: var(--text-color);
+}
+
+.workOngoing {
+  background-color: var(--border-color);
+  color: var(--text-color);
+}
+
+.workComplete {
+  background-color: var(--text-gray);
+  color: #fff;
+}
+
+.textOverflow {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
+}
+
+.textOverflow p {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mainBtn {
+  position: absolute;
+  top: 40px;
+  right: 50px;
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  background: var(--gray_bg, #f5f5f5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.mainBtn:hover {
+  background-color: var(--primary);
+}
+
+.mainBtn:hover img {
+  filter: brightness(0) invert(1);
+}
+
+.mainBtn img {
+  width: 10px;
+  height: 10px;
+}
+
+.whiteBox {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+  padding: 50px;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.leftBox,
+.rightBox {
+  flex: 1;
+}

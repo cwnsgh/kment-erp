@@ -2,12 +2,11 @@ import { getSession, ClientSession } from "@/lib/auth";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 import { redirect } from "next/navigation";
 import {
-  getPendingWorkRequestsByClientId,
   getClientUnreadNotificationCount,
   WorkRequest,
 } from "@/app/actions/work-request";
-import { ClientDashboardDeduct } from "@/components/client/client-dashboard-deduct";
-import { ClientDashboardMaintenance } from "@/components/client/client-dashboard-maintenance";
+import { getContractDashboardForClient } from "@/app/actions/contract";
+import { ClientDashboardWithTabs } from "@/components/client/client-dashboard-with-tabs";
 import { ClientDashboardNone } from "@/components/client/client-dashboard-none";
 
 export default async function ClientDashboardPage() {
@@ -116,8 +115,13 @@ export default async function ClientDashboardPage() {
     ).length,
   };
 
-  // 관리상품 타입에 따라 적절한 컴포넌트 렌더링
-  if (!managedClient) {
+  // 클라이언트 계약 대시보드 (계약별 작업 내용·승인/작업 현황 포함)
+  const contractsResult = await getContractDashboardForClient();
+  const contracts = contractsResult.success ? (contractsResult.contracts ?? []) : [];
+  const contractCount = contracts.length;
+
+  // 계약도 관리상품도 없으면 인사말 + 안내만
+  if (!managedClient && contractCount === 0) {
     return (
       <ClientDashboardNone
         clientName={clientName}
@@ -126,29 +130,18 @@ export default async function ClientDashboardPage() {
     );
   }
 
-  if (managedClient.product_type1 === "deduct") {
-    return (
-      <ClientDashboardDeduct
-        clientName={clientName}
-        managedClient={managedClient}
-        deductedAmount={deductedAmount}
-        approvalRequests={approvalRequestsList}
-        approvalStats={approvalStats}
-        workRequests={workRequestsList}
-        unreadNotificationCount={unreadNotificationCount}
-      />
-    );
-  }
-
-  // 유지보수형
+  // 탭 구조: 계약 업무(N건) | 관리 업무
   return (
-    <ClientDashboardMaintenance
+    <ClientDashboardWithTabs
       clientName={clientName}
+      unreadNotificationCount={unreadNotificationCount}
+      contractCount={contractCount}
+      contracts={contracts}
       managedClient={managedClient}
+      deductedAmount={deductedAmount}
       approvalRequests={approvalRequestsList}
       approvalStats={approvalStats}
       workRequests={workRequestsList}
-      unreadNotificationCount={unreadNotificationCount}
     />
   );
 }

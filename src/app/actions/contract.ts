@@ -266,6 +266,199 @@ export async function getContracts(params?: {
 }
 
 /**
+ * 클라이언트 대시보드용: 로그인한 클라이언트의 계약 목록만 조회
+ */
+export async function getContractsForClient(): Promise<{
+  success: boolean;
+  contracts?: Array<{
+    id: string;
+    contract_name: string;
+    brand_name: string;
+    draft_due_date: string | null;
+    demo_due_date: string | null;
+    final_completion_date: string | null;
+    open_due_date: string | null;
+  }>;
+  error?: string;
+}> {
+  try {
+    const session = await getSession();
+    if (!session || session.type !== "client") {
+      return { success: false, contracts: [], error: "클라이언트 로그인이 필요합니다." };
+    }
+
+    const supabase = await getSupabaseServerClient();
+    const { data, error } = await supabase
+      .from("contract")
+      .select(`
+        id,
+        contract_name,
+        draft_due_date,
+        demo_due_date,
+        final_completion_date,
+        open_due_date,
+        site:site_id ( brand_name )
+      `)
+      .eq("client_id", session.id)
+      .order("contract_date", { ascending: false });
+
+    if (error) throw error;
+
+    const list = (data || []).map((row: any) => ({
+      id: row.id,
+      contract_name: row.contract_name,
+      brand_name: row.site?.brand_name ?? "",
+      draft_due_date: row.draft_due_date ?? null,
+      demo_due_date: row.demo_due_date ?? null,
+      final_completion_date: row.final_completion_date ?? null,
+      open_due_date: row.open_due_date ?? null,
+    }));
+
+    return { success: true, contracts: list };
+  } catch (error: any) {
+    console.error("클라이언트 계약 조회 오류:", error);
+    return {
+      success: false,
+      contracts: [],
+      error: error?.message ?? "계약 목록을 불러올 수 없습니다.",
+    };
+  }
+}
+
+/** 계약별 작업 내용(PC/모바일 수정 등) - modification_count = 잔여 횟수 */
+export type ContractWorkContentItem = {
+  id: string;
+  work_content_name: string;
+  modification_count: number;
+};
+
+/** 계약 업무 요청 한 건 (승인/작업 현황 테이블용) */
+export type ContractWorkRequestItem = {
+  id: string;
+  contract_id: string;
+  work_content: string | null;
+  work_period: string | null;
+  status: string;
+  created_at: string;
+  approved_at: string | null;
+};
+
+/**
+ * 클라이언트 대시보드 계약 탭용: 계약 목록 + 계약별 작업 내용(수정 횟수) + 계약 업무 요청 목록
+ */
+export async function getContractDashboardForClient(): Promise<{
+  success: boolean;
+  contracts?: Array<{
+    id: string;
+    contract_name: string;
+    brand_name: string;
+    draft_due_date: string | null;
+    demo_due_date: string | null;
+    final_completion_date: string | null;
+    open_due_date: string | null;
+    work_contents: ContractWorkContentItem[];
+    work_requests: ContractWorkRequestItem[];
+  }>;
+  error?: string;
+}> {
+  try {
+    const session = await getSession();
+    if (!session || session.type !== "client") {
+      return { success: false, contracts: [], error: "클라이언트 로그인이 필요합니다." };
+    }
+
+    const supabase = await getSupabaseServerClient();
+    const clientId = session.id;
+
+    const { data: contractsData, error: contractsError } = await supabase
+      .from("contract")
+      .select(`
+        id,
+        contract_name,
+        draft_due_date,
+        demo_due_date,
+        final_completion_date,
+        open_due_date,
+        site:site_id ( brand_name )
+      `)
+      .eq("client_id", clientId)
+      .order("contract_date", { ascending: false });
+
+    if (contractsError || !contractsData?.length) {
+      return { success: true, contracts: [] };
+    }
+
+    const contractIds = contractsData.map((c: any) => c.id);
+
+    const [workContentRes, workRequestsRes] = await Promise.all([
+      supabase
+        .from("contract_work_content")
+        .select(`
+          contract_id,
+          id,
+          modification_count,
+          contract_type_work_content:work_content_id ( work_content_name )
+        `)
+        .in("contract_id", contractIds),
+      supabase
+        .from("contract_work_request")
+        .select("id, contract_id, work_content, work_period, status, created_at, approved_at")
+        .eq("client_id", clientId)
+        .order("created_at", { ascending: false }),
+    ]);
+
+    const workContentsByContract: Record<string, ContractWorkContentItem[]> = {};
+    (workContentRes.data || []).forEach((row: any) => {
+      const cid = row.contract_id;
+      if (!workContentsByContract[cid]) workContentsByContract[cid] = [];
+      const wc = row.contract_type_work_content;
+      const name = Array.isArray(wc) ? (wc[0]?.work_content_name ?? "") : (wc?.work_content_name ?? "");
+      workContentsByContract[cid].push({
+        id: row.id,
+        work_content_name: name,
+        modification_count: Number(row.modification_count ?? 0),
+      });
+    });
+
+    const workRequestsByContract: Record<string, ContractWorkRequestItem[]> = {};
+    (workRequestsRes.data || []).forEach((row: any) => {
+      const cid = row.contract_id;
+      if (!workRequestsByContract[cid]) workRequestsByContract[cid] = [];
+      workRequestsByContract[cid].push({
+        id: row.id,
+        contract_id: row.contract_id,
+        work_content: row.work_content ?? null,
+        work_period: row.work_period ?? null,
+        status: row.status,
+        created_at: row.created_at,
+        approved_at: row.approved_at ?? null,
+      });
+    });
+
+    const contracts = contractsData.map((row: any) => ({
+      id: row.id,
+      contract_name: row.contract_name,
+      brand_name: row.site?.brand_name ?? "",
+      draft_due_date: row.draft_due_date ?? null,
+      demo_due_date: row.demo_due_date ?? null,
+      final_completion_date: row.final_completion_date ?? null,
+      open_due_date: row.open_due_date ?? null,
+      work_contents: workContentsByContract[row.id] ?? [],
+      work_requests: workRequestsByContract[row.id] ?? [],
+    }));
+
+    return { success: true, contracts };
+  } catch (error: any) {
+    console.error("클라이언트 계약 대시보드 조회 오류:", error);
+    return {
+      success: false,
+      contracts: [],
+      error: error?.message ?? "계약 정보를 불러올 수 없습니다.",
+    };
+  }
+}
+
+/**
  * 계약 상세 조회 (상세 패널용)
  * contract + client + site + contacts + attachments 일괄 조회
  */

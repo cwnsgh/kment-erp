@@ -217,3 +217,108 @@
   color: var(--text-gray) !important;
   opacity: 0.7 !important;
 }
+
+/* 담당자 정보 / 사이트 정보 / 비고 - 이미지 레이아웃 */
+.infoEmpty {
+  padding: 16px 20px;
+  color: var(--text-gray);
+  font-size: 14px;
+  background: #f8fafc;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+}
+
+.contactBlock {
+  margin-top: 20px;
+}
+
+.contactBlock:first-of-type {
+  margin-top: 0;
+}
+
+.contactGrid {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+  font-size: 14px;
+}
+
+.contactLabel {
+  padding: 14px 16px;
+  background: var(--background-color);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.contactValue {
+  padding: 14px 16px;
+  background: #fff;
+  color: var(--text-color);
+  border-bottom: 1px solid var(--border-color);
+  word-break: break-all;
+}
+
+/* 담당자 그리드 마지막 행 하단 보더 제거 */
+.contactGrid > *:nth-child(9),
+.contactGrid > *:nth-child(10) {
+  border-bottom: none;
+}
+
+.siteTableWrap {
+  overflow-x: auto;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+}
+
+.siteTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.siteTable th {
+  padding: 12px 16px;
+  text-align: left;
+  background: var(--background-color);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.siteTable td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-color);
+  background: #fff;
+}
+
+.siteTable tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.noteBlock {
+  padding: 16px 20px;
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  min-height: 80px;
+}
+
+.noteText {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-color);
+  white-space: pre-wrap;
+  word-break: break-all;
+  line-height: 1.5;
+}
+
+.notePlaceholder {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-gray);
+  line-height: 1.5;
+}

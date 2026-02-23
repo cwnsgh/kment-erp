@@ -38,6 +38,8 @@ type ClientDashboardMaintenanceProps = {
   approvalStats: ApprovalStats; // 승인 통계 (pending, approved, rejected 건수)
   workRequests: WorkRequest[]; // 작업 현황용 (in_progress, completed)
   unreadNotificationCount?: number;
+  /** 탭 레이아웃 안에서 쓰일 때 상단 인사말 숨김 */
+  showGreeting?: boolean;
 };
 
 export function ClientDashboardMaintenance({
@@ -47,13 +49,14 @@ export function ClientDashboardMaintenance({
   approvalStats,
   workRequests,
   unreadNotificationCount = 0,
+  showGreeting = true,
 }: ClientDashboardMaintenanceProps) {
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return "-";
     const date = new Date(dateStr);
     return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(
       2,
-      "0"
+      "0",
     )}.${String(date.getDate()).padStart(2, "0")}`;
   };
 
@@ -73,8 +76,10 @@ export function ClientDashboardMaintenance({
       pending: styles.approvalRequest,
       approved: styles.approvalComplete,
       rejected: styles.approvalRefusal,
+      in_progress: styles.workOngoing,
+      completed: styles.workComplete,
     };
-    return classMap[status] || "";
+    return classMap[status] || styles.approvalComplete;
   };
 
   const getStatusLabel = (status: string) => {
@@ -82,8 +87,10 @@ export function ClientDashboardMaintenance({
       pending: "승인요청",
       approved: "승인완료",
       rejected: "승인반려",
+      in_progress: "작업중",
+      completed: "작업완료",
     };
-    return statusMap[status] || status;
+    return statusMap[status] ?? "승인완료";
   };
 
   const getWorkStatusClass = (status: string) => {
@@ -106,20 +113,22 @@ export function ClientDashboardMaintenance({
 
   return (
     <section className={styles.section}>
-      <div className={styles.pageTitle}>
-        <h1 className={styles.pageTitleHeading}>
-          <span className={styles.pageTitleName}>{clientName}</span>님,
-          안녕하세요!
-        </h1>
-        {unreadNotificationCount > 0 && (
-          <Link
-            href="/client/notifications"
-            className={styles.notificationBadge}
-          >
-            알림 {unreadNotificationCount}건
-          </Link>
-        )}
-      </div>
+      {showGreeting && (
+        <div className={styles.pageTitle}>
+          <h1 className={styles.pageTitleHeading}>
+            <span className={styles.pageTitleName}>{clientName}</span>님,
+            안녕하세요!
+          </h1>
+          {unreadNotificationCount > 0 && (
+            <Link
+              href="/client/notifications"
+              className={styles.notificationBadge}
+            >
+              알림 {unreadNotificationCount}건
+            </Link>
+          )}
+        </div>
+      )}
       <div className={`${styles.whiteBox} ${styles.typeBox}`}>
         <h2 className={`${styles.boxTitle} ${styles.fontBold}`}>
           유지보수형 ({formatProductType2(managedClient.product_type2)})
@@ -133,46 +142,55 @@ export function ClientDashboardMaintenance({
             <p className={styles.typeHead}>영역 텍스트 수정</p>
             <p className={styles.typeData}>
               <span className={styles.fontBold}>
-                {managedClient.detail_text_edit_count || 0}회
+                {managedClient.detail_text_edit_count ?? 0}회
               </span>{" "}
-              /{" "}
-              <span>{managedClient.initial_detail_text_edit_count || 0}회</span>
+              {/* /{" "}
+              <span>{managedClient.initial_detail_text_edit_count ?? managedClient.detail_text_edit_count ?? 0}회</span> */}
             </p>
           </div>
           <div>
             <p className={styles.typeHead}>코딩 수정</p>
             <p className={styles.typeData}>
               <span className={styles.fontBold}>
-                {managedClient.detail_coding_edit_count || 0}회
+                {managedClient.detail_coding_edit_count ?? 0}회
               </span>{" "}
-              /{" "}
+              {/* /{" "}
               <span>
-                {managedClient.initial_detail_coding_edit_count || 0}회
-              </span>
+                {managedClient.initial_detail_coding_edit_count ??
+                  managedClient.detail_coding_edit_count ??
+                  0}
+                회
+              </span> */}
             </p>
           </div>
           <div>
             <p className={styles.typeHead}>기존 결과물 이미지 수정</p>
             <p className={styles.typeData}>
               <span className={styles.fontBold}>
-                {managedClient.detail_image_edit_count || 0}회
+                {managedClient.detail_image_edit_count ?? 0}회
               </span>{" "}
-              /{" "}
+              {/* /{" "}
               <span>
-                {managedClient.initial_detail_image_edit_count || 0}회
-              </span>
+                {managedClient.initial_detail_image_edit_count ??
+                  managedClient.detail_image_edit_count ??
+                  0}
+                회
+              </span> */}
             </p>
           </div>
           <div>
             <p className={styles.typeHead}>팝업 디자인</p>
             <p className={styles.typeData}>
               <span className={styles.fontBold}>
-                {managedClient.detail_popup_design_count || 0}회
+                {managedClient.detail_popup_design_count ?? 0}회
               </span>{" "}
-              /{" "}
+              {/* /{" "}
               <span>
-                {managedClient.initial_detail_popup_design_count || 0}회
-              </span>
+                {managedClient.initial_detail_popup_design_count ??
+                  managedClient.detail_popup_design_count ??
+                  0}
+                회
+              </span> */}
             </p>
           </div>
           {managedClient.product_type2 === "premium" && (
@@ -180,12 +198,15 @@ export function ClientDashboardMaintenance({
               <p className={styles.typeHead}>배너 디자인</p>
               <p className={styles.typeData}>
                 <span className={styles.fontBold}>
-                  {managedClient.detail_banner_design_count || 0}회
+                  {managedClient.detail_banner_design_count ?? 0}회
                 </span>{" "}
-                /{" "}
+                {/* /{" "}
                 <span>
-                  {managedClient.initial_detail_banner_design_count || 0}회
-                </span>
+                  {managedClient.initial_detail_banner_design_count ??
+                    managedClient.detail_banner_design_count ??
+                    0}
+                  회
+                </span> */}
               </p>
             </div>
           )}
@@ -311,7 +332,7 @@ export function ClientDashboardMaintenance({
                       <td>
                         {request.start_date && request.end_date
                           ? `${formatDate(request.start_date)} ~ ${formatDate(
-                              request.end_date
+                              request.end_date,
                             )}`
                           : "-"}
                       </td>

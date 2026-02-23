@@ -384,6 +384,67 @@ export function ClientApprovalPage({ initialWorkRequests, clientName = "" }: Cli
     ? ((detailModal.workRequest as any).work_type as string | null)
     : null;
 
+  // 유지보수형: 승인 전 = (이미 승인된 건) 승인 후 + 이번 요청 사용 횟수 / (미승인 건) 현재 잔여
+  const getBeforeCount = (type: "textEdit" | "codingEdit" | "imageEdit" | "popupDesign" | "bannerDesign") => {
+    const wr = detailModal.workRequest;
+    if (!wr?.managed_client) return "-";
+    if (wr.status !== "approved") {
+      switch (type) {
+        case "textEdit": return wr.managed_client?.detailTextEditCount ?? "-";
+        case "codingEdit": return wr.managed_client?.detailCodingEditCount ?? "-";
+        case "imageEdit": return wr.managed_client?.detailImageEditCount ?? "-";
+        case "popupDesign": return wr.managed_client?.detailPopupDesignCount ?? "-";
+        case "bannerDesign": return wr.managed_client?.detailBannerDesignCount ?? "-";
+        default: return "-";
+      }
+    }
+    const raw = wr as any;
+    // 승인된 건: DB에 저장된 "승인 전" 스냅샷이 있으면 사용 (RPC에서 저장)
+    const before = (() => {
+      switch (type) {
+        case "textEdit": return raw.approval_before_text_edit_count;
+        case "codingEdit": return raw.approval_before_coding_edit_count;
+        case "imageEdit": return raw.approval_before_image_edit_count;
+        case "popupDesign": return raw.approval_before_popup_design_count;
+        case "bannerDesign": return raw.approval_before_banner_design_count;
+        default: return undefined;
+      }
+    })();
+    if (before != null) return Number(before);
+    // fallback: 승인 후 + 이번 요청 사용분 (과거 데이터용)
+    const after = (() => {
+      switch (type) {
+        case "textEdit": return wr.approval_text_edit_count ?? 0;
+        case "codingEdit": return wr.approval_coding_edit_count ?? 0;
+        case "imageEdit": return wr.approval_image_edit_count ?? 0;
+        case "popupDesign": return wr.approval_popup_design_count ?? 0;
+        case "bannerDesign": return wr.approval_banner_design_count ?? 0;
+        default: return 0;
+      }
+    })();
+    const usage = raw.request_usage;
+    const detailRaw = raw.work_type_detail ?? raw.workTypeDetail ?? usage?.work_type_detail ?? "";
+    const detail = String(detailRaw).trim() || "";
+    const count = Math.max(0, Number(raw.count ?? usage?.count ?? 0));
+    const used = detail === type ? count : 0;
+    return after + used;
+  };
+
+  // 유지보수형: 승인 후 = 승인 전 - 이번 요청에서 해당 타입으로 쓴 횟수 (상세에 나오는 세부유형·횟수 기준)
+  const getAfterCount = (type: "textEdit" | "codingEdit" | "imageEdit" | "popupDesign" | "bannerDesign") => {
+    const before = getBeforeCount(type);
+    if (before === "-") return "-";
+    const wr = detailModal.workRequest;
+    if (!wr) return "-";
+    const raw = wr as any;
+    const usage = raw.request_usage;
+    const detailRaw = raw.work_type_detail ?? raw.workTypeDetail ?? usage?.work_type_detail ?? "";
+    const detail = String(detailRaw).trim() || "";
+    const count = Math.max(0, Number(raw.count ?? usage?.count ?? 0));
+    const used = detail === type ? count : 0;
+    return Number(before) - used;
+  };
+
   return (
     <section className={`${styles.approvalList} page_section`}>
       <div className="page_title">
@@ -791,7 +852,8 @@ export function ClientApprovalPage({ initialWorkRequests, clientName = "" }: Cli
                   )}
                 </div>
 
-                {wr.managed_client?.productType1 === "maintenance" && (
+                {/* 이 요청이 유지보수형으로 신청된 경우만 잔여 횟수 표시 (관리유형이 나중에 바뀌어도 요청 당시 기준) */}
+                {(wr as any).work_type === "maintenance" && (
                   <div className={styles.detailRemaining}>
                     <span className={styles.detailLabel}>잔여 횟수</span>
                     <div className={styles.detailRemainingColumns}>
@@ -800,24 +862,24 @@ export function ClientApprovalPage({ initialWorkRequests, clientName = "" }: Cli
                         <ul className={styles.detailRemainingList}>
                           <li>
                             텍스트 수정
-                            <b>{wr.managed_client?.detailTextEditCount ?? "-"}</b>
+                            <b>{getBeforeCount("textEdit")}</b>
                           </li>
                           <li>
                             코딩 수정
-                            <b>{wr.managed_client?.detailCodingEditCount ?? "-"}</b>
+                            <b>{getBeforeCount("codingEdit")}</b>
                           </li>
                           <li>
                             이미지 수정
-                            <b>{wr.managed_client?.detailImageEditCount ?? "-"}</b>
+                            <b>{getBeforeCount("imageEdit")}</b>
                           </li>
                           <li>
                             팝업 디자인
-                            <b>{wr.managed_client?.detailPopupDesignCount ?? "-"}</b>
+                            <b>{getBeforeCount("popupDesign")}</b>
                           </li>
                           {wr.managed_client?.productType2 === "premium" && (
                             <li>
                               배너 디자인
-                              <b>{wr.managed_client?.detailBannerDesignCount ?? "-"}</b>
+                              <b>{getBeforeCount("bannerDesign")}</b>
                             </li>
                           )}
                         </ul>
@@ -828,24 +890,24 @@ export function ClientApprovalPage({ initialWorkRequests, clientName = "" }: Cli
                         <ul className={styles.detailRemainingList}>
                           <li>
                             텍스트 수정
-                            <b>{wr.approval_text_edit_count ?? wr.managed_client?.detailTextEditCount ?? "-"}</b>
+                            <b>{getAfterCount("textEdit")}</b>
                           </li>
                           <li>
                             코딩 수정
-                            <b>{wr.approval_coding_edit_count ?? wr.managed_client?.detailCodingEditCount ?? "-"}</b>
+                            <b>{getAfterCount("codingEdit")}</b>
                           </li>
                           <li>
                             이미지 수정
-                            <b>{wr.approval_image_edit_count ?? wr.managed_client?.detailImageEditCount ?? "-"}</b>
+                            <b>{getAfterCount("imageEdit")}</b>
                           </li>
                           <li>
                             팝업 디자인
-                            <b>{wr.approval_popup_design_count ?? wr.managed_client?.detailPopupDesignCount ?? "-"}</b>
+                            <b>{getAfterCount("popupDesign")}</b>
                           </li>
-                          {(wr.approval_banner_design_count !== null || wr.managed_client?.productType2 === "premium") && (
+                          {wr.managed_client?.productType2 === "premium" && (
                             <li>
                               배너 디자인
-                              <b>{wr.approval_banner_design_count ?? wr.managed_client?.detailBannerDesignCount ?? "-"}</b>
+                              <b>{getAfterCount("bannerDesign")}</b>
                             </li>
                           )}
                         </ul>
@@ -854,7 +916,8 @@ export function ClientApprovalPage({ initialWorkRequests, clientName = "" }: Cli
                   </div>
                 )}
 
-                {wr.managed_client?.productType1 === "deduct" && (
+                {/* 이 요청이 금액차감형으로 신청된 경우만 잔여 금액 표시 (관리유형이 나중에 바뀌어도 요청 당시 기준) */}
+                {(wr as any).work_type === "deduct" && (
                   <div className={styles.detailRemaining}>
                     <span className={styles.detailLabel}>승인 후 잔여 금액</span>
                     <p className={styles.detailValue}>

@@ -478,9 +478,9 @@ export function ContractTaskRegistrationForm({ employeeName }: ContractTaskRegis
                             {(r.status === "in_progress" || r.status === "completed") && (
                               <>
                                 <span>{getStatusLabel(r.status)}</span>
-                                <button type="button" className="btn btn_sm danger" onClick={() => handleDeleteRequest(r.id)}>
+                                {/* <button type="button" className="btn btn_sm danger" onClick={() => handleDeleteRequest(r.id)}>
                                   삭제
-                                </button>
+                                </button> */}
                               </>
                             )}
                             {(r.status === "rejected" || r.status === "deleted") && <span>{getStatusLabel(r.status)}</span>}

@@ -555,7 +555,9 @@
   font-weight: var(--font-weight-semibold);
   width: calc(100% - 160px);
   display: flex;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
   line-height: 25px;
   color: var(--primary);
   font-weight: var(--font-weight-bold);

@@ -29,6 +29,8 @@ type ClientDashboardDeductProps = {
   approvalStats: ApprovalStats; // 승인 통계 (pending, approved, rejected 건수)
   workRequests: WorkRequest[]; // 작업 현황용 (in_progress, completed)
   unreadNotificationCount?: number;
+  /** 탭 레이아웃 안에서 쓰일 때 상단 인사말 숨김 */
+  showGreeting?: boolean;
 };
 
 export function ClientDashboardDeduct({
@@ -39,6 +41,7 @@ export function ClientDashboardDeduct({
   approvalStats,
   workRequests,
   unreadNotificationCount = 0,
+  showGreeting = true,
 }: ClientDashboardDeductProps) {
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return "-";
@@ -67,8 +70,10 @@ export function ClientDashboardDeduct({
       pending: styles.approvalRequest,
       approved: styles.approvalComplete,
       rejected: styles.approvalRefusal,
+      in_progress: styles.workOngoing,
+      completed: styles.workComplete,
     };
-    return classMap[status] || "";
+    return classMap[status] || styles.approvalComplete;
   };
 
   const getStatusLabel = (status: string) => {
@@ -76,8 +81,10 @@ export function ClientDashboardDeduct({
       pending: "승인요청",
       approved: "승인완료",
       rejected: "승인반려",
+      in_progress: "작업중",
+      completed: "작업완료",
     };
-    return statusMap[status] || status;
+    return statusMap[status] ?? "승인완료";
   };
 
   const getWorkStatusClass = (status: string) => {
@@ -104,20 +111,22 @@ export function ClientDashboardDeduct({
 
   return (
     <section className={styles.section}>
-      <div className={styles.pageTitle}>
-        <h1 className={styles.pageTitleHeading}>
-          <span className={styles.pageTitleName}>{clientName}</span>님,
-          안녕하세요!
-        </h1>
-        {unreadNotificationCount > 0 && (
-          <Link
-            href="/client/notifications"
-            className={styles.notificationBadge}
-          >
-            알림 {unreadNotificationCount}건
-          </Link>
-        )}
-      </div>
+      {showGreeting && (
+        <div className={styles.pageTitle}>
+          <h1 className={styles.pageTitleHeading}>
+            <span className={styles.pageTitleName}>{clientName}</span>님,
+            안녕하세요!
+          </h1>
+          {unreadNotificationCount > 0 && (
+            <Link
+              href="/client/notifications"
+              className={styles.notificationBadge}
+            >
+              알림 {unreadNotificationCount}건
+            </Link>
+          )}
+        </div>
+      )}
       <div className={`${styles.whiteBox} ${styles.typeBox}`}>
         <h2 className={`${styles.boxTitle} ${styles.fontBold}`}>
           금액차감형 ({formatProductType2(managedClient.product_type2)})

@@ -13,6 +13,17 @@ import styles from "./contract-form.module.css";
 type ClientData = {
   id: string;
   name: string;
+  businessRegistrationNumber?: string;
+  ceoName?: string;
+  postalCode?: string;
+  address?: string;
+  addressDetail?: string;
+  businessType?: string;
+  businessItem?: string;
+  loginId?: string;
+  loginPassword?: string;
+  status?: string;
+  note?: string;
   sites: Array<{
     id: string;
     brandName: string;
@@ -26,8 +37,10 @@ type ClientData = {
     name: string;
     phone: string;
     email: string;
-    title: string;
+    title?: string;
+    note?: string;
   }>;
+  attachments?: Array<{ fileUrl: string; fileName: string; fileType: string }>;
 };
 
 type WorkContentData = {
@@ -97,10 +110,22 @@ export function ContractForm() {
     setError("");
     const result = await getClientForManagedRegistration(clientId);
     if (result.success && result.client) {
+      const c = result.client as any;
       setClientData({
-        id: result.client.id,
-        name: result.client.name,
-        sites: (result.client.sites || []).map((s: any) => ({
+        id: c.id,
+        name: c.name,
+        businessRegistrationNumber: c.businessRegistrationNumber,
+        ceoName: c.ceoName,
+        postalCode: c.postalCode,
+        address: c.address,
+        addressDetail: c.addressDetail,
+        businessType: c.businessType,
+        businessItem: c.businessItem,
+        loginId: c.loginId,
+        loginPassword: c.loginPassword,
+        status: c.status,
+        note: c.note,
+        sites: (c.sites || []).map((s: any) => ({
           id: s.id,
           brandName: s.brandName,
           domain: s.domain,
@@ -109,7 +134,8 @@ export function ContractForm() {
           loginPassword: s.loginPassword,
           type: s.type,
         })),
-        contacts: result.client.contacts || [],
+        contacts: c.contacts || [],
+        attachments: c.attachments,
       });
       // 첫 번째 계약 초기화
       if (result.client.sites && result.client.sites.length > 0) {
@@ -437,15 +463,137 @@ export function ContractForm() {
           {clientData && (
             <div className="box_inner">
               <div className="table_group">
-                {/* 거래처 정보 */}
+                {/* ERP 정보 */}
                 <div className="table_item">
-                  <h2 className="table_title">거래처 정보</h2>
+                  <h2 className="table_title">ERP 정보</h2>
                   <ul className="table_row">
                     <li className="row_group">
-                      <div className="table_head">거래처명</div>
-                      <div className="table_data">{clientData.name}</div>
+                      <div className="table_head">아이디</div>
+                      <div className="table_data">{clientData.loginId || "-"}</div>
+                    </li>
+                    <li className="row_group">
+                      <div className="table_head">패스워드</div>
+                      <div className="table_data">{clientData.loginPassword ? "••••••••" : "-"}</div>
                     </li>
                   </ul>
+                </div>
+
+                {/* 기본 정보 */}
+                <div className="table_item">
+                  <h2 className="table_title">기본 정보</h2>
+                  <ul className="table_row">
+                    <li className="row_group">
+                      <div className="table_head">거래처 사업자등록번호</div>
+                      <div className="table_data">{clientData.businessRegistrationNumber || "-"}</div>
+                    </li>
+                  </ul>
+                  <ul className="table_row">
+                    <li className="row_group">
+                      <div className="table_head">상호(법인명)</div>
+                      <div className="table_data">{clientData.name || "-"}</div>
+                    </li>
+                    <li className="row_group">
+                      <div className="table_head">대표자</div>
+                      <div className="table_data">{clientData.ceoName || "-"}</div>
+                    </li>
+                  </ul>
+                  <ul className="table_row">
+                    <li className="row_group">
+                      <div className="table_head">사업자 주소</div>
+                      <div className="table_data">
+                        {[clientData.address, clientData.addressDetail].filter(Boolean).join(" ") || "-"}
+                      </div>
+                    </li>
+                  </ul>
+                  <ul className="table_row">
+                    <li className="row_group">
+                      <div className="table_head">업태</div>
+                      <div className="table_data">{clientData.businessType || "-"}</div>
+                    </li>
+                    <li className="row_group">
+                      <div className="table_head">종목</div>
+                      <div className="table_data">{clientData.businessItem || "-"}</div>
+                    </li>
+                  </ul>
+                  <ul className="table_row">
+                    <li className="row_group">
+                      <div className="table_head">휴·폐업 상태</div>
+                      <div className="table_data">{clientData.status || "-"}</div>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* 담당자 정보 */}
+                <div className="table_item">
+                  <h2 className="table_title">담당자 정보</h2>
+                  {clientData.contacts.length === 0 ? (
+                    <div className={styles.infoEmpty}>등록된 담당자가 없습니다.</div>
+                  ) : (
+                    clientData.contacts.map((contact, idx) => (
+                      <div key={idx} className={styles.contactBlock}>
+                        <h3 className="table_title_sub">담당자 {idx + 1}</h3>
+                        <div className={styles.contactGrid}>
+                          <div className={styles.contactLabel}>이름</div>
+                          <div className={styles.contactValue}>{contact.name || "-"}</div>
+                          <div className={styles.contactLabel}>담당자</div>
+                          <div className={styles.contactValue}>{contact.title || "-"}</div>
+                          <div className={styles.contactLabel}>이메일</div>
+                          <div className={styles.contactValue}>{contact.email || "-"}</div>
+                          <div className={styles.contactLabel}>연락처</div>
+                          <div className={styles.contactValue}>{contact.phone || "-"}</div>
+                          <div className={styles.contactLabel}>비고</div>
+                          <div className={styles.contactValue}>{contact.note || "-"}</div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                {/* 사이트 정보 */}
+                <div className="table_item">
+                  <h2 className="table_title">사이트 정보</h2>
+                  {clientData.sites.length === 0 ? (
+                    <div className={styles.infoEmpty}>등록된 사이트가 없습니다.</div>
+                  ) : (
+                    <div className={styles.siteTableWrap}>
+                      <table className={styles.siteTable}>
+                        <thead>
+                          <tr>
+                            <th>브랜드</th>
+                            <th>도메인</th>
+                            <th>솔루션</th>
+                            <th>아이디</th>
+                            <th>패스워드</th>
+                            <th>비고</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {clientData.sites.map((site, idx) => (
+                            <tr key={site.id || idx}>
+                              <td>{site.brandName || "-"}</td>
+                              <td>{site.domain || "-"}</td>
+                              <td>{site.solution || "-"}</td>
+                              <td>{site.loginId || "-"}</td>
+                              <td>{site.loginPassword ? "••••••••" : "-"}</td>
+                              <td>{site.type || "-"}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+
+                {/* 비고 */}
+                <div className="table_item">
+                  <h2 className="table_title">비고</h2>
+                  <div className={styles.noteBlock}>
+                    {clientData.note ? (
+                      <p className={styles.noteText}>{clientData.note}</p>
+                    ) : (
+                      <p className={styles.notePlaceholder}>거래처에 등록되어있는 정보가 제공됩니다.</p>
+                    )}
+                  </div>
                 </div>
 
                 {/* 계약 정보 */}

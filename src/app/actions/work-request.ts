@@ -159,32 +159,27 @@ export async function createWorkRequest(data: {
       }
     }
 
-    // 유지보수형인 경우 횟수 차감 및 초기화 체크
-    if (data.workType === "maintenance" && data.workTypeDetail && data.count) {
+    // 유지보수형: 월별 초기화만 수행. 횟수 차감은 클라이언트 승인 시(approve_work_request RPC)에만 수행.
+    if (data.workType === "maintenance") {
       const currentDate = new Date();
       const today = currentDate.getDate();
 
-      // 초기화 체크: progress_started_date의 날짜와 오늘 날짜 비교
       if (
         managedClient.progress_started_date &&
         managedClient.status === "ongoing"
       ) {
         const progressDate = new Date(managedClient.progress_started_date);
         const progressDay = progressDate.getDate();
-
-        // 오늘이 초기화일인지 확인 (매월 progressDay일에 초기화)
-        // 마지막 초기화일 확인 (같은 날 여러 번 초기화 방지)
         const lastResetDate = managedClient.progress_started_date;
         const todayStr = currentDate
           .toISOString()
           .split("T")[0]
-          .substring(0, 7); // YYYY-MM
+          .substring(0, 7);
         const lastResetMonth = lastResetDate
           ? lastResetDate.substring(0, 7)
           : null;
 
         if (today === progressDay && lastResetMonth !== todayStr) {
-          // 초기값으로 리셋
           updateData.detail_text_edit_count =
             managedClient.initial_detail_text_edit_count || 0;
           updateData.detail_coding_edit_count =
@@ -196,50 +191,6 @@ export async function createWorkRequest(data: {
           updateData.detail_banner_design_count =
             managedClient.initial_detail_banner_design_count || 0;
         }
-      }
-
-      // 횟수 차감
-      switch (data.workTypeDetail) {
-        case "textEdit":
-          updateData.detail_text_edit_count = Math.max(
-            0,
-            (updateData.detail_text_edit_count ??
-              managedClient.detail_text_edit_count ??
-              0) - data.count
-          );
-          break;
-        case "codingEdit":
-          updateData.detail_coding_edit_count = Math.max(
-            0,
-            (updateData.detail_coding_edit_count ??
-              managedClient.detail_coding_edit_count ??
-              0) - data.count
-          );
-          break;
-        case "imageEdit":
-          updateData.detail_image_edit_count = Math.max(
-            0,
-            (updateData.detail_image_edit_count ??
-              managedClient.detail_image_edit_count ??
-              0) - data.count
-          );
-          break;
-        case "popupDesign":
-          updateData.detail_popup_design_count = Math.max(
-            0,
-            (updateData.detail_popup_design_count ??
-              managedClient.detail_popup_design_count ??
-              0) - data.count
-          );
-          break;
-        case "bannerDesign":
-          updateData.detail_banner_design_count = Math.max(
-            0,
-            (updateData.detail_banner_design_count ??
-              managedClient.detail_banner_design_count ??
-              0) - data.count
-          );
-          break;
       }
     }
 
@@ -1443,12 +1394,24 @@ export async function getWorkRequestDetailForClient(
 
     const supabase = await getSupabaseServerClient();
 
-    // 업무 요청 및 관련 정보 조회 (승인 시점 스냅샷 정보 포함)
+    // 업무 요청 및 관련 정보 조회 (승인 시점 스냅샷 + 승인 전 잔여 계산용 work_type_detail, count 명시)
     const { data: workRequest, error: workRequestError } = await supabase
       .from("work_request")
       .select(
         `
         *,
+        work_type_detail,
+        count,
+        approval_text_edit_count,
+        approval_coding_edit_count,
+        approval_image_edit_count,
+        approval_popup_design_count,
+        approval_banner_design_count,
+        approval_before_text_edit_count,
+        approval_before_coding_edit_count,
+        approval_before_image_edit_count,
+        approval_before_popup_design_count,
+        approval_before_banner_design_count,
         employee:employee_id (
           id,
           name
@@ -1470,14 +1433,31 @@ export async function getWorkRequestDetailForClient(
       };
     }
 
-    // 관리 고객 정보 조회
-    const { data: managedClient, error: managedClientError } = await supabase
-      .from("managed_client")
-      .select(
-        "product_type1, product_type2, total_amount, start_date, end_date, status, detail_text_edit_count, detail_coding_edit_count, detail_image_edit_count, detail_popup_design_count, detail_banner_design_count"
-      )
-      .eq("client_id", workRequest.client_id)
-      .single();
+    // 이 업무 요청에 연결된 관리 고객(상품)만 조회 → 금액차감형이면 잔여 금액, 유지보수형이면 잔여 횟수 표시
+    const workRequestMcId = (workRequest as any).managed_client_id;
+    let managedClient: { product_type1: string; product_type2: string | null; total_amount: number | null; start_date: string | null; end_date: string | null; status: string; detail_text_edit_count: number; detail_coding_edit_count: number; detail_image_edit_count: number; detail_popup_design_count: number; detail_banner_design_count: number } | null = null;
+    if (workRequestMcId) {
+      const { data: mc } = await supabase
+        .from("managed_client")
+        .select(
+          "product_type1, product_type2, total_amount, start_date, end_date, status, detail_text_edit_count, detail_coding_edit_count, detail_image_edit_count, detail_popup_design_count, detail_banner_design_count"
+        )
+        .eq("id", workRequestMcId)
+        .single();
+      managedClient = mc;
+    }
+    if (!managedClient && workRequest.client_id) {
+      const { data: mc } = await supabase
+        .from("managed_client")
+        .select(
+          "product_type1, product_type2, total_amount, start_date, end_date, status, detail_text_edit_count, detail_coding_edit_count, detail_image_edit_count, detail_popup_design_count, detail_banner_design_count"
+        )
+        .eq("client_id", workRequest.client_id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      managedClient = mc;
+    }
 
     // 승인한 클라이언트의 서명 이미지 조회
     let approvedByClientName: string | null = null;
@@ -1515,10 +1495,17 @@ export async function getWorkRequestDetailForClient(
       }
     }
 
-    // 관리 고객 정보가 없어도 업무 정보는 반환
+    const wrAny = workRequest as any;
+    const workTypeDetail = wrAny.work_type_detail ?? wrAny.workTypeDetail ?? null;
+    const requestCount = wrAny.count != null ? Number(wrAny.count) : null;
+
+    // 관리 고객 정보가 없어도 업무 정보는 반환 (승인 전 잔여 계산용 work_type_detail, count 명시 전달)
     const formattedWorkRequest = {
       ...workRequest,
-      employee_name: (workRequest as any).employee?.name || null,
+      work_type_detail: workTypeDetail,
+      count: requestCount,
+      request_usage: wrAny.work_type === "maintenance" ? { work_type_detail: workTypeDetail, count: requestCount } : undefined,
+      employee_name: wrAny.employee?.name || null,
       client_name: (workRequest as any).client?.name || null,
       approved_by_client_name: approvedByClientName,
       approved_by_signature_url: approvedBySignatureUrl,
@@ -1528,14 +1515,19 @@ export async function getWorkRequestDetailForClient(
       approval_remaining_amount: workRequest.approval_remaining_amount
         ? Number(workRequest.approval_remaining_amount)
         : null,
-      approval_text_edit_count: workRequest.approval_text_edit_count || null,
+      approval_text_edit_count: workRequest.approval_text_edit_count ?? null,
       approval_coding_edit_count:
-        workRequest.approval_coding_edit_count || null,
-      approval_image_edit_count: workRequest.approval_image_edit_count || null,
+        workRequest.approval_coding_edit_count ?? null,
+      approval_image_edit_count: workRequest.approval_image_edit_count ?? null,
       approval_popup_design_count:
-        workRequest.approval_popup_design_count || null,
+        workRequest.approval_popup_design_count ?? null,
       approval_banner_design_count:
-        workRequest.approval_banner_design_count || null,
+        workRequest.approval_banner_design_count ?? null,
+      approval_before_text_edit_count: wrAny.approval_before_text_edit_count ?? null,
+      approval_before_coding_edit_count: wrAny.approval_before_coding_edit_count ?? null,
+      approval_before_image_edit_count: wrAny.approval_before_image_edit_count ?? null,
+      approval_before_popup_design_count: wrAny.approval_before_popup_design_count ?? null,
+      approval_before_banner_design_count: wrAny.approval_before_banner_design_count ?? null,
       managed_client: managedClient
         ? {
             productType1: managedClient.product_type1,
