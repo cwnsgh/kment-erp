@@ -121,8 +121,16 @@
   margin-left: 15px;
 }
 
+@media (max-width: 1175px) {
+  .kpiCardPeriod {
+    margin-left: 0;
+    margin-top: 10px;
+    display: block;
+  }
+}
+
 .kpiCardValue {
-  font-size: 32px;
+  font-size: 30px;
   font-weight: 800;
   color: var(--text-color);
   margin-top: 40px;
@@ -170,6 +178,8 @@
   margin-left: 15px;
 }
 
+
+
 .tableWrap {
   overflow-x: auto;
   padding-bottom: 40px;
@@ -177,7 +187,7 @@
 
 .table {
   width: 100%;
-  min-width: 800px;
+  min-width: 900px;
   font-size: 14px;
   border-collapse: collapse;
   table-layout: fixed;
@@ -199,13 +209,13 @@
 /* 열 너비 고정 (데이터 있/없어도 동일) */
 .table th:nth-child(1),
 .table td:nth-child(1) {
-  width: 10%;
+  width: auto;
 }
 
 /* 계약일 */
 .table th:nth-child(2),
 .table td:nth-child(2) {
-  width: 16%;
+  width: 15%;
 }
 
 /* 사업자 등록 번호 */
@@ -217,7 +227,7 @@
 /* 회사명 */
 .table th:nth-child(4),
 .table td:nth-child(4) {
-  width: 10%;
+  width: 11%;
 }
 
 /* 대표자명 */
@@ -229,13 +239,13 @@
 /* 담당자 */
 .table th:nth-child(6),
 .table td:nth-child(6) {
-  width: 8%;
+  width: 90px;
 }
 
 /* 진행상태 */
 .table th:nth-child(7),
 .table td:nth-child(7) {
-  width: 12%;
+  width: 11%;
 }
 
 /* 계약종목 */

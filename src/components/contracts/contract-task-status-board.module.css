@@ -128,7 +128,6 @@
 .statusFilterItem {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
   cursor: pointer;
   font-size: 14px;
   color: var(--text-color);
@@ -245,16 +244,17 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 14px;
+  min-width: 900px;
 }
 
 
 .dataTable th {
-  padding: 24px 0px;
+  padding: 24px 10px;
   font-weight: var(--font-weight-semibold);
   color: var(--text-gray);
   border-bottom: 1px solid var(--border-color);
   white-space: nowrap;
-  font-size: 15px;
+  font-size: 14px;
 }
 
 .dataTable th:first-child {

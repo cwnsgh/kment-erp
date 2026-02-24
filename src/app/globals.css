@@ -151,7 +151,7 @@ input[type="radio"] {
   border-radius: 4px;
   cursor: pointer;
   position: relative;
-  margin-right: 12px;
+  margin-right: 6px;
 }
 
 input[type="radio"]:checked {

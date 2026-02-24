@@ -1,16 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  getContractTypes,
-  getWorkContentsByContractType,
-  createContractType,
-  updateContractType,
-  deleteContractType,
-  createWorkContent,
-  updateWorkContent,
-  deleteWorkContent,
-} from "@/app/actions/contract-type";
+import styles from "./work-content-management.module.css";
+import { getContractTypes, getWorkContentsByContractType, createContractType, updateContractType, deleteContractType, createWorkContent, updateWorkContent, deleteWorkContent } from "@/app/actions/contract-type";
 
 type ContractType = {
   id: string;
@@ -79,9 +71,7 @@ export function WorkContentManagement() {
       return;
     }
 
-    const maxOrder = contractTypes.length > 0 
-      ? Math.max(...contractTypes.map(t => t.display_order)) 
-      : 0;
+    const maxOrder = contractTypes.length > 0 ? Math.max(...contractTypes.map((t) => t.display_order)) : 0;
 
     const result = await createContractType(newContractTypeName.trim(), maxOrder + 1);
     if (result.success) {
@@ -132,9 +122,7 @@ export function WorkContentManagement() {
     }
 
     const existingContents = workContents[contractTypeId] || [];
-    const maxOrder = existingContents.length > 0
-      ? Math.max(...existingContents.map(w => w.display_order))
-      : 0;
+    const maxOrder = existingContents.length > 0 ? Math.max(...existingContents.map((w) => w.display_order)) : 0;
 
     const result = await createWorkContent(contractTypeId, name, maxOrder + 1);
     if (result.success) {
@@ -148,12 +136,7 @@ export function WorkContentManagement() {
   };
 
   // 작업 내용 수정
-  const handleUpdateWorkContent = async (
-    id: string,
-    workContentName: string,
-    displayOrder: number,
-    isActive: boolean
-  ) => {
+  const handleUpdateWorkContent = async (id: string, workContentName: string, displayOrder: number, isActive: boolean) => {
     const result = await updateWorkContent(id, workContentName, displayOrder, isActive);
     if (result.success) {
       setEditingWorkContent(null);
@@ -187,9 +170,7 @@ export function WorkContentManagement() {
         <div className="page_title">
           <h1>작업 내용 관리</h1>
         </div>
-        <div style={{ textAlign: "center", padding: "40px 20px" }}>
-          로딩 중...
-        </div>
+        <div style={{ textAlign: "center", padding: "40px 20px" }}>로딩 중...</div>
       </section>
     );
   }
@@ -232,8 +213,10 @@ export function WorkContentManagement() {
 
       <div className="white_box">
         {/* 계약 종목 추가 */}
-        <div style={{ marginBottom: "30px", paddingBottom: "20px", borderBottom: "1px solid #e0e0e0" }}>
-          <h2 className="table_title" style={{ marginBottom: "15px" }}>계약 종목 추가</h2>
+        <div style={{ marginBottom: "40px", paddingBottom: "40px", borderBottom: "1px solid var(--border-color)" }}>
+          <h2 className={styles.table_title} style={{ marginBottom: "15px" }}>
+            계약 종목 추가
+          </h2>
           <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
             <input
               type="text"
@@ -248,213 +231,138 @@ export function WorkContentManagement() {
                 }
               }}
             />
-            <button
-              type="button"
-              onClick={handleAddContractType}
-              className="btn btn_md primary">
+            <button type="button" onClick={handleAddContractType} className="btn btn_lg primary">
               추가
             </button>
           </div>
         </div>
 
+        <h2 className={styles.table_title} style={{ borderBottom: "1px solid var(--border-color)", marginBottom: "0", paddingBottom: "15px" }}>
+          계약 종목 별 작업 내용 설정
+        </h2>
+        <div className={styles.table_head}>
+          <p>계약 종목</p>
+          <p>작업 내용</p>
+        </div>
         {/* 계약 종목 목록 */}
         {contractTypes.map((type) => (
-          <div
-            key={type.id}
-            style={{
-              marginBottom: "40px",
-              padding: "20px",
-              border: "1px solid #e0e0e0",
-              borderRadius: "8px",
-            }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" }}>
+          <div key={type.id} className={styles.table_box}>
+            <div className={styles.box_left} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px", position: "relative" }}>
               <h3 className="table_title_sub">
                 {editingContractType === type.id ? (
                   <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                    <input
-                      type="text"
-                      defaultValue={type.name}
-                      id={`type-name-${type.id}`}
-                      className="border border-slate-200 rounded px-3 py-2 text-sm"
-                      style={{ width: "200px" }}
-                    />
-                    <input
-                      type="number"
-                      defaultValue={type.display_order}
-                      id={`type-order-${type.id}`}
-                      className="border border-slate-200 rounded px-3 py-2 text-sm"
-                      style={{ width: "80px" }}
-                    />
+                    <input type="text" defaultValue={type.name} id={`type-name-${type.id}`} className="border border-slate-200 rounded px-3 py-2 text-sm" style={{ width: "200px" }} />
+                    <input type="number" defaultValue={type.display_order} id={`type-order-${type.id}`} className="border border-slate-200 rounded px-3 py-2 text-sm" style={{ width: "50px" }} />
                     <label style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "13px" }}>
-                      <input
-                        type="checkbox"
-                        defaultChecked={type.is_active}
-                        id={`type-active-${type.id}`}
-                      />
+                      <input type="checkbox" defaultChecked={type.is_active} id={`type-active-${type.id}`} />
                       활성화
                     </label>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const nameInput = document.getElementById(`type-name-${type.id}`) as HTMLInputElement;
-                        const orderInput = document.getElementById(`type-order-${type.id}`) as HTMLInputElement;
-                        const activeInput = document.getElementById(`type-active-${type.id}`) as HTMLInputElement;
-                        handleUpdateContractType(
-                          type.id,
-                          nameInput.value,
-                          parseInt(orderInput.value),
-                          activeInput.checked
-                        );
-                      }}
-                      className="btn btn_sm primary">
-                      저장
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setEditingContractType(null)}
-                      className="btn btn_sm normal">
-                      취소
-                    </button>
+                    <div className={styles.btn_wrap} style={{ position: "absolute", right: "0" }}>
+                      {" "}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const nameInput = document.getElementById(`type-name-${type.id}`) as HTMLInputElement;
+                          const orderInput = document.getElementById(`type-order-${type.id}`) as HTMLInputElement;
+                          const activeInput = document.getElementById(`type-active-${type.id}`) as HTMLInputElement;
+                          handleUpdateContractType(type.id, nameInput.value, parseInt(orderInput.value), activeInput.checked);
+                        }}>
+                        <img src="/images/check_icon_g.png" alt="저장 아이콘" />
+                      </button>
+                      <button type="button" onClick={() => setEditingContractType(null)}>
+                        <img src="/images/close_icon_g.png" alt="취소 아이콘" />
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                    <span>{type.name}</span>
-                    <span style={{ fontSize: "12px", color: "#666" }}>(순서: {type.display_order})</span>
+                    <span className={styles.sub_name}>{type.name}</span>
+                    <span style={{ fontSize: "13px", color: "var(--text-gray)" }}>(순서: {type.display_order})</span>
                     {!type.is_active && <span style={{ fontSize: "12px", color: "#999" }}>(비활성)</span>}
                   </div>
                 )}
               </h3>
               {editingContractType !== type.id && (
-                <div style={{ display: "flex", gap: "5px" }}>
-                  <button
-                    type="button"
-                    onClick={() => setEditingContractType(type.id)}
-                    className="btn btn_sm normal">
-                    수정
+                <div className={styles.btn_wrap}>
+                  <button type="button" onClick={() => setEditingContractType(type.id)}>
+                    <img src="/images/modify_icon.png" alt="수정 아이콘" />
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteContractType(type.id)}
-                    className="btn btn_sm normal">
-                    삭제
+                  <button type="button" onClick={() => handleDeleteContractType(type.id)}>
+                    <img src="/images/close_icon_g.png" alt="삭제 아이콘" />
                   </button>
                 </div>
               )}
             </div>
 
             {/* 작업 내용 목록 */}
-            <div style={{ marginLeft: "20px" }}>
+            <div className={styles.box_right}>
               <div style={{ marginBottom: "15px" }}>
-                <h4 style={{ fontSize: "14px", fontWeight: "600", marginBottom: "10px" }}>작업 내용</h4>
-                <div style={{ display: "flex", gap: "10px", alignItems: "center", marginBottom: "15px" }}>
+                {/*<h4 style={{ fontSize: "14px", fontWeight: "600", marginBottom: "10px" }}>작업 내용</h4>*/}
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                  {(workContents[type.id] || []).map((workContent) => (
+                    <div key={workContent.id} className={styles.work_list}>
+                      {editingWorkContent === workContent.id ? (
+                        <div style={{ display: "flex", gap: "10px", alignItems: "center", flex: 1, position: "relative" }}>
+                          <input type="text" defaultValue={workContent.work_content_name} id={`work-name-${workContent.id}`} className="border border-slate-200 rounded px-3 py-2 text-sm" style={{ width: "200px" }} />
+                          <input type="number" defaultValue={workContent.display_order} id={`work-order-${workContent.id}`} className="border border-slate-200 rounded px-3 py-2 text-sm" style={{ width: "50px" }} />
+                          <label style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "13px" }}>
+                            <input type="checkbox" defaultChecked={workContent.is_active} id={`work-active-${workContent.id}`} />
+                            활성화
+                          </label>
+                          <div className={styles.btn_wrap} style={{ position: "absolute", right: "0" }}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const nameInput = document.getElementById(`work-name-${workContent.id}`) as HTMLInputElement;
+                                const orderInput = document.getElementById(`work-order-${workContent.id}`) as HTMLInputElement;
+                                const activeInput = document.getElementById(`work-active-${workContent.id}`) as HTMLInputElement;
+                                handleUpdateWorkContent(workContent.id, nameInput.value, parseInt(orderInput.value), activeInput.checked);
+                              }}>
+                              <img src="/images/check_icon_g.png" alt="저장 아이콘" />
+                            </button>
+                            <button type="button" onClick={() => setEditingWorkContent(null)}>
+                              <img src="/images/close_icon_g.png" alt="취소 아이콘" />
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                            <span className={styles.work_name}>{workContent.work_content_name}</span>
+                            <span style={{ fontSize: "13px", color: "var(--text-gray)" }}>(순서: {workContent.display_order})</span>
+                            {!workContent.is_active && <span style={{ fontSize: "12px", color: "#999" }}>(비활성)</span>}
+                          </div>
+                          <div className={styles.btn_wrap}>
+                            <button type="button" onClick={() => setEditingWorkContent(workContent.id)}>
+                              <img src="/images/modify_icon.png" alt="수정 아이콘" />
+                            </button>
+                            <button type="button" onClick={() => handleDeleteWorkContent(workContent.id)}>
+                              <img src="/images/close_icon_g.png" alt="삭제 아이콘" />
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <div className={styles.add_form}>
                   <input
                     type="text"
                     value={newWorkContentName[type.id] || ""}
-                    onChange={(e) =>
-                      setNewWorkContentName({ ...newWorkContentName, [type.id]: e.target.value })
-                    }
+                    onChange={(e) => setNewWorkContentName({ ...newWorkContentName, [type.id]: e.target.value })}
                     placeholder="작업 내용명을 입력하세요"
                     className="border border-slate-200 rounded px-3 py-2 text-sm"
-                    style={{ width: "250px" }}
                     onKeyPress={(e) => {
                       if (e.key === "Enter") {
                         handleAddWorkContent(type.id);
                       }
                     }}
                   />
-                  <button
-                    type="button"
-                    onClick={() => handleAddWorkContent(type.id)}
-                    className="btn btn_sm primary">
+                  <button type="button" onClick={() => handleAddWorkContent(type.id)} className="btn btn_md primary">
                     추가
                   </button>
                 </div>
-              </div>
-
-              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                {(workContents[type.id] || []).map((workContent) => (
-                  <div
-                    key={workContent.id}
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      padding: "10px",
-                      backgroundColor: "#f9f9f9",
-                      borderRadius: "4px",
-                    }}>
-                    {editingWorkContent === workContent.id ? (
-                      <div style={{ display: "flex", gap: "10px", alignItems: "center", flex: 1 }}>
-                        <input
-                          type="text"
-                          defaultValue={workContent.work_content_name}
-                          id={`work-name-${workContent.id}`}
-                          className="border border-slate-200 rounded px-3 py-2 text-sm"
-                          style={{ width: "200px" }}
-                        />
-                        <input
-                          type="number"
-                          defaultValue={workContent.display_order}
-                          id={`work-order-${workContent.id}`}
-                          className="border border-slate-200 rounded px-3 py-2 text-sm"
-                          style={{ width: "80px" }}
-                        />
-                        <label style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "13px" }}>
-                          <input
-                            type="checkbox"
-                            defaultChecked={workContent.is_active}
-                            id={`work-active-${workContent.id}`}
-                          />
-                          활성화
-                        </label>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const nameInput = document.getElementById(`work-name-${workContent.id}`) as HTMLInputElement;
-                            const orderInput = document.getElementById(`work-order-${workContent.id}`) as HTMLInputElement;
-                            const activeInput = document.getElementById(`work-active-${workContent.id}`) as HTMLInputElement;
-                            handleUpdateWorkContent(
-                              workContent.id,
-                              nameInput.value,
-                              parseInt(orderInput.value),
-                              activeInput.checked
-                            );
-                          }}
-                          className="btn btn_sm primary">
-                          저장
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setEditingWorkContent(null)}
-                          className="btn btn_sm normal">
-                          취소
-                        </button>
-                      </div>
-                    ) : (
-                      <>
-                        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                          <span>{workContent.work_content_name}</span>
-                          <span style={{ fontSize: "12px", color: "#666" }}>(순서: {workContent.display_order})</span>
-                          {!workContent.is_active && <span style={{ fontSize: "12px", color: "#999" }}>(비활성)</span>}
-                        </div>
-                        <div style={{ display: "flex", gap: "5px" }}>
-                          <button
-                            type="button"
-                            onClick={() => setEditingWorkContent(workContent.id)}
-                            className="btn btn_sm normal">
-                            수정
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteWorkContent(workContent.id)}
-                            className="btn btn_sm normal">
-                            삭제
-                          </button>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                ))}
               </div>
             </div>
           </div>
