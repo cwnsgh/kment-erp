@@ -1,5 +1,5 @@
 "use client";
-
+import { Plus, X, Upload, Trash2 } from "lucide-react";
 import { useState, FormEvent, useEffect } from "react";
 import { getClientForManagedRegistration } from "@/app/actions/managed-client";
 import { getAllEmployees } from "@/app/actions/work-request";
@@ -612,8 +612,8 @@ export function ContractForm() {
                           계약 {index + 1} {contract.contractName ? `(${contract.contractName})` : "(등록 시 계약명으로 변경)"}
                         </h3>
                         {contracts.length > 1 && (
-                          <button type="button" onClick={() => handleRemoveContract(contract.id)} className="btn btn_sm normal" style={{ fontSize: "13px" }}>
-                            계약 삭제
+                          <button type="button" onClick={() => handleRemoveContract(contract.id)}>
+                            <X size={18} />
                           </button>
                         )}
                       </div>
@@ -769,7 +769,11 @@ export function ContractForm() {
                               첨부파일 <img src="/images/attach_icon.svg" alt="첨부" width={16} height={16} />
                               <input type="file" onChange={(e) => handleFileChange(contract.id, "contractFile", e.target.files?.[0] || null)} style={{ display: "none" }} accept=".pdf,.jpg,.jpeg,.png" />
                             </label>
-                            {contract.contractFile && <span style={{ marginLeft: "8px" }}>{contract.contractFile.name}</span>}
+                            {contract.contractFile && (
+                              <span className="attach" style={{ marginLeft: "8px" }}>
+                                {contract.contractFile.name}
+                              </span>
+                            )}
                           </div>
                         </li>
                         <li className="row_group">
@@ -779,7 +783,11 @@ export function ContractForm() {
                               첨부파일 <img src="/images/attach_icon.svg" alt="첨부" width={16} height={16} />
                               <input type="file" onChange={(e) => handleFileChange(contract.id, "estimateFile", e.target.files?.[0] || null)} style={{ display: "none" }} accept=".pdf,.jpg,.jpeg,.png" />
                             </label>
-                            {contract.estimateFile && <span style={{ marginLeft: "8px" }}>{contract.estimateFile.name}</span>}
+                            {contract.estimateFile && (
+                              <span className="attach" style={{ marginLeft: "8px" }}>
+                                {contract.estimateFile.name}
+                              </span>
+                            )}
                           </div>
                         </li>
                       </ul>

@@ -121,8 +121,16 @@
   margin-left: 15px;
 }
 
+@media (max-width: 1175px) {
+  .kpiCardPeriod {
+    margin-left: 0;
+    margin-top: 10px;
+    display: block;
+  }
+}
+
 .kpiCardValue {
-  font-size: 32px;
+  font-size: 30px;
   font-weight: 800;
   color: var(--text-color);
   margin-top: 40px;
@@ -170,6 +178,8 @@
   margin-left: 15px;
 }
 
+
+
 .tableWrap {
   overflow-x: auto;
   padding-bottom: 40px;
@@ -177,7 +187,7 @@
 
 .table {
   width: 100%;
-  min-width: 800px;
+  min-width: 900px;
   font-size: 14px;
   border-collapse: collapse;
   table-layout: fixed;
@@ -199,25 +209,25 @@
 /* 열 너비 고정 (데이터 있/없어도 동일) */
 .table th:nth-child(1),
 .table td:nth-child(1) {
-  width: 10%;
+  width: auto;
 }
 
 /* 계약일 */
 .table th:nth-child(2),
 .table td:nth-child(2) {
-  width: 13%;
+  width: 15%;
 }
 
 /* 사업자 등록 번호 */
 .table th:nth-child(3),
 .table td:nth-child(3) {
-  width: 18%;
+  width: 15%;
 }
 
 /* 회사명 */
 .table th:nth-child(4),
 .table td:nth-child(4) {
-  width: 10%;
+  width: 11%;
 }
 
 /* 대표자명 */
@@ -229,13 +239,13 @@
 /* 담당자 */
 .table th:nth-child(6),
 .table td:nth-child(6) {
-  width: 8%;
+  width: 90px;
 }
 
 /* 진행상태 */
 .table th:nth-child(7),
 .table td:nth-child(7) {
-  width: 12%;
+  width: 11%;
 }
 
 /* 계약종목 */
@@ -262,7 +272,7 @@
   padding: 24px 16px;
   color: var(--text-color);
   font-weight: var(--font-weight-medium);
-  word-break: break-all;
+  word-break: break-word;
   text-align: center;
 }
 
@@ -274,21 +284,22 @@
 
 /* 진행상태 뱃지 */
 .badge {
-  display: inline-flex;
-  padding: 2px 10px;
-  font-size: 12px;
-  font-weight: 500;
-  border-radius: 0;
+  display: inline-block !important;
+  font-size: 13px !important;
+  font-weight: var(--font-weight-bold) !important;
+  padding: 5px 10px !important;
+  border-radius: 4px !important;
+  line-height: 1 !important;
 }
 
 .badgeNormal {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: var(--status-blue);
+  color: var(--primary);
 }
 
 .badgeUnpaid {
-  background: #f1f5f9;
-  color: #475569;
+  background: var(--status-red);
+  color: var(--negative);
 }
 
 /* 월별 매출 - 큰 네모와 동일한 테두리·그림자 */

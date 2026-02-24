@@ -1,7 +1,9 @@
 /* 사이드바 스타일 */
 
 .sidebar {
-  width: 280px;
+  width: 20vw;
+  max-width: 280px;
+  min-width: 240px;
   background-color: #fff;
   padding: 40px 20px;
   height: 100%;

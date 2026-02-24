@@ -28,7 +28,7 @@
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
   width: 100%;
-  padding: 50px 30px 100px;
+  padding: 50px 0 100px;
   box-sizing: border-box;
   position: relative;
 }
@@ -40,6 +40,7 @@
   width: 100%;
   font-size: 14px;
   font-weight: var(--font-weight-semibold);
+  padding: 0 30px;
 }
 
 .boxInner {}
@@ -119,6 +120,7 @@
   align-items: center !important;
   margin-bottom: 20px !important;
   gap: 12px !important;
+  padding: 0 30px;
 }
 
 .topTotal {

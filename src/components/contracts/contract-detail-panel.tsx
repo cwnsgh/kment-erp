@@ -153,7 +153,7 @@ export function ContractDetailPanel({ detail, isOpen, onClose, isLoading }: Cont
                 </ul>
                 <ul className="table_row">
                   <li className="row_group">
-                    <div className="table_head">상호명(법인)</div>
+                    <div className="table_head">상호(법인명)</div>
                     <div className="table_data">{detail.client.name}</div>
                   </li>
                   <li className="row_group">
@@ -163,7 +163,7 @@ export function ContractDetailPanel({ detail, isOpen, onClose, isLoading }: Cont
                 </ul>
                 <ul className="table_row">
                   <li className="row_group">
-                    <div className="table_head">사업장주소</div>
+                    <div className="table_head">사업자 주소</div>
                     <div className="table_data">{detail.client.address ?? ""}</div>
                   </li>
                 </ul>
@@ -181,7 +181,7 @@ export function ContractDetailPanel({ detail, isOpen, onClose, isLoading }: Cont
                   <li className="row_group">
                     <div className="table_head">사업자 등록증 첨부</div>
                     <div className="table_data attach">
-                      <FileLinks items={detail.clientAttachments.filter((a) => a.file_type === "business_registration")} emptyText="등록된 파일이 없습니다" />
+                      <FileLinks items={detail.clientAttachments.filter((a) => a.file_type === "business_registration")} emptyText="등록된 파일이 없습니다." />
                     </div>
                   </li>
                 </ul>
@@ -198,7 +198,7 @@ export function ContractDetailPanel({ detail, isOpen, onClose, isLoading }: Cont
                 detail.contacts.map((contact, index) => (
                   <div key={index} className="table_item">
                     <h2 className="table_title">담당자 정보</h2>
-                    <h3 className="table_title_sub">담당자-{index + 1}</h3>
+                    <h3 className="table_title_sub">담당자{index + 1}</h3>
                     <ul className="table_row">
                       <li className="row_group">
                         <div className="table_head">이름</div>
@@ -279,10 +279,10 @@ export function ContractDetailPanel({ detail, isOpen, onClose, isLoading }: Cont
               {/* 계약 정보 */}
               <div className="table_item">
                 <h2 className="table_title">계약 정보</h2>
-                <h3 className="table_title_sub">계약 진행(클라이언트)</h3>
+                <h3 className="table_title_sub">{detail.contract.contract_name}</h3>
                 <ul className="table_row">
                   <li className="row_group">
-                    <div className="table_head">업무명</div>
+                    <div className="table_head">계약명</div>
                     <div className="table_data">{detail.contract.contract_name}</div>
                   </li>
                   <li className="row_group">
@@ -292,21 +292,21 @@ export function ContractDetailPanel({ detail, isOpen, onClose, isLoading }: Cont
                 </ul>
                 <ul className="table_row">
                   <li className="row_group">
-                    <div className="table_head">계약종목</div>
+                    <div className="table_head">계약 종목</div>
                     <div className="table_data">{detail.contract.contract_type_name || ""}</div>
                   </li>
                   <li className="row_group">
-                    <div className="table_head">시작 진행예정일</div>
+                    <div className="table_head">시안 완료 예정일</div>
                     <div className="table_data">{formatDate(detail.contract.draft_due_date)}</div>
                   </li>
                 </ul>
                 <ul className="table_row">
                   <li className="row_group">
-                    <div className="table_head">완료 예정일</div>
+                    <div className="table_head">최종 완료일</div>
                     <div className="table_data">{formatDate(detail.contract.final_completion_date)}</div>
                   </li>
                   <li className="row_group">
-                    <div className="table_head">최종 진행일</div>
+                    <div className="table_head">오픈 예정일</div>
                     <div className="table_data">{formatDate(detail.contract.final_completion_date)}</div>
                   </li>
                 </ul>
@@ -316,7 +316,7 @@ export function ContractDetailPanel({ detail, isOpen, onClose, isLoading }: Cont
                     <div className="table_data">{formatAmount(detail.contract.contract_amount)}</div>
                   </li>
                   <li className="row_group">
-                    <div className="table_head">납부유형</div>
+                    <div className="table_head">진행상태</div>
                     <div className="table_data">
                       {paymentLabel(detail.contract.payment_progress)}
                       {detail.contract.payment_progress === "installment" && detail.contract.installment_amount != null && ` (${formatAmount(detail.contract.installment_amount)})`}
@@ -337,25 +337,25 @@ export function ContractDetailPanel({ detail, isOpen, onClose, isLoading }: Cont
                 </ul>
                 <ul className="table_row">
                   <li className="row_group">
-                    <div className="table_head">계약서류 첨부</div>
+                    <div className="table_head">계약서 첨부</div>
                     <div className="table_data attach">
-                      <FileLinks items={detail.contractAttachments.filter((a) => a.file_type === "contract")} emptyText="등록된 파일이 없습니다" />
+                      <FileLinks items={detail.contractAttachments.filter((a) => a.file_type === "contract")} emptyText="등록된 파일이 없습니다." />
                     </div>
                   </li>
                   <li className="row_group">
-                    <div className="table_head">견적서류 첨부</div>
+                    <div className="table_head">견적서 첨부</div>
                     <div className="table_data attach">
-                      <FileLinks items={detail.contractAttachments.filter((a) => a.file_type === "estimate")} emptyText="등록된 파일이 없습니다" />
+                      <FileLinks items={detail.contractAttachments.filter((a) => a.file_type === "estimate")} emptyText="등록된 파일이 없습니다." />
                     </div>
                   </li>
                 </ul>
                 <ul className="table_row">
                   <li className="row_group">
-                    <div className="table_head">주담당자</div>
+                    <div className="table_head">주 담당자</div>
                     <div className="table_data">{detail.contract.primary_contact_name ?? ""}</div>
                   </li>
                   <li className="row_group">
-                    <div className="table_head">부담당자</div>
+                    <div className="table_head">부 담당자</div>
                     <div className="table_data">{detail.contract.secondary_contact_name ?? ""}</div>
                   </li>
                 </ul>

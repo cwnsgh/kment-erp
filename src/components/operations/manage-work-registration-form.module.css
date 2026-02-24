@@ -101,6 +101,10 @@
   margin: 0;
 }
 
+.manageWorkRegist :global(.table_group .table_item .table_row .row_group .table_data.attach) {
+  color: var(--text-gray);
+}
+
 .manageWorkRegist :global(.table_group .table_item .table_row .row_group .table_data .flex) {
   width: 100%;
   gap: 8px;
@@ -239,7 +243,7 @@
 }
 
 .deductTable td {
-  padding: 14px 8px !important;
+  padding: 14px 8px;
   border-bottom: 1px solid var(--border-color);
   vertical-align: middle;
   font-weight: var(--font-weight-semibold) !important;
@@ -277,7 +281,7 @@
 }
 
 .maintenanceTable td {
-  padding: 14px 8px !important;
+  padding: 14px 8px;
   border-bottom: 1px solid var(--border-color);
   vertical-align: middle;
   font-weight: var(--font-weight-semibold) !important;
@@ -298,7 +302,7 @@
 }
 
 .workTable th {
-  padding: 12px 8px;
+  padding: 18px 8px;
   font-weight: 600;
   border-bottom: 1px solid var(--border-color);
   text-align: center;
@@ -308,11 +312,11 @@
 }
 
 .workTable td {
-  padding: 14px 8px !important;
+  padding: 24px 10px;
   border-bottom: 1px solid var(--border-color);
-  vertical-align: top;
+  vertical-align: middle;
   font-weight: var(--font-weight-semibold) !important;
-  text-align: center;
+  text-align: left;
 }
 
 .workTable tr {
@@ -395,6 +399,7 @@
   background-size: 12px 10px;
   padding-right: 32px;
   color: #475569;
+  height: 34px !important;
 }
 
 /* 날짜 그룹 */
@@ -454,40 +459,35 @@
 /* 승인 버튼 스타일 */
 .approvalRequest {
   display: inline-block;
-  padding: 6px 12px;
-  background-color: var(--primary);
+  font-size: 14px;
   color: #fff;
+  font-weight: 600;
+  background-color: #3b82f6;
+  padding: 10px 10px;
   border-radius: 4px;
-  font-size: 13px;
-  font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-  white-space: nowrap;
-  text-align: center;
+  line-height: 1;
 }
 
 .approvalDelete {
   display: inline-block;
-  padding: 6px 12px;
-  background-color: var(--negative);
+  font-size: 14px;
   color: #fff;
+  font-weight: 600;
+  background-color: var(--negative);
+  padding: 10px 10px;
   border-radius: 4px;
-  font-size: 13px;
-  font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-  white-space: nowrap;
-  text-align: center;
+  line-height: 1;
 }
 
 .approvalWait {
   display: inline-block;
-  padding: 6px 12px;
-  background-color: var(--status-yellow);
-  color: var(--neutral);
+  font-size: 14px;
+  color: #fff;
+  font-weight: 600;
+  background-color: var(--text-gray);
+  padding: 10px 10px;
   border-radius: 4px;
-  font-size: 13px;
-  font-weight: var(--font-weight-semibold);
-  white-space: nowrap;
-  text-align: center;
+  line-height: 1;
 }
 
 /* 유지보수형 테이블 여백 */
@@ -637,7 +637,7 @@
 /* 버튼 컨테이너 정렬 */
 .workTable td.buttonCell {
   text-align: center;
-  vertical-align: middle;
+  vertical-align: top;
 }
 
 .workTable td.buttonCell>div {
@@ -673,7 +673,6 @@
   gap: 4px;
   align-items: center;
   justify-content: center;
-  width: 100%;
 }
 
 .maintenanceTable td.buttonCell button,

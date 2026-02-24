@@ -1,10 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import {
-  getContractWorkRequestsForBoard,
-  updateContractWorkRequestStatus,
-} from "@/app/actions/contract-work-request";
+import { getContractWorkRequestsForBoard, updateContractWorkRequestStatus } from "@/app/actions/contract-work-request";
 import { getAllEmployees } from "@/app/actions/work-request";
 import styles from "./contract-task-status-board.module.css";
 
@@ -57,8 +54,7 @@ export function ContractTaskStatusBoard({ initialData, currentEmployeeId }: Cont
     const result = await getContractWorkRequestsForBoard({
       employeeId: employeeFilter || currentEmployeeId || undefined,
       searchKeyword: searchKeyword.trim() || undefined,
-      statusFilter:
-        statusFilter === "all" ? undefined : statusFilter === "work_wait" ? "approved" : (statusFilter as any),
+      statusFilter: statusFilter === "all" ? undefined : statusFilter === "work_wait" ? "approved" : (statusFilter as any),
       dateFrom: dateFrom || undefined,
       dateTo: dateTo || undefined,
     });
@@ -98,11 +94,11 @@ export function ContractTaskStatusBoard({ initialData, currentEmployeeId }: Cont
   };
 
   const getStatusClass = (status: string) => {
-    if (status === "pending" || status === "approved") return styles.statusPending;
-    if (status === "in_progress") return styles.statusInProgress;
-    if (status === "completed") return styles.statusCompleted;
-    if (status === "rejected") return styles.statusRejected;
-    if (status === "deleted") return styles.statusDeleted;
+    if (status === "pending" || status === "approved") return styles.approval_request;
+    if (status === "in_progress") return styles.approval_request;
+    if (status === "completed") return styles.approval_complete;
+    if (status === "rejected") return styles.approval_refusal;
+    if (status === "deleted") return styles.approval_refusal;
     return styles.statusPending;
   };
 
@@ -121,11 +117,7 @@ export function ContractTaskStatusBoard({ initialData, currentEmployeeId }: Cont
         alert(result.error || "상태 변경에 실패했습니다.");
         return;
       }
-      setList((prev) =>
-        prev.map((item) =>
-          item.id === confirmAction.task.id ? { ...item, status: confirmAction.nextStatus } : item
-        )
-      );
+      setList((prev) => prev.map((item) => (item.id === confirmAction.task.id ? { ...item, status: confirmAction.nextStatus } : item)));
       setSelectedTask(null);
       setConfirmAction(null);
     } finally {
@@ -174,78 +166,59 @@ export function ContractTaskStatusBoard({ initialData, currentEmployeeId }: Cont
         <div className={styles.filterRow}>
           <span className={styles.filterLabel}>담당자</span>
           <div className={styles.filterControl}>
-          <select
-            className={styles.filterSelect}
-            value={employeeFilter}
-            onChange={(e) => setEmployeeFilter(e.target.value)}>
-            <option value="">{currentEmployeeId ? "로그인 사용자" : "전체"}</option>
-            {employees.map((emp) => (
-              <option key={emp.id} value={emp.id}>
-                {emp.name}
-              </option>
-            ))}
-          </select>
+            <select className={styles.filterSelect} value={employeeFilter} onChange={(e) => setEmployeeFilter(e.target.value)}>
+              <option value="">{currentEmployeeId ? "로그인 사용자" : "전체"}</option>
+              {employees.map((emp) => (
+                <option key={emp.id} value={emp.id}>
+                  {emp.name}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
         <div className={styles.filterRow}>
           <span className={styles.filterLabel}>회사명(브랜드명)</span>
           <div className={styles.filterControl}>
-          <input
-            type="text"
-            className={styles.filterInputFull}
-            placeholder="회사명 또는 브랜드명"
-            value={searchKeyword}
-            onChange={(e) => setSearchKeyword(e.target.value)}
-          />
+            <input type="text" className={styles.filterInputFull} placeholder="회사명 또는 브랜드명" value={searchKeyword} style={{ maxWidth: "400px" }} onChange={(e) => setSearchKeyword(e.target.value)} />
           </div>
         </div>
         <div className={styles.filterRow}>
           <span className={styles.filterLabel}>진행상태</span>
           <div className={styles.filterControl}>
-          <div className={styles.statusFilterGroup}>
-            <label className={styles.statusFilterItem}>
-              <input type="radio" name="statusFilter" checked={statusFilter === "all"} onChange={() => setStatusFilter("all")} />
-              전체
-            </label>
-            <label className={styles.statusFilterItem}>
-              <input type="radio" name="statusFilter" checked={statusFilter === "pending"} onChange={() => setStatusFilter("pending")} />
-              승인요청
-            </label>
-            <label className={styles.statusFilterItem}>
-              <input type="radio" name="statusFilter" checked={statusFilter === "approved"} onChange={() => setStatusFilter("approved")} />
-              승인대기
-            </label>
-            <label className={styles.statusFilterItem}>
-              <input type="radio" name="statusFilter" checked={statusFilter === "work_wait"} onChange={() => setStatusFilter("work_wait")} />
-              작업대기
-            </label>
-            <label className={styles.statusFilterItem}>
-              <input type="radio" name="statusFilter" checked={statusFilter === "in_progress"} onChange={() => setStatusFilter("in_progress")} />
-              작업중
-            </label>
-            <label className={styles.statusFilterItem}>
-              <input type="radio" name="statusFilter" checked={statusFilter === "completed"} onChange={() => setStatusFilter("completed")} />
-              작업완료
-            </label>
-          </div>
+            <div className={styles.statusFilterGroup}>
+              <label className={styles.statusFilterItem}>
+                <input type="radio" name="statusFilter" checked={statusFilter === "all"} onChange={() => setStatusFilter("all")} />
+                전체
+              </label>
+              <label className={styles.statusFilterItem}>
+                <input type="radio" name="statusFilter" checked={statusFilter === "pending"} onChange={() => setStatusFilter("pending")} />
+                승인요청
+              </label>
+              <label className={styles.statusFilterItem}>
+                <input type="radio" name="statusFilter" checked={statusFilter === "approved"} onChange={() => setStatusFilter("approved")} />
+                승인대기
+              </label>
+              <label className={styles.statusFilterItem}>
+                <input type="radio" name="statusFilter" checked={statusFilter === "work_wait"} onChange={() => setStatusFilter("work_wait")} />
+                작업대기
+              </label>
+              <label className={styles.statusFilterItem}>
+                <input type="radio" name="statusFilter" checked={statusFilter === "in_progress"} onChange={() => setStatusFilter("in_progress")} />
+                작업중
+              </label>
+              <label className={styles.statusFilterItem}>
+                <input type="radio" name="statusFilter" checked={statusFilter === "completed"} onChange={() => setStatusFilter("completed")} />
+                작업완료
+              </label>
+            </div>
           </div>
         </div>
         <div className={styles.filterRow}>
           <span className={styles.filterLabel}>등록일</span>
           <div className={styles.filterControl}>
-            <input
-              type="date"
-              className={styles.filterInput}
-              value={dateFrom}
-              onChange={(e) => setDateFrom(e.target.value)}
-            />
+            <input type="date" className={styles.filterInput} value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
             <span className={styles.dateSep}>~</span>
-            <input
-              type="date"
-              className={styles.filterInput}
-              value={dateTo}
-              onChange={(e) => setDateTo(e.target.value)}
-            />
+            <input type="date" className={styles.filterInput} value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
           </div>
         </div>
         <div className={styles.filterRowActions}>
@@ -261,20 +234,20 @@ export function ContractTaskStatusBoard({ initialData, currentEmployeeId }: Cont
       <div className={styles.tableBox}>
         <div className={styles.tableTop}>
           <p className={styles.topTotal}>
-            총 <span>{list.length}</span>건의 계약이 조회되었습니다.
+            총 <span>{list.length}</span>건의 업무가 조회되었습니다.
           </p>
           <div className={styles.topBtnGroup}>
-            <button type="button" className={styles.btnSelectAll}>
+            <button type="button" className={`btn btn_md normal`}>
               전체 선택
             </button>
-            <button type="button" className={styles.btnDeleteSelected}>
+            <button type="button" className={`btn btn_md primary`}>
               선택 삭제
             </button>
-            <button type="button" className={styles.btnExcel}>
+            <button type="button" className={`excel_btn btn btn_md normal`}>
               엑셀 다운로드
             </button>
             <select
-              className={styles.viewSelect}
+              className={`viewSelect`}
               value={itemsPerPage}
               onChange={(e) => {
                 setItemsPerPage(Number(e.target.value));
@@ -307,11 +280,7 @@ export function ContractTaskStatusBoard({ initialData, currentEmployeeId }: Cont
               <thead>
                 <tr>
                   <th>
-                    <input
-                      type="checkbox"
-                      checked={paginatedList.length > 0 && selectedIds.size === paginatedList.length}
-                      onChange={toggleSelectAll}
-                    />
+                    <input type="checkbox" checked={paginatedList.length > 0 && selectedIds.size === paginatedList.length} onChange={toggleSelectAll} />
                   </th>
                   <th>번호</th>
                   <th>회사명</th>
@@ -335,11 +304,7 @@ export function ContractTaskStatusBoard({ initialData, currentEmployeeId }: Cont
                       if (e.key === "Enter") setSelectedTask(row);
                     }}>
                     <td onClick={(e) => e.stopPropagation()}>
-                      <input
-                        type="checkbox"
-                        checked={selectedIds.has(row.id)}
-                        onChange={() => toggleSelect(row.id)}
-                      />
+                      <input type="checkbox" checked={selectedIds.has(row.id)} onChange={() => toggleSelect(row.id)} />
                     </td>
                     <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
                     <td>{row.client_name}</td>
@@ -352,9 +317,7 @@ export function ContractTaskStatusBoard({ initialData, currentEmployeeId }: Cont
                       {row.work_content || "-"}
                     </td>
                     <td>
-                      <span className={`${styles.statusBadge} ${getStatusClass(row.status)}`}>
-                        {getStatusLabel(row.status)}
-                      </span>
+                      <span className={`${styles.statusBadge} ${getStatusClass(row.status)}`}>{getStatusLabel(row.status)}</span>
                     </td>
                   </tr>
                 ))}
@@ -366,43 +329,25 @@ export function ContractTaskStatusBoard({ initialData, currentEmployeeId }: Cont
         {totalPages > 1 && (
           <div className={styles.pagination}>
             <ul>
-              <li
-                className={currentPage === 1 ? styles.disabled : ""}
-                onClick={() => currentPage > 1 && setCurrentPage(1)}>
+              <li className={currentPage === 1 ? styles.disabled : ""} onClick={() => currentPage > 1 && setCurrentPage(1)}>
                 &laquo;
               </li>
-              <li
-                className={currentPage === 1 ? styles.disabled : ""}
-                onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}>
+              <li className={currentPage === 1 ? styles.disabled : ""} onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}>
                 &lsaquo;
               </li>
               {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                let p =
-                  totalPages <= 5
-                    ? i + 1
-                    : currentPage <= 3
-                      ? i + 1
-                      : currentPage >= totalPages - 2
-                        ? totalPages - 4 + i
-                        : currentPage - 2 + i;
+                let p = totalPages <= 5 ? i + 1 : currentPage <= 3 ? i + 1 : currentPage >= totalPages - 2 ? totalPages - 4 + i : currentPage - 2 + i;
                 if (p < 1) p = 1;
                 return (
-                  <li
-                    key={p}
-                    className={currentPage === p ? styles.active : ""}
-                    onClick={() => setCurrentPage(p)}>
+                  <li key={p} className={currentPage === p ? styles.active : ""} onClick={() => setCurrentPage(p)}>
                     {p}
                   </li>
                 );
               })}
-              <li
-                className={currentPage === totalPages ? styles.disabled : ""}
-                onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}>
+              <li className={currentPage === totalPages ? styles.disabled : ""} onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}>
                 &rsaquo;
               </li>
-              <li
-                className={currentPage === totalPages ? styles.disabled : ""}
-                onClick={() => currentPage < totalPages && setCurrentPage(totalPages)}>
+              <li className={currentPage === totalPages ? styles.disabled : ""} onClick={() => currentPage < totalPages && setCurrentPage(totalPages)}>
                 &raquo;
               </li>
             </ul>
@@ -448,9 +393,7 @@ export function ContractTaskStatusBoard({ initialData, currentEmployeeId }: Cont
                 <div className={styles.modalGridItem}>
                   <span className={styles.modalGridLabel}>진행상황</span>
                   <p className={styles.modalGridValue}>
-                    <span className={`${styles.statusBadge} ${getStatusClass(selectedTask.status)}`}>
-                      {getStatusLabel(selectedTask.status)}
-                    </span>
+                    <span className={`${styles.statusBadge} ${getStatusClass(selectedTask.status)}`}>{getStatusLabel(selectedTask.status)}</span>
                   </p>
                 </div>
                 <div className={styles.modalGridItem}>
@@ -486,29 +429,15 @@ export function ContractTaskStatusBoard({ initialData, currentEmployeeId }: Cont
       )}
 
       {confirmAction && (
-        <div
-          className={`${styles.modalOverlay} ${styles.modalOverlayConfirm}`}
-          onClick={() => (statusUpdating ? undefined : setConfirmAction(null))}>
+        <div className={`${styles.modalOverlay} ${styles.modalOverlayConfirm}`} onClick={() => (statusUpdating ? undefined : setConfirmAction(null))}>
           <div className={`${styles.modalContainer} ${styles.modalContainerConfirm}`} onClick={(e) => e.stopPropagation()}>
             <h3 className={styles.confirmModalTitle}>상태를 변경할까요?</h3>
-            <p className={styles.confirmModalText}>
-              {confirmAction.nextStatus === "in_progress"
-                ? "작업 대기인 업무를 작업중으로 변경합니다."
-                : "작업중인 업무를 작업완료로 변경합니다."}
-            </p>
+            <p className={styles.confirmModalText}>{confirmAction.nextStatus === "in_progress" ? "작업 대기인 업무를 작업중으로 변경합니다." : "작업중인 업무를 작업완료로 변경합니다."}</p>
             <div className={styles.confirmModalActions}>
-              <button
-                type="button"
-                className="btn btn_lg normal"
-                onClick={() => setConfirmAction(null)}
-                disabled={statusUpdating}>
+              <button type="button" className="btn btn_lg normal" onClick={() => setConfirmAction(null)} disabled={statusUpdating}>
                 취소
               </button>
-              <button
-                type="button"
-                className="btn btn_lg primary"
-                onClick={handleConfirmStatusChange}
-                disabled={statusUpdating}>
+              <button type="button" className="btn btn_lg primary" onClick={handleConfirmStatusChange} disabled={statusUpdating}>
                 {statusUpdating ? "변경 중..." : "변경"}
               </button>
             </div>

@@ -1,16 +1,25 @@
 "use client";
 
+import { X } from "lucide-react";
 import { useState, useTransition } from "react";
 import Image from "next/image";
 import { ContractSelectModal } from "./contract-select-modal";
-import { getContractForTaskRegistration, getContractWorkRequestsByContract, createContractWorkRequest, updateContractWorkRequestStatus, deleteContractWorkRequest } from "@/app/actions/contract-work-request";
+import {
+  getContractForTaskRegistration,
+  getContractWorkRequestsByContract,
+  createContractWorkRequest,
+  updateContractWorkRequestStatus,
+  deleteContractWorkRequest,
+} from "@/app/actions/contract-work-request";
 import styles from "./contract-task-registration-form.module.css";
 import manageStyles from "../operations/manage-work-registration-form.module.css";
 
 type ContractData = Awaited<ReturnType<typeof getContractForTaskRegistration>>;
 type ContractDetail = NonNullable<ContractData["contract"]>;
 type WorkContent = NonNullable<ContractData["workContents"]>[number];
-type RequestRow = NonNullable<Awaited<ReturnType<typeof getContractWorkRequestsByContract>>["requests"]>[number];
+type RequestRow = NonNullable<
+  Awaited<ReturnType<typeof getContractWorkRequestsByContract>>["requests"]
+>[number];
 
 type NewTaskRow = {
   id: string;
@@ -27,7 +36,9 @@ type ContractTaskRegistrationFormProps = {
   employeeName: string;
 };
 
-export function ContractTaskRegistrationForm({ employeeName }: ContractTaskRegistrationFormProps) {
+export function ContractTaskRegistrationForm({
+  employeeName,
+}: ContractTaskRegistrationFormProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [contractData, setContractData] = useState<ContractData | null>(null);
   const [requests, setRequests] = useState<RequestRow[]>([]);
@@ -106,20 +117,29 @@ export function ContractTaskRegistrationForm({ employeeName }: ContractTaskRegis
   };
 
   const updateNewRow = (id: string, field: keyof NewTaskRow, value: any) => {
-    setNewRows((prev) => prev.map((r) => (r.id === id ? { ...r, [field]: value } : r)));
+    setNewRows((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, [field]: value } : r)),
+    );
   };
 
   const removeNewRow = (id: string) => {
     setNewRows((prev) => prev.filter((r) => r.id !== id));
   };
 
-  const uploadFile = async (file: File): Promise<{ url: string; fileName: string } | null> => {
+  const uploadFile = async (
+    file: File,
+  ): Promise<{ url: string; fileName: string } | null> => {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("folder", "work-attachment");
-    const res = await fetch("/api/files/upload", { method: "POST", body: formData });
+    const res = await fetch("/api/files/upload", {
+      method: "POST",
+      body: formData,
+    });
     const data = await res.json();
-    return data.success && data.url ? { url: data.url, fileName: data.fileName || file.name } : null;
+    return data.success && data.url
+      ? { url: data.url, fileName: data.fileName || file.name }
+      : null;
   };
 
   const handleSubmitRequest = async (row: NewTaskRow) => {
@@ -170,14 +190,22 @@ export function ContractTaskRegistrationForm({ employeeName }: ContractTaskRegis
     setIsLoading(false);
   };
 
-  const handleStatusChange = async (requestId: string, status: "in_progress" | "completed") => {
+  const handleStatusChange = async (
+    requestId: string,
+    status: "in_progress" | "completed",
+  ) => {
     const res = await updateContractWorkRequestStatus(requestId, status);
     if (res.success && contract?.id) loadRequests(contract.id);
     else alert(res.error ?? "상태 변경에 실패했습니다.");
   };
 
   const handleDeleteRequest = async (requestId: string) => {
-    if (!confirm("이 업무를 삭제하시겠습니까? 승인된 경우 수정 횟수가 복구됩니다.")) return;
+    if (
+      !confirm(
+        "이 업무를 삭제하시겠습니까? 승인된 경우 수정 횟수가 복구됩니다.",
+      )
+    )
+      return;
     const res = await deleteContractWorkRequest(requestId);
     if (res.success && contract?.id) loadRequests(contract.id);
     else alert(res.error ?? "삭제에 실패했습니다.");
@@ -202,7 +230,9 @@ export function ContractTaskRegistrationForm({ employeeName }: ContractTaskRegis
   };
 
   return (
-    <section className={`manageWork_regist page_section ${manageStyles.manageWorkRegist}`}>
+    <section
+      className={`manageWork_regist page_section ${manageStyles.manageWorkRegist}`}
+    >
       <div className="page_title">
         <h1>업무 등록</h1>
         <div className="btn_wrap">
@@ -215,18 +245,34 @@ export function ContractTaskRegistrationForm({ employeeName }: ContractTaskRegis
         </div>
       </div>
 
-      <ContractSelectModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSelect={handleSelectContract} />
+      <ContractSelectModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSelect={handleSelectContract}
+      />
 
       <div className="white_box">
         <div className={manageStyles.importBtnWrapper}>
-          <button type="button" className="import_btn btn btn_md black" onClick={() => setIsModalOpen(true)}>
+          <button
+            type="button"
+            className="import_btn btn btn_md black"
+            style={{
+              position: "relative",
+              top: "0",
+              right: "0",
+              marginBottom: "40px",
+            }}
+            onClick={() => setIsModalOpen(true)}
+          >
             계약 불러오기
           </button>
         </div>
 
         {error && <div className={styles.errorBox}>{error}</div>}
 
-        {isLoading && !contractData && <div className={styles.loading}>계약 정보를 불러오는 중...</div>}
+        {isLoading && !contractData && (
+          <div className={styles.loading}>계약 정보를 불러오는 중...</div>
+        )}
 
         {contractData && contract && client && (
           <div className="box_inner">
@@ -235,8 +281,18 @@ export function ContractTaskRegistrationForm({ employeeName }: ContractTaskRegis
               <div className="table_item">
                 <h2 className="table_title">
                   ERP 정보
-                  <button type="button" onClick={() => setErpOpen(!erpOpen)} className={manageStyles.toggleBtn}>
-                    <Image src="/images/arrow_icon.svg" alt="" width={16} height={16} className={`${manageStyles.tableToggle} ${erpOpen ? manageStyles.rotated : ""}`} />
+                  <button
+                    type="button"
+                    onClick={() => setErpOpen(!erpOpen)}
+                    className={manageStyles.toggleBtn}
+                  >
+                    <Image
+                      src="/images/arrow_icon.svg"
+                      alt=""
+                      width={16}
+                      height={16}
+                      className={`${manageStyles.tableToggle} ${erpOpen ? manageStyles.rotated : ""}`}
+                    />
                   </button>
                 </h2>
                 {erpOpen && (
@@ -259,8 +315,18 @@ export function ContractTaskRegistrationForm({ employeeName }: ContractTaskRegis
               <div className="table_item">
                 <h2 className="table_title">
                   기본 정보
-                  <button type="button" onClick={() => setBasicOpen(!basicOpen)} className={manageStyles.toggleBtn}>
-                    <Image src="/images/arrow_icon.svg" alt="" width={16} height={16} className={`${manageStyles.tableToggle} ${basicOpen ? manageStyles.rotated : ""}`} />
+                  <button
+                    type="button"
+                    onClick={() => setBasicOpen(!basicOpen)}
+                    className={manageStyles.toggleBtn}
+                  >
+                    <Image
+                      src="/images/arrow_icon.svg"
+                      alt=""
+                      width={16}
+                      height={16}
+                      className={`${manageStyles.tableToggle} ${basicOpen ? manageStyles.rotated : ""}`}
+                    />
                   </button>
                 </h2>
                 {basicOpen && (
@@ -268,7 +334,9 @@ export function ContractTaskRegistrationForm({ employeeName }: ContractTaskRegis
                     <ul className="table_row">
                       <li className="row_group">
                         <div className="table_head">거래처 사업자등록번호</div>
-                        <div className="table_data">{client.business_registration_number ?? "-"}</div>
+                        <div className="table_data">
+                          {client.business_registration_number ?? "-"}
+                        </div>
                       </li>
                     </ul>
                     <ul className="table_row">
@@ -278,13 +346,17 @@ export function ContractTaskRegistrationForm({ employeeName }: ContractTaskRegis
                       </li>
                       <li className="row_group">
                         <div className="table_head">대표자</div>
-                        <div className="table_data">{client.ceo_name ?? "-"}</div>
+                        <div className="table_data">
+                          {client.ceo_name ?? "-"}
+                        </div>
                       </li>
                     </ul>
                     <ul className="table_row">
                       <li className="row_group">
                         <div className="table_head">사업자 주소</div>
-                        <div className="table_data">{client.address ?? "-"}</div>
+                        <div className="table_data">
+                          {client.address ?? "-"}
+                        </div>
                       </li>
                     </ul>
                   </div>
@@ -295,20 +367,40 @@ export function ContractTaskRegistrationForm({ employeeName }: ContractTaskRegis
               <div className="table_item">
                 <h2 className="table_title">
                   담당자 정보
-                  <button type="button" onClick={() => setContactOpen(!contactOpen)} className={manageStyles.toggleBtn}>
-                    <Image src="/images/arrow_icon.svg" alt="" width={16} height={16} className={`${manageStyles.tableToggle} ${contactOpen ? manageStyles.rotated : ""}`} />
+                  <button
+                    type="button"
+                    onClick={() => setContactOpen(!contactOpen)}
+                    className={manageStyles.toggleBtn}
+                  >
+                    <Image
+                      src="/images/arrow_icon.svg"
+                      alt=""
+                      width={16}
+                      height={16}
+                      className={`${manageStyles.tableToggle} ${contactOpen ? manageStyles.rotated : ""}`}
+                    />
                   </button>
                 </h2>
                 {contactOpen && (
                   <div className="table_wrap">
-                    <ul className="table_row">
+                    <ul
+                      className="table_row"
+                      style={{
+                        borderBottom: "1px solid var(--border-color)",
+                        marginBottom: "30px",
+                      }}
+                    >
                       <li className="row_group">
                         <div className="table_head">주 담당자</div>
-                        <div className="table_data">{contract.primary_contact_name ?? "-"}</div>
+                        <div className="table_data">
+                          {contract.primary_contact_name ?? "-"}
+                        </div>
                       </li>
                       <li className="row_group">
                         <div className="table_head">부 담당자</div>
-                        <div className="table_data">{contract.secondary_contact_name ?? "-"}</div>
+                        <div className="table_data">
+                          {contract.secondary_contact_name ?? "-"}
+                        </div>
                       </li>
                     </ul>
                     {contacts.length > 0 && (
@@ -340,14 +432,27 @@ export function ContractTaskRegistrationForm({ employeeName }: ContractTaskRegis
               <div className="table_item table_item2">
                 <h2 className="table_title">
                   사이트 정보
-                  <button type="button" onClick={() => setSiteOpen(!siteOpen)} className={manageStyles.toggleBtn}>
-                    <Image src="/images/arrow_icon.svg" alt="" width={16} height={16} className={`${manageStyles.tableToggle} ${siteOpen ? manageStyles.rotated : ""}`} />
+                  <button
+                    type="button"
+                    onClick={() => setSiteOpen(!siteOpen)}
+                    className={manageStyles.toggleBtn}
+                  >
+                    <Image
+                      src="/images/arrow_icon.svg"
+                      alt=""
+                      width={16}
+                      height={16}
+                      className={`${manageStyles.tableToggle} ${siteOpen ? manageStyles.rotated : ""}`}
+                    />
                   </button>
                 </h2>
                 {siteOpen && (
                   <div className="table_wrap">
                     {sites.length === 0 ? (
-                      <div className="table_data" style={{ padding: "18px 20px" }}>
+                      <div
+                        className="table_data"
+                        style={{ padding: "18px 20px" }}
+                      >
                         사이트 정보가 없습니다.
                       </div>
                     ) : (
@@ -380,8 +485,18 @@ export function ContractTaskRegistrationForm({ employeeName }: ContractTaskRegis
               <div className="table_item">
                 <h2 className="table_title">
                   비고
-                  <button type="button" onClick={() => setNoteOpen(!noteOpen)} className={manageStyles.toggleBtn}>
-                    <Image src="/images/arrow_icon.svg" alt="" width={16} height={16} className={`${manageStyles.tableToggle} ${noteOpen ? manageStyles.rotated : ""}`} />
+                  <button
+                    type="button"
+                    onClick={() => setNoteOpen(!noteOpen)}
+                    className={manageStyles.toggleBtn}
+                  >
+                    <Image
+                      src="/images/arrow_icon.svg"
+                      alt=""
+                      width={16}
+                      height={16}
+                      className={`${manageStyles.tableToggle} ${noteOpen ? manageStyles.rotated : ""}`}
+                    />
                   </button>
                 </h2>
                 {noteOpen && (
@@ -394,11 +509,17 @@ export function ContractTaskRegistrationForm({ employeeName }: ContractTaskRegis
               </div>
 
               {/* 업무 등록 */}
-              <div className={`table_item table_item2 ${manageStyles.workRegistration}`}>
+              <div
+                className={`table_item table_item2 ${manageStyles.workRegistration}`}
+              >
                 <h2 className="table_title">
                   {contract.contract_name}{" "}
                   <div style={{ textAlign: "right", marginBottom: 12 }}>
-                    <button type="button" onClick={addNewRow} className="plus_btn">
+                    <button
+                      type="button"
+                      onClick={addNewRow}
+                      className="plus_btn"
+                    >
                       + 업무 추가
                     </button>
                   </div>
@@ -408,7 +529,9 @@ export function ContractTaskRegistrationForm({ employeeName }: ContractTaskRegis
                     <div>
                       {" "}
                       <span key={wc.id} className={styles.workContentChip}>
-                        <span className={styles.workContentHead}>{wc.work_content_name}</span>
+                        <span className={styles.workContentHead}>
+                          {wc.work_content_name}
+                        </span>
                         <span>{wc.modification_count}회</span>
                       </span>
                     </div>
@@ -416,7 +539,9 @@ export function ContractTaskRegistrationForm({ employeeName }: ContractTaskRegis
                 </div>
 
                 <div className="table_wrap">
-                  <table className={`${manageStyles.workTable} ${manageStyles.maintenanceTable} ${styles.contractWorkTable}`}>
+                  <table
+                    className={`${manageStyles.workTable} ${manageStyles.maintenanceTable} ${styles.contractWorkTable}`}
+                  >
                     <colgroup>
                       <col style={{ width: "12%" }} />
                       <col style={{ width: "8%" }} />
@@ -426,6 +551,7 @@ export function ContractTaskRegistrationForm({ employeeName }: ContractTaskRegis
                       <col style={{ width: "auto" }} />
                       <col style={{ width: "auto" }} />
                       <col style={{ width: "100px" }} />
+                      <col style={{ width: "20px" }} />
                     </colgroup>
                     <thead>
                       <tr>
@@ -436,7 +562,8 @@ export function ContractTaskRegistrationForm({ employeeName }: ContractTaskRegis
                         <th>작업유형</th>
                         <th>작업내용</th>
                         <th>메모</th>
-                        <th>승인요청</th>
+                        <th>진행상황</th>
+                        <th></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -444,53 +571,90 @@ export function ContractTaskRegistrationForm({ employeeName }: ContractTaskRegis
                         <tr key={r.id}>
                           <td data-th="브랜드">{r.brand_name}</td>
                           <td data-th="담당자">{r.manager}</td>
-                          <td data-th="작업기간">{r.work_period ? formatDate(r.work_period) : "-"}</td>
+                          <td data-th="작업기간">
+                            {r.work_period ? formatDate(r.work_period) : "-"}
+                          </td>
                           <td data-th="첨부파일">
                             {r.attachment_name ? (
-                              <a href={r.attachment_url ?? "#"} target="_blank" rel="noopener noreferrer">
+                              <a
+                                href={r.attachment_url ?? "#"}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
                                 {r.attachment_name}
                               </a>
                             ) : (
                               "-"
                             )}
                           </td>
-                          <td data-th="작업유형">{r.work_content_name ?? "-"}</td>
-                          <td data-th="작업내용" className={manageStyles.inputCell}>
+                          <td data-th="작업유형">
+                            {r.work_content_name ?? "-"}
+                          </td>
+                          <td
+                            data-th="작업내용"
+                            className={manageStyles.inputCell}
+                          >
                             {r.work_content ?? "-"}
                           </td>
                           <td data-th="메모" className={manageStyles.inputCell}>
                             {r.memo ?? "-"}
                           </td>
-                          <td data-th="승인요청" className={manageStyles.buttonCell}>
-                            {r.status === "pending" && <span className={manageStyles.approvalWait}>승인대기</span>}
+                          <td
+                            data-th="승인요청"
+                            className={manageStyles.buttonCell}
+                          >
+                            {r.status === "pending" && (
+                              <span className={manageStyles.approvalWait}>
+                                승인대기
+                              </span>
+                            )}
                             {r.status === "approved" && (
                               <select
                                 value=""
                                 onChange={(e) => {
-                                  const v = e.target.value as "in_progress" | "completed";
+                                  const v = e.target.value as
+                                    | "in_progress"
+                                    | "completed";
                                   if (v) handleStatusChange(r.id, v);
-                                }}>
+                                }}
+                              >
                                 <option value="">선택</option>
                                 <option value="in_progress">작업중</option>
                                 <option value="completed">작업완료</option>
                               </select>
                             )}
-                            {(r.status === "in_progress" || r.status === "completed") && (
+                            {(r.status === "in_progress" ||
+                              r.status === "completed") && (
                               <>
                                 <span>{getStatusLabel(r.status)}</span>
-                                {/* <button type="button" className="btn btn_sm danger" onClick={() => handleDeleteRequest(r.id)}>
-                                  삭제
+                                {/* <button type="button" className="btn" onClick={() => handleDeleteRequest(r.id)}>
+                                  <X size={18} />
                                 </button> */}
                               </>
                             )}
-                            {(r.status === "rejected" || r.status === "deleted") && <span>{getStatusLabel(r.status)}</span>}
+                            {(r.status === "rejected" ||
+                              r.status === "deleted") && (
+                              <span>{getStatusLabel(r.status)}</span>
+                            )}
                           </td>
                         </tr>
                       ))}
                       {newRows.map((row) => (
                         <tr key={row.id}>
-                          <td data-th="브랜드" className={manageStyles.selectCell}>
-                            <select value={row.brandName} onChange={(e) => updateNewRow(row.id, "brandName", e.target.value)}>
+                          <td
+                            data-th="브랜드"
+                            className={manageStyles.selectCell}
+                          >
+                            <select
+                              value={row.brandName}
+                              onChange={(e) =>
+                                updateNewRow(
+                                  row.id,
+                                  "brandName",
+                                  e.target.value,
+                                )
+                              }
+                            >
                               <option value="">선택</option>
                               {sites.map((s) => (
                                 <option key={s.id} value={s.brand_name ?? ""}>
@@ -499,39 +663,117 @@ export function ContractTaskRegistrationForm({ employeeName }: ContractTaskRegis
                               ))}
                             </select>
                           </td>
-                          <td data-th="담당자" className={manageStyles.inputCell}>
-                            <input type="text" value={row.manager} onChange={(e) => updateNewRow(row.id, "manager", e.target.value)} placeholder="담당자" />
+                          <td
+                            data-th="담당자"
+                            className={manageStyles.inputCell}
+                          >
+                            <input
+                              type="text"
+                              value={row.manager}
+                              onChange={(e) =>
+                                updateNewRow(row.id, "manager", e.target.value)
+                              }
+                              placeholder="담당자"
+                            />
                           </td>
-                          <td data-th="작업기간" className={manageStyles.dateCell}>
-                            <input type="date" value={row.workPeriod} onChange={(e) => updateNewRow(row.id, "workPeriod", e.target.value)} />
+                          <td
+                            data-th="작업기간"
+                            className={manageStyles.dateCell}
+                          >
+                            <input
+                              type="date"
+                              value={row.workPeriod}
+                              onChange={(e) =>
+                                updateNewRow(
+                                  row.id,
+                                  "workPeriod",
+                                  e.target.value,
+                                )
+                              }
+                            />
                           </td>
-                          <td data-th="첨부파일" className={manageStyles.inputCell}>
+                          <td
+                            data-th="첨부파일"
+                            className={manageStyles.inputCell}
+                          >
                             <div className="file-upload-box">
-                              <input type="file" className="fileInput" data-work-id={row.id} hidden onChange={(e) => updateNewRow(row.id, "attachment", e.target.files?.[0] ?? null)} />
+                              <input
+                                type="file"
+                                className="fileInput"
+                                data-work-id={row.id}
+                                hidden
+                                onChange={(e) =>
+                                  updateNewRow(
+                                    row.id,
+                                    "attachment",
+                                    e.target.files?.[0] ?? null,
+                                  )
+                                }
+                              />
                               {!row.attachment ? (
-                                <div className="file-upload-btn" onClick={() => (document.querySelector(`.fileInput[data-work-id="${row.id}"]`) as HTMLInputElement)?.click()}>
+                                <div
+                                  className="file-upload-btn"
+                                  onClick={() =>
+                                    (
+                                      document.querySelector(
+                                        `.fileInput[data-work-id="${row.id}"]`,
+                                      ) as HTMLInputElement
+                                    )?.click()
+                                  }
+                                >
                                   <span>첨부파일</span>
-                                  <Image src="/images/attach_icon.svg" alt="" width={12} height={12} style={{ display: "inline-block", margin: 0 }} />
+                                  <Image
+                                    src="/images/attach_icon.svg"
+                                    alt=""
+                                    width={12}
+                                    height={12}
+                                    style={{
+                                      display: "inline-block",
+                                      margin: 0,
+                                    }}
+                                  />
                                 </div>
                               ) : (
                                 <div className={manageStyles.fileNameContainer}>
-                                  <span className="fileName">{row.attachment.name}</span>
+                                  <span className="fileName">
+                                    {row.attachment.name}
+                                  </span>
                                   <button
                                     type="button"
                                     className={manageStyles.fileRemoveBtn}
                                     onClick={() => {
                                       updateNewRow(row.id, "attachment", null);
-                                      const input = document.querySelector(`.fileInput[data-work-id="${row.id}"]`) as HTMLInputElement;
+                                      const input = document.querySelector(
+                                        `.fileInput[data-work-id="${row.id}"]`,
+                                      ) as HTMLInputElement;
                                       if (input) input.value = "";
-                                    }}>
-                                    <Image src="/images/close_icon.svg" alt="제거" width={14} height={14} />
+                                    }}
+                                  >
+                                    <Image
+                                      src="/images/close_icon.svg"
+                                      alt="제거"
+                                      width={14}
+                                      height={14}
+                                    />
                                   </button>
                                 </div>
                               )}
                             </div>
                           </td>
-                          <td data-th="작업유형" className={manageStyles.selectCell}>
-                            <select value={row.contractWorkContentId} onChange={(e) => updateNewRow(row.id, "contractWorkContentId", e.target.value)}>
+                          <td
+                            data-th="작업유형"
+                            className={manageStyles.selectCell}
+                          >
+                            <select
+                              value={row.contractWorkContentId}
+                              onChange={(e) =>
+                                updateNewRow(
+                                  row.id,
+                                  "contractWorkContentId",
+                                  e.target.value,
+                                )
+                              }
+                            >
                               {workContents.map((wc) => (
                                 <option key={wc.id} value={wc.id}>
                                   {wc.work_content_name}
@@ -539,21 +781,64 @@ export function ContractTaskRegistrationForm({ employeeName }: ContractTaskRegis
                               ))}
                             </select>
                           </td>
-                          <td data-th="작업내용" className={manageStyles.inputCell}>
-                            <input type="text" value={row.workContent} onChange={(e) => updateNewRow(row.id, "workContent", e.target.value)} placeholder="작업내용" />
+                          <td
+                            data-th="작업내용"
+                            className={manageStyles.inputCell}
+                          >
+                            <input
+                              type="text"
+                              value={row.workContent}
+                              onChange={(e) =>
+                                updateNewRow(
+                                  row.id,
+                                  "workContent",
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="작업내용"
+                            />
                           </td>
                           <td data-th="메모" className={manageStyles.inputCell}>
-                            <input type="text" value={row.memo} onChange={(e) => updateNewRow(row.id, "memo", e.target.value)} placeholder="메모" />
+                            <input
+                              type="text"
+                              value={row.memo}
+                              onChange={(e) =>
+                                updateNewRow(row.id, "memo", e.target.value)
+                              }
+                              placeholder="메모"
+                            />
                           </td>
-                          <td data-th="승인요청" className={manageStyles.buttonCell}>
+                          <td
+                            data-th="승인요청"
+                            className={manageStyles.buttonCell}
+                          >
                             <div>
-                              <button type="button" className={`btn  ${manageStyles.approvalRequest}`} onClick={() => handleSubmitRequest(row)} disabled={isLoading}>
+                              <button
+                                type="button"
+                                className={`btn  ${manageStyles.approvalRequest}`}
+                                onClick={() => handleSubmitRequest(row)}
+                                disabled={isLoading}
+                              >
                                 승인요청
                               </button>
-                              <button type="button" className={`btn  ${manageStyles.approvalDelete}`} onClick={() => removeNewRow(row.id)}>
-                                취소
-                              </button>
                             </div>
+                          </td>
+                          <td
+                            data-th=""
+                            className={manageStyles.buttonCell}
+                            style={{
+                              paddingLeft: "0",
+                              paddingRight: "0",
+                              paddingTop: "32px",
+                            }}
+                          >
+                            <button
+                              type="button"
+                              className={`btn`}
+                              onClick={() => removeNewRow(row.id)}
+                            >
+                              <X size={18} />
+                            </button>
                           </td>
                         </tr>
                       ))}
@@ -565,7 +850,11 @@ export function ContractTaskRegistrationForm({ employeeName }: ContractTaskRegis
           </div>
         )}
 
-        {!contractData && !isLoading && <div className={styles.empty}>계약 불러오기를 선택한 뒤 계약을 선택해 주세요.</div>}
+        {!contractData && !isLoading && (
+          <div className={styles.empty}>
+            계약 불러오기를 선택한 뒤 계약을 선택해 주세요.
+          </div>
+        )}
       </div>
     </section>
   );
