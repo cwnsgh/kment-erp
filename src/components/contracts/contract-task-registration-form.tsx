@@ -1,7 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import Image from "next/image";
 import { ContractSelectModal } from "./contract-select-modal";
 import {
@@ -60,6 +60,24 @@ export function ContractTaskRegistrationForm({
   const contacts = contractData?.contacts ?? [];
   const workContents = contractData?.workContents ?? [];
 
+  /* 계약 선택 후 업무 빈 행이 없으면 한 줄 보장 (타이밍 이슈 대비) */
+  useEffect(() => {
+    if (!contract || !client) return;
+    if (newRows.length > 0) return;
+    setNewRows([
+      {
+        id: `new-${Date.now()}`,
+        contractWorkContentId: workContents[0]?.id ?? "",
+        brandName: "",
+        manager: employeeName,
+        workPeriod: "",
+        attachment: null,
+        workContent: "",
+        memo: "",
+      },
+    ]);
+  }, [contract?.id, client?.id, workContents, employeeName, newRows.length]);
+
   const loadRequests = (contractId: string) => {
     startTransition(async () => {
       const res = await getContractWorkRequestsByContract(contractId);
@@ -76,22 +94,18 @@ export function ContractTaskRegistrationForm({
       setContractData(detail);
       loadRequests(contractId);
       const wcs = detail.workContents ?? [];
-      setNewRows(
-        wcs.length
-          ? [
-              {
-                id: `new-${Date.now()}`,
-                contractWorkContentId: wcs[0].id,
-                brandName: "",
-                manager: employeeName,
-                workPeriod: "",
-                attachment: null,
-                workContent: "",
-                memo: "",
-              },
-            ]
-          : [],
-      );
+      setNewRows([
+        {
+          id: `new-${Date.now()}`,
+          contractWorkContentId: wcs[0]?.id ?? "",
+          brandName: "",
+          manager: employeeName,
+          workPeriod: "",
+          attachment: null,
+          workContent: "",
+          memo: "",
+        },
+      ]);
     } else {
       setError(detail.error ?? "계약 정보를 불러올 수 없습니다.");
       setContractData(null);
@@ -526,13 +540,12 @@ export function ContractTaskRegistrationForm({
                 </h2>
                 <div className={styles.workContentsBar}>
                   {workContents.map((wc) => (
-                    <div>
-                      {" "}
-                      <span key={wc.id} className={styles.workContentChip}>
+                    <div key={wc.id}>
+                      <span className={styles.workContentChip}>
                         <span className={styles.workContentHead}>
-                          {wc.work_content_name}
+                          {wc.work_content_name || "-"}
                         </span>
-                        <span>{wc.modification_count}회</span>
+                        <span>{Number(wc.modification_count ?? 0)}회</span>
                       </span>
                     </div>
                   ))}

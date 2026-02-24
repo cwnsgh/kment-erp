@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { WorkRequest, getWorkRequestDetailForClient } from "@/app/actions/work-request";
 import { buildExcelFilename, downloadExcel } from "@/lib/excel-download";
 import styles from "./client-work-list.module.css";
@@ -9,13 +9,39 @@ type WorkRequestWithEmployee = WorkRequest & {
   employee_name?: string | null;
 };
 
+export type ContractWorkRequestItem = {
+  id: string;
+  contract_id: string;
+  contract_name: string;
+  work_content_name: string | null;
+  brand_name: string;
+  manager: string;
+  work_period: string | null;
+  work_content: string | null;
+  memo: string | null;
+  status: string;
+  created_at: string;
+  employee_name: string | null;
+};
+
 type ClientWorkListProps = {
   initialWorkRequests: WorkRequest[];
   initialTotalCount: number;
+  initialContractWorkRequests?: ContractWorkRequestItem[];
+  initialContractTotalCount?: number;
   clientName?: string;
 };
 
-export function ClientWorkList({ initialWorkRequests, initialTotalCount, clientName = "" }: ClientWorkListProps) {
+const INITIAL_CONTRACT_PAGE_SIZE = 10;
+
+export function ClientWorkList({
+  initialWorkRequests,
+  initialTotalCount,
+  initialContractWorkRequests,
+  initialContractTotalCount = 0,
+  clientName = "",
+}: ClientWorkListProps) {
+  const [activeTab, setActiveTab] = useState<"manage" | "contract">("manage");
   const [workRequests, setWorkRequests] = useState<WorkRequestWithEmployee[]>(initialWorkRequests as WorkRequestWithEmployee[]);
   const [totalCount, setTotalCount] = useState(initialTotalCount);
   const [statusFilter, setStatusFilter] = useState<"all" | "in_progress" | "completed">("all");
@@ -23,6 +49,13 @@ export function ClientWorkList({ initialWorkRequests, initialTotalCount, clientN
   const [isPending, startTransition] = useTransition();
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const itemsPerPageOptions = [10, 50, 100, 200];
+
+  const [contractWorkRequests, setContractWorkRequests] = useState<ContractWorkRequestItem[]>(initialContractWorkRequests ?? []);
+  const [contractTotalCount, setContractTotalCount] = useState(initialContractTotalCount);
+  const [contractStatusFilter, setContractStatusFilter] = useState<"all" | "in_progress" | "completed">("all");
+  const [contractPage, setContractPage] = useState(1);
+  const [contractItemsPerPage, setContractItemsPerPage] = useState(INITIAL_CONTRACT_PAGE_SIZE);
+
   const [detailModal, setDetailModal] = useState<{
     isOpen: boolean;
     workRequest:
@@ -56,10 +89,12 @@ export function ClientWorkList({ initialWorkRequests, initialTotalCount, clientN
           } | null;
         })
       | null;
+    contractItem: ContractWorkRequestItem | null;
     isLoading: boolean;
   }>({
     isOpen: false,
     workRequest: null,
+    contractItem: null,
     isLoading: false,
   });
 
@@ -81,9 +116,46 @@ export function ClientWorkList({ initialWorkRequests, initialTotalCount, clientN
     });
   };
 
+  const loadContractData = async (page: number, filter: typeof contractStatusFilter, limit: number) => {
+    startTransition(async () => {
+      try {
+        const response = await fetch(
+          `/api/client/contract-work-requests?statusFilter=${filter}&page=${page}&limit=${limit}`,
+        );
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data && data.totalCount !== undefined) {
+            setContractWorkRequests(data.data);
+            setContractTotalCount(data.totalCount);
+            setContractPage(page);
+          }
+        }
+      } catch (error) {
+        console.error("계약 업무 목록 조회 오류:", error);
+      }
+    });
+  };
+
+  useEffect(() => {
+    if (activeTab !== "contract") return;
+    const hasInitial = initialContractWorkRequests != null;
+    const useInitial =
+      contractPage === 1 &&
+      contractItemsPerPage === INITIAL_CONTRACT_PAGE_SIZE &&
+      contractStatusFilter === "all" &&
+      hasInitial;
+    if (useInitial) return;
+    loadContractData(contractPage, contractStatusFilter, contractItemsPerPage);
+  }, [activeTab, contractPage, contractStatusFilter, contractItemsPerPage]);
+
   const handleFilterChange = (filter: typeof statusFilter) => {
     setStatusFilter(filter);
     loadData(1, filter, itemsPerPage);
+  };
+
+  const handleContractFilterChange = (filter: typeof contractStatusFilter) => {
+    setContractStatusFilter(filter);
+    loadContractData(1, filter, contractItemsPerPage);
   };
 
   const handleSearch = () => {
@@ -100,6 +172,16 @@ export function ClientWorkList({ initialWorkRequests, initialTotalCount, clientN
     params.set("statusFilter", statusFilter);
 
     downloadExcel(`/api/client/work-requests/export?${params.toString()}`, buildExcelFilename("작업현황-목록"));
+  };
+
+  const handleContractExcelDownload = () => {
+    const params = new URLSearchParams();
+    params.set("statusFilter", contractStatusFilter);
+
+    downloadExcel(
+      `/api/client/contract-work-requests/export?${params.toString()}`,
+      buildExcelFilename("계약업무-작업현황-목록"),
+    );
   };
 
   const formatDate = (dateStr: string) => {
@@ -124,6 +206,7 @@ export function ClientWorkList({ initialWorkRequests, initialTotalCount, clientN
       rejected: "approval_refusal",
       in_progress: "work_ongoing",
       completed: "work_complete",
+      deleted: "approval_complete",
     };
     return classMap[status] || "";
   };
@@ -135,15 +218,17 @@ export function ClientWorkList({ initialWorkRequests, initialTotalCount, clientN
       rejected: "승인반려",
       in_progress: "작업중",
       completed: "작업완료",
+      deleted: "취소됨",
     };
     return statusMap[status] || status;
   };
 
-  // 업무 상세 모달 열기
+  // 관리 업무 상세 모달 열기
   const handleOpenDetailModal = async (workRequestId: string) => {
     setDetailModal({
       isOpen: true,
       workRequest: null,
+      contractItem: null,
       isLoading: true,
     });
 
@@ -153,6 +238,7 @@ export function ClientWorkList({ initialWorkRequests, initialTotalCount, clientN
         setDetailModal({
           isOpen: true,
           workRequest: result.data as any,
+          contractItem: null,
           isLoading: false,
         });
       } else {
@@ -160,6 +246,7 @@ export function ClientWorkList({ initialWorkRequests, initialTotalCount, clientN
         setDetailModal({
           isOpen: false,
           workRequest: null,
+          contractItem: null,
           isLoading: false,
         });
       }
@@ -169,9 +256,20 @@ export function ClientWorkList({ initialWorkRequests, initialTotalCount, clientN
       setDetailModal({
         isOpen: false,
         workRequest: null,
+        contractItem: null,
         isLoading: false,
       });
     }
+  };
+
+  // 계약 업무 상세 모달 열기 (목록 행 데이터로 표시)
+  const handleOpenContractDetail = (item: ContractWorkRequestItem) => {
+    setDetailModal({
+      isOpen: true,
+      workRequest: null,
+      contractItem: item,
+      isLoading: false,
+    });
   };
 
   // 업무 상세 모달 닫기
@@ -179,6 +277,7 @@ export function ClientWorkList({ initialWorkRequests, initialTotalCount, clientN
     setDetailModal({
       isOpen: false,
       workRequest: null,
+      contractItem: null,
       isLoading: false,
     });
   };
@@ -209,48 +308,73 @@ export function ClientWorkList({ initialWorkRequests, initialTotalCount, clientN
   const paginatedRequests = filteredRequests.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
   const totalPages = Math.ceil(filteredRequests.length / itemsPerPage);
 
+  const contractTotalPages = Math.ceil(contractTotalCount / contractItemsPerPage);
+  const formatContractWorkPeriod = (item: ContractWorkRequestItem) => {
+    const start = item.created_at ? formatDate(item.created_at) : "-";
+    return item.work_period ? `${start} ~ ${formatDate(item.work_period)}` : `${start} ~ `;
+  };
+
   return (
     <section className={`${styles.customerWorkList} page_section`}>
       <div className="page_title">
         <h1>작업 현황</h1>
       </div>
 
+      <div className={styles.tabRow}>
+        <button
+          type="button"
+          className={`${styles.tab} ${activeTab === "manage" ? styles.tabActive : ""}`}
+          onClick={() => setActiveTab("manage")}
+        >
+          관리 업무
+        </button>
+        <button
+          type="button"
+          className={`${styles.tab} ${activeTab === "contract" ? styles.tabActive : ""}`}
+          onClick={() => setActiveTab("contract")}
+        >
+          계약 업무
+        </button>
+      </div>
+
       <div className="white_box">
         <div className={styles.boxInner}>
-          <div className={`${styles.searchBox} table_group`}>
-            <h2 className={styles.pageSubTitle}>
-              <span className={styles.companyName}>{clientName || "(주)케이먼트코퍼레이션"}</span> 업무 내역 <span className={styles.workCount}>({filteredRequests.length}건)</span>
-            </h2>
+          <h2 className={styles.pageSubTitle}>
+            <span className={styles.companyName}>{clientName || "(주)케이먼트코퍼레이션"}</span> 업무 내역{" "}
+            <span className={styles.workCount}>
+              ({activeTab === "manage" ? filteredRequests.length : contractTotalCount}건)
+            </span>
+          </h2>
 
-            <div className={styles.searchTableItem}>
-              <ul className={styles.searchTableRow}>
-                <li className={styles.searchRowGroup}>
-                  <div className={styles.searchTableHead}>진행상황</div>
-                  <div className={styles.searchTableData}>
-                    <input type="radio" id="search_type_all" name="search_type1" value="all" checked={statusFilter === "all"} onChange={() => setStatusFilter("all")} />
-                    <label htmlFor="search_type_all">전체</label>
-
-                    <input type="radio" id="search_type_ongoing" name="search_type1" value="ongoing" checked={statusFilter === "in_progress"} onChange={() => setStatusFilter("in_progress")} />
-                    <label htmlFor="search_type_ongoing">작업중</label>
-
-                    <input type="radio" id="search_type_complete" name="search_type1" value="complete" checked={statusFilter === "completed"} onChange={() => setStatusFilter("completed")} />
-                    <label htmlFor="search_type_complete">작업완료</label>
+          {activeTab === "manage" && (
+            <>
+              <div className={`${styles.searchBox} table_group`}>
+                <div className={styles.searchTableItem}>
+                  <ul className={styles.searchTableRow}>
+                    <li className={styles.searchRowGroup}>
+                      <div className={styles.searchTableHead}>진행상황</div>
+                      <div className={styles.searchTableData}>
+                        <input type="radio" id="search_type_all" name="search_type1" value="all" checked={statusFilter === "all"} onChange={() => setStatusFilter("all")} />
+                        <label htmlFor="search_type_all">전체</label>
+                        <input type="radio" id="search_type_ongoing" name="search_type1" value="ongoing" checked={statusFilter === "in_progress"} onChange={() => setStatusFilter("in_progress")} />
+                        <label htmlFor="search_type_ongoing">작업중</label>
+                        <input type="radio" id="search_type_complete" name="search_type1" value="complete" checked={statusFilter === "completed"} onChange={() => setStatusFilter("completed")} />
+                        <label htmlFor="search_type_complete">작업완료</label>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+                <div className={styles.btnWrap}>
+                  <div className={`btn btn_lg primary`} onClick={handleSearch}>
+                    검색
                   </div>
-                </li>
-              </ul>
-            </div>
-
-            <div className={styles.btnWrap}>
-              <div className={`btn btn_lg primary`} onClick={handleSearch}>
-                검색
+                  <div className={`btn btn_lg normal`} onClick={handleReset}>
+                    초기화
+                  </div>
+                </div>
               </div>
-              <div className={`btn btn_lg normal`} onClick={handleReset}>
-                초기화
-              </div>
-            </div>
-          </div>
 
-          <div className={styles.listTable}>
+              <div className={styles.listTable}>
             <div className={styles.tableTop}>
               <div className={styles.topTotal}>
                 <p>
@@ -325,7 +449,6 @@ export function ClientWorkList({ initialWorkRequests, initialTotalCount, clientN
               </table>
             </div>
           </div>
-        </div>
 
         {totalPages > 1 && (
           <div className={styles.pagination}>
@@ -356,6 +479,172 @@ export function ClientWorkList({ initialWorkRequests, initialTotalCount, clientN
             </ul>
           </div>
         )}
+            </>
+          )}
+
+          {activeTab === "contract" && (
+            <>
+              <div className={`${styles.searchBox} table_group`}>
+                <div className={styles.searchTableItem}>
+                  <ul className={styles.searchTableRow}>
+                    <li className={styles.searchRowGroup}>
+                      <div className={styles.searchTableHead}>진행상황</div>
+                      <div className={styles.searchTableData}>
+                        <input type="radio" id="contract_search_all" name="contract_search_type" value="all" checked={contractStatusFilter === "all"} onChange={() => handleContractFilterChange("all")} />
+                        <label htmlFor="contract_search_all">전체</label>
+                        <input type="radio" id="contract_search_ongoing" name="contract_search_type" value="ongoing" checked={contractStatusFilter === "in_progress"} onChange={() => handleContractFilterChange("in_progress")} />
+                        <label htmlFor="contract_search_ongoing">작업중</label>
+                        <input type="radio" id="contract_search_complete" name="contract_search_type" value="complete" checked={contractStatusFilter === "completed"} onChange={() => handleContractFilterChange("completed")} />
+                        <label htmlFor="contract_search_complete">작업완료</label>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+                <div className={styles.btnWrap}>
+                  <div className="btn btn_lg primary" onClick={() => loadContractData(1, contractStatusFilter, contractItemsPerPage)}>
+                    검색
+                  </div>
+                  <div
+                    className="btn btn_lg normal"
+                    onClick={() => {
+                      setContractStatusFilter("all");
+                      loadContractData(1, "all", contractItemsPerPage);
+                    }}
+                  >
+                    초기화
+                  </div>
+                </div>
+              </div>
+
+              <div className={styles.listTable}>
+                <div className={styles.tableTop}>
+                  <div className={styles.topTotal}>
+                    <p>
+                      총 <span>{contractTotalCount}건</span>의 작업 현황이 조회되었습니다.
+                    </p>
+                  </div>
+                  <div className={styles.topBtnGroup}>
+                    <div className={`${styles.excelBtn} btn btn_md normal excel_btn`} onClick={handleContractExcelDownload}>
+                      엑셀다운로드
+                    </div>
+                    <select
+                      className={`${styles.viewSelect} viewSelect`}
+                      value={contractItemsPerPage}
+                      onChange={(e) => {
+                        const newLimit = parseInt(e.target.value, 10);
+                        setContractItemsPerPage(newLimit);
+                        loadContractData(1, contractStatusFilter, newLimit);
+                      }}
+                    >
+                      {itemsPerPageOptions.map((option) => (
+                        <option key={option} value={option}>
+                          {option}개씩 보기
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <div className={styles.tableWrap}>
+                  <table>
+                    <colgroup>
+                      <col style={{ width: "10%" }} />
+                      <col style={{ width: "15%" }} />
+                      <col style={{ width: "13%" }} />
+                      <col style={{ width: "20%" }} />
+                      <col style={{ width: "auto" }} />
+                      <col style={{ width: "15%" }} />
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th>번호</th>
+                        <th>브랜드명</th>
+                        <th>담당자</th>
+                        <th>작업기간</th>
+                        <th>작업내용</th>
+                        <th>작업여부</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(() => {
+                        const displayed = contractWorkRequests.filter((r) => r.status !== "deleted");
+                        return displayed.length === 0 ? (
+                          <tr>
+                            <td colSpan={6} style={{ textAlign: "center", padding: "40px" }}>
+                              작업 내역이 없습니다.
+                            </td>
+                          </tr>
+                        ) : (
+                          displayed.map((item, index) => (
+                            <tr
+                              key={item.id}
+                              onClick={() => handleOpenContractDetail(item)}
+                              style={{ cursor: "pointer" }}
+                            >
+                              <td>{(contractPage - 1) * contractItemsPerPage + index + 1}</td>
+                              <td>{item.brand_name || "-"}</td>
+                              <td>{item.employee_name || "-"}</td>
+                              <td>{formatContractWorkPeriod(item)}</td>
+                              <td className={styles.text_overflow}>
+                                <p>{item.work_content || item.work_content_name || "-"}</p>
+                              </td>
+                              <td>
+                                <span className={getStatusClass(item.status)}>{getStatusLabel(item.status)}</span>
+                              </td>
+                            </tr>
+                          )));
+                      })()}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              {contractTotalPages > 1 && (
+                <div className={styles.pagination}>
+                  <ul>
+                    <li
+                      className={`${styles.page} ${styles.first} ${contractPage === 1 ? styles.disabled : ""}`}
+                      onClick={() => contractPage > 1 && loadContractData(1, contractStatusFilter, contractItemsPerPage)}
+                    />
+                    <li
+                      className={`${styles.page} ${styles.prev} ${contractPage === 1 ? styles.disabled : ""}`}
+                      onClick={() => contractPage > 1 && loadContractData(contractPage - 1, contractStatusFilter, contractItemsPerPage)}
+                    />
+                    {Array.from({ length: Math.min(contractTotalPages, 5) }, (_, i) => {
+                      let pageNum =
+                        contractTotalPages <= 5
+                          ? i + 1
+                          : contractPage <= 3
+                            ? i + 1
+                            : contractPage >= contractTotalPages - 2
+                              ? contractTotalPages - 4 + i
+                              : contractPage - 2 + i;
+                      return (
+                        <li
+                          key={pageNum}
+                          className={`${styles.page} ${contractPage === pageNum ? styles.active : ""}`}
+                          onClick={() => loadContractData(pageNum, contractStatusFilter, contractItemsPerPage)}
+                        >
+                          {pageNum}
+                        </li>
+                      );
+                    })}
+                    <li
+                      className={`${styles.page} ${styles.next} ${contractPage === contractTotalPages ? styles.disabled : ""}`}
+                      onClick={() =>
+                        contractPage < contractTotalPages && loadContractData(contractPage + 1, contractStatusFilter, contractItemsPerPage)
+                      }
+                    />
+                    <li
+                      className={`${styles.page} ${styles.last} ${contractPage === contractTotalPages ? styles.disabled : ""}`}
+                      onClick={() =>
+                        contractPage < contractTotalPages && loadContractData(contractTotalPages, contractStatusFilter, contractItemsPerPage)
+                      }
+                    />
+                  </ul>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
 
       {/* 업무 상세 모달 */}
@@ -363,14 +652,73 @@ export function ClientWorkList({ initialWorkRequests, initialTotalCount, clientN
         <div className={styles.detailModalOverlay} onClick={handleCloseDetailModal}>
           <div className={styles.detailModalInner} onClick={(e) => e.stopPropagation()}>
             <div className={styles.detailModalHeader}>
-              <h3>관리 업무 상세조회</h3>
+              <h3>{detailModal.contractItem ? "계약 업무 상세조회" : "관리 업무 상세조회"}</h3>
               <button type="button" className={styles.detailModalClose} onClick={handleCloseDetailModal}>
                 ×
               </button>
             </div>
 
             <div className={`${styles.detailModalBody} ${styles.scroll}`}>
-              {detailModal.isLoading ? (
+              {detailModal.contractItem ? (
+                <div className={styles.tableGroup}>
+                  <div className={styles.tableItem}>
+                    <h2 className={styles.tableTitle}>계약 정보</h2>
+                    <ul className={styles.tableRow}>
+                      <li className={styles.rowGroup}>
+                        <div className={styles.tableHead}>계약명</div>
+                        <div className={styles.tableData}>{detailModal.contractItem.contract_name || "-"}</div>
+                      </li>
+                      <li className={styles.rowGroup}>
+                        <div className={styles.tableHead}>브랜드명</div>
+                        <div className={styles.tableData}>{detailModal.contractItem.brand_name || "-"}</div>
+                      </li>
+                    </ul>
+                  </div>
+                  <div className={styles.tableItem}>
+                    <h2 className={styles.tableTitle}>상세 내역</h2>
+                    <ul className={styles.tableRow}>
+                      <li className={styles.rowGroup}>
+                        <div className={styles.tableHead}>담당자</div>
+                        <div className={styles.tableData}>{detailModal.contractItem.manager || detailModal.contractItem.employee_name || "-"}</div>
+                      </li>
+                      <li className={styles.rowGroup}>
+                        <div className={styles.tableHead}>작업유형</div>
+                        <div className={styles.tableData}>{detailModal.contractItem.work_content_name || "-"}</div>
+                      </li>
+                      <li className={styles.rowGroup}>
+                        <div className={styles.tableHead}>요청일</div>
+                        <div className={styles.tableData}>{detailModal.contractItem.created_at ? formatDateForModal(detailModal.contractItem.created_at) : "-"}</div>
+                      </li>
+                      <li className={styles.rowGroup}>
+                        <div className={styles.tableHead}>작업기간</div>
+                        <div className={styles.tableData}>
+                          {detailModal.contractItem.work_period
+                            ? `${formatDateForModal(detailModal.contractItem.created_at)} ~ ${formatDateForModal(detailModal.contractItem.work_period)}`
+                            : detailModal.contractItem.created_at
+                              ? formatDateForModal(detailModal.contractItem.created_at) + " ~ "
+                              : "-"}
+                        </div>
+                      </li>
+                      <li className={styles.rowGroup}>
+                        <div className={styles.tableHead}>작업여부</div>
+                        <div className={styles.tableData}>
+                          <span className={getStatusClass(detailModal.contractItem.status)}>{getStatusLabel(detailModal.contractItem.status)}</span>
+                        </div>
+                      </li>
+                      <li className={styles.rowGroup}>
+                        <div className={styles.tableHead}>작업내용</div>
+                        <div className={styles.tableData}>{detailModal.contractItem.work_content || "-"}</div>
+                      </li>
+                      {detailModal.contractItem.memo && (
+                        <li className={styles.rowGroup}>
+                          <div className={styles.tableHead}>메모</div>
+                          <div className={styles.tableData}>{detailModal.contractItem.memo}</div>
+                        </li>
+                      )}
+                    </ul>
+                  </div>
+                </div>
+              ) : detailModal.isLoading ? (
                 <div style={{ textAlign: "center", padding: "40px 0" }}>로딩 중...</div>
               ) : detailModal.workRequest ? (
                 <div className={styles.tableGroup}>

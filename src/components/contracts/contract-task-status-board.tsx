@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { getContractWorkRequestsForBoard, updateContractWorkRequestStatus } from "@/app/actions/contract-work-request";
+import { getContractWorkRequestsForBoard, updateContractWorkRequestStatus, deleteContractWorkRequest } from "@/app/actions/contract-work-request";
 import { getAllEmployees } from "@/app/actions/work-request";
 import styles from "./contract-task-status-board.module.css";
 
@@ -41,7 +41,9 @@ export function ContractTaskStatusBoard({ initialData, currentEmployeeId }: Cont
     task: BoardItem;
     nextStatus: "in_progress" | "completed";
   } | null>(null);
+  const [cancelConfirmTask, setCancelConfirmTask] = useState<BoardItem | null>(null);
   const [statusUpdating, setStatusUpdating] = useState(false);
+  const [cancelDeleting, setCancelDeleting] = useState(false);
 
   useEffect(() => {
     getAllEmployees().then((r) => {
@@ -122,6 +124,23 @@ export function ContractTaskStatusBoard({ initialData, currentEmployeeId }: Cont
       setConfirmAction(null);
     } finally {
       setStatusUpdating(false);
+    }
+  };
+
+  const handleConfirmCancelRequest = async () => {
+    if (!cancelConfirmTask || cancelDeleting) return;
+    try {
+      setCancelDeleting(true);
+      const result = await deleteContractWorkRequest(cancelConfirmTask.id);
+      if (!result.success) {
+        alert(result.error || "요청 취소에 실패했습니다.");
+        return;
+      }
+      setList((prev) => prev.filter((item) => item.id !== cancelConfirmTask.id));
+      setSelectedTask(null);
+      setCancelConfirmTask(null);
+    } finally {
+      setCancelDeleting(false);
     }
   };
 
@@ -405,11 +424,20 @@ export function ContractTaskStatusBoard({ initialData, currentEmployeeId }: Cont
                 <span className={styles.modalContentBoxLabel}>작업내용</span>
                 <p className={styles.modalContentBoxText}>{selectedTask.work_content || "-"}</p>
               </div>
-              {getNextStatusAction(selectedTask.status) && (
-                <div className={styles.modalActions}>
-                  <button type="button" className="btn btn_lg normal" onClick={() => setSelectedTask(null)}>
-                    닫기
+              <div className={styles.modalActions}>
+                <button type="button" className="btn btn_lg normal" onClick={() => setSelectedTask(null)}>
+                  닫기
+                </button>
+                {selectedTask.status === "pending" && (
+                  <button
+                    type="button"
+                    className="btn btn_lg normal"
+                    style={{ borderColor: "var(--negative)", color: "var(--negative)" }}
+                    onClick={() => setCancelConfirmTask(selectedTask)}>
+                    요청취소
                   </button>
+                )}
+                {getNextStatusAction(selectedTask.status) && (
                   <button
                     type="button"
                     className="btn btn_lg primary"
@@ -421,8 +449,8 @@ export function ContractTaskStatusBoard({ initialData, currentEmployeeId }: Cont
                     }>
                     {getNextStatusAction(selectedTask.status)!.label}
                   </button>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -439,6 +467,23 @@ export function ContractTaskStatusBoard({ initialData, currentEmployeeId }: Cont
               </button>
               <button type="button" className="btn btn_lg primary" onClick={handleConfirmStatusChange} disabled={statusUpdating}>
                 {statusUpdating ? "변경 중..." : "변경"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {cancelConfirmTask && (
+        <div className={`${styles.modalOverlay} ${styles.modalOverlayConfirm}`} onClick={() => (cancelDeleting ? undefined : setCancelConfirmTask(null))}>
+          <div className={`${styles.modalContainer} ${styles.modalContainerConfirm}`} onClick={(e) => e.stopPropagation()}>
+            <h3 className={styles.confirmModalTitle}>요청을 취소할까요?</h3>
+            <p className={styles.confirmModalText}>승인 대기 중인 요청이 취소되며, 목록에서 삭제 처리됩니다.</p>
+            <div className={styles.confirmModalActions}>
+              <button type="button" className="btn btn_lg normal" onClick={() => setCancelConfirmTask(null)} disabled={cancelDeleting}>
+                닫기
+              </button>
+              <button type="button" className="btn btn_lg normal" style={{ borderColor: "var(--negative)", color: "var(--negative)" }} onClick={handleConfirmCancelRequest} disabled={cancelDeleting}>
+                {cancelDeleting ? "취소 중..." : "요청취소"}
               </button>
             </div>
           </div>

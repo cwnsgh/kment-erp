@@ -81,6 +81,7 @@ export function ClientDashboard({
       pending: "approval_request",
       approved: "approval_complete",
       rejected: "approval_refusal",
+      deleted: "approval_complete",
     };
     return classMap[status] || "";
   };
@@ -90,6 +91,7 @@ export function ClientDashboard({
       pending: "승인요청",
       approved: "승인완료",
       rejected: "승인반려",
+      deleted: "취소됨",
     };
     return statusMap[status] || status;
   };

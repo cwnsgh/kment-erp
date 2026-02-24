@@ -31,11 +31,18 @@ type ContractWorkRequestItem = {
 
 type ClientApprovalPageProps = {
   initialWorkRequests: WorkRequest[];
+  /** 서버에서 미리 조회한 계약 업무 1페이지 (탭 전환 시 즉시 표시) */
+  initialContractWorkRequests?: ContractWorkRequestItem[];
+  initialContractTotalCount?: number;
   clientName?: string;
 };
 
+const INITIAL_CONTRACT_PAGE_SIZE = 10;
+
 export function ClientApprovalPage({
   initialWorkRequests,
+  initialContractWorkRequests,
+  initialContractTotalCount = 0,
   clientName = "",
 }: ClientApprovalPageProps) {
   const [activeTab, setActiveTab] = useState<"manage" | "contract">("manage");
@@ -44,10 +51,14 @@ export function ClientApprovalPage({
   );
   const [contractWorkRequests, setContractWorkRequests] = useState<
     ContractWorkRequestItem[]
-  >([]);
-  const [contractTotalCount, setContractTotalCount] = useState(0);
+  >(initialContractWorkRequests ?? []);
+  const [contractTotalCount, setContractTotalCount] = useState(
+    initialContractTotalCount,
+  );
   const [contractPage, setContractPage] = useState(1);
-  const [contractItemsPerPage, setContractItemsPerPage] = useState(10);
+  const [contractItemsPerPage, setContractItemsPerPage] = useState(
+    INITIAL_CONTRACT_PAGE_SIZE,
+  );
   const [isPending, startTransition] = useTransition();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -128,11 +139,17 @@ export function ClientApprovalPage({
     });
   };
 
+  // 계약 업무 탭: 1페이지·기본 limit은 서버 초기 데이터 사용, 그 외에만 API 호출
   useEffect(() => {
-    if (activeTab === "contract") {
-      loadContractData(1, contractItemsPerPage);
-    }
-  }, [activeTab]);
+    if (activeTab !== "contract") return;
+    const hasInitial = initialContractWorkRequests != null;
+    const useInitial =
+      contractPage === 1 &&
+      contractItemsPerPage === INITIAL_CONTRACT_PAGE_SIZE &&
+      hasInitial;
+    if (useInitial) return;
+    loadContractData(contractPage, contractItemsPerPage);
+  }, [activeTab, contractPage, contractItemsPerPage]);
 
   const loadData = async (page: number, limit: number) => {
     startTransition(async () => {
@@ -325,6 +342,7 @@ export function ClientApprovalPage({
       rejected: "approval_refusal",
       in_progress: "work_ongoing",
       completed: "work_complete",
+      deleted: "approval_complete",
     };
     return classMap[status] || "";
   };
@@ -336,6 +354,7 @@ export function ClientApprovalPage({
       rejected: "승인반려",
       in_progress: "작업중",
       completed: "작업완료",
+      deleted: "취소됨",
     };
     return statusMap[status] || status;
   };

@@ -76,6 +76,7 @@ export function ClientDashboardMaintenance({
       pending: styles.approvalRequest,
       approved: styles.approvalComplete,
       rejected: styles.approvalRefusal,
+      deleted: styles.approvalComplete,
       in_progress: styles.workOngoing,
       completed: styles.workComplete,
     };
@@ -87,6 +88,7 @@ export function ClientDashboardMaintenance({
       pending: "승인요청",
       approved: "승인완료",
       rejected: "승인반려",
+      deleted: "취소됨",
       in_progress: "작업중",
       completed: "작업완료",
     };
@@ -98,6 +100,7 @@ export function ClientDashboardMaintenance({
       approved: styles.workWaiting,
       in_progress: styles.workOngoing,
       completed: styles.workComplete,
+      deleted: styles.approvalComplete,
     };
     return classMap[status] || "";
   };
@@ -107,6 +110,7 @@ export function ClientDashboardMaintenance({
       approved: "작업대기",
       in_progress: "작업중",
       completed: "작업완료",
+      deleted: "취소됨",
     };
     return statusMap[status] || status;
   };

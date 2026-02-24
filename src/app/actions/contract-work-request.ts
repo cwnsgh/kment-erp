@@ -64,7 +64,8 @@ export async function getContractForTaskRegistration(contractId: string): Promis
     }
 
     const clientId = contractRow.client_id as string;
-    const [clientRes, contactsRes, sitesRes, workContentRes] = await Promise.all([
+    const contractTypeId = contractRow.contract_type_id as string;
+    const [clientRes, contactsRes, sitesRes, workContentRes, typeWorkContentRes] = await Promise.all([
       supabase
         .from("client")
         .select("id, name, business_registration_number, address, ceo_name")
@@ -89,6 +90,12 @@ export async function getContractForTaskRegistration(contractId: string): Promis
           contract_type_work_content:work_content_id ( work_content_name )
         `)
         .eq("contract_id", contractId),
+      supabase
+        .from("contract_type_work_content")
+        .select("id, work_content_name, display_order")
+        .eq("contract_type_id", contractTypeId)
+        .eq("is_active", true)
+        .order("display_order", { ascending: true }),
     ]);
 
     const client = clientRes.data;
@@ -107,17 +114,51 @@ export async function getContractForTaskRegistration(contractId: string): Promis
       : contractRow.secondary_contact_employee;
     const site = Array.isArray(contractRow.site) ? contractRow.site[0] : contractRow.site;
 
-    const workContents = (workContentRes.data ?? []).map((row: any) => {
+    const existingByWorkContentId = new Map<string, { id: string; modification_count: number; work_content_name: string }>();
+    for (const row of workContentRes.data ?? []) {
       const wc = Array.isArray(row.contract_type_work_content)
         ? row.contract_type_work_content[0]
         : row.contract_type_work_content;
-      return {
+      existingByWorkContentId.set(row.work_content_id, {
         id: row.id,
-        work_content_id: row.work_content_id,
-        work_content_name: wc?.work_content_name ?? "",
         modification_count: Number(row.modification_count ?? 0),
-      };
-    });
+        work_content_name: wc?.work_content_name ?? "",
+      });
+    }
+
+    const typeWorkContents = typeWorkContentRes.data ?? [];
+    const workContents: Array<{ id: string; work_content_id: string; work_content_name: string; modification_count: number }> = [];
+
+    for (const typeWc of typeWorkContents) {
+      const workContentId = typeWc.id;
+      const existing = existingByWorkContentId.get(workContentId);
+      if (existing) {
+        workContents.push({
+          id: existing.id,
+          work_content_id: workContentId,
+          work_content_name: existing.work_content_name || (typeWc.work_content_name ?? ""),
+          modification_count: existing.modification_count,
+        });
+      } else {
+        const { data: inserted, error: insertErr } = await supabase
+          .from("contract_work_content")
+          .insert({
+            contract_id: contractId,
+            work_content_id: workContentId,
+            modification_count: 0,
+          })
+          .select("id")
+          .single();
+        if (!insertErr && inserted) {
+          workContents.push({
+            id: inserted.id,
+            work_content_id: workContentId,
+            work_content_name: typeWc.work_content_name ?? "",
+            modification_count: 0,
+          });
+        }
+      }
+    }
 
     return {
       success: true,
@@ -179,6 +220,20 @@ export async function createContractWorkRequest(data: {
     }
 
     const supabase = await getSupabaseServerClient();
+
+    const { data: workContentRow, error: countError } = await supabase
+      .from("contract_work_content")
+      .select("modification_count")
+      .eq("id", data.contractWorkContentId)
+      .single();
+
+    if (countError || !workContentRow) {
+      return { success: false, error: "작업 유형 정보를 찾을 수 없습니다." };
+    }
+    const count = Number(workContentRow.modification_count ?? 0);
+    if (count < 1) {
+      return { success: false, error: "수정 횟수가 부족합니다. 해당 작업 유형의 잔여 횟수가 0회입니다." };
+    }
 
     const { data: row, error } = await supabase
       .from("contract_work_request")
