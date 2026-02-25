@@ -56,7 +56,7 @@ export function ClientDetailModal({ client, isOpen, onClose }: ClientDetailModal
         </div>
 
         {/* 내용 */}
-        <div className={`${styles.clientDetailModalWrapper}`}>
+        <div className={`${styles.clientDetailModalWrapper} scroll`}>
           <div className="table_group">
             {/* ERP 정보 */}
             <div className="table_item">

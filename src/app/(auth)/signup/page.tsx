@@ -381,13 +381,13 @@ export default function SignUpPage() {
         <h2 className="page_subTitle">약관 동의</h2>
         <p className="text-sm text-slate-600 mb-4">필수항목 및 선택항목 약관에 동의해 주세요.</p>
         <label className="agreeAll">
-          <input type="checkbox" checked={allChecked} onChange={handleToggleAll} className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary" />
+          <input type="checkbox" checked={allChecked} onChange={handleToggleAll} className="h-4 w-4 rounded border-slate-300 text-primary " />
           <span className="text-sm font-medium text-slate-800">전체 약관 동의</span>
         </label>
         <div className="agreeList">
           {agreementItems.map((item) => (
             <label key={item.id}>
-              <input type="checkbox" checked={agreements[item.id]} onChange={() => handleAgreementChange(item.id)} className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary" />
+              <input type="checkbox" checked={agreements[item.id]} onChange={() => handleAgreementChange(item.id)} className="h-4 w-4 rounded border-slate-300 text-primary" />
               <span>{item.label}</span>
               <span>
                 <img src="/images/arrow_icon.svg" alt="" />
@@ -526,7 +526,7 @@ export default function SignUpPage() {
                   <Input label="도메인" value={site.domain} onChange={(event) => handleSiteChange(site.id, "domain", event.target.value)} placeholder="example.com" />
                   <div className="grid grid-cols-[140px_1fr] items-center gap-4">
                     <label className="text-sm font-medium text-slate-700">솔루션</label>
-                    <select value={site.solution} onChange={(event) => handleSiteChange(site.id, "solution", event.target.value)} className="w-full rounded border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                    <select value={site.solution} onChange={(event) => handleSiteChange(site.id, "solution", event.target.value)} className="w-full rounded border border-slate-200 px-3 py-2 text-sm text-slate-700 ">
                       <option value="">선택하세요</option>
                       <option value="카페24">카페24</option>
                       <option value="고도몰">고도몰</option>
@@ -539,7 +539,7 @@ export default function SignUpPage() {
                   <Input label="관리자 패스워드" value={site.loginPassword} onChange={(event) => handleSiteChange(site.id, "loginPassword", event.target.value)} placeholder="관리자 로그인 패스워드" type="password" />
                   <div className="grid grid-cols-[140px_1fr] items-center gap-4">
                     <label className="text-sm font-medium text-slate-700">유형</label>
-                    <select value={site.type} onChange={(event) => handleSiteChange(site.id, "type", event.target.value)} className="w-full rounded border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                    <select value={site.type} onChange={(event) => handleSiteChange(site.id, "type", event.target.value)} className="w-full rounded border border-slate-200 px-3 py-2 text-sm text-slate-700">
                       <option value="">선택하세요</option>
                       <option value="신규">신규</option>
                       <option value="리뉴얼">리뉴얼</option>
@@ -582,7 +582,7 @@ function TextField({ label, name, placeholder, value, onChange, suffix, readOnly
     <div className={`grid grid-cols-[140px_1fr] items-center gap-4 ${className || ""}`}>
       <label className="text-sm font-medium text-slate-700">{label}</label>
       <div className="flex items-center gap-2">
-        <input name={name} value={value} onChange={onChange} placeholder={placeholder} readOnly={readOnly} inputMode={inputMode} className="flex-1 rounded border border-slate-200 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:bg-slate-100 disabled:cursor-not-allowed" />
+        <input name={name} value={value} onChange={onChange} placeholder={placeholder} readOnly={readOnly} inputMode={inputMode} className="flex-1 rounded border border-slate-200 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 disabled:bg-slate-100 disabled:cursor-not-allowed" />
         {suffix}
       </div>
     </div>
@@ -601,7 +601,7 @@ function PasswordField({ label, name, value, onChange, placeholder }: PasswordFi
   return (
     <div className="grid grid-cols-[140px_1fr] items-center gap-4">
       <label className="text-sm font-medium text-slate-700">{label}</label>
-      <input type="password" name={name} value={value} onChange={onChange} placeholder={placeholder} className="w-full rounded border border-slate-200 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
+      <input type="password" name={name} value={value} onChange={onChange} placeholder={placeholder} className="w-full rounded border border-slate-200 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400" />
     </div>
   );
 }
@@ -650,7 +650,7 @@ function Input({ label, value, onChange, placeholder, type = "text" }: InputProp
   return (
     <div className="grid grid-cols-[140px_1fr] items-center gap-4">
       <label className="text-sm font-medium text-slate-700">{label}</label>
-      <input type={type} value={value} onChange={onChange} placeholder={placeholder} className="w-full rounded border border-slate-200 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
+      <input type={type} value={value} onChange={onChange} placeholder={placeholder} className="w-full rounded border border-slate-200 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400" />
     </div>
   );
 }
@@ -687,7 +687,7 @@ function PhoneInputField({ label, value, onChange }: PhoneInputFieldProps) {
     <div className="grid grid-cols-[140px_1fr] items-center gap-4">
       <label className="text-sm font-medium text-slate-700">{label}</label>
       <div className="flex items-center gap-2">
-        <select value={prefix} onChange={handlePrefixChange} className="w-16 rounded border border-slate-200 px-2 py-2 text-sm text-slate-700 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary">
+        <select value={prefix} onChange={handlePrefixChange} className="w-16 rounded border border-slate-200 px-2 py-2 text-sm text-slate-700 ">
           <option value="010">010</option>
           <option value="011">011</option>
           <option value="016">016</option>
@@ -696,9 +696,9 @@ function PhoneInputField({ label, value, onChange }: PhoneInputFieldProps) {
           <option value="019">019</option>
         </select>
         <span className="text-slate-400">-</span>
-        <input type="text" value={middle} onChange={handleMiddleChange} placeholder="1234" maxLength={4} className="w-16 rounded border border-slate-200 px-2 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary text-center" />
+        <input type="text" value={middle} onChange={handleMiddleChange} placeholder="1234" maxLength={4} className="w-16 rounded border border-slate-200 px-2 py-2 text-sm text-slate-700 placeholder:text-slate-400 text-center" />
         <span className="text-slate-400">-</span>
-        <input type="text" value={last} onChange={handleLastChange} placeholder="5678" maxLength={4} className="w-16 rounded border border-slate-200 px-2 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary text-center" />
+        <input type="text" value={last} onChange={handleLastChange} placeholder="5678" maxLength={4} className="w-16 rounded border border-slate-200 px-2 py-2 text-sm text-slate-700 placeholder:text-slate-400 text-center" />
       </div>
     </div>
   );

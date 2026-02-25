@@ -56,51 +56,29 @@ function getWorkStatusClass(status: string) {
   return "";
 }
 
-export function ClientDashboardContract({
-  contracts,
-  slideIndex,
-  onSlideChange,
-}: ClientDashboardContractProps) {
+export function ClientDashboardContract({ contracts, slideIndex, onSlideChange }: ClientDashboardContractProps) {
   const totalSlides = contracts.length;
   const currentContract = contracts[slideIndex] ?? null;
   const goPrev = () => onSlideChange(slideIndex <= 0 ? slideIndex : slideIndex - 1);
   const goNext = () => onSlideChange(slideIndex >= totalSlides - 1 ? slideIndex : slideIndex + 1);
 
   if (contracts.length === 0) {
-    return (
-      <div className={styles.contractEmpty}>
-        등록된 계약이 없습니다.
-      </div>
-    );
+    return <div className={styles.contractEmpty}>등록된 계약이 없습니다.</div>;
   }
 
   return (
     <div className={styles.slideWrap}>
       <div className={styles.slideControl}>
         <div className={styles.slidePagination}>
-          <span className={styles.slidePaginationCurrent}>
-            {String(slideIndex + 1).padStart(2, "0")}
-          </span>
+          <span className={styles.slidePaginationCurrent}>{String(slideIndex + 1).padStart(2, "0")}</span>
           {" / "}
           {String(totalSlides).padStart(2, "0")}
         </div>
         <div className={styles.slideArrows}>
-          <button
-            type="button"
-            className={`${styles.slideArrow} ${styles.slideArrowPrev}`}
-            onClick={goPrev}
-            disabled={slideIndex <= 0}
-            aria-label="이전"
-          >
+          <button type="button" className={`${styles.slideArrow} ${styles.slideArrowPrev}`} onClick={goPrev} disabled={slideIndex <= 0} aria-label="이전">
             <img src="/images/arrow_icon.svg" alt="" />
           </button>
-          <button
-            type="button"
-            className={styles.slideArrow}
-            onClick={goNext}
-            disabled={slideIndex >= totalSlides - 1}
-            aria-label="다음"
-          >
+          <button type="button" className={styles.slideArrow} onClick={goNext} disabled={slideIndex >= totalSlides - 1} aria-label="다음">
             <img src="/images/arrow_icon.svg" alt="" />
           </button>
         </div>
@@ -113,9 +91,7 @@ export function ClientDashboardContract({
               {currentContract.contract_name}
               {currentContract.brand_name ? ` (${currentContract.brand_name})` : ""}
             </h2>
-            <p className={styles.typePeriod}>
-              * 안내된 완료일은 예정 일정으로, 프로젝트 진행 상황에 따라 일부 변동될 수 있습니다.
-            </p>
+            <p className={styles.typePeriod}>* 안내된 완료일은 예정 일정으로, 프로젝트 진행 상황에 따라 일부 변동될 수 있습니다.</p>
             <div className={styles.typeContentC}>
               <div>
                 <p className={styles.typeHead}>시안 완료 예정일</p>
@@ -153,21 +129,15 @@ export function ClientDashboardContract({
               <div className={styles.approvalBox}>
                 <div>
                   <span>승인요청</span>
-                  <p>
-                    {currentContract.work_requests.filter((r) => r.status === "pending").length}건
-                  </p>
+                  <p>{currentContract.work_requests.filter((r) => r.status === "pending").length}건</p>
                 </div>
                 <div>
                   <span>승인반려</span>
-                  <p>
-                    {currentContract.work_requests.filter((r) => r.status === "rejected").length}건
-                  </p>
+                  <p>{currentContract.work_requests.filter((r) => r.status === "rejected").length}건</p>
                 </div>
                 <div>
                   <span>승인완료</span>
-                  <p>
-                    {currentContract.work_requests.filter((r) => r.status === "approved").length}건
-                  </p>
+                  <p>{currentContract.work_requests.filter((r) => r.status === "approved").length}건</p>
                 </div>
               </div>
               <div className={styles.tableWrap}>
@@ -175,7 +145,7 @@ export function ClientDashboardContract({
                   <colgroup>
                     <col style={{ width: "20%" }} />
                     <col style={{ width: "auto" }} />
-                    <col style={{ width: "18%" }} />
+                    <col style={{ width: "20%" }} />
                   </colgroup>
                   <thead>
                     <tr>
@@ -199,9 +169,7 @@ export function ClientDashboardContract({
                             <p>{r.work_content || "-"}</p>
                           </td>
                           <td>
-                            <span className={getApprovalClass(r.status)}>
-                              {getApprovalLabel(r.status)}
-                            </span>
+                            <span className={getApprovalClass(r.status)}>{getApprovalLabel(r.status)}</span>
                           </td>
                         </tr>
                       ))
@@ -215,12 +183,12 @@ export function ClientDashboardContract({
               <Link href="/client/approvals" className={styles.mainBtn}>
                 <img src="/images/arrow_icon2.svg" alt="" width={10} height={10} />
               </Link>
-              <div className={styles.tableWrap}>
+              <div className={styles.tableWrap} style={{ marginTop: "0" }}>
                 <table>
                   <colgroup>
                     <col style={{ width: "40%" }} />
                     <col style={{ width: "auto" }} />
-                    <col style={{ width: "18%" }} />
+                    <col style={{ width: "20%" }} />
                   </colgroup>
                   <thead>
                     <tr>
@@ -239,18 +207,12 @@ export function ClientDashboardContract({
                     ) : (
                       currentContract.work_requests.slice(0, 5).map((r) => (
                         <tr key={r.id}>
-                          <td>
-                            {r.work_period
-                              ? `${formatDate(r.work_period)} ~ ${formatDate(r.work_period)}`
-                              : "-"}
-                          </td>
+                          <td>{r.work_period ? `${formatDate(r.work_period)} ~ ${formatDate(r.work_period)}` : "-"}</td>
                           <td className={styles.textOverflow}>
                             <p>{r.work_content || "-"}</p>
                           </td>
                           <td>
-                            <span className={getWorkStatusClass(r.status)}>
-                              {getWorkStatusLabel(r.status)}
-                            </span>
+                            <span className={getWorkStatusClass(r.status)}>{getWorkStatusLabel(r.status)}</span>
                           </td>
                         </tr>
                       ))

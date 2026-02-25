@@ -2,11 +2,7 @@
 
 import { X } from "lucide-react";
 import { useState, useTransition, useEffect } from "react";
-import {
-  WorkRequest,
-  getClientSignatureUrl,
-  getWorkRequestDetailForClient,
-} from "@/app/actions/work-request";
+import { WorkRequest, getClientSignatureUrl, getWorkRequestDetailForClient } from "@/app/actions/work-request";
 import { buildExcelFilename, downloadExcel } from "@/lib/excel-download";
 import styles from "./client-approval-page.module.css";
 
@@ -39,37 +35,20 @@ type ClientApprovalPageProps = {
 
 const INITIAL_CONTRACT_PAGE_SIZE = 10;
 
-export function ClientApprovalPage({
-  initialWorkRequests,
-  initialContractWorkRequests,
-  initialContractTotalCount = 0,
-  clientName = "",
-}: ClientApprovalPageProps) {
+export function ClientApprovalPage({ initialWorkRequests, initialContractWorkRequests, initialContractTotalCount = 0, clientName = "" }: ClientApprovalPageProps) {
   const [activeTab, setActiveTab] = useState<"manage" | "contract">("manage");
-  const [workRequests, setWorkRequests] = useState<WorkRequestWithEmployee[]>(
-    initialWorkRequests as WorkRequestWithEmployee[],
-  );
-  const [contractWorkRequests, setContractWorkRequests] = useState<
-    ContractWorkRequestItem[]
-  >(initialContractWorkRequests ?? []);
-  const [contractTotalCount, setContractTotalCount] = useState(
-    initialContractTotalCount,
-  );
+  const [workRequests, setWorkRequests] = useState<WorkRequestWithEmployee[]>(initialWorkRequests as WorkRequestWithEmployee[]);
+  const [contractWorkRequests, setContractWorkRequests] = useState<ContractWorkRequestItem[]>(initialContractWorkRequests ?? []);
+  const [contractTotalCount, setContractTotalCount] = useState(initialContractTotalCount);
   const [contractPage, setContractPage] = useState(1);
-  const [contractItemsPerPage, setContractItemsPerPage] = useState(
-    INITIAL_CONTRACT_PAGE_SIZE,
-  );
+  const [contractItemsPerPage, setContractItemsPerPage] = useState(INITIAL_CONTRACT_PAGE_SIZE);
   const [isPending, startTransition] = useTransition();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const itemsPerPageOptions = [10, 50, 100, 200];
   const [approvalTargetId, setApprovalTargetId] = useState<string | null>(null);
-  const [approvalTargetType, setApprovalTargetType] = useState<
-    "work_request" | "contract_work_request"
-  >("work_request");
-  const [approvingRequestId, setApprovingRequestId] = useState<string | null>(
-    null,
-  );
+  const [approvalTargetType, setApprovalTargetType] = useState<"work_request" | "contract_work_request">("work_request");
+  const [approvingRequestId, setApprovingRequestId] = useState<string | null>(null);
   const [signatureUrl, setSignatureUrl] = useState<string | null>(null);
   const [signatureLoading, setSignatureLoading] = useState(false);
   const [signatureError, setSignatureError] = useState<string | null>(null);
@@ -122,9 +101,7 @@ export function ClientApprovalPage({
   const loadContractData = async (page: number, limit: number) => {
     startTransition(async () => {
       try {
-        const response = await fetch(
-          `/api/client/contract-work-requests?statusFilter=all&page=${page}&limit=${limit}`,
-        );
+        const response = await fetch(`/api/client/contract-work-requests?statusFilter=all&page=${page}&limit=${limit}`);
         if (response.ok) {
           const data = await response.json();
           if (data.success && data.data) {
@@ -143,10 +120,7 @@ export function ClientApprovalPage({
   useEffect(() => {
     if (activeTab !== "contract") return;
     const hasInitial = initialContractWorkRequests != null;
-    const useInitial =
-      contractPage === 1 &&
-      contractItemsPerPage === INITIAL_CONTRACT_PAGE_SIZE &&
-      hasInitial;
+    const useInitial = contractPage === 1 && contractItemsPerPage === INITIAL_CONTRACT_PAGE_SIZE && hasInitial;
     if (useInitial) return;
     loadContractData(contractPage, contractItemsPerPage);
   }, [activeTab, contractPage, contractItemsPerPage]);
@@ -154,9 +128,7 @@ export function ClientApprovalPage({
   const loadData = async (page: number, limit: number) => {
     startTransition(async () => {
       try {
-        const response = await fetch(
-          `/api/client/work-requests?statusFilter=all&page=${page}&limit=${limit}`,
-        );
+        const response = await fetch(`/api/client/work-requests?statusFilter=all&page=${page}&limit=${limit}`);
         if (response.ok) {
           const data = await response.json();
           if (data.success && data.data) {
@@ -171,10 +143,7 @@ export function ClientApprovalPage({
   };
 
   const handleExcelDownload = () => {
-    downloadExcel(
-      "/api/client/approvals/export",
-      buildExcelFilename("승인현황-목록"),
-    );
+    downloadExcel("/api/client/approvals/export", buildExcelFilename("승인현황-목록"));
   };
 
   const handleApprove = async (workRequestId: string) => {
@@ -182,22 +151,16 @@ export function ClientApprovalPage({
 
     setApprovingRequestId(workRequestId);
     try {
-      const response = await fetch(
-        `/api/work-request/${workRequestId}/approve`,
-        {
-          method: "POST",
-        },
-      );
+      const response = await fetch(`/api/work-request/${workRequestId}/approve`, {
+        method: "POST",
+      });
 
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
           loadData(currentPage, itemsPerPage);
           // 상세 모달이 열려있고 승인한 업무와 같으면 데이터 다시 불러오기
-          if (
-            detailModal.isOpen &&
-            detailModal.workRequest?.id === workRequestId
-          ) {
+          if (detailModal.isOpen && detailModal.workRequest?.id === workRequestId) {
             handleOpenDetailModal(workRequestId);
           }
         } else {
@@ -215,10 +178,7 @@ export function ClientApprovalPage({
     }
   };
 
-  const handleOpenApprovalModal = async (
-    workRequestId: string,
-    type: "work_request" | "contract_work_request" = "work_request",
-  ) => {
+  const handleOpenApprovalModal = async (workRequestId: string, type: "work_request" | "contract_work_request" = "work_request") => {
     setApprovalTargetId(workRequestId);
     setApprovalTargetType(type);
     setSignatureUrl(null);
@@ -254,10 +214,7 @@ export function ClientApprovalPage({
     if (approvingRequestId) return;
     setApprovingRequestId(requestId);
     try {
-      const response = await fetch(
-        `/api/contract-work-request/${requestId}/approve`,
-        { method: "POST" },
-      );
+      const response = await fetch(`/api/contract-work-request/${requestId}/approve`, { method: "POST" });
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
@@ -281,14 +238,11 @@ export function ClientApprovalPage({
     const reason = window.prompt("거절 사유를 입력해 주세요 (선택)");
     if (reason === null) return;
     try {
-      const response = await fetch(
-        `/api/contract-work-request/${requestId}/reject`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ rejectionReason: reason || "" }),
-        },
-      );
+      const response = await fetch(`/api/contract-work-request/${requestId}/reject`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rejectionReason: reason || "" }),
+      });
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
@@ -307,12 +261,9 @@ export function ClientApprovalPage({
 
   const handleReject = async (workRequestId: string) => {
     try {
-      const response = await fetch(
-        `/api/work-request/${workRequestId}/reject`,
-        {
-          method: "POST",
-        },
-      );
+      const response = await fetch(`/api/work-request/${workRequestId}/reject`, {
+        method: "POST",
+      });
 
       if (response.ok) {
         const data = await response.json();
@@ -363,10 +314,7 @@ export function ClientApprovalPage({
     return status === "pending" ? "승인 전" : "승인 후";
   };
 
-  const formatWorkPeriod = (
-    startDate?: string | null,
-    endDate?: string | null,
-  ) => {
+  const formatWorkPeriod = (startDate?: string | null, endDate?: string | null) => {
     if (!startDate && !endDate) return "-";
     const start = formatDate(startDate || "");
     const end = formatDate(endDate || "");
@@ -432,27 +380,18 @@ export function ClientApprovalPage({
     return type ? (map[type] ?? type) : "-";
   };
 
-  const paginatedRequests = workRequests.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage,
-  );
+  const paginatedRequests = workRequests.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
   const totalPages = Math.ceil(totalCount / itemsPerPage);
 
   const contractStats = {
     pending: contractWorkRequests.filter((r) => r.status === "pending").length,
-    rejected: contractWorkRequests.filter((r) => r.status === "rejected")
-      .length,
-    approved: contractWorkRequests.filter((r) => r.status === "approved")
-      .length,
+    rejected: contractWorkRequests.filter((r) => r.status === "rejected").length,
+    approved: contractWorkRequests.filter((r) => r.status === "approved").length,
   };
-  const contractTotalPages = Math.ceil(
-    contractTotalCount / contractItemsPerPage,
-  );
+  const contractTotalPages = Math.ceil(contractTotalCount / contractItemsPerPage);
   const paginatedContractRequests = contractWorkRequests;
 
-  const currentWorkType = detailModal.workRequest
-    ? ((detailModal.workRequest as any).work_type as string | null)
-    : null;
+  const currentWorkType = detailModal.workRequest ? ((detailModal.workRequest as any).work_type as string | null) : null;
 
   return (
     <section className={`${styles.approvalList} page_section`}>
@@ -460,31 +399,17 @@ export function ClientApprovalPage({
         <h1>승인 현황</h1>
       </div>
       <div className={styles.tabRow}>
-        <button
-          type="button"
-          className={`${styles.tab} ${activeTab === "manage" ? styles.tabActive : ""}`}
-          onClick={() => setActiveTab("manage")}
-        >
+        <button type="button" className={`${styles.tab} ${activeTab === "manage" ? styles.tabActive : ""}`} onClick={() => setActiveTab("manage")}>
           관리 업무
         </button>
-        <button
-          type="button"
-          className={`${styles.tab} ${activeTab === "contract" ? styles.tabActive : ""}`}
-          onClick={() => setActiveTab("contract")}
-        >
+        <button type="button" className={`${styles.tab} ${activeTab === "contract" ? styles.tabActive : ""}`} onClick={() => setActiveTab("contract")}>
           계약 업무
         </button>
       </div>
       <div className="white_box">
         <div className={styles.boxInner}>
           <h2 className={styles.pageSubTitle}>
-            <span className={styles.companyName}>
-              {clientName || "(주)케이먼트코퍼레이션"}
-            </span>{" "}
-            승인 내역{" "}
-            <span className={styles.workCount}>
-              ({activeTab === "manage" ? totalCount : contractTotalCount}건)
-            </span>
+            <span className={styles.companyName}>{clientName || "(주)케이먼트코퍼레이션"}</span> 승인 내역 <span className={styles.workCount}>({activeTab === "manage" ? totalCount : contractTotalCount}건)</span>
           </h2>
 
           {activeTab === "manage" && (
@@ -508,21 +433,19 @@ export function ClientApprovalPage({
                 <div className={styles.tableTop}>
                   <div className={styles.topTotal}>
                     <p>
-                      총 <span>{totalCount}건</span>의 승인현황이
-                      조회되었습니다.
+                      총 <span>{totalCount}건</span>의 관리 업무 승인현황이 조회되었습니다.
                     </p>
                   </div>
                   <div className={styles.topBtnGroup}>
+                    {/*
                     <div className={styles.deleteBtn}>
                       <ul className={styles.deleteGroup}>
                         <li className={`btn normal btn_md`}>전체 선택</li>
                         <li className={`btn primary btn_md`}>선택 삭제</li>
                       </ul>
                     </div>
-                    <div
-                      className={`${styles.excelBtn} btn btn_md normal excel_btn`}
-                      onClick={handleExcelDownload}
-                    >
+                    */}
+                    <div className={`${styles.excelBtn} btn btn_md normal excel_btn`} onClick={handleExcelDownload}>
                       엑셀다운로드
                     </div>
                     <select
@@ -532,8 +455,7 @@ export function ClientApprovalPage({
                         const newLimit = parseInt(e.target.value, 10);
                         setItemsPerPage(newLimit);
                         loadData(1, newLimit);
-                      }}
-                    >
+                      }}>
                       {itemsPerPageOptions.map((option) => (
                         <option key={option} value={option}>
                           {option}개씩 보기
@@ -566,28 +488,16 @@ export function ClientApprovalPage({
                     <tbody>
                       {paginatedRequests.length === 0 ? (
                         <tr>
-                          <td
-                            colSpan={6}
-                            style={{ textAlign: "center", padding: "40px" }}
-                          >
+                          <td colSpan={6} style={{ textAlign: "center", padding: "40px" }}>
                             승인 요청 내역이 없습니다.
                           </td>
                         </tr>
                       ) : (
                         paginatedRequests.map((request, index) => (
-                          <tr
-                            key={request.id}
-                            onClick={() => handleOpenDetailModal(request.id)}
-                            className={styles.clickableRow}
-                          >
-                            <td>
-                              {(currentPage - 1) * itemsPerPage + index + 1}
-                            </td>
+                          <tr key={request.id} onClick={() => handleOpenDetailModal(request.id)} className={styles.clickableRow}>
+                            <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
                             <td>{request.brand_name}</td>
-                            <td>
-                              {(request as WorkRequestWithEmployee)
-                                .employee_name || "-"}
-                            </td>
+                            <td>{(request as WorkRequestWithEmployee).employee_name || "-"}</td>
                             <td>{formatDate(request.created_at)}</td>
                             <td className={`${styles.text_overflow}`}>
                               <p>{request.work_content || "-"}</p>
@@ -602,14 +512,8 @@ export function ClientApprovalPage({
                                       event.stopPropagation();
                                       handleOpenApprovalModal(request.id);
                                     }}
-                                    disabled={
-                                      isPending ||
-                                      approvingRequestId === request.id
-                                    }
-                                  >
-                                    {approvingRequestId === request.id
-                                      ? "승인 중..."
-                                      : "승인하기"}
+                                    disabled={isPending || approvingRequestId === request.id}>
+                                    {approvingRequestId === request.id ? "승인 중..." : "승인하기"}
                                   </button>
                                   <button
                                     type="button"
@@ -618,20 +522,12 @@ export function ClientApprovalPage({
                                       event.stopPropagation();
                                       handleReject(request.id);
                                     }}
-                                    disabled={
-                                      isPending ||
-                                      approvingRequestId === request.id
-                                    }
-                                  >
+                                    disabled={isPending || approvingRequestId === request.id}>
                                     반려하기
                                   </button>
                                 </div>
                               ) : (
-                                <span
-                                  className={getStatusClass(request.status)}
-                                >
-                                  {getStatusLabel(request.status)}
-                                </span>
+                                <span className={getStatusClass(request.status)}>{getStatusLabel(request.status)}</span>
                               )}
                             </td>
                           </tr>
@@ -645,19 +541,8 @@ export function ClientApprovalPage({
               {totalPages > 1 && (
                 <div className={styles.pagination}>
                   <ul>
-                    <li
-                      className={`${styles.page} ${styles.first} ${currentPage === 1 ? styles.disabled : ""}`}
-                      onClick={() =>
-                        currentPage > 1 && loadData(1, itemsPerPage)
-                      }
-                    ></li>
-                    <li
-                      className={`${styles.page} ${styles.prev} ${currentPage === 1 ? styles.disabled : ""}`}
-                      onClick={() =>
-                        currentPage > 1 &&
-                        loadData(currentPage - 1, itemsPerPage)
-                      }
-                    ></li>
+                    <li className={`${styles.page} ${styles.first} ${currentPage === 1 ? styles.disabled : ""}`} onClick={() => currentPage > 1 && loadData(1, itemsPerPage)}></li>
+                    <li className={`${styles.page} ${styles.prev} ${currentPage === 1 ? styles.disabled : ""}`} onClick={() => currentPage > 1 && loadData(currentPage - 1, itemsPerPage)}></li>
 
                     {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
                       let pageNum;
@@ -671,30 +556,14 @@ export function ClientApprovalPage({
                         pageNum = currentPage - 2 + i;
                       }
                       return (
-                        <li
-                          key={pageNum}
-                          className={`${styles.page} ${currentPage === pageNum ? styles.active : ""}`}
-                          onClick={() => loadData(pageNum, itemsPerPage)}
-                        >
+                        <li key={pageNum} className={`${styles.page} ${currentPage === pageNum ? styles.active : ""}`} onClick={() => loadData(pageNum, itemsPerPage)}>
                           {pageNum}
                         </li>
                       );
                     })}
 
-                    <li
-                      className={`${styles.page} ${styles.next} ${currentPage === totalPages ? styles.disabled : ""}`}
-                      onClick={() =>
-                        currentPage < totalPages &&
-                        loadData(currentPage + 1, itemsPerPage)
-                      }
-                    ></li>
-                    <li
-                      className={`${styles.page} ${styles.last} ${currentPage === totalPages ? styles.disabled : ""}`}
-                      onClick={() =>
-                        currentPage < totalPages &&
-                        loadData(totalPages, itemsPerPage)
-                      }
-                    ></li>
+                    <li className={`${styles.page} ${styles.next} ${currentPage === totalPages ? styles.disabled : ""}`} onClick={() => currentPage < totalPages && loadData(currentPage + 1, itemsPerPage)}></li>
+                    <li className={`${styles.page} ${styles.last} ${currentPage === totalPages ? styles.disabled : ""}`} onClick={() => currentPage < totalPages && loadData(totalPages, itemsPerPage)}></li>
                   </ul>
                 </div>
               )}
@@ -721,8 +590,7 @@ export function ClientApprovalPage({
                 <div className={styles.tableTop}>
                   <div className={styles.topTotal}>
                     <p>
-                      총 <span>{contractTotalCount}건</span>의 계약 업무
-                      승인현황이 조회되었습니다.
+                      총 <span>{contractTotalCount}건</span>의 계약 업무 승인현황이 조회되었습니다.
                     </p>
                   </div>
                   <div className={styles.topBtnGroup}>
@@ -733,8 +601,7 @@ export function ClientApprovalPage({
                         const newLimit = parseInt(e.target.value, 10);
                         setContractItemsPerPage(newLimit);
                         loadContractData(1, newLimit);
-                      }}
-                    >
+                      }}>
                       {itemsPerPageOptions.map((option) => (
                         <option key={option} value={option}>
                           {option}개씩 보기
@@ -770,21 +637,14 @@ export function ClientApprovalPage({
                     <tbody>
                       {paginatedContractRequests.length === 0 ? (
                         <tr>
-                          <td
-                            colSpan={8}
-                            style={{ textAlign: "center", padding: "40px" }}
-                          >
+                          <td colSpan={8} style={{ textAlign: "center", padding: "40px" }}>
                             계약 업무 요청 내역이 없습니다.
                           </td>
                         </tr>
                       ) : (
                         paginatedContractRequests.map((req, index) => (
                           <tr key={req.id}>
-                            <td>
-                              {(contractPage - 1) * contractItemsPerPage +
-                                index +
-                                1}
-                            </td>
+                            <td>{(contractPage - 1) * contractItemsPerPage + index + 1}</td>
                             <td>{req.contract_name}</td>
                             <td>{req.work_content_name ?? "-"}</td>
                             <td>{req.brand_name}</td>
@@ -796,34 +656,15 @@ export function ClientApprovalPage({
                             <td>
                               {req.status === "pending" ? (
                                 <div className={styles.actionButtons}>
-                                  <button
-                                    type="button"
-                                    className={`${styles.btnSm} ${styles.primary} btn btn_md primary`}
-                                    onClick={() =>
-                                      handleOpenApprovalModal(
-                                        req.id,
-                                        "contract_work_request",
-                                      )
-                                    }
-                                    disabled={!!approvingRequestId}
-                                  >
-                                    {approvingRequestId === req.id
-                                      ? "승인 중..."
-                                      : "승인하기"}
+                                  <button type="button" className={`${styles.btnSm} ${styles.primary} btn btn_md primary`} onClick={() => handleOpenApprovalModal(req.id, "contract_work_request")} disabled={!!approvingRequestId}>
+                                    {approvingRequestId === req.id ? "승인 중..." : "승인하기"}
                                   </button>
-                                  <button
-                                    type="button"
-                                    className={`${styles.btnSm} ${styles.danger} btn btn_md danger`}
-                                    onClick={() => handleContractReject(req.id)}
-                                    disabled={!!approvingRequestId}
-                                  >
+                                  <button type="button" className={`${styles.btnSm} ${styles.danger} btn btn_md danger`} onClick={() => handleContractReject(req.id)} disabled={!!approvingRequestId}>
                                     반려하기
                                   </button>
                                 </div>
                               ) : (
-                                <span className={getStatusClass(req.status)}>
-                                  {getStatusLabel(req.status)}
-                                </span>
+                                <span className={getStatusClass(req.status)}>{getStatusLabel(req.status)}</span>
                               )}
                             </td>
                           </tr>
@@ -836,64 +677,20 @@ export function ClientApprovalPage({
               {contractTotalPages > 1 && (
                 <div className={styles.pagination}>
                   <ul>
-                    <li
-                      className={`${styles.page} ${styles.first} ${contractPage === 1 ? styles.disabled : ""}`}
-                      onClick={() =>
-                        contractPage > 1 &&
-                        loadContractData(1, contractItemsPerPage)
-                      }
-                    ></li>
-                    <li
-                      className={`${styles.page} ${styles.prev} ${contractPage === 1 ? styles.disabled : ""}`}
-                      onClick={() =>
-                        contractPage > 1 &&
-                        loadContractData(contractPage - 1, contractItemsPerPage)
-                      }
-                    ></li>
-                    {Array.from(
-                      { length: Math.min(contractTotalPages, 5) },
-                      (_, i) => {
-                        let pageNum =
-                          contractTotalPages <= 5
-                            ? i + 1
-                            : contractPage - 2 + i;
-                        if (contractTotalPages > 5 && contractPage <= 3)
-                          pageNum = i + 1;
-                        else if (
-                          contractTotalPages > 5 &&
-                          contractPage >= contractTotalPages - 2
-                        )
-                          pageNum = contractTotalPages - 4 + i;
-                        return (
-                          <li
-                            key={pageNum}
-                            className={`${styles.page} ${contractPage === pageNum ? styles.active : ""}`}
-                            onClick={() =>
-                              loadContractData(pageNum, contractItemsPerPage)
-                            }
-                          >
-                            {pageNum}
-                          </li>
-                        );
-                      },
-                    )}
-                    <li
-                      className={`${styles.page} ${styles.next} ${contractPage === contractTotalPages ? styles.disabled : ""}`}
-                      onClick={() =>
-                        contractPage < contractTotalPages &&
-                        loadContractData(contractPage + 1, contractItemsPerPage)
-                      }
-                    ></li>
-                    <li
-                      className={`${styles.page} ${styles.last} ${contractPage === contractTotalPages ? styles.disabled : ""}`}
-                      onClick={() =>
-                        contractPage < contractTotalPages &&
-                        loadContractData(
-                          contractTotalPages,
-                          contractItemsPerPage,
-                        )
-                      }
-                    ></li>
+                    <li className={`${styles.page} ${styles.first} ${contractPage === 1 ? styles.disabled : ""}`} onClick={() => contractPage > 1 && loadContractData(1, contractItemsPerPage)}></li>
+                    <li className={`${styles.page} ${styles.prev} ${contractPage === 1 ? styles.disabled : ""}`} onClick={() => contractPage > 1 && loadContractData(contractPage - 1, contractItemsPerPage)}></li>
+                    {Array.from({ length: Math.min(contractTotalPages, 5) }, (_, i) => {
+                      let pageNum = contractTotalPages <= 5 ? i + 1 : contractPage - 2 + i;
+                      if (contractTotalPages > 5 && contractPage <= 3) pageNum = i + 1;
+                      else if (contractTotalPages > 5 && contractPage >= contractTotalPages - 2) pageNum = contractTotalPages - 4 + i;
+                      return (
+                        <li key={pageNum} className={`${styles.page} ${contractPage === pageNum ? styles.active : ""}`} onClick={() => loadContractData(pageNum, contractItemsPerPage)}>
+                          {pageNum}
+                        </li>
+                      );
+                    })}
+                    <li className={`${styles.page} ${styles.next} ${contractPage === contractTotalPages ? styles.disabled : ""}`} onClick={() => contractPage < contractTotalPages && loadContractData(contractPage + 1, contractItemsPerPage)}></li>
+                    <li className={`${styles.page} ${styles.last} ${contractPage === contractTotalPages ? styles.disabled : ""}`} onClick={() => contractPage < contractTotalPages && loadContractData(contractTotalPages, contractItemsPerPage)}></li>
                   </ul>
                 </div>
               )}
@@ -903,78 +700,29 @@ export function ClientApprovalPage({
       </div>
 
       {approvalTargetId && (
-        <div
-          className={styles.signatureOverlay}
-          onClick={() => setApprovalTargetId(null)}
-        >
-          <div
-            className={styles.signatureModal}
-            onClick={(event) => event.stopPropagation()}
-          >
+        <div className={styles.signatureOverlay} onClick={() => setApprovalTargetId(null)}>
+          <div className={styles.signatureModal} onClick={(event) => event.stopPropagation()}>
             <h3 className={styles.signatureTitle}>
-              서명 확인{" "}
-              <button
-                type="button"
-                onClick={() => setApprovalTargetId(null)}
-                disabled={
-                  isPending ||
-                  !!(
-                    approvalTargetId && approvingRequestId === approvalTargetId
-                  )
-                }
-              ></button>
+              서명 확인 <button type="button" onClick={() => setApprovalTargetId(null)} disabled={isPending || !!(approvalTargetId && approvingRequestId === approvalTargetId)}></button>
             </h3>
-            <p className={styles.signatureDesc}>
-              저장된 서명을 확인한 후 승인해 주세요.
-            </p>
+            <p className={styles.signatureDesc}>저장된 서명을 확인한 후 승인해 주세요.</p>
 
             {signatureLoading ? (
               <div className={styles.signatureState}>서명을 불러오는 중...</div>
             ) : signatureUrl ? (
               <div className={styles.signatureBox}>
-                <img
-                  src={signatureUrl ?? undefined}
-                  alt="서명 이미지"
-                  className={styles.signatureImage}
-                />
+                <img src={signatureUrl ?? undefined} alt="서명 이미지" className={styles.signatureImage} />
               </div>
             ) : (
-              <div className={styles.signatureState}>
-                {signatureError ||
-                  "저장된 서명이 없습니다. 서명 없이도 승인할 수 있습니다."}
-              </div>
+              <div className={styles.signatureState}>{signatureError || "저장된 서명이 없습니다. 서명 없이도 승인할 수 있습니다."}</div>
             )}
 
             <div className={styles.signatureActions}>
-              <button
-                type="button"
-                className={`btn normal btn_lg`}
-                onClick={() => setApprovalTargetId(null)}
-                disabled={
-                  isPending ||
-                  !!(
-                    approvalTargetId && approvingRequestId === approvalTargetId
-                  )
-                }
-              >
+              <button type="button" className={`btn normal btn_lg`} onClick={() => setApprovalTargetId(null)} disabled={isPending || !!(approvalTargetId && approvingRequestId === approvalTargetId)}>
                 취소
               </button>
-              <button
-                type="button"
-                className={`btn primary btn_lg`}
-                onClick={handleConfirmApprove}
-                disabled={
-                  isPending ||
-                  !!(
-                    approvalTargetId && approvingRequestId === approvalTargetId
-                  )
-                }
-              >
-                {approvalTargetId && approvingRequestId === approvalTargetId
-                  ? "승인 중..."
-                  : signatureUrl
-                    ? "확인 후 승인"
-                    : "서명 없이 승인"}
+              <button type="button" className={`btn primary btn_lg`} onClick={handleConfirmApprove} disabled={isPending || !!(approvalTargetId && approvingRequestId === approvalTargetId)}>
+                {approvalTargetId && approvingRequestId === approvalTargetId ? "승인 중..." : signatureUrl ? "확인 후 승인" : "서명 없이 승인"}
               </button>
             </div>
           </div>
@@ -983,31 +731,16 @@ export function ClientApprovalPage({
 
       {detailModal.isOpen && (
         <div className={styles.detailOverlay} onClick={handleCloseDetailModal}>
-          <div
-            className={styles.detailModal}
-            onClick={(event) => event.stopPropagation()}
-          >
+          <div className={styles.detailModal} onClick={(event) => event.stopPropagation()}>
             <div className={styles.detailHeader}>
               <div>
                 <div className={styles.detailTitleRow}>
-                  <h3 className={styles.detailTitle}>작업 상세 조회</h3>
-                  <span
-                    className={`${styles.approvalPhaseBadge} ${detailModal.workRequest?.status === "pending" ? styles.beforeApproval : styles.afterApproval}`}
-                  >
-                    {getApprovalPhaseLabel(
-                      detailModal.workRequest?.status || "pending",
-                    )}
-                  </span>
+                  <h3 className={styles.detailTitle}>관리 업무 상세조회</h3>
+                  <span className={`${styles.approvalPhaseBadge} ${detailModal.workRequest?.status === "pending" ? styles.beforeApproval : styles.afterApproval}`}>{getApprovalPhaseLabel(detailModal.workRequest?.status || "pending")}</span>
                 </div>
-                <p className={styles.detailSubtitle}>
-                  {detailModal.workRequest?.brand_name || "-"}
-                </p>
+                <p className={styles.detailSubtitle}>{detailModal.workRequest?.brand_name || "-"}</p>
               </div>
-              <button
-                type="button"
-                className={styles.detailModalClose}
-                onClick={handleCloseDetailModal}
-              ></button>
+              <button type="button" className={styles.detailModalClose} onClick={handleCloseDetailModal}></button>
             </div>
 
             {detailModal.isLoading ? (
@@ -1020,60 +753,40 @@ export function ClientApprovalPage({
                     <div className={styles.detailGrid}>
                       <div>
                         <span className={styles.detailLabel}>승인 상태</span>
-                        <p className={styles.detailValue}>
-                          {getStatusLabel(wr.status)}
-                        </p>
+                        <p className={styles.detailValue}>{getStatusLabel(wr.status)}</p>
                       </div>
                       <div>
                         <span className={styles.detailLabel}>담당자</span>
-                        <p className={styles.detailValue}>
-                          {wr.employee_name || "-"}
-                        </p>
+                        <p className={styles.detailValue}>{wr.employee_name || "-"}</p>
                       </div>
                       <div>
                         <span className={styles.detailLabel}>요청일</span>
-                        <p className={styles.detailValue}>
-                          {formatDate(wr.created_at)}
-                        </p>
+                        <p className={styles.detailValue}>{formatDate(wr.created_at)}</p>
                       </div>
                       <div>
                         <span className={styles.detailLabel}>작업기간</span>
-                        <p className={styles.detailValue}>
-                          {formatWorkPeriod(wr.start_date, wr.end_date)}
-                        </p>
+                        <p className={styles.detailValue}>{formatWorkPeriod(wr.start_date, wr.end_date)}</p>
                       </div>
                       <div>
                         <span className={styles.detailLabel}>관리 유형</span>
-                        <p className={styles.detailValue}>
-                          {getWorkTypeLabel((wr as any).work_type)}
-                        </p>
+                        <p className={styles.detailValue}>{getWorkTypeLabel((wr as any).work_type)}</p>
                       </div>
                       {currentWorkType === "maintenance" && (
                         <div>
                           <span className={styles.detailLabel}>세부 유형</span>
-                          <p className={styles.detailValue}>
-                            {getWorkTypeDetailLabel(
-                              (wr as any).work_type_detail,
-                            )}
-                          </p>
+                          <p className={styles.detailValue}>{getWorkTypeDetailLabel((wr as any).work_type_detail)}</p>
                         </div>
                       )}
                       {currentWorkType === "deduct" && (
                         <div>
                           <span className={styles.detailLabel}>금액</span>
-                          <p className={styles.detailValue}>
-                            {(wr as any).cost
-                              ? Number((wr as any).cost).toLocaleString("ko-KR")
-                              : "-"}
-                          </p>
+                          <p className={styles.detailValue}>{(wr as any).cost ? Number((wr as any).cost).toLocaleString("ko-KR") : "-"}</p>
                         </div>
                       )}
                       {currentWorkType === "maintenance" && (
                         <div>
                           <span className={styles.detailLabel}>횟수</span>
-                          <p className={styles.detailValue}>
-                            {(wr as any).count ?? "-"}
-                          </p>
+                          <p className={styles.detailValue}>{(wr as any).count ?? "-"}</p>
                         </div>
                       )}
                     </div>
@@ -1083,99 +796,60 @@ export function ClientApprovalPage({
                         <span className={styles.detailLabel}>잔여 횟수</span>
                         <div className={styles.detailRemainingColumns}>
                           <div className={styles.detailRemainingBox}>
-                            <p className={styles.detailRemainingTitle}>
+                            <p className={styles.detailRemainingTitle} style={{ padding: "0" }}>
                               승인 전
                             </p>
                             <ul className={styles.detailRemainingList}>
                               <li>
                                 텍스트 수정
-                                <b>
-                                  {wr.managed_client?.detailTextEditCount ??
-                                    "-"}
-                                </b>
+                                <b style={{ color: "var(--text-gray)" }}>{wr.managed_client?.detailTextEditCount ?? "-"}</b>
                               </li>
                               <li>
                                 코딩 수정
-                                <b>
-                                  {wr.managed_client?.detailCodingEditCount ??
-                                    "-"}
-                                </b>
+                                <b style={{ color: "var(--text-gray)" }}>{wr.managed_client?.detailCodingEditCount ?? "-"}</b>
                               </li>
                               <li>
                                 이미지 수정
-                                <b>
-                                  {wr.managed_client?.detailImageEditCount ??
-                                    "-"}
-                                </b>
+                                <b style={{ color: "var(--text-gray)" }}>{wr.managed_client?.detailImageEditCount ?? "-"}</b>
                               </li>
                               <li>
                                 팝업 디자인
-                                <b>
-                                  {wr.managed_client?.detailPopupDesignCount ??
-                                    "-"}
-                                </b>
+                                <b style={{ color: "var(--text-gray)" }}>{wr.managed_client?.detailPopupDesignCount ?? "-"}</b>
                               </li>
-                              {wr.managed_client?.productType2 ===
-                                "premium" && (
+                              {wr.managed_client?.productType2 === "premium" && (
                                 <li>
                                   배너 디자인
-                                  <b>
-                                    {wr.managed_client
-                                      ?.detailBannerDesignCount ?? "-"}
-                                  </b>
+                                  <b style={{ color: "var(--text-gray)" }}>{wr.managed_client?.detailBannerDesignCount ?? "-"}</b>
                                 </li>
                               )}
                             </ul>
                           </div>
 
                           <div className={styles.detailRemainingBox}>
-                            <p className={styles.detailRemainingTitle}>
+                            <p className={styles.detailRemainingTitle} style={{ padding: "0" }}>
                               승인 후
                             </p>
                             <ul className={styles.detailRemainingList}>
                               <li>
                                 텍스트 수정
-                                <b>
-                                  {wr.approval_text_edit_count ??
-                                    wr.managed_client?.detailTextEditCount ??
-                                    "-"}
-                                </b>
+                                <b>{wr.approval_text_edit_count ?? wr.managed_client?.detailTextEditCount ?? "-"}</b>
                               </li>
                               <li>
                                 코딩 수정
-                                <b>
-                                  {wr.approval_coding_edit_count ??
-                                    wr.managed_client?.detailCodingEditCount ??
-                                    "-"}
-                                </b>
+                                <b>{wr.approval_coding_edit_count ?? wr.managed_client?.detailCodingEditCount ?? "-"}</b>
                               </li>
                               <li>
                                 이미지 수정
-                                <b>
-                                  {wr.approval_image_edit_count ??
-                                    wr.managed_client?.detailImageEditCount ??
-                                    "-"}
-                                </b>
+                                <b>{wr.approval_image_edit_count ?? wr.managed_client?.detailImageEditCount ?? "-"}</b>
                               </li>
                               <li>
                                 팝업 디자인
-                                <b>
-                                  {wr.approval_popup_design_count ??
-                                    wr.managed_client?.detailPopupDesignCount ??
-                                    "-"}
-                                </b>
+                                <b>{wr.approval_popup_design_count ?? wr.managed_client?.detailPopupDesignCount ?? "-"}</b>
                               </li>
-                              {(wr.approval_banner_design_count !== null ||
-                                wr.managed_client?.productType2 ===
-                                  "premium") && (
+                              {(wr.approval_banner_design_count !== null || wr.managed_client?.productType2 === "premium") && (
                                 <li>
                                   배너 디자인
-                                  <b>
-                                    {wr.approval_banner_design_count ??
-                                      wr.managed_client
-                                        ?.detailBannerDesignCount ??
-                                      "-"}
-                                  </b>
+                                  <b>{wr.approval_banner_design_count ?? wr.managed_client?.detailBannerDesignCount ?? "-"}</b>
                                 </li>
                               )}
                             </ul>
@@ -1186,23 +860,15 @@ export function ClientApprovalPage({
 
                     {wr.managed_client?.productType1 === "deduct" && (
                       <div className={styles.detailRemaining}>
-                        <span className={styles.detailLabel}>
-                          승인 후 잔여 금액
-                        </span>
+                        <span className={styles.detailLabel}>승인 후 잔여 금액</span>
                         <p className={styles.detailValue}>
                           {(() => {
                             if (wr.approval_remaining_amount != null) {
-                              return wr.approval_remaining_amount.toLocaleString(
-                                "ko-KR",
-                              );
+                              return wr.approval_remaining_amount.toLocaleString("ko-KR");
                             }
-                            const currentAmount =
-                              wr.managed_client?.totalAmount || 0;
+                            const currentAmount = wr.managed_client?.totalAmount || 0;
                             const requestCost = (wr as any).cost || 0;
-                            const remainingAmount = Math.max(
-                              0,
-                              currentAmount - requestCost,
-                            );
+                            const remainingAmount = Math.max(0, currentAmount - requestCost);
                             return remainingAmount.toLocaleString("ko-KR");
                           })()}
                         </p>
@@ -1211,17 +877,13 @@ export function ClientApprovalPage({
 
                     <div className={styles.detailContent}>
                       <span className={styles.detailLabel}>작업 내용</span>
-                      <p className={styles.detailText}>
-                        {wr.work_content || "-"}
-                      </p>
+                      <p className={styles.detailText}>{wr.work_content || "-"}</p>
                     </div>
                   </div>
                 );
               })()
             ) : (
-              <div className={styles.detailLoading}>
-                업무 정보를 불러올 수 없습니다.
-              </div>
+              <div className={styles.detailLoading}>업무 정보를 불러올 수 없습니다.</div>
             )}
           </div>
         </div>

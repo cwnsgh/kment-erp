@@ -244,15 +244,16 @@
 
 .contactGrid {
   display: grid;
-  grid-template-columns: 120px 1fr;
-  border: 1px solid var(--border-color);
+  grid-template-columns: 180px 1fr 180px 1fr;
   border-radius: 4px;
   overflow: hidden;
   font-size: 14px;
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .contactLabel {
-  padding: 14px 16px;
+  padding: 18px 20px;
   background: var(--background-color);
   font-weight: var(--font-weight-semibold);
   color: var(--text-color);
@@ -260,45 +261,53 @@
 }
 
 .contactValue {
-  padding: 14px 16px;
+  padding: 18px 20px;
   background: #fff;
   color: var(--text-color);
   border-bottom: 1px solid var(--border-color);
   word-break: break-all;
+  display: flex;
+  align-items: center;
 }
 
 /* 담당자 그리드 마지막 행 하단 보더 제거 */
-.contactGrid > *:nth-child(9),
-.contactGrid > *:nth-child(10) {
+.contactGrid>*:nth-child(9),
+.contactGrid>*:nth-child(10) {
   border-bottom: none;
 }
 
 .siteTableWrap {
   overflow-x: auto;
-  border: 1px solid var(--border-color);
   border-radius: 4px;
 }
 
 .siteTable {
+  display: table;
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .siteTable th {
-  padding: 12px 16px;
-  text-align: left;
-  background: var(--background-color);
+  padding: 14px 10px;
   font-weight: var(--font-weight-semibold);
-  color: var(--text-color);
+  border-top: 1px solid var(--border-color);
   border-bottom: 1px solid var(--border-color);
+  text-align: center;
+  background: var(--background-color);
+  color: var(--text-color);
+  font-size: 14px;
 }
 
 .siteTable td {
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border-color);
+  padding: 18px 10px;
+  vertical-align: middle;
+  text-align: center;
+  font-weight: var(--font-weight-semibold);
   color: var(--text-color);
-  background: #fff;
+  font-size: 14px;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .siteTable tbody tr:last-child td {
@@ -310,7 +319,7 @@
   background: #fff;
   border: 1px solid var(--border-color);
   border-radius: 4px;
-  min-height: 80px;
+  min-height: 180px;
 }
 
 .noteText {

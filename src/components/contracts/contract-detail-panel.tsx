@@ -120,7 +120,7 @@ export function ContractDetailPanel({ detail, isOpen, onClose, isLoading }: Cont
           </div>
         </div>
 
-        <div className={styles.contractDetailModalWrapper}>
+        <div className={`${styles.contractDetailModalWrapper} scroll`}>
           {isLoading ? (
             <div className={styles.loading}>로딩 중...</div>
           ) : !detail ? (

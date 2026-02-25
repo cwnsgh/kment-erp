@@ -16,21 +16,11 @@
   margin-right: 6px;
 }
 
-.searchBox .searchFlex select {
-  height: 42px;
-  border-radius: 4px;
-  border: 1px solid var(--border-color);
-  padding: 0 12px;
-  font-size: 13px;
-  color: #475569;
-  background: #fff;
-  cursor: pointer;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  background: url(/images/select_arrow.svg) no-repeat center right 10px;
-  padding-right: 32px;
-  background-size: 12px 10px;
+
+.searchBox .searchFlex select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 /* 페이지 목록 테이블 공통 css */

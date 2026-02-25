@@ -102,7 +102,7 @@ export function ManagedClientSelectModal({ isOpen, onClose, onSelect }: ManagedC
                 <div>
                   <span className="text-sm text-slate-600">회사명(브랜드명)</span>
                 </div>
-                <input type="text" value={searchKeyword} onChange={(e) => setSearchKeyword(e.target.value)} placeholder="회사명(브랜드명) 검색" className="flex-1 px-3 py-2 border border-slate-300 rounded-md text-sm" />
+                <input type="text" value={searchKeyword} onChange={(e) => setSearchKeyword(e.target.value)} placeholder="회사명(브랜드명) 검색" className="flex-1 px-3 py-2 border border-slate-300 rounded-md text-sm" style={{ maxWidth: "400px" }} />
               </div>
             </div>
             <div className="flex flex-col" style={{ borderTop: "1px solid var(--border-color)" }}>
@@ -148,7 +148,7 @@ export function ManagedClientSelectModal({ isOpen, onClose, onSelect }: ManagedC
         </div>
 
         {/* 목록 영역 */}
-        <div className="flex-1 overflow-y-auto p-6 modalTableWrap">
+        <div className="flex-1 overflow-y-auto p-6 modalTableWrap scroll">
           {error && <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">{error}</div>}
 
           {isLoading ? (

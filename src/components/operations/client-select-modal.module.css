@@ -59,7 +59,8 @@
 }
 
 .clientSeletModal :global(.modalTableWrap) {
-    padding: 0 30px 60px;
+    padding: 0 30px;
+    margin-bottom: 60px;
 }
 
 .clientSeletModal :global(.modalTotal) {

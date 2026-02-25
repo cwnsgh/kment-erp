@@ -86,7 +86,7 @@ export function ContractSelectModal({ isOpen, onClose, onSelect }: ContractSelec
             </button>
           </form>
         </div>
-        <div className={styles.tableWrap}>
+        <div className={`${styles.tableWrap} scroll`}>
           {error && <p className={styles.error}>{error}</p>}
           {isLoading ? (
             <p className={styles.loading}>로딩 중...</p>

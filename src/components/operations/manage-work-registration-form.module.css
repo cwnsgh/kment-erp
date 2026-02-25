@@ -335,7 +335,6 @@
   resize: none;
   vertical-align: middle;
   width: 100%;
-  border: 1px solid var(--border-color);
   border-radius: 4px;
   padding: 0 10px;
   box-sizing: border-box;
@@ -399,7 +398,7 @@
   background-size: 12px 10px;
   padding-right: 32px;
   color: #475569;
-  height: 34px !important;
+  height: 40px !important;
 }
 
 /* 날짜 그룹 */
@@ -435,6 +434,13 @@
   text-align: left;
   width: 100%;
   box-sizing: border-box;
+  border: 1px solid var(--border-color);
+}
+
+.workTable td input[type="date"]:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .workTable td input[type="date"]::-webkit-calendar-picker-indicator {
@@ -718,6 +724,11 @@
   font-weight: var(--font-weight-semibold);
   color: var(--text-color);
   font-size: 14px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.manageWorkRegist :global(.site-table tr:last-child td) {
+  border-bottom: none;
 }
 
 .manageWorkRegist :global(.site-table tbody tr:hover) {

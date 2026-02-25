@@ -34,13 +34,7 @@ type ClientWorkListProps = {
 
 const INITIAL_CONTRACT_PAGE_SIZE = 10;
 
-export function ClientWorkList({
-  initialWorkRequests,
-  initialTotalCount,
-  initialContractWorkRequests,
-  initialContractTotalCount = 0,
-  clientName = "",
-}: ClientWorkListProps) {
+export function ClientWorkList({ initialWorkRequests, initialTotalCount, initialContractWorkRequests, initialContractTotalCount = 0, clientName = "" }: ClientWorkListProps) {
   const [activeTab, setActiveTab] = useState<"manage" | "contract">("manage");
   const [workRequests, setWorkRequests] = useState<WorkRequestWithEmployee[]>(initialWorkRequests as WorkRequestWithEmployee[]);
   const [totalCount, setTotalCount] = useState(initialTotalCount);
@@ -119,9 +113,7 @@ export function ClientWorkList({
   const loadContractData = async (page: number, filter: typeof contractStatusFilter, limit: number) => {
     startTransition(async () => {
       try {
-        const response = await fetch(
-          `/api/client/contract-work-requests?statusFilter=${filter}&page=${page}&limit=${limit}`,
-        );
+        const response = await fetch(`/api/client/contract-work-requests?statusFilter=${filter}&page=${page}&limit=${limit}`);
         if (response.ok) {
           const data = await response.json();
           if (data.success && data.data && data.totalCount !== undefined) {
@@ -139,11 +131,7 @@ export function ClientWorkList({
   useEffect(() => {
     if (activeTab !== "contract") return;
     const hasInitial = initialContractWorkRequests != null;
-    const useInitial =
-      contractPage === 1 &&
-      contractItemsPerPage === INITIAL_CONTRACT_PAGE_SIZE &&
-      contractStatusFilter === "all" &&
-      hasInitial;
+    const useInitial = contractPage === 1 && contractItemsPerPage === INITIAL_CONTRACT_PAGE_SIZE && contractStatusFilter === "all" && hasInitial;
     if (useInitial) return;
     loadContractData(contractPage, contractStatusFilter, contractItemsPerPage);
   }, [activeTab, contractPage, contractStatusFilter, contractItemsPerPage]);
@@ -178,10 +166,7 @@ export function ClientWorkList({
     const params = new URLSearchParams();
     params.set("statusFilter", contractStatusFilter);
 
-    downloadExcel(
-      `/api/client/contract-work-requests/export?${params.toString()}`,
-      buildExcelFilename("계약업무-작업현황-목록"),
-    );
+    downloadExcel(`/api/client/contract-work-requests/export?${params.toString()}`, buildExcelFilename("계약업무-작업현황-목록"));
   };
 
   const formatDate = (dateStr: string) => {
@@ -321,18 +306,10 @@ export function ClientWorkList({
       </div>
 
       <div className={styles.tabRow}>
-        <button
-          type="button"
-          className={`${styles.tab} ${activeTab === "manage" ? styles.tabActive : ""}`}
-          onClick={() => setActiveTab("manage")}
-        >
+        <button type="button" className={`${styles.tab} ${activeTab === "manage" ? styles.tabActive : ""}`} onClick={() => setActiveTab("manage")}>
           관리 업무
         </button>
-        <button
-          type="button"
-          className={`${styles.tab} ${activeTab === "contract" ? styles.tabActive : ""}`}
-          onClick={() => setActiveTab("contract")}
-        >
+        <button type="button" className={`${styles.tab} ${activeTab === "contract" ? styles.tabActive : ""}`} onClick={() => setActiveTab("contract")}>
           계약 업무
         </button>
       </div>
@@ -340,10 +317,7 @@ export function ClientWorkList({
       <div className="white_box">
         <div className={styles.boxInner}>
           <h2 className={styles.pageSubTitle}>
-            <span className={styles.companyName}>{clientName || "(주)케이먼트코퍼레이션"}</span> 업무 내역{" "}
-            <span className={styles.workCount}>
-              ({activeTab === "manage" ? filteredRequests.length : contractTotalCount}건)
-            </span>
+            <span className={styles.companyName}>{clientName || "(주)케이먼트코퍼레이션"}</span> 업무 내역 <span className={styles.workCount}>({activeTab === "manage" ? filteredRequests.length : contractTotalCount}건)</span>
           </h2>
 
           {activeTab === "manage" && (
@@ -375,110 +349,110 @@ export function ClientWorkList({
               </div>
 
               <div className={styles.listTable}>
-            <div className={styles.tableTop}>
-              <div className={styles.topTotal}>
-                <p>
-                  총 <span>{filteredRequests.length}건</span>의 작업 현황이 조회되었습니다.
-                </p>
-              </div>
-              <div className={styles.topBtnGroup}>
-                <div className={`${styles.excelBtn} btn btn_md normal excel_btn`} onClick={handleExcelDownload}>
-                  엑셀다운로드
+                <div className={styles.tableTop}>
+                  <div className={styles.topTotal}>
+                    <p>
+                      총 <span>{filteredRequests.length}건</span>의 작업 현황이 조회되었습니다.
+                    </p>
+                  </div>
+                  <div className={styles.topBtnGroup}>
+                    <div className={`${styles.excelBtn} btn btn_md normal excel_btn`} onClick={handleExcelDownload}>
+                      엑셀다운로드
+                    </div>
+                    <select
+                      className={`${styles.viewSelect} viewSelect`}
+                      value={itemsPerPage}
+                      onChange={(e) => {
+                        const newLimit = parseInt(e.target.value, 10);
+                        setItemsPerPage(newLimit);
+                        loadData(1, statusFilter, newLimit);
+                      }}>
+                      {itemsPerPageOptions.map((option) => (
+                        <option key={option} value={option}>
+                          {option}개씩 보기
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
-                <select
-                  className={`${styles.viewSelect} viewSelect`}
-                  value={itemsPerPage}
-                  onChange={(e) => {
-                    const newLimit = parseInt(e.target.value, 10);
-                    setItemsPerPage(newLimit);
-                    loadData(1, statusFilter, newLimit);
-                  }}>
-                  {itemsPerPageOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {option}개씩 보기
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
 
-            <div className={styles.tableWrap}>
-              <table>
-                <colgroup>
-                  <col style={{ width: "10%" }} />
-                  <col style={{ width: "15%" }} />
-                  <col style={{ width: "13%" }} />
-                  <col style={{ width: "20%" }} />
-                  <col style={{ width: "auto" }} />
-                  <col style={{ width: "15%" }} />
-                </colgroup>
-                <thead>
-                  <tr>
-                    <th>번호</th>
-                    <th>브랜드명</th>
-                    <th>담당자</th>
-                    <th>작업기간</th>
-                    <th>작업내용</th>
-                    <th>작업여부</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedRequests.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} style={{ textAlign: "center", padding: "40px" }}>
-                        작업 내역이 없습니다.
-                      </td>
-                    </tr>
-                  ) : (
-                    paginatedRequests.map((request, index) => (
-                      <tr key={request.id} onClick={() => handleOpenDetailModal(request.id)} style={{ cursor: "pointer" }}>
-                        <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
-                        <td>{request.brand_name}</td>
-                        <td>{request.employee_name || "-"}</td>
-                        <td>{formatWorkPeriod(request)}</td>
-                        <td className={`${styles.text_overflow}`}>
-                          <p>{request.work_content || "-"}</p>
-                        </td>
-                        <td>
-                          <span className={getStatusClass(request.status)}>{getStatusLabel(request.status)}</span>
-                        </td>
+                <div className={styles.tableWrap}>
+                  <table>
+                    <colgroup>
+                      <col style={{ width: "10%" }} />
+                      <col style={{ width: "15%" }} />
+                      <col style={{ width: "13%" }} />
+                      <col style={{ width: "20%" }} />
+                      <col style={{ width: "auto" }} />
+                      <col style={{ width: "15%" }} />
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th>번호</th>
+                        <th>브랜드명</th>
+                        <th>담당자</th>
+                        <th>작업기간</th>
+                        <th>작업내용</th>
+                        <th>작업여부</th>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                    </thead>
+                    <tbody>
+                      {paginatedRequests.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} style={{ textAlign: "center", padding: "40px" }}>
+                            작업 내역이 없습니다.
+                          </td>
+                        </tr>
+                      ) : (
+                        paginatedRequests.map((request, index) => (
+                          <tr key={request.id} onClick={() => handleOpenDetailModal(request.id)} style={{ cursor: "pointer" }}>
+                            <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
+                            <td>{request.brand_name}</td>
+                            <td>{request.employee_name || "-"}</td>
+                            <td>{formatWorkPeriod(request)}</td>
+                            <td className={`${styles.text_overflow}`}>
+                              <p>{request.work_content || "-"}</p>
+                            </td>
+                            <td>
+                              <span className={getStatusClass(request.status)}>{getStatusLabel(request.status)}</span>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
 
-        {totalPages > 1 && (
-          <div className={styles.pagination}>
-            <ul>
-              <li className={`${styles.page} ${styles.first} ${currentPage === 1 ? styles.disabled : ""}`} onClick={() => currentPage > 1 && loadData(1, statusFilter, itemsPerPage)}></li>
-              <li className={`${styles.page} ${styles.prev} ${currentPage === 1 ? styles.disabled : ""}`} onClick={() => currentPage > 1 && loadData(currentPage - 1, statusFilter, itemsPerPage)}></li>
+              {totalPages > 1 && (
+                <div className={styles.pagination}>
+                  <ul>
+                    <li className={`${styles.page} ${styles.first} ${currentPage === 1 ? styles.disabled : ""}`} onClick={() => currentPage > 1 && loadData(1, statusFilter, itemsPerPage)}></li>
+                    <li className={`${styles.page} ${styles.prev} ${currentPage === 1 ? styles.disabled : ""}`} onClick={() => currentPage > 1 && loadData(currentPage - 1, statusFilter, itemsPerPage)}></li>
 
-              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                let pageNum;
-                if (totalPages <= 5) {
-                  pageNum = i + 1;
-                } else if (currentPage <= 3) {
-                  pageNum = i + 1;
-                } else if (currentPage >= totalPages - 2) {
-                  pageNum = totalPages - 4 + i;
-                } else {
-                  pageNum = currentPage - 2 + i;
-                }
-                return (
-                  <li key={pageNum} className={`${styles.page} ${currentPage === pageNum ? styles.active : ""}`} onClick={() => loadData(pageNum, statusFilter, itemsPerPage)}>
-                    {pageNum}
-                  </li>
-                );
-              })}
+                    {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                      let pageNum;
+                      if (totalPages <= 5) {
+                        pageNum = i + 1;
+                      } else if (currentPage <= 3) {
+                        pageNum = i + 1;
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNum = totalPages - 4 + i;
+                      } else {
+                        pageNum = currentPage - 2 + i;
+                      }
+                      return (
+                        <li key={pageNum} className={`${styles.page} ${currentPage === pageNum ? styles.active : ""}`} onClick={() => loadData(pageNum, statusFilter, itemsPerPage)}>
+                          {pageNum}
+                        </li>
+                      );
+                    })}
 
-              <li className={`${styles.page} ${styles.next} ${currentPage === totalPages ? styles.disabled : ""}`} onClick={() => currentPage < totalPages && loadData(currentPage + 1, statusFilter, itemsPerPage)}></li>
-              <li className={`${styles.page} ${styles.last} ${currentPage === totalPages ? styles.disabled : ""}`} onClick={() => currentPage < totalPages && loadData(totalPages, statusFilter, itemsPerPage)}></li>
-            </ul>
-          </div>
-        )}
+                    <li className={`${styles.page} ${styles.next} ${currentPage === totalPages ? styles.disabled : ""}`} onClick={() => currentPage < totalPages && loadData(currentPage + 1, statusFilter, itemsPerPage)}></li>
+                    <li className={`${styles.page} ${styles.last} ${currentPage === totalPages ? styles.disabled : ""}`} onClick={() => currentPage < totalPages && loadData(totalPages, statusFilter, itemsPerPage)}></li>
+                  </ul>
+                </div>
+              )}
             </>
           )}
 
@@ -509,8 +483,7 @@ export function ClientWorkList({
                     onClick={() => {
                       setContractStatusFilter("all");
                       loadContractData(1, "all", contractItemsPerPage);
-                    }}
-                  >
+                    }}>
                     초기화
                   </div>
                 </div>
@@ -534,8 +507,7 @@ export function ClientWorkList({
                         const newLimit = parseInt(e.target.value, 10);
                         setContractItemsPerPage(newLimit);
                         loadContractData(1, contractStatusFilter, newLimit);
-                      }}
-                    >
+                      }}>
                       {itemsPerPageOptions.map((option) => (
                         <option key={option} value={option}>
                           {option}개씩 보기
@@ -575,11 +547,7 @@ export function ClientWorkList({
                           </tr>
                         ) : (
                           displayed.map((item, index) => (
-                            <tr
-                              key={item.id}
-                              onClick={() => handleOpenContractDetail(item)}
-                              style={{ cursor: "pointer" }}
-                            >
+                            <tr key={item.id} onClick={() => handleOpenContractDetail(item)} style={{ cursor: "pointer" }}>
                               <td>{(contractPage - 1) * contractItemsPerPage + index + 1}</td>
                               <td>{item.brand_name || "-"}</td>
                               <td>{item.employee_name || "-"}</td>
@@ -591,7 +559,8 @@ export function ClientWorkList({
                                 <span className={getStatusClass(item.status)}>{getStatusLabel(item.status)}</span>
                               </td>
                             </tr>
-                          )));
+                          ))
+                        );
                       })()}
                     </tbody>
                   </table>
@@ -600,45 +569,18 @@ export function ClientWorkList({
               {contractTotalPages > 1 && (
                 <div className={styles.pagination}>
                   <ul>
-                    <li
-                      className={`${styles.page} ${styles.first} ${contractPage === 1 ? styles.disabled : ""}`}
-                      onClick={() => contractPage > 1 && loadContractData(1, contractStatusFilter, contractItemsPerPage)}
-                    />
-                    <li
-                      className={`${styles.page} ${styles.prev} ${contractPage === 1 ? styles.disabled : ""}`}
-                      onClick={() => contractPage > 1 && loadContractData(contractPage - 1, contractStatusFilter, contractItemsPerPage)}
-                    />
+                    <li className={`${styles.page} ${styles.first} ${contractPage === 1 ? styles.disabled : ""}`} onClick={() => contractPage > 1 && loadContractData(1, contractStatusFilter, contractItemsPerPage)} />
+                    <li className={`${styles.page} ${styles.prev} ${contractPage === 1 ? styles.disabled : ""}`} onClick={() => contractPage > 1 && loadContractData(contractPage - 1, contractStatusFilter, contractItemsPerPage)} />
                     {Array.from({ length: Math.min(contractTotalPages, 5) }, (_, i) => {
-                      let pageNum =
-                        contractTotalPages <= 5
-                          ? i + 1
-                          : contractPage <= 3
-                            ? i + 1
-                            : contractPage >= contractTotalPages - 2
-                              ? contractTotalPages - 4 + i
-                              : contractPage - 2 + i;
+                      let pageNum = contractTotalPages <= 5 ? i + 1 : contractPage <= 3 ? i + 1 : contractPage >= contractTotalPages - 2 ? contractTotalPages - 4 + i : contractPage - 2 + i;
                       return (
-                        <li
-                          key={pageNum}
-                          className={`${styles.page} ${contractPage === pageNum ? styles.active : ""}`}
-                          onClick={() => loadContractData(pageNum, contractStatusFilter, contractItemsPerPage)}
-                        >
+                        <li key={pageNum} className={`${styles.page} ${contractPage === pageNum ? styles.active : ""}`} onClick={() => loadContractData(pageNum, contractStatusFilter, contractItemsPerPage)}>
                           {pageNum}
                         </li>
                       );
                     })}
-                    <li
-                      className={`${styles.page} ${styles.next} ${contractPage === contractTotalPages ? styles.disabled : ""}`}
-                      onClick={() =>
-                        contractPage < contractTotalPages && loadContractData(contractPage + 1, contractStatusFilter, contractItemsPerPage)
-                      }
-                    />
-                    <li
-                      className={`${styles.page} ${styles.last} ${contractPage === contractTotalPages ? styles.disabled : ""}`}
-                      onClick={() =>
-                        contractPage < contractTotalPages && loadContractData(contractTotalPages, contractStatusFilter, contractItemsPerPage)
-                      }
-                    />
+                    <li className={`${styles.page} ${styles.next} ${contractPage === contractTotalPages ? styles.disabled : ""}`} onClick={() => contractPage < contractTotalPages && loadContractData(contractPage + 1, contractStatusFilter, contractItemsPerPage)} />
+                    <li className={`${styles.page} ${styles.last} ${contractPage === contractTotalPages ? styles.disabled : ""}`} onClick={() => contractPage < contractTotalPages && loadContractData(contractTotalPages, contractStatusFilter, contractItemsPerPage)} />
                   </ul>
                 </div>
               )}
@@ -663,12 +605,12 @@ export function ClientWorkList({
                 <div className={styles.tableGroup}>
                   <div className={styles.tableItem}>
                     <h2 className={styles.tableTitle}>계약 정보</h2>
-                    <ul className={styles.tableRow}>
-                      <li className={styles.rowGroup}>
+                    <ul className={styles.tableRow} style={{ flexDirection: "row" }}>
+                      <li className={styles.rowGroup} style={{ width: "50%" }}>
                         <div className={styles.tableHead}>계약명</div>
                         <div className={styles.tableData}>{detailModal.contractItem.contract_name || "-"}</div>
                       </li>
-                      <li className={styles.rowGroup}>
+                      <li className={styles.rowGroup} style={{ width: "50%" }}>
                         <div className={styles.tableHead}>브랜드명</div>
                         <div className={styles.tableData}>{detailModal.contractItem.brand_name || "-"}</div>
                       </li>
@@ -676,29 +618,27 @@ export function ClientWorkList({
                   </div>
                   <div className={styles.tableItem}>
                     <h2 className={styles.tableTitle}>상세 내역</h2>
-                    <ul className={styles.tableRow}>
-                      <li className={styles.rowGroup}>
+                    <ul className={styles.tableRow} style={{ flexDirection: "row" }}>
+                      <li className={styles.rowGroup} style={{ width: "50%" }}>
                         <div className={styles.tableHead}>담당자</div>
                         <div className={styles.tableData}>{detailModal.contractItem.manager || detailModal.contractItem.employee_name || "-"}</div>
                       </li>
-                      <li className={styles.rowGroup}>
+                      <li className={styles.rowGroup} style={{ width: "50%" }}>
                         <div className={styles.tableHead}>작업유형</div>
                         <div className={styles.tableData}>{detailModal.contractItem.work_content_name || "-"}</div>
                       </li>
-                      <li className={styles.rowGroup}>
+                    </ul>
+                    <ul className={styles.tableRow} style={{ flexDirection: "row" }}>
+                      <li className={styles.rowGroup} style={{ width: "50%" }}>
                         <div className={styles.tableHead}>요청일</div>
                         <div className={styles.tableData}>{detailModal.contractItem.created_at ? formatDateForModal(detailModal.contractItem.created_at) : "-"}</div>
                       </li>
-                      <li className={styles.rowGroup}>
+                      <li className={styles.rowGroup} style={{ width: "50%" }}>
                         <div className={styles.tableHead}>작업기간</div>
-                        <div className={styles.tableData}>
-                          {detailModal.contractItem.work_period
-                            ? `${formatDateForModal(detailModal.contractItem.created_at)} ~ ${formatDateForModal(detailModal.contractItem.work_period)}`
-                            : detailModal.contractItem.created_at
-                              ? formatDateForModal(detailModal.contractItem.created_at) + " ~ "
-                              : "-"}
-                        </div>
+                        <div className={styles.tableData}>{detailModal.contractItem.work_period ? `${formatDateForModal(detailModal.contractItem.created_at)} ~ ${formatDateForModal(detailModal.contractItem.work_period)}` : detailModal.contractItem.created_at ? formatDateForModal(detailModal.contractItem.created_at) + " ~ " : "-"}</div>
                       </li>
+                    </ul>
+                    <ul>
                       <li className={styles.rowGroup}>
                         <div className={styles.tableHead}>작업여부</div>
                         <div className={styles.tableData}>

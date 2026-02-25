@@ -77,7 +77,6 @@
 }
 
 .boxInner {
-  padding: 0 30px;
   box-sizing: border-box;
   width: 100%;
   min-width: 0;
@@ -93,6 +92,7 @@
   font-weight: var(--font-weight-bold);
   margin-bottom: 40px;
   color: var(--text-color);
+  padding: 0 30px;
 }
 
 .companyName {
@@ -140,7 +140,7 @@
 /* 버튼 래퍼 */
 .btnWrap {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   justify-content: center;
 }
 
@@ -227,6 +227,7 @@
 .tableWrap tbody td {
   padding: 24px 0px !important;
   text-align: center !important;
+  font-size: 14px;
 }
 
 .tableWrap tbody td:last-child {
@@ -401,7 +402,7 @@
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
-  padding: 20px 30px;
+  padding: 20px 30px 40px;
   box-sizing: border-box;
 }
 
@@ -452,12 +453,12 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  border-top: 1px solid #e5e7eb;
   width: 100%;
 }
 
-.tableRow:last-child {
-  border-bottom: 1px solid #e5e7eb;
+
+.tableRow:last-of-type {
+  border-top: none;
   box-sizing: border-box;
 }
 
@@ -467,6 +468,9 @@
   width: 100%;
   min-width: 0;
   position: relative;
+  border-bottom: 1px solid var(--border-color);
+  border-top: 1px solid var(--border-color);
+  margin-top: -1px;
 }
 
 .rowGroup::after {
