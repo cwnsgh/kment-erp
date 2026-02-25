@@ -250,7 +250,7 @@ export function ContractForm() {
                 workContents: result.data!.map((wc) => ({
                   workContentId: wc.id,
                   workContentName: wc.work_content_name,
-                  modificationCount: "0",
+                  modificationCount: String(Math.max(0, wc.default_modification_count ?? 0)),
                 })),
               };
             }

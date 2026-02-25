@@ -84,6 +84,14 @@ export async function changePassword(data: {
       };
     }
 
+    // 비밀번호 변경 이력 기록 (감사용)
+    await supabase.from("password_change_log").insert({
+      actor_type: "employee_self",
+      actor_employee_id: session.id,
+      target_type: "employee",
+      target_employee_id: session.id,
+    });
+
     return {
       success: true,
       message: "비밀번호가 성공적으로 변경되었습니다.",

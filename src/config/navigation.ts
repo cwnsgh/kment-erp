@@ -95,6 +95,7 @@ export const mainNav: NavItem[] = [
         label: "로그 관리",
         href: "/admin/logs",
         children: [
+          { label: "비밀번호 변경 이력", href: "/admin/logs" },
           { label: "거래처 관리", href: "/admin/logs/clients" },
           { label: "계약 관리", href: "/admin/logs/contracts" },
           { label: "고객사 관리", href: "/admin/logs/customers" },

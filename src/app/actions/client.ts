@@ -53,8 +53,10 @@ type ClientData = {
 export async function createClient(data: ClientData) {
   try {
     await requireAuth();
+    const session = await getSession();
     const supabase = await getSupabaseServerClient();
     // 비밀번호 해싱 (있는 경우)
+    const hasPasswordSet = !!data.loginPassword;
     let hashedPassword = data.loginPassword;
     if (data.loginPassword) {
       hashedPassword = await bcrypt.hash(data.loginPassword, 10);
@@ -83,6 +85,20 @@ export async function createClient(data: ClientData) {
 
     if (clientError) throw clientError;
     if (!client) throw new Error("거래처 생성 실패");
+
+    // 직원이 거래처 등록 시 비밀번호를 설정한 경우 이력 기록
+    if (
+      hasPasswordSet &&
+      session?.type === "employee" &&
+      session.id
+    ) {
+      await supabase.from("password_change_log").insert({
+        actor_type: "employee_for_client",
+        actor_employee_id: session.id,
+        target_type: "client",
+        target_client_id: client.id,
+      });
+    }
 
     // 2. 담당자 정보 저장 (여러 명)
     if (data.contacts.length > 0) {
@@ -323,11 +339,14 @@ export async function getClientDetail(clientId: string) {
 export async function updateClient(clientId: string, data: ClientData) {
   try {
     await requireAuth();
+    const session = await getSession();
     const supabase = await getSupabaseServerClient();
     // 비밀번호 해싱 (변경된 경우만)
+    const isNewPlainPassword =
+      !!data.loginPassword && !data.loginPassword.startsWith("$2");
     let hashedPassword = data.loginPassword;
-    if (data.loginPassword && !data.loginPassword.startsWith("$2")) {
-      hashedPassword = await bcrypt.hash(data.loginPassword, 10);
+    if (isNewPlainPassword) {
+      hashedPassword = await bcrypt.hash(data.loginPassword!, 10);
     }
 
     // status 매핑 (UI 상태를 DB 상태로 변환)
@@ -364,6 +383,20 @@ export async function updateClient(clientId: string, data: ClientData) {
 
     if (clientError) throw clientError;
     if (!client) throw new Error("거래처 수정 실패");
+
+    // 직원이 거래처 비밀번호를 변경한 경우 이력 기록
+    if (
+      isNewPlainPassword &&
+      session?.type === "employee" &&
+      session.id
+    ) {
+      await supabase.from("password_change_log").insert({
+        actor_type: "employee_for_client",
+        actor_employee_id: session.id,
+        target_type: "client",
+        target_client_id: clientId,
+      });
+    }
 
     // 2. 기존 담당자 정보 삭제 후 새로 추가
     await supabase.from("client_contact").delete().eq("client_id", clientId);
@@ -658,6 +691,14 @@ export async function changeClientPassword(data: {
         error: "비밀번호 변경에 실패했습니다.",
       };
     }
+
+    // 비밀번호 변경 이력 기록 (감사용)
+    await supabase.from("password_change_log").insert({
+      actor_type: "client_self",
+      actor_client_id: data.clientId,
+      target_type: "client",
+      target_client_id: data.clientId,
+    });
 
     return {
       success: true,

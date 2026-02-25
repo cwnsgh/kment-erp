@@ -16,6 +16,7 @@ type WorkContent = {
   work_content_name: string;
   display_order: number;
   is_active: boolean;
+  default_modification_count?: number | null;
 };
 
 export function WorkContentManagement() {
@@ -30,6 +31,7 @@ export function WorkContentManagement() {
   const [editingWorkContent, setEditingWorkContent] = useState<string | null>(null);
   const [newContractTypeName, setNewContractTypeName] = useState("");
   const [newWorkContentName, setNewWorkContentName] = useState<Record<string, string>>({});
+  const [newWorkContentCount, setNewWorkContentCount] = useState<Record<string, number>>({});
 
   // 초기 데이터 로드
   useEffect(() => {
@@ -123,10 +125,12 @@ export function WorkContentManagement() {
 
     const existingContents = workContents[contractTypeId] || [];
     const maxOrder = existingContents.length > 0 ? Math.max(...existingContents.map((w) => w.display_order)) : 0;
+    const count = Math.max(0, Math.floor(newWorkContentCount[contractTypeId] ?? 0));
 
-    const result = await createWorkContent(contractTypeId, name, maxOrder + 1);
+    const result = await createWorkContent(contractTypeId, name, maxOrder + 1, count);
     if (result.success) {
       setNewWorkContentName({ ...newWorkContentName, [contractTypeId]: "" });
+      setNewWorkContentCount({ ...newWorkContentCount, [contractTypeId]: 0 });
       setSuccess("작업 내용이 추가되었습니다.");
       setTimeout(() => setSuccess(""), 3000);
       await loadData();
@@ -136,8 +140,14 @@ export function WorkContentManagement() {
   };
 
   // 작업 내용 수정
-  const handleUpdateWorkContent = async (id: string, workContentName: string, displayOrder: number, isActive: boolean) => {
-    const result = await updateWorkContent(id, workContentName, displayOrder, isActive);
+  const handleUpdateWorkContent = async (
+    id: string,
+    workContentName: string,
+    displayOrder: number,
+    isActive: boolean,
+    defaultModificationCount?: number
+  ) => {
+    const result = await updateWorkContent(id, workContentName, displayOrder, isActive, defaultModificationCount);
     if (result.success) {
       setEditingWorkContent(null);
       setSuccess("작업 내용이 수정되었습니다.");
@@ -306,6 +316,8 @@ export function WorkContentManagement() {
                         <div style={{ display: "flex", gap: "10px", alignItems: "center", flex: 1, position: "relative" }}>
                           <input type="text" defaultValue={workContent.work_content_name} id={`work-name-${workContent.id}`} className="border border-slate-200 rounded px-3 py-2 text-sm" style={{ width: "200px" }} />
                           <input type="number" defaultValue={workContent.display_order} id={`work-order-${workContent.id}`} className="border border-slate-200 rounded px-3 py-2 text-sm" style={{ width: "50px" }} />
+                          <span style={{ fontSize: "13px" }}>기본 횟수</span>
+                          <input type="number" defaultValue={workContent.default_modification_count ?? 0} id={`work-count-${workContent.id}`} min={0} className="border border-slate-200 rounded px-3 py-2 text-sm" style={{ width: "60px" }} />
                           <label style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "13px" }}>
                             <input type="checkbox" defaultChecked={workContent.is_active} id={`work-active-${workContent.id}`} />
                             활성화
@@ -316,8 +328,10 @@ export function WorkContentManagement() {
                               onClick={() => {
                                 const nameInput = document.getElementById(`work-name-${workContent.id}`) as HTMLInputElement;
                                 const orderInput = document.getElementById(`work-order-${workContent.id}`) as HTMLInputElement;
+                                const countInput = document.getElementById(`work-count-${workContent.id}`) as HTMLInputElement;
                                 const activeInput = document.getElementById(`work-active-${workContent.id}`) as HTMLInputElement;
-                                handleUpdateWorkContent(workContent.id, nameInput.value, parseInt(orderInput.value), activeInput.checked);
+                                const count = countInput ? Math.max(0, parseInt(countInput.value, 10) || 0) : undefined;
+                                handleUpdateWorkContent(workContent.id, nameInput.value, parseInt(orderInput.value, 10), activeInput.checked, count);
                               }}>
                               <img src="/images/check_icon_g.png" alt="저장 아이콘" />
                             </button>
@@ -331,6 +345,7 @@ export function WorkContentManagement() {
                           <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
                             <span className={styles.work_name}>{workContent.work_content_name}</span>
                             <span style={{ fontSize: "13px", color: "var(--text-gray)" }}>(순서: {workContent.display_order})</span>
+                            <span style={{ fontSize: "13px", color: "var(--text-gray)" }}>(기본 횟수: {(workContent.default_modification_count ?? 0)}회)</span>
                             {!workContent.is_active && <span style={{ fontSize: "12px", color: "#999" }}>(비활성)</span>}
                           </div>
                           <div className={styles.btn_wrap}>
@@ -346,18 +361,29 @@ export function WorkContentManagement() {
                     </div>
                   ))}
                 </div>
-                <div className={styles.add_form}>
+                <div className={styles.add_form} style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
                   <input
                     type="text"
                     value={newWorkContentName[type.id] || ""}
                     onChange={(e) => setNewWorkContentName({ ...newWorkContentName, [type.id]: e.target.value })}
                     placeholder="작업 내용명을 입력하세요"
                     className="border border-slate-200 rounded px-3 py-2 text-sm"
+                    style={{ width: "200px" }}
                     onKeyPress={(e) => {
                       if (e.key === "Enter") {
                         handleAddWorkContent(type.id);
                       }
                     }}
+                  />
+                  <span style={{ fontSize: "13px" }}>기본 횟수</span>
+                  <input
+                    type="number"
+                    min={0}
+                    value={newWorkContentCount[type.id] ?? ""}
+                    onChange={(e) => setNewWorkContentCount({ ...newWorkContentCount, [type.id]: parseInt(e.target.value, 10) || 0 })}
+                    className="border border-slate-200 rounded px-3 py-2 text-sm"
+                    style={{ width: "60px" }}
+                    placeholder="0"
                   />
                   <button type="button" onClick={() => handleAddWorkContent(type.id)} className="btn btn_md primary">
                     추가

@@ -92,7 +92,7 @@ export async function getContractForTaskRegistration(contractId: string): Promis
         .eq("contract_id", contractId),
       supabase
         .from("contract_type_work_content")
-        .select("id, work_content_name, display_order")
+        .select("id, work_content_name, display_order, default_modification_count")
         .eq("contract_type_id", contractTypeId)
         .eq("is_active", true)
         .order("display_order", { ascending: true }),
@@ -119,9 +119,10 @@ export async function getContractForTaskRegistration(contractId: string): Promis
       const wc = Array.isArray(row.contract_type_work_content)
         ? row.contract_type_work_content[0]
         : row.contract_type_work_content;
+      const count = Number(row.modification_count ?? 0);
       existingByWorkContentId.set(row.work_content_id, {
         id: row.id,
-        modification_count: Number(row.modification_count ?? 0),
+        modification_count: count,
         work_content_name: wc?.work_content_name ?? "",
       });
     }
@@ -140,21 +141,23 @@ export async function getContractForTaskRegistration(contractId: string): Promis
           modification_count: existing.modification_count,
         });
       } else {
+        const defaultCount = Math.max(0, Number((typeWc as { default_modification_count?: number }).default_modification_count ?? 0));
         const { data: inserted, error: insertErr } = await supabase
           .from("contract_work_content")
           .insert({
             contract_id: contractId,
             work_content_id: workContentId,
-            modification_count: 0,
+            modification_count: defaultCount,
           })
-          .select("id")
+          .select("id, modification_count")
           .single();
         if (!insertErr && inserted) {
+          const count = Number((inserted as { id: string; modification_count?: number }).modification_count ?? defaultCount);
           workContents.push({
             id: inserted.id,
             work_content_id: workContentId,
             work_content_name: typeWc.work_content_name ?? "",
-            modification_count: 0,
+            modification_count: count,
           });
         }
       }

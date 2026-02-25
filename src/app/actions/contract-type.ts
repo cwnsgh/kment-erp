@@ -215,6 +215,7 @@ export async function getWorkContentsByContractType(
     work_content_name: string;
     display_order: number;
     is_active: boolean;
+    default_modification_count?: number | null;
   }>;
   error?: string;
 }> {
@@ -223,7 +224,7 @@ export async function getWorkContentsByContractType(
 
     const { data, error } = await supabase
       .from("contract_type_work_content")
-      .select("id, work_content_name, display_order, is_active")
+      .select("id, work_content_name, display_order, is_active, default_modification_count")
       .eq("contract_type_id", contractTypeId)
       .order("display_order", { ascending: true });
 
@@ -253,6 +254,7 @@ export async function getActiveWorkContentsByContractType(
     id: string;
     work_content_name: string;
     display_order: number;
+    default_modification_count?: number | null;
   }>;
   error?: string;
 }> {
@@ -261,7 +263,7 @@ export async function getActiveWorkContentsByContractType(
 
     const { data, error } = await supabase
       .from("contract_type_work_content")
-      .select("id, work_content_name, display_order")
+      .select("id, work_content_name, display_order, default_modification_count")
       .eq("contract_type_id", contractTypeId)
       .eq("is_active", true)
       .order("display_order", { ascending: true });
@@ -287,20 +289,26 @@ export async function getActiveWorkContentsByContractType(
 export async function createWorkContent(
   contractTypeId: string,
   workContentName: string,
-  displayOrder: number
+  displayOrder: number,
+  defaultModificationCount: number = 0
 ): Promise<{ success: boolean; data?: { id: string }; error?: string }> {
   try {
     await requireAuth();
     const supabase = await getSupabaseServerClient();
 
+    const payload: Record<string, unknown> = {
+      contract_type_id: contractTypeId,
+      work_content_name: workContentName.trim(),
+      display_order: displayOrder,
+      is_active: true,
+    };
+    if (defaultModificationCount !== undefined && defaultModificationCount !== null) {
+      payload.default_modification_count = Math.max(0, Math.floor(defaultModificationCount));
+    }
+
     const { data, error } = await supabase
       .from("contract_type_work_content")
-      .insert({
-        contract_type_id: contractTypeId,
-        work_content_name: workContentName.trim(),
-        display_order: displayOrder,
-        is_active: true,
-      })
+      .insert(payload)
       .select("id")
       .single();
 
@@ -328,19 +336,25 @@ export async function updateWorkContent(
   id: string,
   workContentName: string,
   displayOrder: number,
-  isActive: boolean
+  isActive: boolean,
+  defaultModificationCount?: number
 ): Promise<{ success: boolean; error?: string }> {
   try {
     await requireAuth();
     const supabase = await getSupabaseServerClient();
 
+    const payload: Record<string, unknown> = {
+      work_content_name: workContentName.trim(),
+      display_order: displayOrder,
+      is_active: isActive,
+    };
+    if (defaultModificationCount !== undefined && defaultModificationCount !== null) {
+      payload.default_modification_count = Math.max(0, Math.floor(defaultModificationCount));
+    }
+
     const { error } = await supabase
       .from("contract_type_work_content")
-      .update({
-        work_content_name: workContentName.trim(),
-        display_order: displayOrder,
-        is_active: isActive,
-      })
+      .update(payload)
       .eq("id", id);
 
     if (error) throw error;
