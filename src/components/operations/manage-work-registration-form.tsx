@@ -1188,9 +1188,10 @@ export function ManageWorkRegistrationForm({ employeeName }: ManageWorkRegistrat
                                     {selectedOption && (
                                       <div
                                         style={{
-                                          fontSize: "11px",
+                                          fontSize: "12px",
                                           color: "var(--text-gray)",
                                           marginTop: "4px",
+                                          marginLeft: "6px",
                                         }}>
                                         잔여: <span className="font_b">{selectedOption.remaining}</span>회
                                       </div>

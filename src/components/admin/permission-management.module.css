@@ -320,13 +320,8 @@
   background: url(/images/close_icon.svg);
 }
 
-.closeButton:hover {
-  background-color: #f3f4f6;
-  color: #374151;
-}
-
 .modalContent {
-  padding: 24px;
+  padding: 20px 30px;
   overflow-y: auto;
   flex: 1;
 }
@@ -341,7 +336,7 @@
 }
 
 .modalSection {
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .modalSectionTitle {

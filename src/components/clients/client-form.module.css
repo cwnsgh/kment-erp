@@ -197,6 +197,11 @@
   box-sizing: border-box;
   flex-shrink: 0;
   width: fit-content;
+  transition: background-color 0.2s;
+}
+
+.clientRegist :global(.file-upload-btn:hover) {
+  background-color: #475569;
 }
 
 .clientRegist :global(.file-upload-btn > img) {

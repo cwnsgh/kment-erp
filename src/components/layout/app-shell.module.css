@@ -314,7 +314,7 @@
 .notifyContent {
   max-height: 360px;
   overflow-y: auto;
-  padding-bottom: 40px;
+  margin-bottom: 40px;
 }
 
 .notifyArea {

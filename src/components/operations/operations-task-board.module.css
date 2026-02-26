@@ -115,29 +115,35 @@
 }
 
 .filterButton {
-  border-radius: 4px;
-  border: 1px solid var(--border-color);
-  padding: 8px 12px;
-  font-size: 12px;
-  font-weight: var(--font-weight-semibold);
-  background: #fff;
-  color: #475569;
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+  border-radius: 0;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color 0.15s;
+  box-sizing: border-box;
+  border-radius: 4px;
+  background-color: #fff;
+  border: 1px solid var(--border-color);
+  line-height: 1;
 }
 
 .filterButton:hover {
-  background: #f8fafc;
+  background: var(--background-color);
 }
 
 .filterButtonActive {
-  border-color: var(--primary);
-  background: var(--primary);
+  border-color: var(--text-gray);
+  background: var(--text-gray);
   color: #fff;
+  transition: background-color 0.15s;
 }
 
 .filterButtonActive:hover {
-  background: var(--primary);
+  opacity: 0.9;
+  border-color: var(--text-gray);
+  background: var(--text-gray);
   color: #fff;
 }
 

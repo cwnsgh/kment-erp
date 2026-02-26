@@ -600,7 +600,7 @@ export function ClientWorkList({ initialWorkRequests, initialTotalCount, initial
               </button>
             </div>
 
-            <div className={`${styles.detailModalBody} ${styles.scroll}`}>
+            <div className={`${styles.detailModalBody} scroll`}>
               {detailModal.contractItem ? (
                 <div className={styles.tableGroup}>
                   <div className={styles.tableItem}>

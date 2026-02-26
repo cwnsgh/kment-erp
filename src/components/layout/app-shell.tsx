@@ -423,7 +423,7 @@ export function AppShell({ children, session, pendingApprovalCount = 0, initialM
                     </button>
                   )}
                 </div>
-                <div className={styles.notifyContent}>
+                <div className={`${styles.notifyContent} scroll`}>
                   {notificationLoading ? (
                     <div className={styles.notifyEmpty}>알림을 불러오는 중...</div>
                   ) : notifications.length === 0 ? (

@@ -104,6 +104,11 @@ a img {
   @apply inline-flex items-center justify-center rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-800;
 }
 
+.font_b {
+  color: var(--primary);
+  font-weight: var(--font-weight-bold);
+}
+
 /* Input Styles */
 input[type="text"],
 input[type="email"],
@@ -174,6 +179,7 @@ input[type="radio"]:checked::before {
 
 input[type="radio"]:checked+label {
   color: var(--text-color);
+  font-weight: var(--font-weight-semibold);
 }
 
 input[type="checkbox"] {
@@ -409,6 +415,10 @@ button.btn.danger:hover {
   border: 1px solid var(--text-color);
 }
 
+.btn.black:hover {
+  opacity: 0.8;
+}
+
 .btn_lg {
   height: 40px;
   padding: 0 20px;
@@ -488,7 +498,7 @@ Select {
   border: 1px solid var(--border-color);
   font-size: 13px !important;
   font-weight: var(--font-weight-medium) !important;
-  min-width: 100px;
+  min-width: 80px;
 }
 
 Select:focus {

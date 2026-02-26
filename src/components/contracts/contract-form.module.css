@@ -103,6 +103,11 @@
   box-sizing: border-box;
   flex-shrink: 0;
   width: fit-content;
+  transition: background-color 0.2s;
+}
+
+.contractRegist :global(.file-upload-btn:hover) {
+  background-color: #475569;
 }
 
 .contractRegist :global(.file-upload-btn img) {
