@@ -15,10 +15,5 @@ export default async function ConsultationNewPage() {
   const { success, data: categories } = await getConsultationCategories();
   const list = success && categories ? categories : [];
 
-  return (
-    <div style={{ padding: "24px 0" }}>
-      <h1 className="page_title">상담 등록</h1>
-      <ConsultationRegistrationForm categories={list} />
-    </div>
-  );
+  return <ConsultationRegistrationForm categories={list} />;
 }

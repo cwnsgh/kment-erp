@@ -6,6 +6,65 @@ import { revalidatePath } from "next/cache";
 
 export type ConsultationCategory = { id: string; name: string; sort_order: number };
 
+export type ConsultationListItem = {
+  id: string;
+  company_name: string;
+  industry: string | null;
+  brand: string | null;
+  consultation_date: string | null;
+  created_at: string;
+  category_names: string[];
+};
+
+/** 상담 목록 조회 */
+export async function getConsultations(): Promise<{
+  success: boolean;
+  data?: ConsultationListItem[];
+  error?: string;
+}> {
+  try {
+    const supabase = await getSupabaseServerClient();
+    const { data: rows, error } = await supabase
+      .from("consultation")
+      .select(
+        `
+        id,
+        company_name,
+        industry,
+        brand,
+        consultation_date,
+        created_at,
+        consultation_consultation_category(
+          consultation_category(name)
+        )
+      `
+      )
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    const list: ConsultationListItem[] = (rows ?? []).map((r: any) => {
+      const categories = r.consultation_consultation_category ?? [];
+      const category_names = categories
+        .map((cc: { consultation_category?: { name: string } | null }) => cc?.consultation_category?.name)
+        .filter(Boolean);
+      return {
+        id: r.id,
+        company_name: r.company_name ?? "",
+        industry: r.industry ?? null,
+        brand: r.brand ?? null,
+        consultation_date: r.consultation_date ?? null,
+        created_at: r.created_at ?? "",
+        category_names,
+      };
+    });
+
+    return { success: true, data: list };
+  } catch (e: any) {
+    return { success: false, error: e?.message ?? "상담 목록 조회 실패" };
+  }
+}
+
 /** 상담 구분(카테고리) 목록 */
 export async function getConsultationCategories(): Promise<{
   success: boolean;

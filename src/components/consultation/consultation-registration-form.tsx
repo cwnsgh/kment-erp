@@ -104,14 +104,18 @@ export function ConsultationRegistrationForm({ categories }: Props) {
   };
 
   return (
-    <div className={styles.root}>
-      <form onSubmit={handleSubmit} className="table_group">
-        <div className={`btn_wrap ${styles.topBtnWrap}`}>
-          <button type="submit" className="btn btn_md primary" disabled={loading}>
+    <section className={`${styles.consultationPage} page_section`}>
+      <div className="page_title">
+        <h1>상담 등록</h1>
+        <div className="btn_wrap">
+          <button type="submit" form="consultation-registration-form" className="btn btn_lg primary" disabled={loading}>
             {loading ? "등록 중..." : "등록"}
           </button>
         </div>
-
+      </div>
+      <div className={styles.whiteBox}>
+        <div className={styles.boxInner}>
+          <form id="consultation-registration-form" onSubmit={handleSubmit} className={`table_group ${styles.root}`}>
       {/* 1. 기본 정보 */}
       <div className="table_item">
         <h2 className="table_title">기본 정보</h2>
@@ -213,7 +217,7 @@ export function ConsultationRegistrationForm({ categories }: Props) {
         ))}
       </div>
 
-      {/* 3. 사이트 정보 */}
+      {/* 3. 사이트 정보 - 2행 배치로 필드 너비 확보 (브랜드/도메인 | 솔루션/유형) */}
       <div className="table_item">
         <h2 className="table_title">
           사이트 정보
@@ -222,65 +226,69 @@ export function ConsultationRegistrationForm({ categories }: Props) {
           </button>
         </h2>
         {sites.map((site) => (
-          <ul key={site.id} className={`table_row ${styles.siteRow}`}>
-            <li className="row_group">
-              <div className="table_head">브랜드</div>
-              <div className="table_data pd12">
-                <input
-                  type="text"
-                  placeholder="브랜드"
-                  value={site.brand}
-                  onChange={(e) => setSites((prev) => prev.map((s) => (s.id === site.id ? { ...s, brand: e.target.value } : s)))}
-                />
-              </div>
-            </li>
-            <li className="row_group">
-              <div className="table_head">도메인</div>
-              <div className="table_data pd12">
-                <input
-                  type="text"
-                  placeholder="도메인"
-                  value={site.domain}
-                  onChange={(e) => setSites((prev) => prev.map((s) => (s.id === site.id ? { ...s, domain: e.target.value } : s)))}
-                />
-              </div>
-            </li>
-            <li className="row_group">
-              <div className="table_head">솔루션</div>
-              <div className="table_data pd12">
-                <select
-                  value={site.solution || "선택해주세요"}
-                  onChange={(e) => setSites((prev) => prev.map((s) => (s.id === site.id ? { ...s, solution: e.target.value } : s)))}
-                >
-                  {SOLUTION_OPTIONS.map((opt) => (
-                    <option key={opt} value={opt}>
-                      {opt}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </li>
-            <li className="row_group">
-              <div className="table_head">유형</div>
-              <div className={`table_data pd12 ${styles.siteDataWithRemove}`}>
-                <select
-                  value={site.type || "선택해주세요"}
-                  onChange={(e) => setSites((prev) => prev.map((s) => (s.id === site.id ? { ...s, type: e.target.value } : s)))}
-                >
-                  {SITE_TYPE_OPTIONS.map((opt) => (
-                    <option key={opt} value={opt}>
-                      {opt}
-                    </option>
-                  ))}
-                </select>
-                {sites.length > 1 && (
-                  <button type="button" onClick={() => removeSite(site.id)} className={styles.removeBtn} title="삭제">
-                    <X size={18} />
-                  </button>
-                )}
-              </div>
-            </li>
-          </ul>
+          <div key={site.id} className={styles.siteBlock}>
+            <ul className={`table_row ${styles.siteRow}`}>
+              <li className="row_group">
+                <div className="table_head">브랜드</div>
+                <div className="table_data pd12">
+                  <input
+                    type="text"
+                    placeholder="브랜드"
+                    value={site.brand}
+                    onChange={(e) => setSites((prev) => prev.map((s) => (s.id === site.id ? { ...s, brand: e.target.value } : s)))}
+                  />
+                </div>
+              </li>
+              <li className="row_group">
+                <div className="table_head">도메인</div>
+                <div className="table_data pd12">
+                  <input
+                    type="text"
+                    placeholder="도메인"
+                    value={site.domain}
+                    onChange={(e) => setSites((prev) => prev.map((s) => (s.id === site.id ? { ...s, domain: e.target.value } : s)))}
+                  />
+                </div>
+              </li>
+            </ul>
+            <ul className={`table_row ${styles.siteRow}`}>
+              <li className="row_group">
+                <div className="table_head">솔루션</div>
+                <div className="table_data pd12">
+                  <select
+                    value={site.solution || "선택해주세요"}
+                    onChange={(e) => setSites((prev) => prev.map((s) => (s.id === site.id ? { ...s, solution: e.target.value } : s)))}
+                  >
+                    {SOLUTION_OPTIONS.map((opt) => (
+                      <option key={opt} value={opt}>
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </li>
+              <li className="row_group">
+                <div className="table_head">유형</div>
+                <div className={`table_data pd12 ${styles.siteDataWithRemove}`}>
+                  <select
+                    value={site.type || "선택해주세요"}
+                    onChange={(e) => setSites((prev) => prev.map((s) => (s.id === site.id ? { ...s, type: e.target.value } : s)))}
+                  >
+                    {SITE_TYPE_OPTIONS.map((opt) => (
+                      <option key={opt} value={opt}>
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
+                  {sites.length > 1 && (
+                    <button type="button" onClick={() => removeSite(site.id)} className={styles.removeBtn} title="삭제">
+                      <X size={18} />
+                    </button>
+                  )}
+                </div>
+              </li>
+            </ul>
+          </div>
         ))}
       </div>
 
@@ -302,24 +310,28 @@ export function ConsultationRegistrationForm({ categories }: Props) {
         </ul>
       </div>
 
-      {/* 5. 상담 내용 */}
+      {/* 5. 상담 내용 - 구분 → 상담일자 → 상담내용 → 첨부파일 순, 각각 한 줄 */}
       <div className="table_item">
         <h2 className="table_title">상담 내용</h2>
-        <div className={styles.categorySection}>
-          <div className={`table_head ${styles.categoryLabel}`}>구분</div>
-          <div className={styles.categoryGroup}>
-            {categories.map((cat) => (
-              <label key={cat.id} className={styles.categoryCheckbox}>
-                <input
-                  type="checkbox"
-                  checked={categoryIds.includes(cat.id)}
-                  onChange={() => toggleCategory(cat.id)}
-                />
-                <span>{cat.name}</span>
-              </label>
-            ))}
-          </div>
-        </div>
+        <ul className="table_row">
+          <li className={`row_group ${styles.fullRow}`}>
+            <div className="table_head">구분</div>
+            <div className={`table_data pd12 ${styles.categoryCell}`}>
+              <div className={styles.categoryGroup}>
+                {categories.map((cat) => (
+                  <label key={cat.id} className={styles.categoryCheckbox}>
+                    <input
+                      type="checkbox"
+                      checked={categoryIds.includes(cat.id)}
+                      onChange={() => toggleCategory(cat.id)}
+                    />
+                    <span>{cat.name}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          </li>
+        </ul>
         <ul className="table_row">
           <li className="row_group">
             <div className="table_head">상담일자</div>
@@ -328,6 +340,20 @@ export function ConsultationRegistrationForm({ categories }: Props) {
                 type="date"
                 value={consultationDate}
                 onChange={(e) => setConsultationDate(e.target.value)}
+              />
+            </div>
+          </li>
+        </ul>
+        <ul className="table_row">
+          <li className={`row_group ${styles.fullRow}`}>
+            <div className="table_head">상담내용</div>
+            <div className="table_data pd12">
+              <textarea
+                className={styles.contentArea}
+                placeholder="상담 내용을 입력하세요."
+                value={consultationContent}
+                onChange={(e) => setConsultationContent(e.target.value)}
+                rows={6}
               />
             </div>
           </li>
@@ -363,28 +389,10 @@ export function ConsultationRegistrationForm({ categories }: Props) {
             </div>
           </li>
         </ul>
-        <ul className="table_row">
-          <li className={`row_group ${styles.fullRow}`}>
-            <div className="table_head">상담내용</div>
-            <div className="table_data pd12">
-              <textarea
-                className={styles.contentArea}
-                placeholder="상담 내용을 입력하세요."
-                value={consultationContent}
-                onChange={(e) => setConsultationContent(e.target.value)}
-                rows={6}
-              />
-            </div>
-          </li>
-        </ul>
       </div>
-
-        <div className={`btn_wrap ${styles.bottomBtnWrap}`}>
-          <button type="submit" className="btn btn_md primary" disabled={loading}>
-            {loading ? "등록 중..." : "등록"}
-          </button>
+          </form>
         </div>
-      </form>
-    </div>
+      </div>
+    </section>
   );
 }

@@ -1,0 +1,150 @@
+.consultationList {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.listTable {
+  margin-top: 0 !important;
+}
+
+.listTable .tableTop {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  margin-bottom: 20px !important;
+  padding: 0 30px !important;
+}
+
+.listTable .topTotal {
+  display: flex !important;
+  align-items: center !important;
+}
+
+.listTable .topTotal p {
+  font-size: 13px !important;
+  font-weight: var(--font-weight-semibold) !important;
+  color: var(--text-gray) !important;
+}
+
+.listTable .topTotal p > span {
+  color: var(--primary) !important;
+  font-weight: var(--font-weight-bold) !important;
+}
+
+.listTable .topBtnGroup {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.listTable .viewSelect {
+  appearance: none !important;
+  background: url("/images/select_arrow.svg") no-repeat center right 10px !important;
+  background-size: 12px 8px !important;
+  height: 30px !important;
+  padding: 0 26px 0 14px !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  font-size: 13px !important;
+  font-weight: var(--font-weight-medium) !important;
+}
+
+.listTable .tableWrap table {
+  text-align: center !important;
+  width: 100% !important;
+  border-collapse: collapse !important;
+}
+
+.listTable .tableWrap table th {
+  padding: 24px 0 !important;
+  font-weight: var(--font-weight-semibold) !important;
+  color: var(--text-gray) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+.listTable .tableWrap table tr {
+  border-top: 1px solid var(--border-color) !important;
+  transition: background-color 0.2s;
+}
+
+.listTable .tableWrap table tbody tr:hover {
+  background-color: var(--hover-bg) !important;
+}
+
+.listTable .tableWrap table tr:last-child {
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+.listTable .tableWrap table td {
+  padding: 30px 10px !important;
+  font-size: 14px !important;
+  font-weight: var(--font-weight-medium) !important;
+  vertical-align: middle !important;
+  word-break: keep-all !important;
+  box-sizing: border-box !important;
+}
+
+.pagination {
+  margin-top: 60px !important;
+  text-align: center !important;
+}
+
+.pagination ul {
+  display: inline-flex !important;
+  gap: 6px !important;
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.pagination .page {
+  min-width: 26px !important;
+  height: 26px !important;
+  font-size: 15px !important;
+  font-weight: var(--font-weight-bold) !important;
+  opacity: 0.4 !important;
+  line-height: 26px !important;
+  cursor: pointer !important;
+  border: none !important;
+  background: none !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.pagination .page.active {
+  opacity: 1 !important;
+}
+
+.pagination .page.disabled {
+  opacity: 0.4 !important;
+  cursor: not-allowed !important;
+}
+
+.pagination .page.first {
+  background: url("/images/page_last_icon.svg") no-repeat center center !important;
+  transform: rotate(180deg) !important;
+  background-size: 12px !important;
+  opacity: 1 !important;
+}
+
+.pagination .page.prev {
+  background: url("/images/arrow_icon.svg") no-repeat center center !important;
+  transform: rotate(180deg) !important;
+  background-size: 12px !important;
+  opacity: 1 !important;
+}
+
+.pagination .page.next {
+  background: url("/images/arrow_icon.svg") no-repeat center center !important;
+  background-size: 12px !important;
+  opacity: 1 !important;
+}
+
+.pagination .page.last {
+  background: url("/images/page_last_icon.svg") no-repeat center center !important;
+  background-size: 12px !important;
+  opacity: 1 !important;
+}

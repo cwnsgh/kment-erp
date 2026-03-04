@@ -1,29 +1,61 @@
-/* 상담 등록 폼 전용 스타일 */
+/* 상담 등록 폼 - 업무등록과 동일한 여유 있는 레이아웃 */
+.consultationPage {
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.consultationPage :global(.page_title) {
+  text-align: left;
+  margin: 0 auto 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.consultationPage :global(.page_title h1) {
+  font-size: 32px;
+  font-weight: var(--font-weight-bold);
+}
+
+.whiteBox {
+  background: #fff !important;
+  border-radius: 10px !important;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.08) !important;
+  width: 100% !important;
+  padding: 50px 0 100px;
+  box-sizing: border-box !important;
+  position: relative !important;
+}
+
+.boxInner {
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* 폼 자체가 .root + .table_group 이므로, .root가 곧 테이블 그룹 컨테이너 */
 .root {
   max-width: 100%;
   margin-top: 0;
-}
-
-.root :global(.table_group) {
+  padding: 0 30px;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   gap: 60px;
   width: 100%;
   font-size: 14px;
   font-weight: var(--font-weight-semibold);
-  box-sizing: border-box;
 }
 
-.root :global(.table_group h2.table_title) {
+.root :global(h2.table_title) {
   font-size: 18px;
   font-weight: var(--font-weight-bold);
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.root :global(.table_group h2.table_title .plus_btn) {
+.root :global(h2.table_title .plus_btn) {
   font-size: 13px;
   color: var(--text-gray);
   font-weight: var(--font-weight-semibold);
@@ -32,18 +64,18 @@
   border: none;
 }
 
-.root :global(.table_group h2.table_title .plus_btn:hover) {
+.root :global(h2.table_title .plus_btn:hover) {
   color: var(--primary);
 }
 
-.root :global(.table_group h3.table_title_sub) {
+.root :global(h3.table_title_sub) {
   font-size: 15px;
   font-weight: var(--font-weight-semibold);
   color: var(--text-gray);
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
-.root :global(.table_group .table_item .table_row) {
+.root :global(.table_item .table_row) {
   display: flex;
   align-items: stretch;
   border-top: 1px solid var(--border-color);
@@ -53,23 +85,23 @@
   padding: 0;
 }
 
-.root :global(.table_group .table_item .table_row:first-child) {
+.root :global(.table_item .table_row:first-child) {
   border-top: 1px solid var(--border-color);
 }
 
-.root :global(.table_group .table_item .table_row:last-child) {
+.root :global(.table_item .table_row:last-child) {
   border-bottom: 1px solid var(--border-color);
   box-sizing: border-box;
 }
 
-.root :global(.table_group .table_item .table_row .row_group) {
+.root :global(.table_item .table_row .row_group) {
   flex: 1;
   display: flex;
   position: relative;
   min-width: 0;
 }
 
-.root :global(.table_group .table_item .table_row .row_group:after) {
+.root :global(.table_item .table_row .row_group:after) {
   content: "";
   display: block;
   width: 180px;
@@ -81,10 +113,10 @@
   z-index: -1;
 }
 
-.root :global(.table_group .table_item .table_row .row_group .table_head) {
+.root :global(.table_item .table_row .row_group .table_head) {
   width: 180px;
   min-width: 180px;
-  padding: 18px 20px;
+  padding: 22px 24px;
   background: var(--background-color);
   box-sizing: border-box;
   z-index: 1;
@@ -97,8 +129,8 @@
   margin: 0;
 }
 
-.root :global(.table_group .table_item .table_row .row_group .table_data) {
-  padding: 18px 20px;
+.root :global(.table_item .table_row .row_group .table_data) {
+  padding: 22px 24px;
   box-sizing: border-box;
   word-break: break-all;
   display: flex;
@@ -112,29 +144,29 @@
   margin: 0;
 }
 
-.root :global(.table_group .table_item .table_row .row_group .table_data.pd12) {
-  padding-top: 12px;
-  padding-bottom: 12px;
+.root :global(.table_item .table_row .row_group .table_data.pd12) {
+  padding: 16px 24px;
   box-sizing: border-box;
   flex-direction: column;
   align-items: flex-start;
 }
 
-.root :global(.table_group .table_item .table_row .row_group .table_data input),
-.root :global(.table_group .table_item .table_row .row_group .table_data select) {
+.root :global(.table_item .table_row .row_group .table_data input:not([type="checkbox"])),
+.root :global(.table_item .table_row .row_group .table_data select) {
   width: 100%;
   max-width: 100%;
   border: 1px solid var(--border-color);
   border-radius: 4px;
-  padding: 8px 12px;
+  padding: 10px 14px;
   font-size: 14px;
   box-sizing: border-box;
+  min-height: 40px;
 }
 
-.root :global(.table_group .table_item .table_row .row_group .table_data textarea) {
+.root :global(.table_item .table_row .row_group .table_data textarea) {
   width: 100%;
   min-height: 80px;
-  padding: 12px;
+  padding: 10px;
   border: 1px solid var(--border-color);
   border-radius: 4px;
   font-size: 14px;
@@ -152,9 +184,9 @@
   gap: 10px;
 }
 
-/* 담당자 블록 간격 */
+/* 담당자 블록 간격 (업무등록과 동일하게 여유 있게) */
 .contactBlock {
-  margin-bottom: 16px;
+  margin-bottom: 28px;
 }
 
 /* 담당자 비고 셀: input + 삭제 버튼 */
@@ -169,9 +201,18 @@
   min-width: 0;
 }
 
+/* 사이트 정보: 사이트별 2행 묶음 */
+.siteBlock {
+  margin-bottom: 16px;
+}
+
+.siteBlock:last-child {
+  margin-bottom: 0;
+}
+
 /* 사이트 행 하단 간격 */
 .siteRow {
-  margin-bottom: 8px;
+  margin-bottom: 0;
 }
 
 /* 사이트 유형 셀: select + 삭제 버튼 */
@@ -203,19 +244,22 @@
   color: #dc2626;
 }
 
-/* 구분(카테고리) 영역 */
-.categorySection {
-  margin-bottom: 16px;
+/* 구분 열: 상담내용 옆에 배치 시 고정 너비 (체크박스 영역 확보) */
+.categoryColumn {
+  flex: 0 0 320px;
+  min-width: 280px;
 }
 
-.categoryLabel {
-  margin-bottom: 8px;
+/* 구분 셀: 위아래 간격만 다른 행과 동일하게 (pd12는 16px라서 22px로 통일), 정렬은 왼쪽 */
+.categoryCell {
+  padding-top: 22px !important;
+  padding-bottom: 22px !important;
 }
 
 .categoryGroup {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 12px 16px;
   align-items: center;
 }
 
@@ -227,9 +271,18 @@
   font-weight: var(--font-weight-semibold);
 }
 
-.categoryCheckbox input {
-  width: auto;
+.categoryCheckbox input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  min-width: 14px;
+  min-height: 14px;
   margin: 0;
+  padding: 0;
+  flex-shrink: 0;
+  cursor: pointer;
+  box-sizing: border-box;
+  border: 1px solid var(--border-color);
+  border-radius: 2px;
 }
 
 /* 첨부파일 영역 */
