@@ -76,9 +76,10 @@
 }
 
 .tableWrap {
-  padding: 0 30px 60px;
+  padding: 0 30px;
   overflow: auto;
   flex: 1;
+  margin-bottom: 60px;
 }
 
 .total {

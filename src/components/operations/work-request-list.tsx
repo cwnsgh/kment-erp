@@ -784,7 +784,7 @@ export default function WorkRequestList({ clientId, clientName, currentEmployeeI
               </div>
             </div>
 
-            <div className={`${styles.detailModalBody} ${styles.scroll}`}>
+            <div className={`${styles.detailModalBody} ${styles.scroll} scroll`}>
               {detailModal.isLoading ? (
                 <div style={{ textAlign: "center", padding: "40px 0" }}>로딩 중...</div>
               ) : detailModal.workRequest ? (

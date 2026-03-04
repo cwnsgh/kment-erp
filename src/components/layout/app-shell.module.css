@@ -1,9 +1,8 @@
 /* 사이드바 스타일 */
 
 .sidebar {
-  width: 20vw;
+  width: 22vw;
   max-width: 280px;
-  min-width: 240px;
   background-color: #fff;
   padding: 40px 20px;
   height: 100%;
@@ -315,7 +314,7 @@
 .notifyContent {
   max-height: 360px;
   overflow-y: auto;
-  padding-bottom: 40px;
+  margin-bottom: 40px;
 }
 
 .notifyArea {

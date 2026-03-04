@@ -40,19 +40,33 @@
 .boxTitle {
   font-size: 20px;
   font-weight: var(--font-weight-bold);
-  margin: 0 0 40px;
+  margin-bottom: 20px;
+  line-height: 1;
 }
 
 .typePeriod {
   font-size: 16px;
   color: var(--text-gray);
   margin: 0 0 40px;
+  font-weight: var(--font-weight-semibold);
 }
 
 .typeContent {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   border-top: 1px solid var(--border-color);
+  position: relative;
+}
+
+.typeContent:after {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 1px;
+  background: var(--border-color);
+  position: absolute;
+  left: 0;
+  bottom: 0;
 }
 
 .typeContent>div {
@@ -131,6 +145,7 @@
 .approvalBox {
   display: flex;
   margin-bottom: 20px;
+  margin-top: 40px;
   border: 1px solid var(--border-color);
   border-radius: 10px;
 }
@@ -168,7 +183,7 @@
 }
 
 .table thead th {
-  padding: 20px 12px;
+  padding: 20px 10px;
   text-align: center;
   font-weight: var(--font-weight-semibold);
   font-size: 14px;
@@ -177,8 +192,8 @@
 }
 
 .table tbody td {
-  padding: 12px;
-  font-size: 14px;
+  padding: 18px 10px;
+  font-size: 13px;
   border-bottom: 1px solid var(--border-color);
   text-align: center;
 }

@@ -166,12 +166,9 @@
 .clientRegist textarea {
   width: 100%;
   min-height: 190px;
-  padding: 20px;
-  border: 1px solid var(--border-color) !important;
-  border-radius: 4px;
-  box-sizing: border-box;
   resize: none;
 }
+
 
 /* 파일 업로드 박스 스타일 */
 .clientRegist :global(.file-upload-box) {
@@ -200,6 +197,11 @@
   box-sizing: border-box;
   flex-shrink: 0;
   width: fit-content;
+  transition: background-color 0.2s;
+}
+
+.clientRegist :global(.file-upload-btn:hover) {
+  background-color: #475569;
 }
 
 .clientRegist :global(.file-upload-btn > img) {
@@ -280,8 +282,8 @@
 
 .siteTable th {
   padding: 14px 10px;
-  font-weight: 600;
-  border-bottom: 1px solid #ddd;
+  font-weight: var(--font-weight-semibold);
+  border-bottom: 1px solid var(--border-color);
   text-align: center;
   background: #f8f9fc;
 }
@@ -308,13 +310,16 @@
   resize: none;
   vertical-align: middle;
   width: 100%;
-  border: 1px solid var(--line-color);
-  border-radius: 4px;
-  padding: 4px 4px 4px 14px;
-  box-sizing: border-box;
   font-size: 14px;
 }
 
 .siteTable td.right {
   text-align: right;
+}
+
+.siteTable td select:focus,
+.siteTable td textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }

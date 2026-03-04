@@ -241,10 +241,10 @@ export function ContractTaskStatusBoard({ initialData, currentEmployeeId }: Cont
           </div>
         </div>
         <div className={styles.filterRowActions}>
-          <button type="button" className={styles.btnSearch} onClick={handleSearch} disabled={loading}>
+          <button type="button" className={`btn btn_lg primary`} onClick={handleSearch} disabled={loading}>
             검색
           </button>
-          <button type="button" className={styles.btnReset} onClick={handleReset}>
+          <button type="button" className={`btn btn_lg normal`} onClick={handleReset}>
             초기화
           </button>
         </div>
@@ -429,11 +429,7 @@ export function ContractTaskStatusBoard({ initialData, currentEmployeeId }: Cont
                   닫기
                 </button>
                 {selectedTask.status === "pending" && (
-                  <button
-                    type="button"
-                    className="btn btn_lg normal"
-                    style={{ borderColor: "var(--negative)", color: "var(--negative)" }}
-                    onClick={() => setCancelConfirmTask(selectedTask)}>
+                  <button type="button" className="btn btn_lg normal" style={{ background: "var(--negative)", color: "#fff", borderColor: "var(--negative)" }} onClick={() => setCancelConfirmTask(selectedTask)}>
                     요청취소
                   </button>
                 )}
@@ -482,7 +478,7 @@ export function ContractTaskStatusBoard({ initialData, currentEmployeeId }: Cont
               <button type="button" className="btn btn_lg normal" onClick={() => setCancelConfirmTask(null)} disabled={cancelDeleting}>
                 닫기
               </button>
-              <button type="button" className="btn btn_lg normal" style={{ borderColor: "var(--negative)", color: "var(--negative)" }} onClick={handleConfirmCancelRequest} disabled={cancelDeleting}>
+              <button type="button" className="btn btn_lg normal" style={{ background: "var(--negative)", color: "#fff", borderColor: "var(--negative)" }} onClick={handleConfirmCancelRequest} disabled={cancelDeleting}>
                 {cancelDeleting ? "취소 중..." : "요청취소"}
               </button>
             </div>

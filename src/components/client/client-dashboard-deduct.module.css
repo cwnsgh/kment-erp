@@ -40,12 +40,14 @@
 .boxTitle {
   font-size: 20px;
   font-weight: var(--font-weight-bold);
-  margin: 0 0 40px;
+  margin: 0 0 20px;
+  line-height: 1;
 }
 
 .typePeriod {
-  font-size: 16px;
+  font-size: 15px;
   color: var(--text-gray);
+  font-weight: var(--font-weight-medium);
   margin: 0 0 40px;
 }
 
@@ -118,6 +120,10 @@
   background-color: var(--primary);
 }
 
+.mainBtn:hover img {
+  filter: invert(1);
+}
+
 .arrowIcon {
   width: 10px;
   height: 10px;
@@ -127,6 +133,7 @@
 .approvalBox {
   display: flex;
   margin-bottom: 20px;
+  margin-top: 40px;
   border: 1px solid var(--border-color);
   border-radius: 10px;
 }

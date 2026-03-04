@@ -81,10 +81,13 @@
 
 .btn_wrap {
     display: flex;
-    gap: 16px;
     align-items: center;
     opacity: 0;
     transition: all 0.1s;
+}
+
+.btn_wrap button {
+    padding: 8px;
 }
 
 .add_form {

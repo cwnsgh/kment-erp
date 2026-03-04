@@ -70,7 +70,7 @@ export function ClientSelectModal({ isOpen, onClose, onSelect, allowAllClients =
         {/* 검색 영역 */}
         <div className="p-6 searchBox">
           <form onSubmit={handleSearch} className="flex">
-            <select value={searchType} onChange={(e) => setSearchType(e.target.value as "name" | "ceo")} className="px-3 py-2 border border-slate-300 rounded-md text-sm">
+            <select value={searchType} onChange={(e) => setSearchType(e.target.value as "name" | "ceo")} className="px-3 py-2 rounded-md text-sm">
               <option value="name">회사명</option>
               <option value="ceo">대표자명</option>
             </select>
@@ -82,7 +82,7 @@ export function ClientSelectModal({ isOpen, onClose, onSelect, allowAllClients =
         </div>
 
         {/* 목록 영역 */}
-        <div className="flex-1 overflow-y-auto modalTableWrap">
+        <div className="flex-1 overflow-y-auto modalTableWrap scroll">
           {error && <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">{error}</div>}
 
           {isLoading ? (
@@ -111,11 +111,7 @@ export function ClientSelectModal({ isOpen, onClose, onSelect, allowAllClients =
                         <td className="px-4 py-3 text-sm text-slate-700">{client.name}</td>
                         <td className="px-4 py-3 text-sm text-slate-700">{client.ceo_name || "-"}</td>
                         <td className="px-4 py-3">
-                          <button 
-                            type="button" 
-                            onClick={() => handleSelect(client.id)} 
-                            disabled={!allowAllClients && (client.hasManagedProduct || false)} 
-                            className="btn btn_md primary disabled:opacity-50 disabled:cursor-not-allowed">
+                          <button type="button" onClick={() => handleSelect(client.id)} disabled={!allowAllClients && (client.hasManagedProduct || false)} className="btn btn_md primary disabled:opacity-50 disabled:cursor-not-allowed">
                             선택
                           </button>
                         </td>

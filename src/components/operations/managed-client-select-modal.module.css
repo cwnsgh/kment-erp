@@ -66,7 +66,7 @@
 .MclientSeletModal :global(.searchBox form .flex >div>div) {
     width: 180px;
     background-color: var(--background-color);
-    padding: 20px;
+    padding: 18px 20px;
     margin-right: 20px;
 }
 
@@ -76,7 +76,8 @@
 }
 
 .MclientSeletModal :global(.modalTableWrap) {
-    padding: 0 30px 60px;
+    padding: 0 30px;
+    margin-bottom: 60px;
 }
 
 .MclientSeletModal :global(.modalTotal) {
@@ -111,4 +112,10 @@
     color: var(--text-color);
     font-weight: var(--font-weight-medium);
     padding: 20px;
+}
+
+
+.MclientSeletModal label:has(input[type="radio"]:checked) {
+    color: var(--text-color);
+    font-weight: var(--font-weight-semibold);
 }

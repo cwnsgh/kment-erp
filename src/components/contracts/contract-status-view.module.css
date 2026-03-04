@@ -17,7 +17,7 @@
 }
 
 .filterBtn {
-  padding: 8px 16px;
+  padding: 10px 16px;
   font-size: 14px;
   font-weight: 500;
   border: none;
@@ -45,7 +45,7 @@
 }
 
 .filterBtnDefault:hover {
-  background: #e2e8f0;
+  background: var(--background-color);
 }
 
 .filterLabel {
@@ -60,7 +60,7 @@
 
 
 .filterSelect {
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--border-color);
   padding: 6px 8px;
   font-size: 14px;
   border-radius: 0;

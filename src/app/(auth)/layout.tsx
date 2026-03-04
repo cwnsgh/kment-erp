@@ -14,7 +14,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
   });
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-100 text-slate-800">
+    <div className="flex min-h-screen flex-col bg-white text-slate-800">
       <header className="flex items-center justify-between bg-black px-10 py-6 text-white">
         <div className="text-lg font-semibold tracking-wide">
           <img src="/images/kment-logo.svg" alt="케이먼트 로고" style={{ width: "100px" }} />

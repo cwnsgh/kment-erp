@@ -104,6 +104,11 @@ a img {
   @apply inline-flex items-center justify-center rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-800;
 }
 
+.font_b {
+  color: var(--primary);
+  font-weight: var(--font-weight-bold);
+}
+
 /* Input Styles */
 input[type="text"],
 input[type="email"],
@@ -137,9 +142,9 @@ textarea {
 
 input:focus,
 textarea:focus {
-  border: 2px solid var(--primary);
   outline: none;
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 20%, transparent);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 /* Radio Button Styles */
@@ -174,6 +179,7 @@ input[type="radio"]:checked::before {
 
 input[type="radio"]:checked+label {
   color: var(--text-color);
+  font-weight: var(--font-weight-semibold);
 }
 
 input[type="checkbox"] {
@@ -409,16 +415,20 @@ button.btn.danger:hover {
   border: 1px solid var(--text-color);
 }
 
+.btn.black:hover {
+  opacity: 0.8;
+}
+
 .btn_lg {
   height: 40px;
   padding: 0 20px;
-  line-height: 40px;
+  line-height: 38px;
   font-size: 15px;
 }
 
 .btn_md {
   height: 30px;
-  line-height: 30px;
+  line-height: 28px;
   padding: 0 10px;
   font-size: 13px;
   border-radius: 4px;
@@ -426,7 +436,7 @@ button.btn.danger:hover {
 
 .btn_sm {
   height: 24px;
-  line-height: 24px;
+  line-height: 22px;
   padding: 0 14px;
   font-size: 12px;
 }
@@ -466,10 +476,10 @@ button.btn.danger:hover {
   background-size: 12px 8px !important;
   height: 30px !important;
   padding: 0 26px 0 14px !important;
-  border-color: var(--border-color) !important;
+  border-color: var(--border-color);
   border-radius: 4px !important;
   cursor: pointer !important;
-  border: 1px solid var(--border-color) !important;
+  border: 1px solid var(--border-color);
   font-size: 13px !important;
   font-weight: var(--font-weight-medium) !important;
 }
@@ -482,12 +492,19 @@ Select {
   background-size: 12px 8px !important;
   height: 40px !important;
   padding: 0 26px 0 14px !important;
-  border-color: var(--border-color) !important;
+  border-color: var(--border-color);
   border-radius: 4px !important;
   cursor: pointer !important;
-  border: 1px solid var(--border-color) !important;
+  border: 1px solid var(--border-color);
   font-size: 13px !important;
   font-weight: var(--font-weight-medium) !important;
+  min-width: 80px;
+}
+
+Select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .page_title {
@@ -572,4 +589,26 @@ Select {
   background: url(/images/page_last_icon.svg) no-repeat center center;
   background-size: 12px;
   opacity: 1;
+}
+
+.scroll {
+  margin-right: 10px
+}
+
+.scroll::-webkit-scrollbar {
+  width: 4px;
+  /* 스크롤바의 너비 */
+}
+
+.scroll::-webkit-scrollbar-thumb {
+  height: 30%;
+  /* 스크롤바의 길이 */
+  background: var(--text-color);
+  /* 스크롤바의 색상 */
+  border-radius: 2px;
+}
+
+.scroll::-webkit-scrollbar-track {
+  background: rgba(30, 41, 59, .2);
+  /*스크롤바 뒷 배경 색상*/
 }

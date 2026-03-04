@@ -701,9 +701,7 @@ export function ClientForm() {
                     placeholder="추가 정보를 입력하세요"
                     style={{
                       width: "100%",
-                      border: "none",
                       resize: "none",
-                      outline: "none",
                     }}
                   />
                 </div>

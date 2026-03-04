@@ -67,7 +67,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   padding-top: 20px;
 }
 
@@ -78,14 +78,9 @@
 
 .filterSelect,
 .filterInput {
-  height: 36px;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  padding: 0 12px;
-  font-size: 14px;
-  color: var(--text-color);
-  background: #fff;
-  min-width: 140px;
+
+  font-size: 13px;
+
 }
 
 .filterSelect {
@@ -94,10 +89,6 @@
   background: url(/images/select_arrow.svg) no-repeat center right 10px;
   padding-right: 32px;
   background-size: 12px 10px;
-}
-
-.filterInput {
-  min-width: 180px;
 }
 
 .filterInputFull {
@@ -115,7 +106,20 @@
 .filterControl .filterSelect {}
 
 .filterInput[type="date"] {
-  cursor: pointer;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  padding: 14px !important;
+  border: 1px solid var(--border-color);
+  height: 40px !important;
+  border-radius: 4px !important;
+  box-sizing: border-box !important;
+}
+
+.filterInput[type="date"]:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .statusFilterGroup {
@@ -130,33 +134,15 @@
   align-items: center;
   cursor: pointer;
   font-size: 14px;
-  color: var(--text-color);
 }
 
 .statusFilterItem input {
   cursor: pointer;
 }
 
-.btnSearch {
-  padding: 8px 20px;
-  font-size: 14px;
-  font-weight: var(--font-weight-semibold);
-  border-radius: 4px;
-  border: none;
-  cursor: pointer;
-  background: var(--primary);
-  color: #fff;
-}
-
-.btnReset {
-  padding: 8px 20px;
-  font-size: 14px;
-  font-weight: var(--font-weight-semibold);
-  border-radius: 4px;
-  border: 1px solid var(--border-color);
-  cursor: pointer;
-  background: #fff;
+.statusFilterItem:has(input[type="radio"]:checked) {
   color: var(--text-color);
+  font-weight: var(--font-weight-semibold);
 }
 
 .tableBox {
@@ -536,7 +522,7 @@
   display: flex;
   align-items: flex-start;
   width: 160px;
-  padding: 20px;
+  padding: 18px 20px;
   background-color: var(--background-color);
   font-weight: var(--font-weight-semibold);
 }
@@ -550,31 +536,40 @@
 }
 
 .modalContentBox {
-  margin: 24px 30px;
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
-  background: #f8fafc;
-  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+  border-top: 1px solid var(--border-color);
+  margin: 0 30px;
   font-size: 14px;
-  color: var(--text-color);
+  display: flex;
+  margin-top: -1px;
 }
 
 .modalContentBoxLabel {
-  font-size: 13px;
-  color: var(--text-gray);
+  color: var(--text-color);
+  display: flex;
+  align-items: flex-start;
+  width: 160px;
+  padding: 20px;
+  background-color: var(--background-color);
+  font-weight: var(--font-weight-semibold);
 }
 
 .modalContentBoxText {
-  margin-top: 8px;
-  white-space: pre-wrap;
-  font-weight: var(--font-weight-medium);
-  color: var(--text-color);
+  width: calc(100% - 160px);
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: center;
+  line-height: 25px;
+  font-weight: var(--font-weight-bold);
+  font-size: 13px;
+  padding: 18px 10px 18px 20px;
 }
 
 .modalActions {
   padding: 20px 24px 0;
   border-top: 1px solid var(--border-color);
-  margin-top: 20px;
+  margin-top: 40px;
   display: flex;
   gap: 10px;
   justify-content: center;
