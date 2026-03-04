@@ -1348,6 +1348,69 @@ export async function getWorkRequestsForEmployee(employeeId?: string | null): Pr
 }
 
 /**
+ * 관리자용: 삭제된 업무 요청 목록 (금액차감/유지보수형)
+ */
+export async function getDeletedWorkRequestsForAdmin(): Promise<{
+  success: boolean;
+  data?: Array<{
+    id: string;
+    brand_name: string;
+    manager: string | null;
+    work_type: string;
+    work_content: string | null;
+    updated_at: string;
+    client_name: string | null;
+    employee_name: string | null;
+  }>;
+  error?: string;
+}> {
+  try {
+    const session = await getSession();
+    if (!session || session.type !== "employee" || !session.roleId || ![1, 2, 3].includes(session.roleId)) {
+      return { success: false, error: "권한이 없습니다.", data: [] };
+    }
+    const supabase = await getSupabaseServerClient();
+    const { data: rows, error } = await supabase
+      .from("work_request")
+      .select(
+        `
+        id,
+        brand_name,
+        manager,
+        work_type,
+        work_content,
+        updated_at,
+        client:client_id ( name ),
+        employee:employee_id ( name )
+      `
+      )
+      .eq("status", "deleted")
+      .order("updated_at", { ascending: false })
+      .limit(200);
+
+    if (error) throw error;
+    const list = (rows ?? []).map((r: any) => {
+      const client = Array.isArray(r.client) ? r.client[0] : r.client;
+      const employee = Array.isArray(r.employee) ? r.employee[0] : r.employee;
+      return {
+        id: r.id,
+        brand_name: r.brand_name ?? "",
+        manager: r.manager ?? null,
+        work_type: r.work_type ?? "",
+        work_content: r.work_content ?? null,
+        updated_at: r.updated_at ?? "",
+        client_name: client?.name ?? null,
+        employee_name: employee?.name ?? null,
+      };
+    });
+    return { success: true, data: list };
+  } catch (e: any) {
+    console.error("삭제된 업무 목록 조회 오류:", e);
+    return { success: false, error: e?.message ?? "조회에 실패했습니다.", data: [] };
+  }
+}
+
+/**
  * 클라이언트용 업무 상세 조회
  */
 export async function getWorkRequestDetailForClient(

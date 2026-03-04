@@ -1,0 +1,284 @@
+/* 상담 등록 폼 전용 스타일 */
+.root {
+  max-width: 100%;
+  margin-top: 0;
+}
+
+.root :global(.table_group) {
+  display: flex;
+  flex-direction: column;
+  gap: 60px;
+  width: 100%;
+  font-size: 14px;
+  font-weight: var(--font-weight-semibold);
+  box-sizing: border-box;
+}
+
+.root :global(.table_group h2.table_title) {
+  font-size: 18px;
+  font-weight: var(--font-weight-bold);
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.root :global(.table_group h2.table_title .plus_btn) {
+  font-size: 13px;
+  color: var(--text-gray);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+.root :global(.table_group h2.table_title .plus_btn:hover) {
+  color: var(--primary);
+}
+
+.root :global(.table_group h3.table_title_sub) {
+  font-size: 15px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-gray);
+  margin-bottom: 20px;
+}
+
+.root :global(.table_group .table_item .table_row) {
+  display: flex;
+  align-items: stretch;
+  border-top: 1px solid var(--border-color);
+  width: 100%;
+  margin: 0;
+  list-style: none;
+  padding: 0;
+}
+
+.root :global(.table_group .table_item .table_row:first-child) {
+  border-top: 1px solid var(--border-color);
+}
+
+.root :global(.table_group .table_item .table_row:last-child) {
+  border-bottom: 1px solid var(--border-color);
+  box-sizing: border-box;
+}
+
+.root :global(.table_group .table_item .table_row .row_group) {
+  flex: 1;
+  display: flex;
+  position: relative;
+  min-width: 0;
+}
+
+.root :global(.table_group .table_item .table_row .row_group:after) {
+  content: "";
+  display: block;
+  width: 180px;
+  height: 100%;
+  background-color: var(--background-color);
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: -1;
+}
+
+.root :global(.table_group .table_item .table_row .row_group .table_head) {
+  width: 180px;
+  min-width: 180px;
+  padding: 18px 20px;
+  background: var(--background-color);
+  box-sizing: border-box;
+  z-index: 1;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-color);
+  border: none;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  margin: 0;
+}
+
+.root :global(.table_group .table_item .table_row .row_group .table_data) {
+  padding: 18px 20px;
+  box-sizing: border-box;
+  word-break: break-all;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex: 1;
+  min-width: 0;
+  color: var(--text-color);
+  background: #fff;
+  border: none;
+  margin: 0;
+}
+
+.root :global(.table_group .table_item .table_row .row_group .table_data.pd12) {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  box-sizing: border-box;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.root :global(.table_group .table_item .table_row .row_group .table_data input),
+.root :global(.table_group .table_item .table_row .row_group .table_data select) {
+  width: 100%;
+  max-width: 100%;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.root :global(.table_group .table_item .table_row .row_group .table_data textarea) {
+  width: 100%;
+  min-height: 80px;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
+  resize: vertical;
+}
+
+.contentArea {
+  min-height: 120px !important;
+}
+
+.root :global(.btn_wrap) {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 담당자 블록 간격 */
+.contactBlock {
+  margin-bottom: 16px;
+}
+
+/* 담당자 비고 셀: input + 삭제 버튼 */
+.dataWithRemove {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.dataWithRemove input {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 사이트 행 하단 간격 */
+.siteRow {
+  margin-bottom: 8px;
+}
+
+/* 사이트 유형 셀: select + 삭제 버튼 */
+.siteDataWithRemove {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.siteDataWithRemove select {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 삭제 버튼 */
+.removeBtn {
+  padding: 4px 8px;
+  color: #ef4444;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.removeBtn:hover {
+  color: #dc2626;
+}
+
+/* 구분(카테고리) 영역 */
+.categorySection {
+  margin-bottom: 16px;
+}
+
+.categoryLabel {
+  margin-bottom: 8px;
+}
+
+.categoryGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.categoryCheckbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-weight: var(--font-weight-semibold);
+}
+
+.categoryCheckbox input {
+  width: auto;
+  margin: 0;
+}
+
+/* 첨부파일 영역 */
+.fileInputHidden {
+  display: none;
+}
+
+.attachBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.attachmentList {
+  margin-top: 8px;
+  padding-left: 20px;
+  list-style: disc;
+}
+
+.attachmentItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  font-size: 13px;
+}
+
+.attachmentItem a {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.attachmentItem a:hover {
+  text-decoration: underline;
+}
+
+/* 상단/하단 버튼 래퍼 */
+.topBtnWrap {
+  justify-content: flex-end;
+  margin-bottom: 24px;
+}
+
+.bottomBtnWrap {
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+/* full width row (비고, 상담내용) */
+.fullRow {
+  flex: 1;
+  min-width: 0;
+}

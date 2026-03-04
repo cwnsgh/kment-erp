@@ -15,6 +15,7 @@ INSERT INTO erp.menu_structure (category_key, category_name, menu_key, menu_name
 ('contract', '계약관리', 'contract-register', '계약등록', '/contracts/new', 2, true),
 ('contract', '계약관리', 'contract-status', '계약현황', '/contracts/status', 3, true),
 ('contract', '계약관리', 'contract-tasks', '업무현황', '/contracts/tasks', 4, true),
+('contract', '계약관리', 'contract-task-register', '계약업무등록', '/contracts/tasks/new', 5, true),
 
 -- 일정 관리
 ('schedule', '일정관리', 'schedule-register', '일정등록', '/schedule/new', 1, true),
