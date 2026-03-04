@@ -500,9 +500,7 @@ export function ContractForm() {
                   <ul className="table_row">
                     <li className="row_group">
                       <div className="table_head">사업자 주소</div>
-                      <div className="table_data">
-                        {[clientData.address, clientData.addressDetail].filter(Boolean).join(" ") || "-"}
-                      </div>
+                      <div className="table_data">{[clientData.address, clientData.addressDetail].filter(Boolean).join(" ") || "-"}</div>
                     </li>
                   </ul>
                   <ul className="table_row">
@@ -587,13 +585,7 @@ export function ContractForm() {
                 {/* 비고 */}
                 <div className="table_item">
                   <h2 className="table_title">비고</h2>
-                  <div className={styles.noteBlock}>
-                    {clientData.note ? (
-                      <p className={styles.noteText}>{clientData.note}</p>
-                    ) : (
-                      <p className={styles.notePlaceholder}>거래처에 등록되어있는 정보가 제공됩니다.</p>
-                    )}
-                  </div>
+                  <div className={styles.noteBlock}>{clientData.note ? <p className={styles.noteText}>{clientData.note}</p> : <p className={styles.notePlaceholder}>거래처에 등록되어있는 정보가 제공됩니다.</p>}</div>
                 </div>
 
                 {/* 계약 정보 */}
@@ -737,7 +729,7 @@ export function ContractForm() {
                           <li className="row_group" style={{ width: "100%" }}>
                             <div className="table_head">작업 내용 및 수정 횟수</div>
                             <div className="table_data" style={{ padding: "0px" }}>
-                              <div style={{ display: "flex", gap: "30px", flexWrap: "wrap" }}>
+                              <div style={{ display: "flex", flexWrap: "wrap" }}>
                                 {contract.workContents.map((workContent) => (
                                   <div
                                     key={workContent.workContentId}

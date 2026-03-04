@@ -58,13 +58,12 @@ export function ConsultationTable({ initialList }: ConsultationTableProps) {
           </div>
           <div className={styles.topBtnGroup}>
             <select
-              className={styles.viewSelect}
+              className={`viewSelect`}
               value={itemsPerPage}
               onChange={(e) => {
                 setItemsPerPage(Number(e.target.value));
                 setCurrentPage(1);
-              }}
-            >
+              }}>
               <option value={10}>10개씩 보기</option>
               <option value={20}>20개씩 보기</option>
               <option value={50}>50개씩 보기</option>
@@ -101,14 +100,7 @@ export function ConsultationTable({ initialList }: ConsultationTableProps) {
                 </tr>
               ) : (
                 currentItems.map((row) => (
-                  <tr
-                    key={row.id}
-                    onClick={() => handleRowClick(row.id)}
-                    onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), handleRowClick(row.id))}
-                    role="button"
-                    tabIndex={0}
-                    className={styles.clickableRow}
-                  >
+                  <tr key={row.id} onClick={() => handleRowClick(row.id)} onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), handleRowClick(row.id))} role="button" tabIndex={0} className={styles.clickableRow}>
                     <td>{row.company_name || "-"}</td>
                     <td>{row.industry || "-"}</td>
                     <td>{row.brand || "-"}</td>
@@ -126,46 +118,20 @@ export function ConsultationTable({ initialList }: ConsultationTableProps) {
       {totalPages > 1 && (
         <div className={`${styles.pagination} pagination`}>
           <ul>
-            <li
-              className={`${styles.page} ${styles.first} ${currentPage === 1 ? styles.disabled : ""}`}
-              style={{ cursor: currentPage === 1 ? "not-allowed" : "pointer" }}
-              onClick={() => currentPage !== 1 && setCurrentPage(1)}
-            />
-            <li
-              className={`${styles.page} ${styles.prev} ${currentPage === 1 ? styles.disabled : ""}`}
-              style={{ cursor: currentPage === 1 ? "not-allowed" : "pointer" }}
-              onClick={() => currentPage !== 1 && setCurrentPage(currentPage - 1)}
-            />
+            <li className={`${styles.page} ${styles.first} ${currentPage === 1 ? styles.disabled : ""}`} style={{ cursor: currentPage === 1 ? "not-allowed" : "pointer" }} onClick={() => currentPage !== 1 && setCurrentPage(1)} />
+            <li className={`${styles.page} ${styles.prev} ${currentPage === 1 ? styles.disabled : ""}`} style={{ cursor: currentPage === 1 ? "not-allowed" : "pointer" }} onClick={() => currentPage !== 1 && setCurrentPage(currentPage - 1)} />
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <li
-                key={page}
-                className={`${styles.page} ${currentPage === page ? styles.active : ""}`}
-                style={{ cursor: "pointer" }}
-                onClick={() => setCurrentPage(page)}
-              >
+              <li key={page} className={`${styles.page} ${currentPage === page ? styles.active : ""}`} style={{ cursor: "pointer" }} onClick={() => setCurrentPage(page)}>
                 {page}
               </li>
             ))}
-            <li
-              className={`${styles.page} ${styles.next} ${currentPage === totalPages ? styles.disabled : ""}`}
-              style={{ cursor: currentPage === totalPages ? "not-allowed" : "pointer" }}
-              onClick={() => currentPage !== totalPages && setCurrentPage(currentPage + 1)}
-            />
-            <li
-              className={`${styles.page} ${styles.last} ${currentPage === totalPages ? styles.disabled : ""}`}
-              style={{ cursor: currentPage === totalPages ? "not-allowed" : "pointer" }}
-              onClick={() => currentPage !== totalPages && setCurrentPage(totalPages)}
-            />
+            <li className={`${styles.page} ${styles.next} ${currentPage === totalPages ? styles.disabled : ""}`} style={{ cursor: currentPage === totalPages ? "not-allowed" : "pointer" }} onClick={() => currentPage !== totalPages && setCurrentPage(currentPage + 1)} />
+            <li className={`${styles.page} ${styles.last} ${currentPage === totalPages ? styles.disabled : ""}`} style={{ cursor: currentPage === totalPages ? "not-allowed" : "pointer" }} onClick={() => currentPage !== totalPages && setCurrentPage(totalPages)} />
           </ul>
         </div>
       )}
 
-      <ConsultationDetailModal
-        detail={detail}
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        isLoading={detailLoading}
-      />
+      <ConsultationDetailModal detail={detail} isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} isLoading={detailLoading} />
     </div>
   );
 }

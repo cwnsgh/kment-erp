@@ -140,13 +140,7 @@ export function WorkContentManagement() {
   };
 
   // 작업 내용 수정
-  const handleUpdateWorkContent = async (
-    id: string,
-    workContentName: string,
-    displayOrder: number,
-    isActive: boolean,
-    defaultModificationCount?: number
-  ) => {
+  const handleUpdateWorkContent = async (id: string, workContentName: string, displayOrder: number, isActive: boolean, defaultModificationCount?: number) => {
     const result = await updateWorkContent(id, workContentName, displayOrder, isActive, defaultModificationCount);
     if (result.success) {
       setEditingWorkContent(null);
@@ -263,7 +257,8 @@ export function WorkContentManagement() {
                   <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
                     <input type="text" defaultValue={type.name} id={`type-name-${type.id}`} className="border border-slate-200 rounded px-3 py-2 text-sm" style={{ width: "200px" }} />
                     <input type="number" defaultValue={type.display_order} id={`type-order-${type.id}`} className="border border-slate-200 rounded px-3 py-2 text-sm" style={{ width: "50px" }} />
-                    <label style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "13px" }}>
+                    <span style={{ fontSize: "13px" }}>번</span>
+                    <label style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "13px", marginLeft: "6px" }}>
                       <input type="checkbox" defaultChecked={type.is_active} id={`type-active-${type.id}`} />
                       활성화
                     </label>
@@ -293,7 +288,7 @@ export function WorkContentManagement() {
                 )}
               </h3>
               {editingContractType !== type.id && (
-                <div className={styles.btn_wrap}>
+                <div className={styles.btn_wrap} style={{ right: "0" }}>
                   <button type="button" onClick={() => setEditingContractType(type.id)}>
                     <img src="/images/modify_icon.png" alt="수정 아이콘" />
                   </button>
@@ -313,16 +308,23 @@ export function WorkContentManagement() {
                   {(workContents[type.id] || []).map((workContent) => (
                     <div key={workContent.id} className={styles.work_list}>
                       {editingWorkContent === workContent.id ? (
-                        <div style={{ display: "flex", gap: "10px", alignItems: "center", flex: 1, position: "relative" }}>
-                          <input type="text" defaultValue={workContent.work_content_name} id={`work-name-${workContent.id}`} className="border border-slate-200 rounded px-3 py-2 text-sm" style={{ width: "200px" }} />
-                          <input type="number" defaultValue={workContent.display_order} id={`work-order-${workContent.id}`} className="border border-slate-200 rounded px-3 py-2 text-sm" style={{ width: "50px" }} />
-                          <span style={{ fontSize: "13px" }}>기본 횟수</span>
-                          <input type="number" defaultValue={workContent.default_modification_count ?? 0} id={`work-count-${workContent.id}`} min={0} className="border border-slate-200 rounded px-3 py-2 text-sm" style={{ width: "60px" }} />
-                          <label style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "13px" }}>
-                            <input type="checkbox" defaultChecked={workContent.is_active} id={`work-active-${workContent.id}`} />
-                            활성화
-                          </label>
-                          <div className={styles.btn_wrap} style={{ position: "absolute", right: "0" }}>
+                        <div style={{ display: "flex", gap: "10px", alignItems: "flex-start", flex: 1, position: "relative", flexDirection: "column" }}>
+                          <div style={{ gap: "10px", display: "flex", alignItems: "center" }}>
+                            <input type="text" defaultValue={workContent.work_content_name} id={`work-name-${workContent.id}`} className="border border-slate-200 rounded px-3 py-2 text-sm" style={{ width: "260px" }} />
+                            <input type="number" defaultValue={workContent.display_order} id={`work-order-${workContent.id}`} className="border border-slate-200 rounded px-3 py-2 text-sm" style={{ width: "50px" }} />
+                            <span style={{ fontSize: "13px" }}>번</span>
+                          </div>
+                          <div style={{ gap: "10px", display: "flex", alignItems: "center" }}>
+                            {" "}
+                            <span style={{ fontSize: "13px" }}>기본 횟수 :</span>
+                            <input type="number" defaultValue={workContent.default_modification_count ?? 0} id={`work-count-${workContent.id}`} min={0} className="border border-slate-200 rounded px-3 py-2 text-sm" style={{ width: "60px" }} />
+                            <label style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "13px" }}>
+                              <input type="checkbox" defaultChecked={workContent.is_active} id={`work-active-${workContent.id}`} />
+                              활성화
+                            </label>
+                          </div>
+
+                          <div className={styles.btn_wrap} style={{ position: "absolute", right: "-40px" }}>
                             <button
                               type="button"
                               onClick={() => {
@@ -342,10 +344,10 @@ export function WorkContentManagement() {
                         </div>
                       ) : (
                         <>
-                          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                          <div style={{ display: "flex", gap: "10px", alignItems: "center", position: "relative", flexWrap: "wrap" }}>
                             <span className={styles.work_name}>{workContent.work_content_name}</span>
                             <span style={{ fontSize: "13px", color: "var(--text-gray)" }}>(순서: {workContent.display_order})</span>
-                            <span style={{ fontSize: "13px", color: "var(--text-gray)" }}>(기본 횟수: {(workContent.default_modification_count ?? 0)}회)</span>
+                            <span style={{ fontSize: "13px", color: "var(--text-gray)" }}>(기본 횟수: {workContent.default_modification_count ?? 0}회)</span>
                             {!workContent.is_active && <span style={{ fontSize: "12px", color: "#999" }}>(비활성)</span>}
                           </div>
                           <div className={styles.btn_wrap}>
@@ -368,23 +370,15 @@ export function WorkContentManagement() {
                     onChange={(e) => setNewWorkContentName({ ...newWorkContentName, [type.id]: e.target.value })}
                     placeholder="작업 내용명을 입력하세요"
                     className="border border-slate-200 rounded px-3 py-2 text-sm"
-                    style={{ width: "200px" }}
+                    style={{ flex: "1" }}
                     onKeyPress={(e) => {
                       if (e.key === "Enter") {
                         handleAddWorkContent(type.id);
                       }
                     }}
                   />
-                  <span style={{ fontSize: "13px" }}>기본 횟수</span>
-                  <input
-                    type="number"
-                    min={0}
-                    value={newWorkContentCount[type.id] ?? ""}
-                    onChange={(e) => setNewWorkContentCount({ ...newWorkContentCount, [type.id]: parseInt(e.target.value, 10) || 0 })}
-                    className="border border-slate-200 rounded px-3 py-2 text-sm"
-                    style={{ width: "60px" }}
-                    placeholder="0"
-                  />
+                  <span style={{ fontSize: "13px" }}>기본 횟수 : </span>
+                  <input type="number" min={0} value={newWorkContentCount[type.id] ?? ""} onChange={(e) => setNewWorkContentCount({ ...newWorkContentCount, [type.id]: parseInt(e.target.value, 10) || 0 })} className="border border-slate-200 rounded px-3 py-2 text-sm" style={{ width: "54px" }} placeholder="0" />
                   <button type="button" onClick={() => handleAddWorkContent(type.id)} className="btn btn_md primary">
                     추가
                   </button>

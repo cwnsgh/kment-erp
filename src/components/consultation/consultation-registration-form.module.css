@@ -55,20 +55,8 @@
   align-items: center;
 }
 
-.root :global(h2.table_title .plus_btn) {
-  font-size: 13px;
-  color: var(--text-gray);
-  font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-  background: none;
-  border: none;
-}
 
-.root :global(h2.table_title .plus_btn:hover) {
-  color: var(--primary);
-}
-
-.root :global(h3.table_title_sub) {
+.root :global(.table_title_sub) {
   font-size: 15px;
   font-weight: var(--font-weight-semibold);
   color: var(--text-gray);
@@ -116,7 +104,7 @@
 .root :global(.table_item .table_row .row_group .table_head) {
   width: 180px;
   min-width: 180px;
-  padding: 22px 24px;
+  padding: 18px 20px;
   background: var(--background-color);
   box-sizing: border-box;
   z-index: 1;
@@ -130,7 +118,7 @@
 }
 
 .root :global(.table_item .table_row .row_group .table_data) {
-  padding: 22px 24px;
+  padding: 18px 20px;
   box-sizing: border-box;
   word-break: break-all;
   display: flex;
@@ -145,7 +133,8 @@
 }
 
 .root :global(.table_item .table_row .row_group .table_data.pd12) {
-  padding: 16px 24px;
+  padding-top: 12px;
+  padding-bottom: 12px;
   box-sizing: border-box;
   flex-direction: column;
   align-items: flex-start;
@@ -155,19 +144,30 @@
 .root :global(.table_item .table_row .row_group .table_data select) {
   width: 100%;
   max-width: 100%;
-  border: 1px solid var(--border-color);
   border-radius: 4px;
+  border: 1px solid var(--border-color);
   padding: 10px 14px;
   font-size: 14px;
   box-sizing: border-box;
-  min-height: 40px;
+  height: 40px;
+}
+
+.root :global(.table_item .table_row .row_group .table_data input:not([type="checkbox"]):focus),
+.root :global(.table_item .table_row .row_group .table_data select:focus) {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.consultationPage input[type="checkbox"]:checked+span {
+  color: var(--text-color);
+  font-weight: var(--font-weight-semibold);
 }
 
 .root :global(.table_item .table_row .row_group .table_data textarea) {
   width: 100%;
   min-height: 80px;
   padding: 10px;
-  border: 1px solid var(--border-color);
   border-radius: 4px;
   font-size: 14px;
   box-sizing: border-box;
@@ -193,7 +193,6 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
 }
 
 .contactBlockHeader .table_title_sub {
@@ -202,7 +201,7 @@
 
 .removeBtnHeader {
   padding: 4px 8px;
-  color: #ef4444;
+  color: var(--text-gray);
   background: none;
   border: none;
   cursor: pointer;
@@ -213,8 +212,7 @@
 }
 
 .removeBtnHeader:hover {
-  color: #dc2626;
-  background: rgba(239, 68, 68, 0.08);
+  color: var(--text-color);
 }
 
 /* 담당자 비고 셀: input + 삭제 버튼 */
@@ -231,14 +229,13 @@
 
 /* 사이트 정보: 사이트별 2행 묶음 */
 .siteBlock {
-  margin-bottom: 16px;
+  margin-bottom: 28px;
 }
 
 .siteBlockHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
 }
 
 .siteBlockTitle {
@@ -270,8 +267,7 @@
 
 /* 삭제 버튼 */
 .removeBtn {
-  padding: 4px 8px;
-  color: #ef4444;
+  color: var(--text-gray);
   background: none;
   border: none;
   cursor: pointer;
@@ -282,7 +278,7 @@
 }
 
 .removeBtn:hover {
-  color: #dc2626;
+  color: var(--text-color);
 }
 
 /* 구분 열: 상담내용 옆에 배치 시 고정 너비 (체크박스 영역 확보) */
@@ -338,9 +334,9 @@
 }
 
 .attachmentList {
-  margin-top: 8px;
   padding-left: 20px;
   list-style: disc;
+
 }
 
 .attachmentItem {
@@ -352,7 +348,7 @@
 }
 
 .attachmentItem a {
-  color: var(--primary);
+  color: var(--text-gray);
   text-decoration: none;
 }
 
@@ -375,4 +371,5 @@
 .fullRow {
   flex: 1;
   min-width: 0;
+  list-style: none;
 }

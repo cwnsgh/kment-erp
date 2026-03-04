@@ -64,6 +64,7 @@
     padding: 10px 16px;
     border-radius: 6px;
     transition: all 0.1s;
+    padding-right: 50px;
 }
 
 .work_list:hover {
@@ -84,6 +85,8 @@
     align-items: center;
     opacity: 0;
     transition: all 0.1s;
+    position: relative;
+    right: -40px;
 }
 
 .btn_wrap button {
@@ -96,9 +99,10 @@
     gap: 10px;
     align-items: center;
     flex: 1;
+    padding-right: 16px;
+    box-sizing: border-box;
 }
 
 .add_form button {
-    flex: 1;
     white-space: nowrap;
 }

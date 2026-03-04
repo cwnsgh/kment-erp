@@ -36,11 +36,7 @@ const formatAmount = (amount: number | null): string => {
   return new Intl.NumberFormat("ko-KR").format(amount);
 };
 
-const calculateRemaining = (
-  contractAmount: number,
-  installmentAmount: number | null,
-  paymentProgress: string
-): number => {
+const calculateRemaining = (contractAmount: number, installmentAmount: number | null, paymentProgress: string): number => {
   if (paymentProgress === "paid") return 0;
   if (paymentProgress === "unpaid") return contractAmount;
   if (paymentProgress === "installment" && installmentAmount) {
@@ -151,42 +147,17 @@ export function ContractTable({ initialContracts }: ContractTableProps) {
             <li className={styles.rowGroup}>
               <div className={styles.tableHead}>검색분류</div>
               <div className={`${styles.tableData} ${styles.pd12}`}>
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                  placeholder="계약명, 회사명, 브랜드명 검색"
-                  className={styles.searchInput}
-                />
+                <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleSearch()} placeholder="계약명, 회사명, 브랜드명 검색" className={styles.searchInput} />
               </div>
             </li>
             <li className={styles.rowGroup}>
               <div className={styles.tableHead}>진행상태</div>
               <div className={styles.tableData}>
-                <input
-                  type="radio"
-                  id="contract_progress_all"
-                  name="contract_progress"
-                  checked={paymentProgressFilter === "all"}
-                  onChange={() => setPaymentProgressFilter("all")}
-                />
+                <input type="radio" id="contract_progress_all" name="contract_progress" checked={paymentProgressFilter === "all"} onChange={() => setPaymentProgressFilter("all")} />
                 <label htmlFor="contract_progress_all">전체</label>
-                <input
-                  type="radio"
-                  id="contract_progress_paid"
-                  name="contract_progress"
-                  checked={paymentProgressFilter === "paid"}
-                  onChange={() => setPaymentProgressFilter("paid")}
-                />
+                <input type="radio" id="contract_progress_paid" name="contract_progress" checked={paymentProgressFilter === "paid"} onChange={() => setPaymentProgressFilter("paid")} />
                 <label htmlFor="contract_progress_paid">정상</label>
-                <input
-                  type="radio"
-                  id="contract_progress_unpaid"
-                  name="contract_progress"
-                  checked={paymentProgressFilter === "unpaid"}
-                  onChange={() => setPaymentProgressFilter("unpaid")}
-                />
+                <input type="radio" id="contract_progress_unpaid" name="contract_progress" checked={paymentProgressFilter === "unpaid"} onChange={() => setPaymentProgressFilter("unpaid")} />
                 <label htmlFor="contract_progress_unpaid">미납</label>
               </div>
             </li>
@@ -194,37 +165,23 @@ export function ContractTable({ initialContracts }: ContractTableProps) {
               <div className={styles.tableHead}>계약일</div>
               <div className={`${styles.tableData} ${styles.pd12}`}>
                 <div className={styles.dateGroup}>
-                  <input
-                    type="date"
-                    id="contract-date-from"
-                    value={contractDateFrom}
-                    onChange={(e) => setContractDateFrom(e.target.value)}
-                    className={styles.dateInput}
-                  />
+                  <input type="date" id="contract-date-from" value={contractDateFrom} onChange={(e) => setContractDateFrom(e.target.value)} className={styles.dateInput} />
                   <label
                     htmlFor="contract-date-from"
                     onClick={(e) => {
                       e.preventDefault();
                       (document.getElementById("contract-date-from") as HTMLInputElement)?.showPicker?.();
-                    }}
-                  >
+                    }}>
                     <img src="/images/date_icon.svg" alt="날짜" width={24} height={24} style={{ width: 24, height: 24, display: "block" }} />
                   </label>
                   <span>~</span>
-                  <input
-                    type="date"
-                    id="contract-date-to"
-                    value={contractDateTo}
-                    onChange={(e) => setContractDateTo(e.target.value)}
-                    className={styles.dateInput}
-                  />
+                  <input type="date" id="contract-date-to" value={contractDateTo} onChange={(e) => setContractDateTo(e.target.value)} className={styles.dateInput} />
                   <label
                     htmlFor="contract-date-to"
                     onClick={(e) => {
                       e.preventDefault();
                       (document.getElementById("contract-date-to") as HTMLInputElement)?.showPicker?.();
-                    }}
-                  >
+                    }}>
                     <img src="/images/date_icon.svg" alt="날짜" width={24} height={24} style={{ width: 24, height: 24, display: "block" }} />
                   </label>
                 </div>
@@ -251,22 +208,19 @@ export function ContractTable({ initialContracts }: ContractTableProps) {
             </p>
           </div>
           <div className={styles.topBtnGroup}>
-            <div
-              className={`${styles.deleteBtn} ${showDeleteMenu ? styles.show : ""}`}
-              onMouseEnter={() => setShowDeleteMenu(true)}
-              onMouseLeave={() => setShowDeleteMenu(false)}
-            >
-              <button
-                type="button"
-                className="btn primary btn_md"
-                id="contractDeleteClick"
-                onClick={() => setShowDeleteMenu(!showDeleteMenu)}
-              >
+            <div className={`${styles.deleteBtn} ${showDeleteMenu ? styles.show : ""}`} onMouseEnter={() => setShowDeleteMenu(true)} onMouseLeave={() => setShowDeleteMenu(false)}>
+              <button type="button" className="btn primary btn_md" id="contractDeleteClick" onClick={() => setShowDeleteMenu(!showDeleteMenu)}>
                 삭제
               </button>
               <ul className={styles.deleteGroup}>
                 <li>
-                  <button type="button" className="btn normal btn_md" onClick={() => { handleSelectAll(); setShowDeleteMenu(false); }}>
+                  <button
+                    type="button"
+                    className="btn normal btn_md"
+                    onClick={() => {
+                      handleSelectAll();
+                      setShowDeleteMenu(false);
+                    }}>
                     전체 선택
                   </button>
                 </li>
@@ -274,9 +228,10 @@ export function ContractTable({ initialContracts }: ContractTableProps) {
                   <button
                     type="button"
                     className="btn primary btn_md"
-                    onClick={() => { setShowDeleteMenu(false); }}
-                    disabled={selectedRows.size === 0}
-                  >
+                    onClick={() => {
+                      setShowDeleteMenu(false);
+                    }}
+                    disabled={selectedRows.size === 0}>
                     선택 삭제
                   </button>
                 </li>
@@ -286,13 +241,12 @@ export function ContractTable({ initialContracts }: ContractTableProps) {
               엑셀다운로드
             </button>
             <select
-              className={styles.viewSelect}
+              className={`viewSelect`}
               value={itemsPerPage}
               onChange={(e) => {
                 setItemsPerPage(Number(e.target.value));
                 setCurrentPage(1);
-              }}
-            >
+              }}>
               <option value={10}>10개씩 보기</option>
               <option value={20}>20개씩 보기</option>
               <option value={50}>50개씩 보기</option>
@@ -315,12 +269,7 @@ export function ContractTable({ initialContracts }: ContractTableProps) {
             <thead>
               <tr>
                 <th>
-                  <input
-                    type="checkbox"
-                    id="contractCheckAll"
-                    checked={currentContracts.length > 0 && selectedRows.size === currentContracts.length}
-                    onChange={handleSelectAll}
-                  />
+                  <input type="checkbox" id="contractCheckAll" checked={currentContracts.length > 0 && selectedRows.size === currentContracts.length} onChange={handleSelectAll} />
                 </th>
                 <th>계약일</th>
                 <th>회사명</th>
@@ -347,11 +296,7 @@ export function ContractTable({ initialContracts }: ContractTableProps) {
               ) : (
                 currentContracts.map((contract) => {
                   const progress = mapPaymentProgress(contract.payment_progress);
-                  const remaining = calculateRemaining(
-                    contract.contract_amount,
-                    contract.installment_amount,
-                    contract.payment_progress
-                  );
+                  const remaining = calculateRemaining(contract.contract_amount, contract.installment_amount, contract.payment_progress);
                   return (
                     <tr
                       key={contract.id}
@@ -360,23 +305,16 @@ export function ContractTable({ initialContracts }: ContractTableProps) {
                         if (target.closest("input[type=checkbox]")) return;
                         openDetail(contract.id);
                       }}
-                      style={{ cursor: "pointer" }}
-                    >
+                      style={{ cursor: "pointer" }}>
                       <td onClick={(e) => e.stopPropagation()}>
-                        <input
-                          type="checkbox"
-                          checked={selectedRows.has(contract.id)}
-                          onChange={() => handleRowSelect(contract.id)}
-                        />
+                        <input type="checkbox" checked={selectedRows.has(contract.id)} onChange={() => handleRowSelect(contract.id)} />
                       </td>
                       <td>{formatDate(contract.contract_date)}</td>
                       <td>{contract.client_name}</td>
                       <td>{contract.brand_name}</td>
                       <td>{contract.contract_name}</td>
                       <td>
-                        <span className={progress === "정상" ? `${styles.statusBadge} ${styles.statusNormal}` : `${styles.statusBadge} ${styles.statusUnpaid}`}>
-                          {progress}
-                        </span>
+                        <span className={progress === "정상" ? `${styles.statusBadge} ${styles.statusNormal}` : `${styles.statusBadge} ${styles.statusUnpaid}`}>{progress}</span>
                       </td>
                       <td>{contract.contract_type_name}</td>
                       <td>
@@ -395,46 +333,20 @@ export function ContractTable({ initialContracts }: ContractTableProps) {
       {totalPages > 1 && (
         <div className={`${styles.pagination} pagination`}>
           <ul>
-            <li
-              className={`${styles.page} ${styles.first} ${currentPage === 1 ? styles.disabled : ""}`}
-              style={{ cursor: currentPage === 1 ? "not-allowed" : "pointer" }}
-              onClick={() => currentPage !== 1 && setCurrentPage(1)}
-            />
-            <li
-              className={`${styles.page} ${styles.prev} ${currentPage === 1 ? styles.disabled : ""}`}
-              style={{ cursor: currentPage === 1 ? "not-allowed" : "pointer" }}
-              onClick={() => currentPage !== 1 && setCurrentPage(currentPage - 1)}
-            />
+            <li className={`${styles.page} ${styles.first} ${currentPage === 1 ? styles.disabled : ""}`} style={{ cursor: currentPage === 1 ? "not-allowed" : "pointer" }} onClick={() => currentPage !== 1 && setCurrentPage(1)} />
+            <li className={`${styles.page} ${styles.prev} ${currentPage === 1 ? styles.disabled : ""}`} style={{ cursor: currentPage === 1 ? "not-allowed" : "pointer" }} onClick={() => currentPage !== 1 && setCurrentPage(currentPage - 1)} />
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <li
-                key={page}
-                className={`${styles.page} ${currentPage === page ? styles.active : ""}`}
-                style={{ cursor: "pointer" }}
-                onClick={() => setCurrentPage(page)}
-              >
+              <li key={page} className={`${styles.page} ${currentPage === page ? styles.active : ""}`} style={{ cursor: "pointer" }} onClick={() => setCurrentPage(page)}>
                 {page}
               </li>
             ))}
-            <li
-              className={`${styles.page} ${styles.next} ${currentPage === totalPages ? styles.disabled : ""}`}
-              style={{ cursor: currentPage === totalPages ? "not-allowed" : "pointer" }}
-              onClick={() => currentPage !== totalPages && setCurrentPage(currentPage + 1)}
-            />
-            <li
-              className={`${styles.page} ${styles.last} ${currentPage === totalPages ? styles.disabled : ""}`}
-              style={{ cursor: currentPage === totalPages ? "not-allowed" : "pointer" }}
-              onClick={() => currentPage !== totalPages && setCurrentPage(totalPages)}
-            />
+            <li className={`${styles.page} ${styles.next} ${currentPage === totalPages ? styles.disabled : ""}`} style={{ cursor: currentPage === totalPages ? "not-allowed" : "pointer" }} onClick={() => currentPage !== totalPages && setCurrentPage(currentPage + 1)} />
+            <li className={`${styles.page} ${styles.last} ${currentPage === totalPages ? styles.disabled : ""}`} style={{ cursor: currentPage === totalPages ? "not-allowed" : "pointer" }} onClick={() => currentPage !== totalPages && setCurrentPage(totalPages)} />
           </ul>
         </div>
       )}
 
-      <ContractDetailPanel
-        isOpen={detailOpen}
-        onClose={() => setDetailOpen(false)}
-        detail={detailData}
-        isLoading={detailLoading}
-      />
+      <ContractDetailPanel isOpen={detailOpen} onClose={() => setDetailOpen(false)} detail={detailData} isLoading={detailLoading} />
     </div>
   );
 }

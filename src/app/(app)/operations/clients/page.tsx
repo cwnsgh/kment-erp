@@ -350,7 +350,7 @@ export default function ManagedClientListPage() {
                 <button type="button" className={`${styles.excelBtn} btn btn_md normal`} onClick={handleExcelDownload}>
                   엑셀다운로드
                 </button>
-                <select className={styles.viewSelect}>
+                <select className={`viewSelect`}>
                   <option value="view_10">10개씩 보기</option>
                   <option value="view_30">50개씩 보기</option>
                   <option value="view_50">100개씩 보기</option>
