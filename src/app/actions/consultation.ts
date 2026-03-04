@@ -65,6 +65,97 @@ export async function getConsultations(): Promise<{
   }
 }
 
+export type ConsultationDetail = {
+  id: string;
+  company_name: string;
+  industry: string | null;
+  brand: string | null;
+  budget: string | null;
+  general_remarks: string | null;
+  consultation_date: string | null;
+  consultation_content: string | null;
+  created_at: string;
+  category_names: string[];
+  contacts: Array<{ name: string; email: string | null; phone: string | null; note: string | null }>;
+  sites: Array<{ brand: string | null; domain: string | null; solution: string | null; type: string | null }>;
+  attachments: Array<{ file_url: string; file_name: string | null; file_size: number | null }>;
+};
+
+/** 상담 상세 조회 (모달용) */
+export async function getConsultationDetail(consultationId: string): Promise<{
+  success: boolean;
+  data?: ConsultationDetail;
+  error?: string;
+}> {
+  try {
+    const supabase = await getSupabaseServerClient();
+    const { data: row, error } = await supabase
+      .from("consultation")
+      .select(
+        `
+        id,
+        company_name,
+        industry,
+        brand,
+        budget,
+        general_remarks,
+        consultation_date,
+        consultation_content,
+        created_at,
+        consultation_contact(name, email, phone, note),
+        consultation_site(brand, domain, solution, type),
+        consultation_consultation_category(consultation_category(name)),
+        consultation_attachment(file_url, file_name, file_size)
+      `
+      )
+      .eq("id", consultationId)
+      .single();
+
+    if (error || !row) {
+      return { success: false, error: error?.message ?? "상담을 찾을 수 없습니다." };
+    }
+
+    const categories = (row as any).consultation_consultation_category ?? [];
+    const category_names = categories
+      .map((cc: { consultation_category?: { name: string } | null }) => cc?.consultation_category?.name)
+      .filter(Boolean);
+
+    const detail: ConsultationDetail = {
+      id: row.id,
+      company_name: row.company_name ?? "",
+      industry: row.industry ?? null,
+      brand: row.brand ?? null,
+      budget: row.budget ?? null,
+      general_remarks: row.general_remarks ?? null,
+      consultation_date: row.consultation_date ?? null,
+      consultation_content: row.consultation_content ?? null,
+      created_at: row.created_at ?? "",
+      category_names,
+      contacts: ((row as any).consultation_contact ?? []).map((c: any) => ({
+        name: c.name ?? "",
+        email: c.email ?? null,
+        phone: c.phone ?? null,
+        note: c.note ?? null,
+      })),
+      sites: ((row as any).consultation_site ?? []).map((s: any) => ({
+        brand: s.brand ?? null,
+        domain: s.domain ?? null,
+        solution: s.solution ?? null,
+        type: s.type ?? null,
+      })),
+      attachments: ((row as any).consultation_attachment ?? []).map((a: any) => ({
+        file_url: a.file_url,
+        file_name: a.file_name ?? null,
+        file_size: a.file_size ?? null,
+      })),
+    };
+
+    return { success: true, data: detail };
+  } catch (e: any) {
+    return { success: false, error: e?.message ?? "상담 상세 조회 실패" };
+  }
+}
+
 /** 상담 구분(카테고리) 목록 */
 export async function getConsultationCategories(): Promise<{
   success: boolean;

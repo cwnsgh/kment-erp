@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { ConsultationListItem } from "@/app/actions/consultation";
+import { getConsultationDetail, type ConsultationDetail, type ConsultationListItem } from "@/app/actions/consultation";
+import { ConsultationDetailModal } from "./consultation-detail-modal";
 import styles from "./consultation-table.module.css";
 
 type ConsultationTableProps = {
@@ -18,10 +19,27 @@ export function ConsultationTable({ initialList }: ConsultationTableProps) {
   const [list, setList] = useState<ConsultationListItem[]>(initialList);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [detail, setDetail] = useState<ConsultationDetail | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [detailLoading, setDetailLoading] = useState(false);
 
   useEffect(() => {
     setList(initialList);
   }, [initialList]);
+
+  const handleRowClick = async (id: string) => {
+    setDetailLoading(true);
+    setIsModalOpen(true);
+    setDetail(null);
+    const result = await getConsultationDetail(id);
+    setDetailLoading(false);
+    if (result.success && result.data) {
+      setDetail(result.data);
+    } else {
+      alert(result.error ?? "상담 정보를 불러오는데 실패했습니다.");
+      setIsModalOpen(false);
+    }
+  };
 
   const totalItems = list.length;
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -83,7 +101,14 @@ export function ConsultationTable({ initialList }: ConsultationTableProps) {
                 </tr>
               ) : (
                 currentItems.map((row) => (
-                  <tr key={row.id}>
+                  <tr
+                    key={row.id}
+                    onClick={() => handleRowClick(row.id)}
+                    onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), handleRowClick(row.id))}
+                    role="button"
+                    tabIndex={0}
+                    className={styles.clickableRow}
+                  >
                     <td>{row.company_name || "-"}</td>
                     <td>{row.industry || "-"}</td>
                     <td>{row.brand || "-"}</td>
@@ -134,6 +159,13 @@ export function ConsultationTable({ initialList }: ConsultationTableProps) {
           </ul>
         </div>
       )}
+
+      <ConsultationDetailModal
+        detail={detail}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        isLoading={detailLoading}
+      />
     </div>
   );
 }

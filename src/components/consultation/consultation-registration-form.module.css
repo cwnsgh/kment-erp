@@ -189,6 +189,34 @@
   margin-bottom: 28px;
 }
 
+.contactBlockHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.contactBlockHeader .table_title_sub {
+  margin-bottom: 0;
+}
+
+.removeBtnHeader {
+  padding: 4px 8px;
+  color: #ef4444;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.removeBtnHeader:hover {
+  color: #dc2626;
+  background: rgba(239, 68, 68, 0.08);
+}
+
 /* 담당자 비고 셀: input + 삭제 버튼 */
 .dataWithRemove {
   display: flex;
@@ -204,6 +232,19 @@
 /* 사이트 정보: 사이트별 2행 묶음 */
 .siteBlock {
   margin-bottom: 16px;
+}
+
+.siteBlockHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.siteBlockTitle {
+  font-size: 15px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-gray);
 }
 
 .siteBlock:last-child {

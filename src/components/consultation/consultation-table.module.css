@@ -72,6 +72,10 @@
   background-color: var(--hover-bg) !important;
 }
 
+.clickableRow {
+  cursor: pointer !important;
+}
+
 .listTable .tableWrap table tr:last-child {
   border-bottom: 1px solid var(--border-color) !important;
 }

@@ -4,9 +4,21 @@ import { X, Paperclip } from "lucide-react";
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createConsultation, type ConsultationCategory, type CreateConsultationInput } from "@/app/actions/consultation";
+import { formatAmountInput, parseAmountInput } from "@/lib/format-amount";
 import styles from "./consultation-registration-form.module.css";
 
 const createId = () => (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2));
+
+/** 연락처 입력: 숫자만 저장, 표시는 010-1234-5678 형식 (최대 11자리) */
+function formatPhoneDisplay(value: string): string {
+  const digits = (value ?? "").replace(/\D/g, "").slice(0, 11);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+}
+function parsePhoneInput(value: string): string {
+  return (value ?? "").replace(/\D/g, "").slice(0, 11);
+}
 
 const SOLUTION_OPTIONS = ["선택해주세요", "카페24", "고도몰", "기타"];
 const SITE_TYPE_OPTIONS = ["선택해주세요", "신규", "리뉴얼", "이전", "개발", "유지보수", "기타"];
@@ -79,7 +91,7 @@ export function ConsultationRegistrationForm({ categories }: Props) {
         companyName,
         industry,
         brand,
-        budget,
+        budget: parseAmountInput(budget),
         generalRemarks,
         consultationDate,
         consultationContent,
@@ -90,7 +102,6 @@ export function ConsultationRegistrationForm({ categories }: Props) {
       };
       const result = await createConsultation(input);
       if (result.success) {
-        alert("상담이 등록되었습니다.");
         router.push("/consultation");
         router.refresh();
       } else {
@@ -143,7 +154,13 @@ export function ConsultationRegistrationForm({ categories }: Props) {
           <li className="row_group">
             <div className="table_head">예산</div>
             <div className="table_data pd12">
-              <input type="text" placeholder="예산" value={budget} onChange={(e) => setBudget(e.target.value)} />
+              <input
+                type="text"
+                inputMode="numeric"
+                placeholder="예산 (예: 1,000,000)"
+                value={formatAmountInput(budget)}
+                onChange={(e) => setBudget(parseAmountInput(e.target.value))}
+              />
             </div>
           </li>
         </ul>
@@ -159,7 +176,14 @@ export function ConsultationRegistrationForm({ categories }: Props) {
         </h2>
         {contacts.map((contact, index) => (
           <div key={contact.id} className={styles.contactBlock}>
-            <h3 className="table_title_sub">담당자 {index + 1}</h3>
+            <div className={styles.contactBlockHeader}>
+              <h3 className="table_title_sub">담당자 {index + 1}</h3>
+              {contacts.length > 1 && (
+                <button type="button" onClick={() => removeContact(contact.id)} className={styles.removeBtnHeader} title="삭제">
+                  <X size={18} />
+                </button>
+              )}
+            </div>
             <ul className="table_row">
               <li className="row_group">
                 <div className="table_head">이름</div>
@@ -189,27 +213,23 @@ export function ConsultationRegistrationForm({ categories }: Props) {
                 <div className="table_head">연락처</div>
                 <div className="table_data pd12">
                   <input
-                    type="text"
-                    placeholder="연락처"
-                    value={contact.phone}
-                    onChange={(e) => setContacts((prev) => prev.map((c) => (c.id === contact.id ? { ...c, phone: e.target.value } : c)))}
+                    type="tel"
+                    inputMode="tel"
+                    placeholder="010-1234-5678"
+                    value={formatPhoneDisplay(contact.phone)}
+                    onChange={(e) => setContacts((prev) => prev.map((c) => (c.id === contact.id ? { ...c, phone: parsePhoneInput(e.target.value) } : c)))}
                   />
                 </div>
               </li>
               <li className="row_group">
                 <div className="table_head">비고</div>
-                <div className={`table_data pd12 ${styles.dataWithRemove}`}>
+                <div className="table_data pd12">
                   <input
                     type="text"
                     placeholder="비고"
                     value={contact.note}
                     onChange={(e) => setContacts((prev) => prev.map((c) => (c.id === contact.id ? { ...c, note: e.target.value } : c)))}
                   />
-                  {contacts.length > 1 && (
-                    <button type="button" onClick={() => removeContact(contact.id)} className={styles.removeBtn} title="삭제">
-                      <X size={18} />
-                    </button>
-                  )}
                 </div>
               </li>
             </ul>
@@ -225,8 +245,16 @@ export function ConsultationRegistrationForm({ categories }: Props) {
             + 사이트 추가
           </button>
         </h2>
-        {sites.map((site) => (
+        {sites.map((site, index) => (
           <div key={site.id} className={styles.siteBlock}>
+            {sites.length > 1 && (
+              <div className={styles.siteBlockHeader}>
+                <span className={styles.siteBlockTitle}>사이트 {index + 1}</span>
+                <button type="button" onClick={() => removeSite(site.id)} className={styles.removeBtnHeader} title="삭제">
+                  <X size={18} />
+                </button>
+              </div>
+            )}
             <ul className={`table_row ${styles.siteRow}`}>
               <li className="row_group">
                 <div className="table_head">브랜드</div>
@@ -269,7 +297,7 @@ export function ConsultationRegistrationForm({ categories }: Props) {
               </li>
               <li className="row_group">
                 <div className="table_head">유형</div>
-                <div className={`table_data pd12 ${styles.siteDataWithRemove}`}>
+                <div className="table_data pd12">
                   <select
                     value={site.type || "선택해주세요"}
                     onChange={(e) => setSites((prev) => prev.map((s) => (s.id === site.id ? { ...s, type: e.target.value } : s)))}
@@ -280,11 +308,6 @@ export function ConsultationRegistrationForm({ categories }: Props) {
                       </option>
                     ))}
                   </select>
-                  {sites.length > 1 && (
-                    <button type="button" onClick={() => removeSite(site.id)} className={styles.removeBtn} title="삭제">
-                      <X size={18} />
-                    </button>
-                  )}
                 </div>
               </li>
             </ul>
