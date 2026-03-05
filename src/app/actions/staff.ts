@@ -154,35 +154,36 @@ export async function getStaffById(id: string): Promise<{
         role:role_id ( name )
       `;
 
-    const { data: row, error } = await supabase
+    const { data, error } = await supabase
       .from("employee")
       .select(selectFields)
       .eq("id", id)
       .single();
 
-    if (error || !row) {
+    if (error || !data) {
       return { success: false, error: error?.message ?? "직원을 찾을 수 없습니다." };
     }
 
-    const role = Array.isArray((row as any).role) ? (row as any).role[0] : (row as any).role;
+    const row = data as unknown as Record<string, unknown> & { role?: { name?: string } | { name?: string }[] };
+    const role = Array.isArray(row.role) ? row.role[0] : row.role;
     const detail: StaffDetail = {
-      id: row.id,
-      name: row.name ?? "",
-      email: row.email ?? "",
-      login_id: row.login_id ?? null,
-      role_id: row.role_id ?? null,
-      role_name: role?.name ?? null,
-      job_type: row.job_type ?? null,
-      phone: row.phone ?? null,
-      contact_email: row.contact_email ?? null,
-      birth_date: row.birth_date ?? null,
-      join_date: row.join_date ?? null,
-      leave_date: row.leave_date ?? null,
-      employment_status: row.employment_status ?? null,
-      leave_reason: row.leave_reason ?? null,
-      profile_image_url: row.profile_image_url ?? null,
-      admin_memo: includeAdminMemo ? (row.admin_memo ?? null) : null,
-      is_active: row.is_active ?? true,
+      id: row.id as string,
+      name: (row.name as string) ?? "",
+      email: (row.email as string) ?? "",
+      login_id: (row.login_id as string | null) ?? null,
+      role_id: (row.role_id as number | null) ?? null,
+      role_name: (role?.name as string) ?? null,
+      job_type: (row.job_type as string | null) ?? null,
+      phone: (row.phone as string | null) ?? null,
+      contact_email: (row.contact_email as string | null) ?? null,
+      birth_date: (row.birth_date as string | null) ?? null,
+      join_date: (row.join_date as string | null) ?? null,
+      leave_date: (row.leave_date as string | null) ?? null,
+      employment_status: (row.employment_status as string | null) ?? null,
+      leave_reason: (row.leave_reason as string | null) ?? null,
+      profile_image_url: (row.profile_image_url as string | null) ?? null,
+      admin_memo: includeAdminMemo ? ((row.admin_memo as string | null) ?? null) : null,
+      is_active: (row.is_active as boolean) ?? true,
     };
 
     return { success: true, data: detail };
