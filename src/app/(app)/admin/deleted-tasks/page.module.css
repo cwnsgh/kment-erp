@@ -1,0 +1,77 @@
+.deletedPage {
+    padding: 0 !important;
+    box-sizing: border-box !important;
+}
+
+.deletedPage :global(.white_box) {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+.deletedPage .table_title {
+    font-size: 18px;
+    font-weight: var(--font-weight-bold);
+    margin-bottom: 50px;
+    justify-content: space-between;
+    display: flex;
+    align-items: center;
+    padding: 0 30px;
+    box-sizing: border-box;
+}
+
+.table_wrap table {
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table_wrap table th {
+    padding: 24px 0;
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-gray);
+    text-align: center;
+    font-size: 15px;
+}
+
+.table_wrap table tbody tr {
+    transition: backgruond-color 0.2s;
+}
+
+.table_wrap table tbody tr:hover {
+    background-color: var(--hover-bg);
+}
+
+.table_wrap table td {
+    padding: 30px 10px;
+    font-size: 14px;
+    font-weight: var(--font-weight-medium);
+    vertical-align: middle;
+    word-break: keep-all;
+    box-sizing: border-box;
+    text-align: center;
+    border-top: 1px solid var(--border-color);
+}
+
+.tableTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding: 0 30px;
+}
+
+.topTotal p {
+    font-size: 13px;
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-gray);
+}
+
+.topTotal p>span {
+    color: var(--primary);
+    font-weight: var(--font-weight-bold);
+}
+
+.topBtnGroup {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}

@@ -354,6 +354,7 @@
   text-align: center;
   font-size: 14px;
   color: var(--text-gray);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .pagination {
@@ -594,3 +595,8 @@
   justify-content: center;
   gap: 8px;
 }
+
+/*.wrap input[type="date"]::-webkit-calendar-picker-indicator {
+  display: none;
+  -webkit-appearance: none;
+}*/

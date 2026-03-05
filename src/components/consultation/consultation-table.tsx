@@ -83,7 +83,7 @@ export function ConsultationTable({ initialList }: ConsultationTableProps) {
             </colgroup>
             <thead>
               <tr>
-                <th>상호</th>
+                <th>회사명</th>
                 <th>업종</th>
                 <th>브랜드</th>
                 <th>구분</th>
