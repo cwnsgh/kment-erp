@@ -49,9 +49,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!folder || (folder !== 'business-registration' && folder !== 'signature' && folder !== 'work-attachment' && folder !== 'contract-attachments' && folder !== 'consultation-attachments')) {
+    if (!folder || (folder !== 'business-registration' && folder !== 'signature' && folder !== 'work-attachment' && folder !== 'contract-attachments' && folder !== 'consultation-attachments' && folder !== 'staff-profile')) {
       return NextResponse.json(
-        { success: false, error: '올바른 폴더를 지정해주세요. (business-registration, signature, work-attachment, contract-attachments, consultation-attachments)' },
+        { success: false, error: '올바른 폴더를 지정해주세요. (business-registration, signature, work-attachment, contract-attachments, consultation-attachments, staff-profile)' },
         { status: 400 }
       );
     }

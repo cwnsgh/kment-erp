@@ -1,0 +1,226 @@
+.staffList {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.searchBox {
+  margin-bottom: 20px;
+  padding: 0 30px;
+}
+
+.searchFlex {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.searchSelect,
+.searchInput {
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 14px;
+  min-width: 120px;
+}
+
+.searchInput {
+  flex: 1;
+  max-width: 240px;
+}
+
+.listTable {
+  margin-top: 0;
+}
+
+.listTable .tableTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding: 0 30px;
+}
+
+.listTable .topTotal p {
+  font-size: 13px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-gray);
+}
+
+.listTable .topTotal p > span {
+  color: var(--primary);
+  font-weight: var(--font-weight-bold);
+}
+
+.listTable .topBtnGroup {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.listTable .viewSelect {
+  appearance: none;
+  background: url("/images/select_arrow.svg") no-repeat center right 10px;
+  background-size: 12px 8px;
+  height: 30px;
+  padding: 0 26px 0 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: var(--font-weight-medium);
+}
+
+.listTable .tableWrap {
+  padding: 0 30px;
+}
+
+.listTable .tableWrap table {
+  text-align: center;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.listTable .tableWrap table th {
+  padding: 24px 10px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-gray);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.listTable .tableWrap table tr {
+  border-top: 1px solid var(--border-color);
+}
+
+.listTable .tableWrap table tbody tr:hover {
+  background-color: var(--hover-bg);
+}
+
+.clickableRow {
+  cursor: pointer;
+}
+
+.listTable .tableWrap table td {
+  padding: 30px 10px;
+  font-size: 14px;
+  font-weight: var(--font-weight-medium);
+  vertical-align: middle;
+  word-break: keep-all;
+  border-top: 1px solid var(--border-color);
+}
+
+.nameLink {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: var(--font-weight-semibold);
+}
+
+.nameLink:hover {
+  text-decoration: underline;
+}
+
+.emptyCell {
+  text-align: center !important;
+  padding: 40px 0 !important;
+  color: var(--text-gray);
+}
+
+.statusOngoing {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.statusEnd {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+  background: #ffebee;
+  color: #c62828;
+}
+
+.statusUnpaid {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.pagination {
+  margin-top: 60px;
+  text-align: center;
+}
+
+.pagination ul {
+  display: inline-flex;
+  gap: 6px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.pagination .page {
+  min-width: 26px;
+  height: 26px;
+  font-size: 15px;
+  font-weight: var(--font-weight-bold);
+  opacity: 0.4;
+  line-height: 26px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 4px;
+}
+
+.pagination .page:hover:not(.disabled) {
+  opacity: 1;
+}
+
+.pagination .page.active {
+  opacity: 1;
+}
+
+.pagination .page.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.pagination .page.first {
+  background: url("/images/page_last_icon.svg") no-repeat center center;
+  transform: rotate(180deg);
+  background-size: 12px;
+  opacity: 1;
+}
+
+.pagination .page.prev {
+  background: url("/images/arrow_icon.svg") no-repeat center center;
+  transform: rotate(180deg);
+  background-size: 12px;
+  opacity: 1;
+}
+
+.pagination .page.next {
+  background: url("/images/arrow_icon.svg") no-repeat center center;
+  background-size: 12px;
+  opacity: 1;
+}
+
+.pagination .page.last {
+  background: url("/images/page_last_icon.svg") no-repeat center center;
+  background-size: 12px;
+  opacity: 1;
+}
