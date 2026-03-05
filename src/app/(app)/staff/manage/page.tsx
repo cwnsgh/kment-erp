@@ -1,17 +1,16 @@
-import Link from "next/link";
 import { requireMenuPermission } from "@/lib/require-menu-permission";
 import { getStaffList, getRoleOptions } from "@/app/actions/staff";
-import { StaffListContent } from "@/components/staff/staff-list-content";
-import styles from "./page.module.css";
+import { StaffManageContent } from "@/components/staff/staff-manage-content";
+import styles from "../page.module.css";
 
 type SearchParams = { page?: string; pageSize?: string; searchType?: string; searchKeyword?: string };
 
-export default async function StaffPage({
+export default async function StaffManagePage({
   searchParams,
 }: {
   searchParams: Promise<SearchParams> | SearchParams;
 }) {
-  await requireMenuPermission("/staff");
+  await requireMenuPermission("/staff/manage");
 
   const resolved = await Promise.resolve(searchParams);
   const page = Math.max(1, Number(resolved?.page) || 1);
@@ -30,16 +29,11 @@ export default async function StaffPage({
   return (
     <div className={`${styles.staffPage} page_section`}>
       <div className="page_title">
-        <h1>직원 조회</h1>
-        <div className="btn_wrap">
-          <Link href="/staff/new" className="btn btn_lg primary">
-            직원 등록
-          </Link>
-        </div>
+        <h1>직원 관리</h1>
       </div>
       <div className={styles.whiteBox}>
         <div className={styles.boxInner}>
-          <StaffListContent
+          <StaffManageContent
             initialList={list}
             total={total}
             roleOptions={roleOptions}
@@ -53,11 +47,3 @@ export default async function StaffPage({
     </div>
   );
 }
-
-
-
-
-
-
-
-

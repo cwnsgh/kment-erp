@@ -1,0 +1,229 @@
+.staffPage {
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.staffPage :global(.page_title) {
+  text-align: left;
+  margin: 0 auto 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.staffPage :global(.page_title h1) {
+  font-size: 32px;
+  font-weight: var(--font-weight-bold);
+}
+
+.whiteBox {
+  background: #fff !important;
+  border-radius: 10px !important;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.08) !important;
+  width: 100% !important;
+  padding: 50px 0 100px;
+  box-sizing: border-box !important;
+}
+
+.boxInner {
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.root {
+  max-width: 100%;
+  margin-top: 0;
+  padding: 0 30px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  width: 100%;
+  font-size: 14px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.root :global(h2.table_title) {
+  font-size: 18px;
+  font-weight: var(--font-weight-bold);
+  margin-bottom: 24px;
+}
+
+.root :global(.table_item .table_row) {
+  display: flex;
+  align-items: stretch;
+  border-top: 1px solid var(--border-color);
+  width: 100%;
+  margin: 0;
+  list-style: none;
+  padding: 0;
+}
+
+.root :global(.table_item .table_row .row_group) {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.root :global(.table_item .table_row .row_group .table_head) {
+  width: 180px;
+  min-width: 180px;
+  padding: 22px 24px;
+  background: var(--background-color);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-gray);
+}
+
+.root :global(.table_item .table_row .row_group .table_data) {
+  flex: 1;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.root :global(.table_item .table_row .row_group .table_data input[type="text"]),
+.root :global(.table_item .table_row .row_group .table_data input[type="password"]),
+.root :global(.table_item .table_row .row_group .table_data input[type="email"]),
+.root :global(.table_item .table_row .row_group .table_data input[type="tel"]),
+.root :global(.table_item .table_row .row_group .table_data input[type="date"]) {
+  width: 200px;
+  max-width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.root :global(.table_item .table_row .row_group .table_data select) {
+  width: 200px;
+  max-width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.profileWrap {
+  margin-bottom: 24px;
+  position: relative;
+  width: fit-content;
+}
+
+.imgWrap {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  background: var(--border-color);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.imgWrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.placeholder {
+  color: var(--text-gray);
+  font-size: 14px;
+}
+
+.imgBtn {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--border-color);
+  background: #fff;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.imgBtn:hover:not(:disabled) {
+  background: var(--background-color);
+}
+
+.hiddenInput {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.hint {
+  font-size: 12px;
+  color: var(--text-gray);
+}
+
+.passwordInput {
+  flex: 1;
+  max-width: 200px;
+}
+
+.radioLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 16px;
+  cursor: pointer;
+  font-weight: var(--font-weight-medium);
+}
+
+.adminMemo {
+  width: 100%;
+  min-height: 140px;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 14px;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #fff;
+  padding: 24px;
+  border-radius: 8px;
+  min-width: 320px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.modal h3 {
+  margin: 0 0 16px;
+  font-size: 18px;
+}
+
+.modal input {
+  display: block;
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
