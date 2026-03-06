@@ -40,13 +40,115 @@ type SignupData = {
  */
 export async function signup(data: SignupData) {
   const supabase = await getSupabaseServerClient();
+  const normalizedBiz = normalizeBusinessNumber(data.businessNumber);
 
   try {
-    // 최종 중복 확인 (서버 사이드 검증)
-    const { checkBusinessNumber, checkUsername } = await import(
-      "./signup-validation"
-    );
+    // 거절된 건이 있으면 재신청(갱신) 처리
+    const { data: existingClient } = await supabase
+      .from("client")
+      .select("id, login_id, status")
+      .eq("business_registration_number", normalizedBiz)
+      .maybeSingle();
 
+    if (existingClient?.status === "rejected") {
+      const trimmedUsername = data.username.trim();
+      const { data: otherClient } = await supabase
+        .from("client")
+        .select("id")
+        .eq("login_id", trimmedUsername)
+        .neq("id", existingClient.id)
+        .maybeSingle();
+      if (otherClient) {
+        return {
+          success: false,
+          error: "이미 다른 거래처에서 사용 중인 아이디입니다.",
+        };
+      }
+      const hashedPassword = await bcrypt.hash(data.password, 10);
+      const { error: updateError } = await supabase
+        .from("client")
+        .update({
+          name: data.companyName,
+          ceo_name: data.ceoName,
+          address: data.address,
+          address_detail: data.addressDetail,
+          business_type: data.businessType,
+          business_item: data.businessItem,
+          login_id: data.username.trim(),
+          login_password: hashedPassword,
+          status: "pending",
+          note: "회원가입 요청(재신청)",
+        })
+        .eq("id", existingClient.id);
+      if (updateError) throw updateError;
+
+      await supabase.from("client_contact").delete().eq("client_id", existingClient.id);
+      await supabase.from("client_site").delete().eq("client_id", existingClient.id);
+      await supabase.from("client_attachment").delete().eq("client_id", existingClient.id);
+
+      const client = { id: existingClient.id };
+
+      if (data.contacts.length > 0) {
+        const contactsData = data.contacts
+          .filter((c) => c.name?.trim() !== "")
+          .map((contact) => ({
+            client_id: client.id,
+            name: contact.name,
+            phone: contact.phone,
+            email: contact.email,
+            title: contact.title,
+          }));
+        if (contactsData.length > 0) {
+          await supabase.from("client_contact").insert(contactsData);
+        }
+      }
+      if (data.sites?.length) {
+        const sitesData = data.sites
+          .filter((s) => s.brandName?.trim() || s.domain?.trim())
+          .map((site) => ({
+            client_id: client.id,
+            brand_name: site.brandName,
+            domain: site.domain,
+            solution: site.solution,
+            login_id: site.loginId,
+            login_password: site.loginPassword,
+            type: site.type,
+          }));
+        if (sitesData.length > 0) {
+          await supabase.from("client_site").insert(sitesData);
+        }
+      }
+      const attachments: { client_id: string; file_url: string; file_name: string | null; file_type: string }[] = [];
+      if (data.businessRegistrationFileUrl) {
+        attachments.push({
+          client_id: client.id,
+          file_url: data.businessRegistrationFileUrl,
+          file_name: data.businessRegistrationFileName ?? null,
+          file_type: "business_registration",
+        });
+      }
+      if (data.signatureFileUrl) {
+        attachments.push({
+          client_id: client.id,
+          file_url: data.signatureFileUrl,
+          file_name: data.signatureFileName ?? null,
+          file_type: "signature",
+        });
+      }
+      if (attachments.length > 0) {
+        await supabase.from("client_attachment").insert(attachments);
+      }
+      return { success: true, clientId: client.id };
+    }
+
+    if (existingClient) {
+      return {
+        success: false,
+        error: "이미 등록된 사업자등록번호입니다.",
+      };
+    }
+
+    const { checkBusinessNumber, checkUsername } = await import("./signup-validation");
     const businessNumberCheck = await checkBusinessNumber(data.businessNumber);
     if (!businessNumberCheck.available) {
       return {
@@ -65,14 +167,12 @@ export async function signup(data: SignupData) {
       };
     }
 
-    // 비밀번호 해싱
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
-    // 1. 거래처 메인 정보 저장 (회원가입 요청)
     const { data: client, error: clientError } = await supabase
       .from("client")
       .insert({
-        business_registration_number: normalizeBusinessNumber(data.businessNumber),
+        business_registration_number: normalizedBiz,
         name: data.companyName,
         ceo_name: data.ceoName,
         address: data.address,
@@ -80,28 +180,20 @@ export async function signup(data: SignupData) {
         business_type: data.businessType,
         business_item: data.businessItem,
         login_id: data.username,
-        login_password: hashedPassword, // 해시화된 비밀번호 저장
-        status: "pending", // 승인 대기 상태
+        login_password: hashedPassword,
+        status: "pending",
         note: "회원가입 요청",
       })
       .select()
       .single();
 
     if (clientError) {
-      // 중복 에러 처리
       if (clientError.code === "23505") {
-        // PostgreSQL unique violation
         if (clientError.message.includes("business_registration_number")) {
-          return {
-            success: false,
-            error: "이미 등록된 사업자등록번호입니다.",
-          };
+          return { success: false, error: "이미 등록된 사업자등록번호입니다." };
         }
         if (clientError.message.includes("login_id")) {
-          return {
-            success: false,
-            error: "이미 사용 중인 아이디입니다.",
-          };
+          return { success: false, error: "이미 사용 중인 아이디입니다." };
         }
       }
       throw clientError;

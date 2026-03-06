@@ -72,8 +72,52 @@
 }
 
 .dateSep {
+  margin: 0 10px;
   color: var(--text-color);
   font-size: 14px;
+}
+
+.dateGroup {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-wrap: nowrap;
+}
+
+.dateGroup label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-left: 8px;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.dateGroup label img {
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  min-height: 16px;
+  object-fit: contain;
+  display: block;
+}
+
+.dateInput {
+  font-size: 13px;
+  padding: 4px 4px 4px 10px;
+  border: 1px solid var(--border-color);
+  height: 36px;
+  border-radius: 4px;
+  box-sizing: border-box;
+  max-width: 140px;
+  min-width: 110px;
+}
+
+.dateInput:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .filterSelect,

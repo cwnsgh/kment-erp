@@ -371,7 +371,7 @@ export default function SignUpPage() {
   return (
     <form onSubmit={handleSubmit} className={`${styles.SignUpPage}  p-8 rounded-lg shadow-sm max-w-xl mx-auto`}>
       <div className="flex items-center pageTitle">
-        <button type="button" onClick={() => router.back()} className="inline-flex items-center justify-center w-10 h-10" aria-label="뒤로가기">
+        <button type="button" onClick={() => router.push("/")} className="inline-flex items-center justify-center w-10 h-10" aria-label="뒤로가기">
           <img src="/images/arrow_icon.svg" alt="" />
         </button>
         <h1>회원가입</h1>

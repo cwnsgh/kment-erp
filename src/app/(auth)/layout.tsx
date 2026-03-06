@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ReactNode } from "react";
 
 type AuthLayoutProps = {
@@ -16,9 +17,9 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
   return (
     <div className="flex min-h-screen flex-col bg-white text-slate-800">
       <header className="flex items-center justify-between bg-black px-10 py-6 text-white">
-        <div className="text-lg font-semibold tracking-wide">
+        <Link href="/" className="text-lg font-semibold tracking-wide">
           <img src="/images/kment-logo.svg" alt="케이먼트 로고" style={{ width: "100px" }} />
-        </div>
+        </Link>
         <div className="text-sm text-white">{formattedDate}</div>
       </header>
       <main className="flex flex-1 items-center justify-center px-4 py-12 md:px-8">

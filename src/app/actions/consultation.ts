@@ -16,15 +16,21 @@ export type ConsultationListItem = {
   category_names: string[];
 };
 
-/** 상담 목록 조회 */
-export async function getConsultations(): Promise<{
+export type GetConsultationsParams = {
+  searchKeyword?: string;
+  consultationDateFrom?: string;
+  consultationDateTo?: string;
+};
+
+/** 상담 목록 조회 (검색·날짜 필터) */
+export async function getConsultations(params?: GetConsultationsParams): Promise<{
   success: boolean;
   data?: ConsultationListItem[];
   error?: string;
 }> {
   try {
     const supabase = await getSupabaseServerClient();
-    const { data: rows, error } = await supabase
+    let query = supabase
       .from("consultation")
       .select(
         `
@@ -40,6 +46,19 @@ export async function getConsultations(): Promise<{
       `
       )
       .order("created_at", { ascending: false });
+
+    const keyword = (params?.searchKeyword ?? "").trim();
+    if (keyword) {
+      query = query.or(`company_name.ilike.%${keyword}%,industry.ilike.%${keyword}%,brand.ilike.%${keyword}%`);
+    }
+    if (params?.consultationDateFrom) {
+      query = query.gte("consultation_date", params.consultationDateFrom);
+    }
+    if (params?.consultationDateTo) {
+      query = query.lte("consultation_date", params.consultationDateTo);
+    }
+
+    const { data: rows, error } = await query;
 
     if (error) throw error;
 
@@ -76,6 +95,7 @@ export type ConsultationDetail = {
   consultation_content: string | null;
   created_at: string;
   category_names: string[];
+  category_ids: string[];
   contacts: Array<{ name: string; email: string | null; phone: string | null; note: string | null }>;
   sites: Array<{ brand: string | null; domain: string | null; solution: string | null; type: string | null }>;
   attachments: Array<{ file_url: string; file_name: string | null; file_size: number | null }>;
@@ -104,7 +124,7 @@ export async function getConsultationDetail(consultationId: string): Promise<{
         created_at,
         consultation_contact(name, email, phone, note),
         consultation_site(brand, domain, solution, type),
-        consultation_consultation_category(consultation_category(name)),
+        consultation_consultation_category(category_id, consultation_category(name)),
         consultation_attachment(file_url, file_name, file_size)
       `
       )
@@ -119,6 +139,9 @@ export async function getConsultationDetail(consultationId: string): Promise<{
     const category_names = categories
       .map((cc: { consultation_category?: { name: string } | null }) => cc?.consultation_category?.name)
       .filter(Boolean);
+    const category_ids = categories
+      .map((cc: { category_id?: string } | null) => cc?.category_id)
+      .filter(Boolean);
 
     const detail: ConsultationDetail = {
       id: row.id,
@@ -131,6 +154,7 @@ export async function getConsultationDetail(consultationId: string): Promise<{
       consultation_content: row.consultation_content ?? null,
       created_at: row.created_at ?? "",
       category_names,
+      category_ids,
       contacts: ((row as any).consultation_contact ?? []).map((c: any) => ({
         name: c.name ?? "",
         email: c.email ?? null,
@@ -279,5 +303,121 @@ export async function createConsultation(input: CreateConsultationInput): Promis
   } catch (e: any) {
     console.error("상담 등록 오류:", e);
     return { success: false, error: e?.message ?? "상담 등록에 실패했습니다." };
+  }
+}
+
+export type UpdateConsultationInput = CreateConsultationInput;
+
+/** 상담 수정 */
+export async function updateConsultation(
+  id: string,
+  input: UpdateConsultationInput
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    await requireAuth();
+    const supabase = await getSupabaseServerClient();
+
+    const { error: updateError } = await supabase
+      .from("consultation")
+      .update({
+        company_name: input.companyName?.trim() || "(미입력)",
+        industry: input.industry.trim() || null,
+        brand: input.brand.trim() || null,
+        budget: input.budget.trim() || null,
+        general_remarks: input.generalRemarks.trim() || null,
+        consultation_date: input.consultationDate || null,
+        consultation_content: input.consultationContent.trim() || null,
+      })
+      .eq("id", id);
+
+    if (updateError) return { success: false, error: updateError.message ?? "상담 수정 실패" };
+
+    await supabase.from("consultation_contact").delete().eq("consultation_id", id);
+    await supabase.from("consultation_site").delete().eq("consultation_id", id);
+    await supabase.from("consultation_consultation_category").delete().eq("consultation_id", id);
+    await supabase.from("consultation_attachment").delete().eq("consultation_id", id);
+
+    if (input.contacts.length > 0) {
+      const contactRows = input.contacts
+        .filter((c) => c.name.trim() !== "")
+        .map((c, i) => ({
+          consultation_id: id,
+          name: c.name.trim(),
+          email: c.email.trim() || null,
+          phone: c.phone.trim() || null,
+          note: c.note.trim() || null,
+          sort_order: i,
+        }));
+      if (contactRows.length > 0) {
+        await supabase.from("consultation_contact").insert(contactRows);
+      }
+    }
+    if (input.sites.length > 0) {
+      const siteRows = input.sites
+        .filter((s) => s.brand?.trim() || s.domain?.trim())
+        .map((s, i) => ({
+          consultation_id: id,
+          brand: s.brand?.trim() || null,
+          domain: s.domain?.trim() || null,
+          solution: s.solution?.trim() || null,
+          type: s.type?.trim() || null,
+          sort_order: i,
+        }));
+      if (siteRows.length > 0) {
+        await supabase.from("consultation_site").insert(siteRows);
+      }
+    }
+    if (input.categoryIds.length > 0) {
+      const categoryRows = input.categoryIds.map((category_id) => ({
+        consultation_id: id,
+        category_id,
+      }));
+      await supabase.from("consultation_consultation_category").insert(categoryRows);
+    }
+    if (input.attachments.length > 0) {
+      const attachRows = input.attachments.map((a) => ({
+        consultation_id: id,
+        file_url: a.fileUrl,
+        file_name: a.fileName || null,
+        file_size: a.fileSize ?? null,
+      }));
+      await supabase.from("consultation_attachment").insert(attachRows);
+    }
+
+    revalidatePath("/consultation");
+    revalidatePath(`/consultation/${id}/edit`);
+    return { success: true };
+  } catch (e: any) {
+    console.error("상담 수정 오류:", e);
+    return { success: false, error: e?.message ?? "상담 수정에 실패했습니다." };
+  }
+}
+
+/** 상담 삭제 (1건) */
+export async function deleteConsultation(id: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    await requireAuth();
+    const supabase = await getSupabaseServerClient();
+    const { error } = await supabase.from("consultation").delete().eq("id", id);
+    if (error) return { success: false, error: error.message ?? "상담 삭제 실패" };
+    revalidatePath("/consultation");
+    return { success: true };
+  } catch (e: any) {
+    return { success: false, error: e?.message ?? "상담 삭제에 실패했습니다." };
+  }
+}
+
+/** 상담 다건 삭제 */
+export async function deleteConsultations(ids: string[]): Promise<{ success: boolean; error?: string }> {
+  if (ids.length === 0) return { success: true };
+  try {
+    await requireAuth();
+    const supabase = await getSupabaseServerClient();
+    const { error } = await supabase.from("consultation").delete().in("id", ids);
+    if (error) return { success: false, error: error.message ?? "상담 삭제 실패" };
+    revalidatePath("/consultation");
+    return { success: true };
+  } catch (e: any) {
+    return { success: false, error: e?.message ?? "상담 삭제에 실패했습니다." };
   }
 }

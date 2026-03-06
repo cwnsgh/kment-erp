@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
+import Link from "next/link";
 import { X } from "lucide-react";
-import type { ConsultationDetail } from "@/app/actions/consultation";
+import { deleteConsultation, type ConsultationDetail } from "@/app/actions/consultation";
 import styles from "./consultation-detail-modal.module.css";
 
 type ConsultationDetailModalProps = {
@@ -9,6 +11,8 @@ type ConsultationDetailModalProps = {
   isOpen: boolean;
   onClose: () => void;
   isLoading?: boolean;
+  /** 삭제 후 목록 갱신용 (해당 id 제거) */
+  onDeleted?: (id: string) => void;
 };
 
 function formatDate(dateString: string | null): string {
@@ -24,7 +28,23 @@ function formatAmount(value: string | null | undefined): string {
   return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-export function ConsultationDetailModal({ detail, isOpen, onClose, isLoading }: ConsultationDetailModalProps) {
+export function ConsultationDetailModal({ detail, isOpen, onClose, isLoading, onDeleted }: ConsultationDetailModalProps) {
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    if (!detail?.id) return;
+    if (!confirm("이 상담을 삭제하시겠습니까?")) return;
+    setDeleting(true);
+    const result = await deleteConsultation(detail.id);
+    setDeleting(false);
+    if (result.success) {
+      onDeleted?.(detail.id);
+      onClose();
+    } else {
+      alert(result.error ?? "삭제에 실패했습니다.");
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -187,6 +207,16 @@ export function ConsultationDetailModal({ detail, isOpen, onClose, isLoading }: 
         </div>
 
         <div className={styles.footer}>
+          {detail && (
+            <>
+              <Link href={`/consultation/${detail.id}/edit`} className="btn btn_lg primary" onClick={onClose}>
+                수정
+              </Link>
+              <button type="button" className="btn btn_lg normal" onClick={handleDelete} disabled={deleting}>
+                {deleting ? "삭제 중..." : "삭제"}
+              </button>
+            </>
+          )}
           <button type="button" onClick={onClose} className="btn btn_lg normal">
             닫기
           </button>

@@ -235,9 +235,39 @@ export function ContractTaskStatusBoard({ initialData, currentEmployeeId }: Cont
         <div className={styles.filterRow}>
           <span className={styles.filterLabel}>등록일</span>
           <div className={styles.filterControl}>
-            <input type="date" className={styles.filterInput} value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
-            <span className={styles.dateSep}>~</span>
-            <input type="date" className={styles.filterInput} value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
+            <div className={styles.dateGroup}>
+              <input
+                type="date"
+                id="task-date-from"
+                className={styles.dateInput}
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+              />
+              <label
+                htmlFor="task-date-from"
+                onClick={(e) => {
+                  e.preventDefault();
+                  (document.getElementById("task-date-from") as HTMLInputElement)?.showPicker?.();
+                }}>
+                <img src="/images/date_icon.svg" alt="날짜" width={16} height={16} style={{ width: 16, height: 16, display: "block" }} />
+              </label>
+              <span className={styles.dateSep}>~</span>
+              <input
+                type="date"
+                id="task-date-to"
+                className={styles.dateInput}
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+              />
+              <label
+                htmlFor="task-date-to"
+                onClick={(e) => {
+                  e.preventDefault();
+                  (document.getElementById("task-date-to") as HTMLInputElement)?.showPicker?.();
+                }}>
+                <img src="/images/date_icon.svg" alt="날짜" width={16} height={16} style={{ width: 16, height: 16, display: "block" }} />
+              </label>
+            </div>
           </div>
         </div>
         <div className={styles.filterRowActions}>

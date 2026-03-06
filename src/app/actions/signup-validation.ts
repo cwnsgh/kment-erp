@@ -104,7 +104,7 @@ export async function checkBusinessNumber(businessNumber: string): Promise<{
 
     const { data, error } = await supabase
       .from("client")
-      .select("id, business_registration_number, name")
+      .select("id, business_registration_number, name, status")
       .or(orConditions)
       .maybeSingle();
 
@@ -123,9 +123,15 @@ export async function checkBusinessNumber(businessNumber: string): Promise<{
     }
 
     if (data) {
+      if (data.status === "rejected") {
+        return {
+          available: true,
+          message: "이전에 거절된 건이 있습니다. 내용을 수정하여 재신청할 수 있습니다.",
+        };
+      }
       return {
         available: false,
-        message: `이미 등록된 사업자등록번호입니다. (${data.name})`,
+        message: `이미 등록된 사업자등록번호입니다. (${data.name || ""})`,
       };
     }
 

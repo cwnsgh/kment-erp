@@ -1,9 +1,15 @@
 "use client";
 
 import { X, Paperclip } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { createConsultation, type ConsultationCategory, type CreateConsultationInput } from "@/app/actions/consultation";
+import {
+  createConsultation,
+  updateConsultation,
+  type ConsultationCategory,
+  type CreateConsultationInput,
+  type ConsultationDetail,
+} from "@/app/actions/consultation";
 import { formatAmountInput, parseAmountInput } from "@/lib/format-amount";
 import styles from "./consultation-registration-form.module.css";
 
@@ -28,9 +34,11 @@ type SiteRow = { id: string; brand: string; domain: string; solution: string; ty
 
 type Props = {
   categories: ConsultationCategory[];
+  mode?: "new" | "edit";
+  initialData?: ConsultationDetail | null;
 };
 
-export function ConsultationRegistrationForm({ categories }: Props) {
+export function ConsultationRegistrationForm({ categories, mode = "new", initialData }: Props) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
@@ -47,6 +55,45 @@ export function ConsultationRegistrationForm({ categories }: Props) {
   const [contacts, setContacts] = useState<ContactRow[]>([{ id: createId(), name: "", email: "", phone: "", note: "" }]);
   const [sites, setSites] = useState<SiteRow[]>([{ id: createId(), brand: "", domain: "", solution: "", type: "" }]);
   const [attachments, setAttachments] = useState<Array<{ fileUrl: string; fileName: string; fileSize?: number }>>([]);
+
+  const isEdit = mode === "edit" && initialData?.id;
+
+  useEffect(() => {
+    if (!initialData) return;
+    setCompanyName(initialData.company_name ?? "");
+    setIndustry(initialData.industry ?? "");
+    setBrand(initialData.brand ?? "");
+    setBudget(initialData.budget ?? "");
+    setGeneralRemarks(initialData.general_remarks ?? "");
+    setConsultationDate(initialData.consultation_date ? String(initialData.consultation_date).slice(0, 10) : "");
+    setConsultationContent(initialData.consultation_content ?? "");
+    setCategoryIds(initialData.category_ids ?? []);
+    setContacts(
+      initialData.contacts?.length
+        ? initialData.contacts.map((c) => ({
+            id: createId(),
+            name: c.name ?? "",
+            email: c.email ?? "",
+            phone: c.phone ?? "",
+            note: c.note ?? "",
+          }))
+        : [{ id: createId(), name: "", email: "", phone: "", note: "" }]
+    );
+    setSites(
+      initialData.sites?.length
+        ? initialData.sites.map((s) => ({
+            id: createId(),
+            brand: s.brand ?? "",
+            domain: s.domain ?? "",
+            solution: s.solution ?? "",
+            type: s.type ?? "",
+          }))
+        : [{ id: createId(), brand: "", domain: "", solution: "", type: "" }]
+    );
+    setAttachments(
+      initialData.attachments?.map((a) => ({ fileUrl: a.file_url, fileName: a.file_name ?? "", fileSize: a.file_size ?? undefined })) ?? []
+    );
+  }, [initialData?.id]);
 
   const addContact = () => setContacts((prev) => [...prev, { id: createId(), name: "", email: "", phone: "", note: "" }]);
   const removeContact = (id: string) => setContacts((prev) => prev.filter((c) => c.id !== id));
@@ -100,15 +147,25 @@ export function ConsultationRegistrationForm({ categories }: Props) {
         sites: sites.map((s) => ({ brand: s.brand, domain: s.domain, solution: s.solution === "선택해주세요" ? "" : s.solution, type: s.type === "선택해주세요" ? "" : s.type })),
         attachments,
       };
-      const result = await createConsultation(input);
-      if (result.success) {
-        router.push("/consultation");
-        router.refresh();
+      if (isEdit) {
+        const result = await updateConsultation(initialData!.id, input);
+        if (result.success) {
+          router.push("/consultation");
+          router.refresh();
+        } else {
+          alert(result.error || "수정에 실패했습니다.");
+        }
       } else {
-        alert(result.error || "등록에 실패했습니다.");
+        const result = await createConsultation(input);
+        if (result.success) {
+          router.push("/consultation");
+          router.refresh();
+        } else {
+          alert(result.error || "등록에 실패했습니다.");
+        }
       }
     } catch (err) {
-      alert("등록 중 오류가 발생했습니다.");
+      alert(isEdit ? "수정 중 오류가 발생했습니다." : "등록 중 오류가 발생했습니다.");
     } finally {
       setLoading(false);
     }
@@ -117,10 +174,10 @@ export function ConsultationRegistrationForm({ categories }: Props) {
   return (
     <section className={`${styles.consultationPage} page_section`}>
       <div className="page_title">
-        <h1>상담 등록</h1>
+        <h1>{isEdit ? "상담 수정" : "상담 등록"}</h1>
         <div className="btn_wrap">
           <button type="submit" form="consultation-registration-form" className="btn btn_lg primary" disabled={loading}>
-            {loading ? "등록 중..." : "등록"}
+            {loading ? (isEdit ? "저장 중..." : "등록 중...") : isEdit ? "저장" : "등록"}
           </button>
         </div>
       </div>

@@ -3,8 +3,199 @@
   box-sizing: border-box;
 }
 
+/* 검색 영역 - 계약조회와 동일 구조/스타일 */
+.searchBox {
+  box-sizing: border-box;
+  padding: 0 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+  font-size: 14px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.searchBox .tableItem {
+  width: 100%;
+}
+
+.searchBox .tableRow {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  border-top: 1px solid var(--border-color);
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.searchBox .rowGroup {
+  flex: 1;
+  display: flex;
+  width: 100%;
+  position: relative;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.searchBox .tableHead {
+  width: 180px;
+  padding: 20px;
+  background: var(--background-color);
+  box-sizing: border-box;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-color);
+}
+
+.searchBox .tableData {
+  padding: 18px 10px 18px 20px;
+  box-sizing: border-box;
+  word-break: break-all;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  width: calc(100% - 180px);
+  line-height: 25px;
+}
+
+.searchBox .tableData input {
+  margin-top: 3px;
+}
+
+.searchBox .tableData.pd12 {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  flex-direction: column;
+}
+
+.searchBox .tableData.pd12 .dateGroup {
+  flex-direction: row;
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.searchBox .dateGroup {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+  width: 100%;
+}
+
+.searchBox .dateGroup > span {
+  margin: 0 10px;
+  color: var(--text-gray);
+  font-size: 14px;
+}
+
+.searchBox .dateGroup label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-left: 8px;
+  line-height: 1;
+  vertical-align: middle;
+  margin-right: 0;
+}
+
+.searchBox .dateGroup label img {
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  min-height: 16px;
+  object-fit: contain;
+  display: block;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.searchBox .btnWrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.searchBox .searchInput {
+  max-width: 400px;
+}
+
+.searchBox .dateInput {
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  height: 40px;
+  padding: 4px 4px 4px 14px;
+  box-sizing: border-box;
+  font-size: 14px;
+  max-width: 150px;
+  width: auto;
+  min-width: 120px;
+}
+
+.searchBox input[type="text"]:focus,
+.searchBox input[type="date"]:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.searchBox input[type="date"]::-webkit-calendar-picker-indicator {
+  display: none;
+}
+
+.deleteBtn {
+  position: relative;
+}
+
+.deleteBtn .deleteGroup {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  min-width: 120px;
+}
+
+.deleteBtn.show .deleteGroup {
+  display: block;
+}
+
+.deleteBtn .deleteGroup li {
+  padding: 0;
+}
+
+.deleteBtn .deleteGroup button {
+  width: 100%;
+  justify-content: flex-start;
+  padding: 8px 12px;
+  border-radius: 0;
+  background: none;
+  border: none;
+}
+
+.emptyCell {
+  text-align: center !important;
+  padding: 40px 0 !important;
+  color: var(--text-gray);
+}
+
 .listTable {
-  margin-top: 0 !important;
+  margin-top: 80px !important;
 }
 
 .listTable .tableTop {
