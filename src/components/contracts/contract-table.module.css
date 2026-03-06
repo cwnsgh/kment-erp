@@ -209,38 +209,6 @@
   gap: 6px !important;
 }
 
-.listTable .deleteBtn {
-  position: relative !important;
-}
-
-.listTable .deleteBtn.show .deleteGroup {
-  display: flex !important;
-}
-
-.listTable .deleteBtn.show button#contractDeleteClick {
-  display: none !important;
-}
-
-.listTable .deleteBtn .deleteGroup {
-  display: none !important;
-  position: absolute !important;
-  top: -8px !important;
-  left: -249% !important;
-  margin-top: 4px !important;
-  padding: 4px !important;
-  z-index: 10 !important;
-  list-style: none !important;
-  min-width: 100px !important;
-  gap: 6px;
-}
-
-.listTable .deleteBtn .deleteGroup li {
-  list-style: none !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  width: max-content;
-}
-
 .listTable .excelBtn {
   background: url("/images/excel_icon.png") no-repeat !important;
   background-size: 16px !important;

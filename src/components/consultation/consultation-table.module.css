@@ -151,43 +151,6 @@
   display: none;
 }
 
-.deleteBtn {
-  position: relative;
-}
-
-.deleteBtn .deleteGroup {
-  display: none;
-  position: absolute;
-  top: 100%;
-  left: 0;
-  margin: 0;
-  padding: 4px 0;
-  list-style: none;
-  background: #fff;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  z-index: 10;
-  min-width: 120px;
-}
-
-.deleteBtn.show .deleteGroup {
-  display: block;
-}
-
-.deleteBtn .deleteGroup li {
-  padding: 0;
-}
-
-.deleteBtn .deleteGroup button {
-  width: 100%;
-  justify-content: flex-start;
-  padding: 8px 12px;
-  border-radius: 0;
-  background: none;
-  border: none;
-}
-
 .emptyCell {
   text-align: center !important;
   padding: 40px 0 !important;

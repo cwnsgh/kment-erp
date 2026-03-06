@@ -33,7 +33,6 @@ export function ConsultationTable({ initialList }: ConsultationTableProps) {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [showDeleteMenu, setShowDeleteMenu] = useState(false);
 
   useEffect(() => {
     setList(initialList);
@@ -98,7 +97,6 @@ export function ConsultationTable({ initialList }: ConsultationTableProps) {
     if (ids.length === 0) return;
     if (!confirm(`선택한 ${ids.length}건의 상담을 삭제하시겠습니까?`)) return;
     const result = await deleteConsultations(ids);
-    setShowDeleteMenu(false);
     if (result.success) {
       setList((prev) => prev.filter((r) => !selectedIds.has(r.id)));
       setSelectedIds(new Set());
@@ -190,32 +188,17 @@ export function ConsultationTable({ initialList }: ConsultationTableProps) {
             </p>
           </div>
           <div className={styles.topBtnGroup}>
-            <div
-              className={`${styles.deleteBtn} ${showDeleteMenu ? styles.show : ""}`}
-              onMouseEnter={() => setShowDeleteMenu(true)}
-              onMouseLeave={() => setShowDeleteMenu(false)}
+            <button type="button" className="btn normal btn_md" onClick={handleSelectAll}>
+              전체 선택
+            </button>
+            <button
+              type="button"
+              className="btn primary btn_md"
+              onClick={handleBulkDelete}
+              disabled={selectedIds.size === 0}
             >
-              <button type="button" className="btn primary btn_md" onClick={() => setShowDeleteMenu(!showDeleteMenu)}>
-                삭제
-              </button>
-              <ul className={styles.deleteGroup}>
-                <li>
-                  <button type="button" className="btn normal btn_md" onClick={() => (handleSelectAll(), setShowDeleteMenu(false))}>
-                    전체 선택
-                  </button>
-                </li>
-                <li>
-                  <button
-                    type="button"
-                    className="btn primary btn_md"
-                    onClick={() => handleBulkDelete()}
-                    disabled={selectedIds.size === 0}
-                  >
-                    선택 삭제
-                  </button>
-                </li>
-              </ul>
-            </div>
+              선택 삭제
+            </button>
             <select
               className={styles.viewSelect}
               value={itemsPerPage}

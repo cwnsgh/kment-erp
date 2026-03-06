@@ -55,7 +55,6 @@ export function ContractTable({ initialContracts }: ContractTableProps) {
   const [contractDateTo, setContractDateTo] = useState("");
   const [loading, setLoading] = useState(false);
   const [contracts, setContracts] = useState<ContractRow[]>(initialContracts);
-  const [showDeleteMenu, setShowDeleteMenu] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailData, setDetailData] = useState<ContractDetailData | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -208,35 +207,16 @@ export function ContractTable({ initialContracts }: ContractTableProps) {
             </p>
           </div>
           <div className={styles.topBtnGroup}>
-            <div className={`${styles.deleteBtn} ${showDeleteMenu ? styles.show : ""}`} onMouseEnter={() => setShowDeleteMenu(true)} onMouseLeave={() => setShowDeleteMenu(false)}>
-              <button type="button" className="btn primary btn_md" id="contractDeleteClick" onClick={() => setShowDeleteMenu(!showDeleteMenu)}>
-                삭제
-              </button>
-              <ul className={styles.deleteGroup}>
-                <li>
-                  <button
-                    type="button"
-                    className="btn normal btn_md"
-                    onClick={() => {
-                      handleSelectAll();
-                      setShowDeleteMenu(false);
-                    }}>
-                    전체 선택
-                  </button>
-                </li>
-                <li>
-                  <button
-                    type="button"
-                    className="btn primary btn_md"
-                    onClick={() => {
-                      setShowDeleteMenu(false);
-                    }}
-                    disabled={selectedRows.size === 0}>
-                    선택 삭제
-                  </button>
-                </li>
-              </ul>
-            </div>
+            <button type="button" className="btn normal btn_md" onClick={handleSelectAll}>
+              전체 선택
+            </button>
+            <button
+              type="button"
+              className="btn primary btn_md"
+              disabled={selectedRows.size === 0}
+            >
+              선택 삭제
+            </button>
             <button type="button" className={`${styles.excelBtn} btn btn_md normal`}>
               엑셀다운로드
             </button>
